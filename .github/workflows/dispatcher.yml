@@ -1,0 +1,40 @@
+name: CI/CD
+on:
+  push:
+    branches-ignore:
+      - 'dependabot/**'
+    paths-ignore:
+      - '.gitignore'
+      - '.mergify.yml'
+      - 'CHANGELOG.md'
+      - 'LICENSE'
+      - 'README.md'
+      - 'renovate.json'
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'Trigger a release?'
+        required: false
+        default: 'false'
+
+jobs:
+  dispatcher:
+    runs-on: ubuntu-24.04
+    if: >-
+      github.event_name == 'workflow_dispatch'
+      || github.event_name != 'pull_request'
+      || github.event.pull_request.head.repo.full_name != github.repository
+      || startsWith(github.head_ref, 'dependabot/')
+    steps:
+      - run: 'true'
+
+  ci-cd:
+    needs:
+      - dispatcher
+    uses: ./.github/workflows/build-and-deploy.yml
+    with:
+      release: ${{ github.event.inputs.release }}
+    secrets: inherit
+
+
