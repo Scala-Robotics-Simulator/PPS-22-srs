@@ -36,3 +36,26 @@ jobs:
         shell: bash
         run: sbt +test
 
+
+  code-style:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: DanySK/action-checkout@0.2.22
+      - name: Set up JDK
+        uses: actions/setup-java@v4.7.1
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: sbt
+      - uses: sbt/setup-sbt@v1.1.11
+      - name: Compile
+        shell: bash
+        run: sbt compile
+      - name: Check formatting
+        shell: bash
+        run: sbt scalafmtCheckAll
+      - name: Run linter
+        shell: bash
+        run: sbt "scalafixAll --check"
+
