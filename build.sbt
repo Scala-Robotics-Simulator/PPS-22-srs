@@ -1,5 +1,7 @@
 import Dependencies.*
 
+enablePlugins(JacocoCoverallsPlugin)
+
 lazy val root = project
   .in(file("."))
   .settings(
@@ -56,6 +58,17 @@ lazy val root = project
     semanticdbEnabled := true,
     semanticdbVersion := scalafixSemanticdb.revision,
     wartremoverErrors ++= Warts.all,
+    jacocoReportSettings := JacocoReportSettings(
+      title = "PR report",
+      None,
+      JacocoThresholds(),
+      formats = Seq(JacocoReportFormats.ScalaHTML, JacocoReportFormats.XML),
+      "utf-8",
+    ),
+    jacocoCoverallsServiceName := "github-actions",
+    jacocoCoverallsBranch := sys.env.get("CI_BRANCH"),
+    jacocoCoverallsPullRequest := sys.env.get("GITHUB_EVENT_NAME"),
+    jacocoCoverallsRepoToken := sys.env.get("COVERALLS_REPO_TOKEN"),
 
     /*
      * Dependencies
