@@ -23,7 +23,7 @@ const config = {
   url: "https://scala-robotics-simulator.github.io",
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: "/pps-22-srs/",
+  baseUrl: "/PPS-22-srs/",
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
