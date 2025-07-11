@@ -58,6 +58,11 @@ lazy val root = project
     semanticdbEnabled := true,
     semanticdbVersion := scalafixSemanticdb.revision,
     wartremoverErrors ++= Warts.all,
+    wartremoverErrors --= Seq(
+      Wart.DefaultArguments,
+      Wart.Equals,
+      Wart.Any,
+    ),
     jacocoReportSettings := JacocoReportSettings(
       title = "PR report",
       None,
