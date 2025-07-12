@@ -1,0 +1,48 @@
+---
+sidebar_position: 1
+---
+import React from 'react';
+import { BacklogTable } from '@site/src/components/tables/BacklogTable';
+
+# Project Backlog
+
+<BacklogTable
+  data={[
+    {
+      id: 1,
+      item: "Setup repository",
+      stima: 6,
+      effettivo: 6,
+      sprints: [6, 0, 0, 0, 0]
+    },
+    {
+      id: 2,
+      item: "Comprensione e Modellazione del dominio",
+      stima: 12,
+      effettivo: 10,
+      sprints: [10, 0, 0, 0, 0]
+    },
+    {
+      id: 3,
+      item: "Scelta e implementazione pattern architetturale",
+      stima: 3,
+      effettivo: 3,
+      sprints: [3, 0, 0, 0, 0]
+    },
+    {
+      id: 4,
+      item: "Definizione dei requisiti",
+      stima: 6,
+      effettivo: 5,
+      sprints: [5, 0, 0, 0, 0]
+    },
+    {
+      id: 5,
+      item: "Deliverable sprint-1 (GUI con messaggio di welcome)",
+      stima: 1,
+      effettivo: 1,
+      sprints: [1, 0, 0, 0, 0]
+    },
+  ]}
+/>
+
