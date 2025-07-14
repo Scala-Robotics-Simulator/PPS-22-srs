@@ -4,6 +4,10 @@ export function SprintTable({ data }) {
     task.days.forEach((d, i) => (dayTotals[i] += d));
     return acc + task.effettivo;
   }, 0);
+  const stimaTot = data.reduce((acc, task) => {
+    task.days.forEach((d, i) => (dayTotals[i] += d));
+    return acc + task.stima;
+  }, 0);
 
   return (
     <table>
@@ -41,7 +45,7 @@ export function SprintTable({ data }) {
           <td colSpan={2}></td>
           <td><strong>TOT</strong></td>
           <td></td>
-          <td></td>
+          <td><strong>{stimaTot}</strong></td>
           <td><strong>{effettivoTot}</strong></td>
           {dayTotals.map((t, i) => (
             <td key={i}><strong>{t}</strong></td>
