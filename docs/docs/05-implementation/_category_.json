@@ -1,0 +1,9 @@
+{
+  "label": "5. Implementazione",
+  "position": 5,
+  "link": {
+    "type": "generated-index",
+    "title": "Implementazione",
+    "description": "In questa sezione ciascuno studente descrive in dettaglio le attività di implementazione svolte individualmente o in collaborazione, specificando con chi ha lavorato e quali parti del progetto ha realizzato o contribuito a realizzare. Vengono inoltre illustrate le scelte implementative rilevanti che non erano già state dettagliate nella sezione di design, come l'adozione di meccanismi avanzati di Scala (ad esempio l'uso di pattern funzionali, attori, monadi o tecniche di gestione della concorrenza), eventuali ottimizzazioni o soluzioni tecniche particolarmente significative. Questa sezione consente di evidenziare il contributo personale e le competenze tecniche dimostrate durante lo sviluppo."
+  }
+}
