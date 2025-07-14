@@ -1,2 +1,6 @@
+package io.github.srs.model
+
 trait Entity:
-  def id: Int
+  def position: Point2D
+  def shape: ShapeType
+  def orientation: Orientation
