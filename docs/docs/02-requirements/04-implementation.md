@@ -5,14 +5,14 @@ description: "Requisiti di implementazione del progetto."
 # Di implementazione
 
 - Stack tecnologico:
-    - Scala 3.0;
-    - sbt;
-    - ScalaTest.
+  - Scala 3.0;
+  - sbt;
+  - ScalaTest.
 - Pipeline CI/CD:
-    - GitHub Actions;
-    - Test automatizzati;
-    - Quality Assurance;
-    - Documentazione.
+  - GitHub Actions;
+  - Test automatizzati;
+  - Quality Assurance;
+  - Documentazione.
 - Gestione progetto:
-    - Backlog Trello;
-    - Sprint bisettimanali.
+  - Backlog Trello;
+  - Sprint bisettimanali.
