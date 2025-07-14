@@ -1,5 +1,5 @@
 export function SprintTable({ data }) {
-  const dayTotals = Array(6).fill(0);
+  const dayTotals = Array(8).fill(0);
   const effettivoTot = data.reduce((acc, task) => {
     task.days.forEach((d, i) => (dayTotals[i] += d));
     return acc + task.effettivo;
@@ -8,7 +8,7 @@ export function SprintTable({ data }) {
     task.days.forEach((d, i) => (dayTotals[i] += d));
     return acc + task.stima;
   }, 0);
-
+  // TODO: calculate days and effective time programmatically
   return (
     <table>
       <thead>
@@ -25,6 +25,8 @@ export function SprintTable({ data }) {
           <th>D4</th>
           <th>D5</th>
           <th>D6</th>
+          <th>D7</th>
+          <th>D8</th>
         </tr>
       </thead>
       <tbody>

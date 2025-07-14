@@ -2,7 +2,7 @@
 sidebar_label: Sprint 0
 ---
 
-import { SprintTable } from '@site/src/components/tables/SprintTable'
+import {SprintTable} from '@site/src/components/tables/SprintTable'
 
 # Sprint 0 [06/07/2025 - 13/07/2025]
 
@@ -11,187 +11,215 @@ Questo è dovuto al fatto che molti dei task sono stati pianificati come da eseg
 preferito svolgerli tutti in un tempo ravvicinato.
 
 <SprintTable
-  data={[
-    {
-      backlogItem: "Setup repository",
-      id: "1.1",
-      task: "Inizializzazione progetto",
-      volontario: "Ceredi",
-      stima: 0.5,
-      effettivo: 0.5,
-      days: [0.5, 0, 0, 0, 0, 0, 0, 0]
-    },
-    {
-      backlogItem: "Setup repository",
-      id: "1.2",
-      task: "Integrazione scalafmt, scalafix e wartremover",
-      volontario: "Ceredi",
-      stima: 1,
-      effettivo: 0.5,
-      days: [0.5, 0, 0, 0, 0, 0, 0, 0]
-    },
-    {
-      backlogItem: "Setup repository",
-      id: "1.3",
-      task: "Configurazione githooks",
-      volontario: "Ceredi",
-      stima: 1,
-      effettivo: 0.5,
-      days: [0.5, 0, 0, 0, 0, 0, 0, 0]
-    },
-    {
-      backlogItem: "Setup repository",
-      id: "1.4",
-      task: "Configurazione jacoco e coveralls",
-      volontario: "Ceredi",
-      stima: 1,
-      effettivo: 1,
-      days: [1, 0, 0, 0, 0, 0, 0, 0]
-    },
-    {
-      backlogItem: "Setup repository",
-      id: "1.5",
-      task: "Realizzazione pipeline CI",
-      volontario: "Ceredi",
-      stima: 1,
-      effettivo: 1.5,
-      days: [1.5, 0, 0, 0, 0, 0, 0, 0]
-    },
-    {
-      backlogItem: "Setup repository",
-      id: "1.6",
-      task: "Preparazione ed upload doc",
-      volontario: "Ceredi",
-      stima: 1,
-      effettivo: 1,
-      days: [1, 0, 0, 0, 0, 0, 0, 0]
-    },
-    {
-      backlogItem: "Setup repository",
-      id: "1.7",
-      task: "Configurazione e integrazione Mergify",
-      volontario: "Ceredi",
-      stima: 1,
-      effettivo: 0.5,
-      days: [0.5, 0, 0, 0, 0, 0, 0, 0]
-    },
-    {
-      backlogItem: "Setup repository",
-      id: "1.7",
-      task: "Configurazione e integrazione MendRenovate",
-      volontario: "Ceredi",
-      stima: 0.5,
-      effettivo: 0.5,
-      days: [0.5, 0, 0, 0, 0, 0, 0, 0]
-    },
-    {
-      backlogItem: "Comprensione e modellazione del dominio",
-      id: "2.1",
-      task: "Mokup interfaccia grafica",
-      volontario: "Cohen, Nardicchia",
-      stima: 2,
-      effettivo: 2,
-      days: [0, 2, 0, 0, 0, 0, 0, 0]
-    },
-    {
-      backlogItem: "Comprensione e modellazione del dominio",
-      id: "2.2",
-      task: "Realizzazione Use Cases",
-      volontario: "Cohen, Nardicchia",
-      stima: 2,
-      effettivo: 2,
-      days: [0, 2, 0, 0, 0, 0, 0, 0]
-    },
-    {
-      backlogItem: "Comprensione e modellazione del dominio",
-      id: "2.3",
-      task: "Realizzazione User Stories",
-      volontario: "Cohen, Nardicchia",
-      stima: 2,
-      effettivo: 2,
-      days: [0, 0, 2, 0, 0, 0, 0, 0]
-    },
-    {
-      backlogItem: "Comprensione e modellazione del dominio",
-      id: "2.4",
-      task: "Modellazione di dominio (UML)",
-      volontario: "Team",
-      stima: 5,
-      effettivo: 4,
-      days: [0, 0, 2, 2, 0, 0, 0, 0]
-    },
-    {
-      backlogItem: "Scelta e implementazione pattern architetturale",
-      id: "3.1",
-      task: "Valutazione possibili pattern architetturali",
-      volontario: "Team",
-      stima: 2,
-      effettivo: 1.5,
-      days: [0, 0, 0, 0, 1.5, 0, 0, 0]
-    },
-    {
-      backlogItem: "Scelta e implementazione pattern architetturale",
-      id: "3.2",
-      task: "Implementazione dell'architettura",
-      volontario: "Team",
-      stima: 2,
-      effettivo: 1.5,
-      days: [0, 0, 0, 0, 0, 1.5, 0, 0]
-    },
-    {
-      backlogItem: "Definizione dei requisiti",
-      id: "4.1",
-      task: "Definizione requisiti di business",
-      volontario: "Team",
-      stima: 1,
-      effettivo: 1,
-      days: [1, 0, 0, 0, 0, 0, 0, 0]
-    },
-    {
-      backlogItem: "Definizione dei requisiti",
-      id: "4.2",
-      task: "Definizione requisiti funzionali - utente",
-      volontario: "Team",
-      stima: 2,
-      effettivo: 1.5,
-      days: [1.5, 0, 0, 0, 0, 0, 0, 0]
-    },
-    {
-      backlogItem: "Definizione dei requisiti",
-      id: "4.3",
-      task: "Definizione requisiti funzionali - sistema",
-      volontario: "Team",
-      stima: 1,
-      effettivo: 1.5,
-      days: [1.5, 0, 0, 0, 0, 0, 0, 0]
-    },
-    {
-      backlogItem: "Definizione dei requisiti",
-      id: "4.4",
-      task: "Definizione requisiti non funzionali",
-      volontario: "Team",
-      stima: 0.5,
-      effettivo: 0.5,
-      days: [0.5, 0, 0, 0, 0, 0, 0, 0]
-    },
-    {
-      backlogItem: "Definizione dei requisiti",
-      id: "4.5",
-      task: "Definizione requisiti di implementazione",
-      volontario: "Team",
-      stima: 0.5,
-      effettivo: 0.5,
-      days: [0.5, 0, 0, 0, 0, 0, 0, 0]
-    },
-    {
-      backlogItem: "Deliverable sprint-1 (GUI con messaggio di welcome)",
-      id: "5.1",
-      task: "Implementazione GUI con messaggio di welcome",
-      volontario: "Cohen, Nardicchia",
-      stima: 1,
-      effettivo: 1,
-      days: [0, 0, 0, 0, 0, 1, 0, 0]
-    },
+    data={[
+        {
+            backlogItem: "Setup repository",
+            id: "1.1",
+            task: "Inizializzazione progetto",
+            volontario: "Ceredi",
+            stima: 0.5,
+            effettivo: 0.5,
+            days: [0.5, 0, 0, 0, 0, 0, 0, 0]
+        },
+        {
+            backlogItem: "Setup repository",
+            id: "1.2",
+            task: "Integrazione scalafmt, scalafix e wartremover",
+            volontario: "Ceredi",
+            stima: 1,
+            effettivo: 0.5,
+            days: [0.5, 0, 0, 0, 0, 0, 0, 0]
+        },
+        {
+            backlogItem: "Setup repository",
+            id: "1.3",
+            task: "Configurazione githooks",
+            volontario: "Ceredi",
+            stima: 1,
+            effettivo: 0.5,
+            days: [0.5, 0, 0, 0, 0, 0, 0, 0]
+        },
+        {
+            backlogItem: "Setup repository",
+            id: "1.4",
+            task: "Configurazione jacoco e coveralls",
+            volontario: "Ceredi",
+            stima: 1,
+            effettivo: 1,
+            days: [1, 0, 0, 0, 0, 0, 0, 0]
+        },
+        {
+            backlogItem: "Setup repository",
+            id: "1.5",
+            task: "Realizzazione pipeline CI",
+            volontario: "Ceredi",
+            stima: 1,
+            effettivo: 1.5,
+            days: [1.5, 0, 0, 0, 0, 0, 0, 0]
+        },
+        {
+            backlogItem: "Setup repository",
+            id: "1.6",
+            task: "Preparazione ed upload doc",
+            volontario: "Ceredi",
+            stima: 1,
+            effettivo: 1,
+            days: [1, 0, 0, 0, 0, 0, 0, 0]
+        },
+        {
+            backlogItem: "Setup repository",
+            id: "1.7",
+            task: "Configurazione e integrazione Mergify",
+            volontario: "Ceredi",
+            stima: 1,
+            effettivo: 0.5,
+            days: [0.5, 0, 0, 0, 0, 0, 0, 0]
+        },
+        {
+            backlogItem: "Setup repository",
+            id: "1.7",
+            task: "Configurazione e integrazione MendRenovate",
+            volontario: "Ceredi",
+            stima: 0.5,
+            effettivo: 0.5,
+            days: [0.5, 0, 0, 0, 0, 0, 0, 0]
+        },
+        {
+            backlogItem: "Comprensione e modellazione del dominio",
+            id: "2.1",
+            task: "Mokup interfaccia grafica",
+            volontario: "Cohen, Nardicchia",
+            stima: 2,
+            effettivo: 2,
+            days: [0, 2, 0, 0, 0, 0, 0, 0]
+        },
+        {
+            backlogItem: "Comprensione e modellazione del dominio",
+            id: "2.2",
+            task: "Realizzazione Use Cases",
+            volontario: "Cohen, Nardicchia",
+            stima: 2,
+            effettivo: 2,
+            days: [0, 2, 0, 0, 0, 0, 0, 0]
+        },
+        {
+            backlogItem: "Comprensione e modellazione del dominio",
+            id: "2.3",
+            task: "Realizzazione User Stories",
+            volontario: "Cohen, Nardicchia",
+            stima: 2,
+            effettivo: 2,
+            days: [0, 0, 2, 0, 0, 0, 0, 0]
+        },
+        {
+            backlogItem: "Comprensione e modellazione del dominio",
+            id: "2.4",
+            task: "Modellazione di dominio (UML)",
+            volontario: "Team",
+            stima: 5,
+            effettivo: 8,
+            days: [0, 0, 4, 4, 0, 0, 0, 0]
+        },
+        {
+            backlogItem: "Scelta e implementazione pattern architetturale",
+            id: "3.1",
+            task: "Valutazione possibili pattern architetturali",
+            volontario: "Team",
+            stima: 2,
+            effettivo: 1.5,
+            days: [0, 0, 0, 0, 1.5, 0, 0, 0]
+        },
+        {
+            backlogItem: "Scelta e implementazione pattern architetturale",
+            id: "3.2",
+            task: "Implementazione dell'architettura",
+            volontario: "Team",
+            stima: 2,
+            effettivo: 1.5,
+            days: [0, 0, 0, 0, 0, 1.5, 0, 0]
+        },
+        {
+            backlogItem: "Definizione dei requisiti",
+            id: "4.1",
+            task: "Definizione requisiti di business",
+            volontario: "Team",
+            stima: 1,
+            effettivo: 1,
+            days: [1, 0, 0, 0, 0, 0, 0, 0]
+        },
+        {
+            backlogItem: "Definizione dei requisiti",
+            id: "4.2",
+            task: "Definizione requisiti funzionali - utente",
+            volontario: "Team",
+            stima: 2,
+            effettivo: 1.5,
+            days: [1.5, 0, 0, 0, 0, 0, 0, 0]
+        },
+        {
+            backlogItem: "Definizione dei requisiti",
+            id: "4.3",
+            task: "Definizione requisiti funzionali - sistema",
+            volontario: "Team",
+            stima: 1,
+            effettivo: 1.5,
+            days: [1.5, 0, 0, 0, 0, 0, 0, 0]
+        },
+        {
+            backlogItem: "Definizione dei requisiti",
+            id: "4.4",
+            task: "Definizione requisiti non funzionali",
+            volontario: "Team",
+            stima: 0.5,
+            effettivo: 0.5,
+            days: [0.5, 0, 0, 0, 0, 0, 0, 0]
+        },
+        {
+            backlogItem: "Definizione dei requisiti",
+            id: "4.5",
+            task: "Definizione requisiti di implementazione",
+            volontario: "Team",
+            stima: 0.5,
+            effettivo: 0.5,
+            days: [0.5, 0, 0, 0, 0, 0, 0, 0]
+        },
+        {
+            backlogItem: "Deliverable sprint-1 (GUI con messaggio di welcome)",
+            id: "5.1",
+            task: "Implementazione GUI con messaggio di welcome",
+            volontario: "Cohen, Nardicchia",
+            stima: 1,
+            effettivo: 1,
+            days: [0, 0, 0, 0, 0, 1, 0, 0]
+        },
 
-  ]}
+        ]}
 />
+
+## Sprint Goal
+
+Gli obiettivi dello Sprint 0 sono stati:
+
+- Setup del repository e degli strumenti di sviluppo;
+- Comprensione e modellazione del dominio;
+- Definizione dell'architettura e prima implementazione.
+
+## Sprint Deadline
+
+Lo Sprint 0 è iniziato il 6 Luglio 2025 e si è concluso il 13 Luglio 2025.
+
+## Sprint Review
+
+Lo Sprint 0 ha portato a termine tutti i task previsti e ha raggiunto gli obiettivi prefissati.
+
+## Sprint Retrospective
+
+Lo Sprint 0 si è concentrato principalmente sulla preparazione del progetto e sulla comprensione del dominio.
+
+La parte di configurazione del repository ha richiesto meno tempo del previsto, perchè è stato possibile riutilizzare
+molti degli strumenti già utilizzati in un precedente progetto di **Software Process Engeneering** (SPE).
+
+La parte di modellazione di dominio ha invece, richiesto più tempo del previsto perchè si è preferito fare un'analisi
+approfondita del dominio e delle funzionalità richieste, in modo che sia il più stabile possibile durante lo svolgimento
+del progetto. Questa analisi ha permesso di avere una visione chiara degli elementi chiave del sistema e ha permesso di
+ridurre il rischio di dover apportare modifiche significative in seguito.
