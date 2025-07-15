@@ -1,9 +1,6 @@
 package io.github.srs.model.entity.dynamic
 
-import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
+import io.github.srs.model.entity.Entity
 
-trait DynamicEntity:
-  def position: Point2D
-  def shape: ShapeType
-  def orientation: Orientation
+trait DynamicEntity extends Entity:
   def actuators: Option[Seq[Actuator]]
