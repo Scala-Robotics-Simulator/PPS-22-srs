@@ -4,7 +4,7 @@ type Point2D = (Double, Double)
 
 object Point2D:
   def apply(x: Double, y: Double): Point2D = (x, y)
-  
+
 extension (p: Point2D)
   private def x: Double = p._1
   private def y: Double = p._2
