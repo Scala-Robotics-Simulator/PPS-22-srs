@@ -2,7 +2,6 @@ package io.github.srs.model
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
-import io.github.srs.model.Point2D.distanceTo
 
 class Point2DTest extends AnyFlatSpec with should.Matchers:
 
