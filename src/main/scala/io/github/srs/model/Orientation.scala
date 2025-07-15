@@ -5,8 +5,8 @@ trait Orientation:
   def toRadians: Double
 
 object Orientation:
-  def apply(deg: Double): Orientation = OrientationImpl(deg)
+  def apply(degree: Double): Orientation = OrientationImpl(degree)
 
-  private case class OrientationImpl(private val deg: Double) extends Orientation:
-    override def degrees: Double = deg
-    override def toRadians: Double = math.toRadians(deg)
+  private case class OrientationImpl(private val degree: Double) extends Orientation:
+    override def degrees: Double = degree
+    override def toRadians: Double = math.toRadians(degree)
