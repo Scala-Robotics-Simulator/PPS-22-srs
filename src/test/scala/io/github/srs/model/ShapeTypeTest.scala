@@ -1,8 +1,9 @@
 package io.github.srs.model
 
+import io.github.srs.model.entity.ShapeType
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
-import io.github.srs.model.ShapeType.*
+import io.github.srs.model.entity.ShapeType.*
 
 class ShapeTypeTest extends AnyFlatSpec with should.Matchers:
 
