@@ -24,6 +24,7 @@ enum StaticEntity(val position: Point2D, val orientation: Orientation) extends E
     case Obstacle(_, _, w, h) => ShapeType.Rectangle(w, h)
     case Light(_, _, r, _, _) => ShapeType.Circle(r)
 
+end StaticEntity
 
 object StaticEntity:
 
@@ -49,4 +50,4 @@ object StaticEntity:
       i <- positive("intensity", intensity)
       a <- positive("attenuation", attenuation)
     yield StaticEntity.Light(pos, orient, radius, i, a)
-
+end StaticEntity

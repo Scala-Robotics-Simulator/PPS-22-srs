@@ -40,3 +40,4 @@ class StaticEntityTest extends AnyFlatSpec:
     inside(res.left.value):
       case DomainError.NegativeOrZero(field, _) =>
         field shouldBe "attenuation"
+end StaticEntityTest
