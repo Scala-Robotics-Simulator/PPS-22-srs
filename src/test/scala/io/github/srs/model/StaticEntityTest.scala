@@ -8,36 +8,44 @@ import org.scalatest.matchers.should.Matchers.*
 
 class StaticEntityTest extends AnyFlatSpec:
 
-  private val origin = Point2D(0, 0)
-  private val orient = Orientation(0)
+  given CanEqual[StaticEntity, StaticEntity] = CanEqual.derived
 
-  "obstacle" should "return Right when width and height are positive" in:
-    StaticEntity.obstacle(origin, orient, 2, 3).isRight shouldBe true
+  val origin: (Double, Double) = Point2D(0, 0)
+  val orientation: Orientation = Orientation(0)
 
-  "light" should "return Right when all parameters are positive" in:
-    StaticEntity.light(origin, orient, 1.0, 1.0, 1.0).isRight shouldBe true
+  // Obstacle
+  val width = 2
+  val height = 3
+  val expectedObstacle: StaticEntity = StaticEntity.Obstacle(origin, orientation, width, height)
+
+  // Light
+  val radius = 1.0
+  val intensity = 1.0
+  val attenuation = 1.0
+  val expectedLight: StaticEntity = StaticEntity.Light(origin, orientation, radius, intensity, attenuation)
+
+  "obstacle" should "create a valid entity" in:
+    inside(StaticEntity.obstacle(origin, orientation, width, height)):
+      case Right(entity) => entity shouldBe expectedObstacle
 
   it should "fail when width is not positive" in:
-    val res = StaticEntity.obstacle(origin, orient, 0, 3)
-    inside(res.left.value):
-      case DomainError.NegativeOrZero(field, _) =>
-        field shouldBe "width"
-
-  "obstacle" should "fail when height is not positive" in:
-    val res = StaticEntity.obstacle(origin, orient, 2, 0)
-    inside(res.left.value):
-      case DomainError.NegativeOrZero(field, _) =>
-        field shouldBe "height"
-
-  "light" should "fail when intensity is not positive" in:
-    val res = StaticEntity.light(origin, orient, 1.0, 0.0, 1.0)
-    inside(res.left.value):
-      case DomainError.NegativeOrZero(field, _) =>
-        field shouldBe "intensity"
-
+    val res = StaticEntity.obstacle(origin, orientation, 0, height)
+    inside(res.left.value) { case DomainError.NegativeOrZero("width", _) => succeed }
+  
+  it should "fail when height is not positive" in:
+      val res = StaticEntity.obstacle(origin, orientation, width, 0)
+      inside(res.left.value) { case DomainError.NegativeOrZero("height", _) => succeed }
+  
+  "light" should "create a valid entity" in:
+    inside(StaticEntity.light(origin, orientation, radius, intensity, attenuation)):
+      case Right(entity) => entity shouldBe expectedLight
+  
+  it should "fail when intensity is not positive" in:
+      val res = StaticEntity.light(origin, orientation, radius, 0.0, attenuation)
+      inside(res.left.value) { case DomainError.NegativeOrZero("intensity", _) => succeed }
+  
   it should "fail when attenuation is not positive" in:
-    val res = StaticEntity.light(origin, orient, 1.0, 1.0, 0.0)
-    inside(res.left.value):
-      case DomainError.NegativeOrZero(field, _) =>
-        field shouldBe "attenuation"
+      val res = StaticEntity.light(origin, orientation, radius, intensity, 0.0)
+      inside(res.left.value) { case DomainError.NegativeOrZero("attenuation", _) => succeed }
+  
 end StaticEntityTest
