@@ -31,21 +31,21 @@ class StaticEntityTest extends AnyFlatSpec:
   it should "fail when width is not positive" in:
     val res = StaticEntity.obstacle(origin, orientation, 0, height)
     inside(res.left.value) { case DomainError.NegativeOrZero("width", _) => succeed }
-  
+
   it should "fail when height is not positive" in:
-      val res = StaticEntity.obstacle(origin, orientation, width, 0)
-      inside(res.left.value) { case DomainError.NegativeOrZero("height", _) => succeed }
-  
+    val res = StaticEntity.obstacle(origin, orientation, width, 0)
+    inside(res.left.value) { case DomainError.NegativeOrZero("height", _) => succeed }
+
   "light" should "create a valid entity" in:
     inside(StaticEntity.light(origin, orientation, radius, intensity, attenuation)):
       case Right(entity) => entity shouldBe expectedLight
-  
+
   it should "fail when intensity is not positive" in:
-      val res = StaticEntity.light(origin, orientation, radius, 0.0, attenuation)
-      inside(res.left.value) { case DomainError.NegativeOrZero("intensity", _) => succeed }
-  
+    val res = StaticEntity.light(origin, orientation, radius, 0.0, attenuation)
+    inside(res.left.value) { case DomainError.NegativeOrZero("intensity", _) => succeed }
+
   it should "fail when attenuation is not positive" in:
-      val res = StaticEntity.light(origin, orientation, radius, intensity, 0.0)
-      inside(res.left.value) { case DomainError.NegativeOrZero("attenuation", _) => succeed }
-  
+    val res = StaticEntity.light(origin, orientation, radius, intensity, 0.0)
+    inside(res.left.value) { case DomainError.NegativeOrZero("attenuation", _) => succeed }
+
 end StaticEntityTest
