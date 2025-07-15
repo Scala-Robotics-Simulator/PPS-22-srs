@@ -1,4 +1,6 @@
-package io.github.srs.model
+package io.github.srs.model.entity
+
+import io.github.srs.model.entity.{ Orientation, ShapeType }
 
 /**
  * Represents a generic entity in a two-dimensional space.

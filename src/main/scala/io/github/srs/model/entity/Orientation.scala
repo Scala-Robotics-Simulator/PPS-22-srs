@@ -1,4 +1,4 @@
-package io.github.srs.model
+package io.github.srs.model.entity
 
 /**
  * Represents an orientation in a two-dimensional plane.
