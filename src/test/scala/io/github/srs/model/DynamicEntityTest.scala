@@ -1,6 +1,6 @@
 package io.github.srs.model
 
-import io.github.srs.model.entity.dynamic.{ Actuator, DynamicEntity }
+import io.github.srs.model.entity.dynamic.{ Actuator, DynamicEntity, Wheel }
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -23,7 +23,7 @@ class DynamicEntityTest extends AnyFlatSpec with Matchers:
     entity.actuators should be(None)
 
   it should "support having some actuators" in:
-    val actuator = Actuator.WheelMotor((1.0, 1.0))
+    val actuator = Actuator.WheelMotor(Wheel(1.0), Wheel(1.0))
     val entity = new Dummy(p, shape, o, Some(Seq(actuator)))
     entity.actuators should be(Some(Seq(actuator)))
 end DynamicEntityTest
