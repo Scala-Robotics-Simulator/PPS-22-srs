@@ -40,6 +40,10 @@ class StaticEntityTest extends AnyFlatSpec:
     inside(StaticEntity.light(origin, orientation, radius, intensity, attenuation)):
       case Right(entity) => entity shouldBe expectedLight
 
+  it should "fail when radius is not positive" in:
+    val res = StaticEntity.light(origin, orientation, 0.0, intensity, attenuation)
+    inside(res.left.value) { case DomainError.NegativeOrZero("radius", _) => succeed }
+
   it should "fail when intensity is not positive" in:
     val res = StaticEntity.light(origin, orientation, radius, 0.0, attenuation)
     inside(res.left.value) { case DomainError.NegativeOrZero("intensity", _) => succeed }

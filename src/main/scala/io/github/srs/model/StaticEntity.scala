@@ -116,7 +116,8 @@ object StaticEntity:
       attenuation: Double,
   ): Validation[StaticEntity] =
     for
+      r <- positive("radius", radius)
       i <- positive("intensity", intensity)
       a <- positive("attenuation", attenuation)
-    yield StaticEntity.Light(pos, orient, radius, i, a)
+    yield StaticEntity.Light(pos, orient, r, i, a)
 end StaticEntity
