@@ -23,7 +23,7 @@ class DynamicEntityTest extends AnyFlatSpec with Matchers:
     entity.actuators should be(None)
 
   it should "support having some actuators" in:
-    val actuator = Actuator.WheelMotor(Wheel(1.0), Wheel(1.0))
+    val actuator = Actuator.WheelMotor(Wheel(1.0, ShapeType.Circle(0.05)), Wheel(1.0, ShapeType.Circle(0.05)))
     val entity = new Dummy(p, shape, o, Some(Seq(actuator)))
     entity.actuators should be(Some(Seq(actuator)))
 end DynamicEntityTest
