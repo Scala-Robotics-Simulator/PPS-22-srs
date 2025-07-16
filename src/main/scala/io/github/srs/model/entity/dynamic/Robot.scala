@@ -3,7 +3,7 @@ package io.github.srs.model.entity.dynamic
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 
 trait Robot extends DynamicEntity:
-  val actuators: Option[Seq[Actuator]]
+  def moveTo(newPosition: Point2D): Robot
 
 object Robot:
 
@@ -19,4 +19,7 @@ object Robot:
       shape: ShapeType.Circle,
       orientation: Orientation,
       actuators: Option[Seq[Actuator]],
-  ) extends Robot
+  ) extends Robot:
+
+    override def moveTo(newPosition: Point2D): Robot =
+      this.copy(position = newPosition)

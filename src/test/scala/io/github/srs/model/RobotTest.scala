@@ -14,3 +14,8 @@ class RobotTest extends AnyFlatSpec with Matchers:
   "Robot" should "have an initial position" in:
     val robot: Robot = Robot(p, s, o, None)
     robot.position should be(Point2D(0.0, 0.0))
+
+  it should "move to a new position" in:
+    val newPosition: Point2D = Point2D(1.0, 1.0)
+    val robot: Robot = Robot(p, s, o, None).moveTo(newPosition)
+    robot.position should be(Point2D(1.0, 1.0))
