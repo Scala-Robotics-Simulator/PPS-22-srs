@@ -22,17 +22,16 @@ object WheelMotor:
   private case class DifferentialWheelMotor(val dt: Double, val left: Wheel, val right: Wheel) extends WheelMotor:
 
     override def act(robot: Robot): Robot =
-      val leftSpeed = this.left.speed * this.left.shape.radius
-      val rightSpeed = this.right.speed * this.right.shape.radius
-      val radius = robot.shape.radius
-      val wheelDistance = radius * 2
-      val speed = (leftSpeed + rightSpeed) / 2
-      val omega = (rightSpeed - leftSpeed) / wheelDistance
-      val newPosition = Point2D(
-        robot.position.x + speed * math.cos(robot.orientation.toRadians) * dt,
-        robot.position.y + speed * math.sin(robot.orientation.toRadians) * dt,
-      )
-      val newOrientation = Orientation.fromRadians(robot.orientation.toRadians + omega * dt)
+      val vLeft = this.left.speed * this.left.shape.radius
+      val vRight = this.right.speed * this.right.shape.radius
+      val wheelDistance = robot.shape.radius * 2
+      val velocity = (vLeft + vRight) / 2
+      val omega = (vRight - vLeft) / wheelDistance
+      val theta = robot.orientation.toRadians
+      val dx = velocity * math.cos(theta) * dt
+      val dy = velocity * math.sin(theta) * dt
+      val newPosition = Point2D(robot.position.x + dx, robot.position.y + dy)
+      val newOrientation = Orientation.fromRadians(theta + omega * dt)
       Robot(newPosition, robot.shape, newOrientation, robot.actuators)
 
   end DifferentialWheelMotor
