@@ -1,4 +1,4 @@
 package io.github.srs.model.entity.dynamic_entity
 
-trait Actuator:
-  def act(robot: Robot): Robot
+trait Actuator[E <: DynamicEntity]:
+  def act(entity: E): E
