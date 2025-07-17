@@ -1,10 +1,10 @@
-package io.github.srs.model.entity.dynamic_entity
+package io.github.srs.model.entity.dynamicentity
 
-import io.github.srs.model.entity.dynamic_entity.Robot
+import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import io.github.srs.model.entity.dynamic_entity.WheelMotor.move
+import io.github.srs.model.entity.dynamicentity.WheelMotor.move
 
 class RobotTest extends AnyFlatSpec with Matchers:
 
