@@ -1,6 +1,8 @@
 package io.github.srs.model.environment
 
 import io.github.srs.model.Entity
+import io.github.srs.model.validation.Validation.*
+import io.github.srs.model.validation.Validation
 
 /**
  * Represents the environment in which entities exist.
@@ -50,7 +52,21 @@ object Environment:
    * @return
    *   a new [[Environment]] instance with the given dimensions.
    */
-  def apply(width: Double, height: Double, entities: Set[Entity] = Set.empty): Environment =
-    EnvironmentImpl(width, height, entities)
+  def apply(width: Double, height: Double, entities: Set[Entity] = Set.empty): Validation[Environment] =
+    for
+      width <- positive("width", width)
+      height <- positive("height", height)
+    yield EnvironmentImpl(width, height, entities)
+
+  /**
+   * Extracts the width, height, and entities from an [[Environment]] instance.
+   * @param env
+   *   the environment to extract values from.
+   * @return
+   *   a tuple containing the width, height, and a set of entities in the environment.
+   */
+  def unapply(env: Environment): Environment =
+    EnvironmentImpl(env.width, env.height, env.entities)
 
   private final case class EnvironmentImpl(width: Double, height: Double, entities: Set[Entity]) extends Environment
+end Environment
