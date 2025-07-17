@@ -1,4 +1,4 @@
-package io.github.srs.model.entity.dynamic
+package io.github.srs.model.entity.dynamic_entity
 
 import io.github.srs.model.entity.ShapeType
 

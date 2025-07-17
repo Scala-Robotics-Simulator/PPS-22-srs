@@ -1,7 +1,7 @@
-package io.github.srs.model
+package io.github.srs.model.entity.dynamic_entity
 
-import io.github.srs.model.entity.dynamic.Robot
-import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
+import io.github.srs.model.entity.dynamic_entity.Robot
+import io.github.srs.model.entity.{Orientation, Point2D, ShapeType}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
