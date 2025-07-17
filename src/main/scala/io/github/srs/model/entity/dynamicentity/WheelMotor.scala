@@ -2,25 +2,83 @@ package io.github.srs.model.entity.dynamicentity
 
 import io.github.srs.model.entity.*
 
+/**
+ * WheelMotor is an actuator that controls the movement of a robot.
+ */
 trait WheelMotor extends Actuator[Robot]:
+  /**
+   * The time step for the motor's operation, in seconds.
+   * @return
+   *   the delta time in seconds.
+   */
   def dt: Double
+
+  /**
+   * The left wheel of the motor.
+   * @return
+   *   the left wheel.
+   */
   def left: Wheel
+
+  /**
+   * The right wheel of the motor.
+   * @return
+   *   the right wheel.
+   */
   def right: Wheel
 
+/**
+ * Companion object for [[WheelMotor]] providing an extension method to move the robot.
+ */
 object WheelMotor:
 
+  /**
+   * Extension method to move the robot using its wheel motors.
+   */
   extension (robot: Robot)
 
+    /**
+     * Moves the robot based on the current state of its wheel motors.
+     * @return
+     *   a new instance of the robot with updated position and orientation.
+     */
     def move: Robot =
       robot.actuators.collectFirst { case wm: WheelMotor => wm } match
         case Some(wm) => wm.act(robot)
         case None => robot
 
+  /**
+   * Creates a new instance of [[WheelMotor]] with the specified time step and wheel configurations.
+   * @param dt
+   *   the time step for the motor's operation, in seconds.
+   * @param left
+   *   the left wheel of the motor.
+   * @param right
+   *   the right wheel of the motor.
+   * @return
+   *   a new instance of [[WheelMotor]].
+   */
   def apply(dt: Double, left: Wheel, right: Wheel): WheelMotor =
     new DifferentialWheelMotor(dt, left, right)
 
+  /**
+   * Implementation of the [[WheelMotor]] trait that uses differential drive to move the robot.
+   * @param dt
+   *   the time step for the motor's operation, in seconds.
+   * @param left
+   *   the left wheel of the motor.
+   * @param right
+   *   the right wheel of the motor.
+   */
   private case class DifferentialWheelMotor(val dt: Double, val left: Wheel, val right: Wheel) extends WheelMotor:
 
+    /**
+     * Moves the robot based on the current state of its wheel motors.
+     * @param robot
+     *   the robot to be moved.
+     * @return
+     *   a new instance of the robot with updated position and orientation.
+     */
     override def act(robot: Robot): Robot =
       val vLeft = this.left.speed * this.left.shape.radius
       val vRight = this.right.speed * this.right.shape.radius
