@@ -14,7 +14,7 @@ class WheelTest extends AnyFlatSpec with Matchers:
     wheel.speed should be(1.0)
 
   it should "be updated with a new speed" in:
-    val updatedWheel: Wheel = wheel.updated(2.0)
+    val updatedWheel: Wheel = wheel.updatedSpeed(2.0)
     updatedWheel.speed should be(2.0)
 
   it should "have a circular shape" in:
