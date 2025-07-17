@@ -5,14 +5,14 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 import org.scalatest.Inside.inside
 
-private def createEntity(p: (Double, Double), s: ShapeType, o: Orientation): Entity =
-  new Entity:
-    override def position: (Double, Double) = p
-    override def shape: ShapeType = s
-    override def orientation: Orientation = o
-
 class EnvironmentTest extends AnyFlatSpec with should.Matchers:
   given CanEqual[Entity, Entity] = CanEqual.derived
+
+  private def createEntity(p: (Double, Double), s: ShapeType, o: Orientation): Entity =
+    new Entity:
+      override def position: (Double, Double) = p
+      override def shape: ShapeType = s
+      override def orientation: Orientation = o
 
   "Environment" should "have a width and height" in:
     inside(Environment(10, 10)):
