@@ -63,10 +63,10 @@ object Environment:
    * @param env
    *   the environment to extract values from.
    * @return
-   *   a tuple containing the width, height, and a set of entities in the environment.
+   *   an Option containing a tuple of (width, height, entities) if the environment is valid.
    */
-  def unapply(env: Environment): Environment =
-    EnvironmentImpl(env.width, env.height, env.entities)
+  def unapply(env: Environment): Option[(Double, Double, Set[Entity])] =
+    Some((env.width, env.height, env.entities))
 
   private final case class EnvironmentImpl(width: Double, height: Double, entities: Set[Entity]) extends Environment
 end Environment

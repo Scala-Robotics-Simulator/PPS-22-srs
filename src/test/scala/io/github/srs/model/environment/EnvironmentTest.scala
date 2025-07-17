@@ -28,4 +28,13 @@ class EnvironmentTest extends AnyFlatSpec with should.Matchers:
     inside(Environment(10, 10, Set(entity1, entity2))):
       case Right(environment) => environment.entities should contain theSameElementsAs Set(entity1, entity2)
 
+  it should "extract environment fields correctly" in:
+    val entity = createEntity((5.0, 5.0), ShapeType.Circle(2.0), Orientation(45.0))
+    inside(Environment(20, 15, Set(entity))):
+      case Right(environment) =>
+        val result = environment match
+          case Environment(w, h, es) => (w, h, es)
+          case _ => fail("Pattern match failed")
+        result shouldBe (20.0, 15.0, Set(entity))
+
 end EnvironmentTest
