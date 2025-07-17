@@ -1,13 +1,13 @@
-package io.github.srs.model.entity.dynamic_entity
+package io.github.srs.model.entity.dynamicentity
 
 import io.github.srs.model.entity.ShapeType
-import io.github.srs.model.entity.dynamic_entity.Wheel
+import io.github.srs.model.entity.dynamicentity.Wheel
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 class WheelTest extends AnyFlatSpec with Matchers:
 
-  val shape: ShapeType.Circle = ShapeType.Circle(0.05)
+  val shape: ShapeType.Circle = ShapeType.Circle(0.5)
   val wheel: Wheel = Wheel(1.0, shape)
 
   "Wheel" should "have a speed" in:
@@ -19,4 +19,4 @@ class WheelTest extends AnyFlatSpec with Matchers:
 
   it should "have a circular shape" in:
     wheel.shape match
-      case ShapeType.Circle(radius) => radius should be(0.05)
+      case ShapeType.Circle(radius) => radius should be(0.5)

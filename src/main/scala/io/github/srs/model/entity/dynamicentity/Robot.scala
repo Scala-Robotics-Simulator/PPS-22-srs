@@ -1,4 +1,4 @@
-package io.github.srs.model.entity.dynamic_entity
+package io.github.srs.model.entity.dynamicentity
 
 import io.github.srs.model.entity.*
 

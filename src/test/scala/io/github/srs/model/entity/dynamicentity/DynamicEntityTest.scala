@@ -1,4 +1,4 @@
-package io.github.srs.model.entity.dynamic_entity
+package io.github.srs.model.entity.dynamicentity
 
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import org.scalatest.flatspec.AnyFlatSpec
