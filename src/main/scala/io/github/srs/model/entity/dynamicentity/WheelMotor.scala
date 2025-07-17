@@ -32,7 +32,7 @@ object WheelMotor:
         robot.position.x + speed * math.cos(robot.orientation.toRadians) * dt,
         robot.position.y + speed * math.sin(robot.orientation.toRadians) * dt,
       )
-      val newOrientation = Orientation(robot.orientation.toRadians + omega * dt)
+      val newOrientation = Orientation.fromRadians(robot.orientation.toRadians + omega * dt)
       Robot(newPosition, robot.shape, newOrientation, robot.actuators)
 
   end DifferentialWheelMotor
