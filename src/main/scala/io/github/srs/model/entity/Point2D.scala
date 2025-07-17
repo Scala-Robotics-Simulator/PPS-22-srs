@@ -34,12 +34,12 @@ extension (p: Point2D)
   /**
    * The x-coordinate of this point.
    */
-  private def x: Double = p._1
+  def x: Double = p._1
 
   /**
    * The y-coordinate of this point.
    */
-  private def y: Double = p._2
+  def y: Double = p._2
 
   /**
    * Computes the Euclidean distance between this point and another point.

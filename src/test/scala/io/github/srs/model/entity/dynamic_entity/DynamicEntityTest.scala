@@ -15,15 +15,15 @@ class DynamicEntityTest extends AnyFlatSpec with Matchers:
       val position: Point2D,
       val shape: ShapeType,
       val orientation: Orientation,
-      val actuators: Option[Seq[Actuator]],
+      val actuators: Seq[Actuator],
   ) extends DynamicEntity
 
   "DynamicEntity" should "support having no actuators" in:
-    val entity = new Dummy(p, shape, o, None)
-    entity.actuators should be(None)
+    val entity = new Dummy(p, shape, o, Seq.empty)
+    entity.actuators should be(Seq.empty)
 
   it should "support having some actuators" in:
-    val actuator = Actuator.WheelMotor(Wheel(1.0, ShapeType.Circle(0.05)), Wheel(1.0, ShapeType.Circle(0.05)))
-    val entity = new Dummy(p, shape, o, Some(Seq(actuator)))
-    entity.actuators should be(Some(Seq(actuator)))
+    val actuator = WheelMotor(0.1, Wheel(1.0, ShapeType.Circle(0.05)), Wheel(1.0, ShapeType.Circle(0.05)))
+    val entity = new Dummy(p, shape, o, Seq(actuator))
+    entity.actuators should be(Seq(actuator))
 end DynamicEntityTest
