@@ -1,5 +1,7 @@
 package io.github.srs.model.environment
 
+import io.github.srs.model.Entity
+
 /**
  * Represents the environment in which entities exist.
  *
@@ -23,10 +25,21 @@ trait Environment:
    */
   val height: Double
 
+  /**
+   * A set of entities that exist within the environment.
+   *
+   * @return
+   *   a Set of [[Entity]] representing the entities in the environment.
+   */
+  val entities: Set[Entity]
+
+end Environment
+
 /**
  * Companion object for [[Environment]], providing a factory method to create instances.
  */
 object Environment:
+
   /**
    * Creates a new instance of [[Environment]] with the specified width and height.
    *
@@ -37,6 +50,7 @@ object Environment:
    * @return
    *   a new [[Environment]] instance with the given dimensions.
    */
-  def apply(width: Double, height: Double): Environment = EnvironmentImpl(width, height)
+  def apply(width: Double, height: Double, entities: Set[Entity] = Set.empty): Environment =
+    EnvironmentImpl(width, height, entities)
 
-  private final case class EnvironmentImpl(width: Double, height: Double) extends Environment
+  private final case class EnvironmentImpl(width: Double, height: Double, entities: Set[Entity]) extends Environment
