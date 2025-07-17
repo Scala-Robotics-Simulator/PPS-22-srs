@@ -3,4 +3,4 @@ package io.github.srs.model.entity.dynamic_entity
 import io.github.srs.model.entity.Entity
 
 trait DynamicEntity extends Entity:
-  def actuators: Option[Seq[Actuator]]
+  def actuators: Seq[Actuator]
