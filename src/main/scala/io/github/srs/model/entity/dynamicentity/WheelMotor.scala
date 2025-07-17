@@ -27,6 +27,8 @@ trait WheelMotor extends Actuator[Robot]:
    */
   def right: Wheel
 
+end WheelMotor
+
 /**
  * Companion object for [[WheelMotor]] providing an extension method to move the robot.
  */
@@ -73,11 +75,41 @@ object WheelMotor:
   private case class DifferentialWheelMotor(val dt: Double, val left: Wheel, val right: Wheel) extends WheelMotor:
 
     /**
-     * Moves the robot based on the current state of its wheel motors.
+     * Computes the updated position and orientation of a differential-drive robot based on the speeds of its wheels and
+     * the time interval `dt`.
+     *
+     * The robot is assumed to move on a 2D plane, and the orientation is in radians.
+     *
+     * Physics model:
+     *
+     *   - The linear velocity of each wheel is obtained by:
+     *     {{{
+     * v_left = left.speed * left.radius
+     * v_right = right.speed * right.radius
+     *     }}}
+     *   - The linear velocity of the robot is the average of the two:
+     *     {{{
+     * v = (v_right + v_left) / 2
+     *     }}}
+     *   - The angular velocity (omega) is proportional to the difference of the wheel velocities:
+     *     {{{
+     * omega = (v_right - v_left) / d
+     *     }}}
+     *     where `d` is the distance between the wheels (assumed to be robot.shape.radius * 2)
+     *   - The new position is computed as:
+     *     {{{
+     * x_new = x + v * cos(theta) * dt
+     * y_new = y + v * sin(theta) * dt
+     *     }}}
+     *   - The new orientation is:
+     *     {{{
+     * theta_new = theta + omega * dt
+     *     }}}
+     *
      * @param robot
-     *   the robot to be moved.
+     *   the robot whose state should be updated.
      * @return
-     *   a new instance of the robot with updated position and orientation.
+     *   a new [[Robot]] instance with updated position and orientation.
      */
     override def act(robot: Robot): Robot =
       val vLeft = this.left.speed * this.left.shape.radius
