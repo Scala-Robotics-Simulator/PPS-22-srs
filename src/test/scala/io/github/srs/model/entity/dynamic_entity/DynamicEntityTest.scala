@@ -1,7 +1,7 @@
 package io.github.srs.model.entity.dynamic_entity
 
-import io.github.srs.model.entity.dynamic_entity.{Actuator, DynamicEntity, Wheel}
-import io.github.srs.model.entity.{Orientation, Point2D, ShapeType}
+import io.github.srs.model.entity.dynamic_entity.{ Actuator, DynamicEntity, Wheel }
+import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
