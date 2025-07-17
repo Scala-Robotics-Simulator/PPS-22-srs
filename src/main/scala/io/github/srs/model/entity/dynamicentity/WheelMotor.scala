@@ -1,6 +1,7 @@
 package io.github.srs.model.entity.dynamicentity
 
 import io.github.srs.model.entity.*
+import io.github.srs.model.entity.dynamicentity.Action.applyTo
 
 /**
  * WheelMotor is an actuator that controls the movement of a robot.
@@ -48,6 +49,9 @@ object WheelMotor:
       robot.actuators.collectFirst { case wm: WheelMotor => wm } match
         case Some(wm) => wm.act(robot)
         case None => robot
+
+    def applyActions(actions: Seq[Action]): Robot =
+      actions.foldLeft(robot)((r, a) => a.applyTo(r).move)
 
   /**
    * Creates a new instance of [[WheelMotor]] with the specified time step and wheel configurations.
