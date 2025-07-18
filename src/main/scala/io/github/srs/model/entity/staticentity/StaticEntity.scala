@@ -1,5 +1,6 @@
-package io.github.srs.model
+package io.github.srs.model.entity.staticentity
 
+import io.github.srs.model.entity.*
 import io.github.srs.model.validation.Validation
 import io.github.srs.model.validation.Validation.*
 

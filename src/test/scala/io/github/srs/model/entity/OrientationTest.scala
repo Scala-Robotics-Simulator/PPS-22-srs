@@ -1,5 +1,6 @@
-package io.github.srs.model
+package io.github.srs.model.entity
 
+import io.github.srs.model.entity.Orientation
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 

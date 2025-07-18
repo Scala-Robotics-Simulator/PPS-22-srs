@@ -1,4 +1,4 @@
-package io.github.srs.model
+package io.github.srs.model.entity
 
 /**
  * ShapeType represents different geometric shapes used in the simulation.

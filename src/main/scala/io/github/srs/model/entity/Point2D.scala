@@ -1,4 +1,4 @@
-package io.github.srs.model
+package io.github.srs.model.entity
 
 /**
  * Represents a point in a two-dimensional Cartesian coordinate system.
@@ -32,12 +32,12 @@ extension (p: Point2D)
   /**
    * The x-coordinate of this point.
    */
-  private def x: Double = p._1
+  def x: Double = p._1
 
   /**
    * The y-coordinate of this point.
    */
-  private def y: Double = p._2
+  def y: Double = p._2
 
   /**
    * Computes the Euclidean distance between this point and another point.
@@ -54,4 +54,5 @@ extension (p: Point2D)
    */
   def distanceTo(other: Point2D): Double =
     math.sqrt(math.pow(other.x - p.x, 2) + math.pow(other.y - p.y, 2))
+
 end extension
