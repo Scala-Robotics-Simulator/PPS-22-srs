@@ -24,12 +24,12 @@ object EnvironmentView:
 
   /** Static environment only—no robots yet. */
   def static(env: Environment): EnvironmentView =
-    val W = env.width.toInt
-    val H = env.height.toInt
+    val W = env.width
+    val H = env.height
 
     val obs = env.entities.collect { case o: Obstacle =>
       val tl = o.pos.toCell
-      for dx <- 0 until o.width; dy <- 0 until o.height
+      for dx <- 0 until o.width.toInt; dy <- 0 until o.height.toInt
         yield Cell(tl.x + dx, tl.y + dy)
     }.flatten
 
@@ -41,6 +41,3 @@ object EnvironmentView:
     EnvironmentView(W, H, obs, lts, res)
 
 
-extension (env: Environment)
-  /** View of the static world (no robots yet). */
-  def view: EnvironmentView = EnvironmentView.static(env)

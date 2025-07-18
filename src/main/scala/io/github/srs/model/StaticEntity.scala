@@ -85,8 +85,8 @@ object StaticEntity:
   def obstacle(
       pos: Point2D,
       orient: Orientation,
-      width: Int,
-      height: Int,
+      width: Double,
+      height: Double,
   ): Validation[StaticEntity] =
     for
       w <- positive("width", width)
