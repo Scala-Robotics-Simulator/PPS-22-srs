@@ -50,6 +50,13 @@ object WheelMotor:
         case Some(wm) => wm.act(robot)
         case None => robot
 
+    /**
+     * Applies a sequence of actions to the robot, updating its state accordingly.
+     * @param actions
+     *   the sequence of [[Action]] to apply to the robot.
+     * @return
+     *   the robot with updated state after applying the actions.
+     */
     def applyActions(actions: Seq[Action]): Robot =
       actions.foldLeft(robot)((r, a) => a.applyTo(r).move)
 
