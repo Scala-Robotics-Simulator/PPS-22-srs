@@ -17,7 +17,7 @@ trait Environment:
    * @return
    *   a Double representing the width of the environment.
    */
-  val width: Double
+  val width: Int
 
   /**
    * The height of the environment.
@@ -25,7 +25,7 @@ trait Environment:
    * @return
    *   a Double representing the height of the environment.
    */
-  val height: Double
+  val height: Int
 
   /**
    * A set of entities that exist within the environment.
@@ -52,7 +52,7 @@ object Environment:
    * @return
    *   a new [[Environment]] instance with the given dimensions.
    */
-  def apply(width: Double, height: Double, entities: Set[Entity] = Set.empty): Validation[Environment] =
+  def apply(width: Int, height: Int, entities: Set[Entity] = Set.empty): Validation[Environment] =
     for
       width <- positive("width", width)
       height <- positive("height", height)
@@ -68,5 +68,9 @@ object Environment:
   def unapply(env: Environment): Option[(Double, Double, Set[Entity])] =
     Some((env.width, env.height, env.entities))
 
-  private final case class EnvironmentImpl(width: Double, height: Double, entities: Set[Entity]) extends Environment
+  private final case class EnvironmentImpl(width: Int, height: Int, entities: Set[Entity]) extends Environment
 end Environment
+
+extension (env: Environment)
+  /** Derives the static view of the environment. */
+  def view: EnvironmentView = EnvironmentView.static(env)
