@@ -74,4 +74,3 @@ end Environment
 extension (env: Environment)
   /** Derives the static view of the environment. */
   def view: EnvironmentView = EnvironmentView.static(env)
-end extension

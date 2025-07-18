@@ -1,4 +1,5 @@
 package io.github.srs.model
+
 /**
  * Represents a point in a two-dimensional Cartesian coordinate system.
  *
@@ -56,11 +57,11 @@ extension (p: Point2D)
   def distanceTo(other: Point2D): Double =
     math.sqrt(math.pow(other.x - p.x, 2) + math.pow(other.y - p.y, 2))
 
-  /** transforms the [[Point2D]] into a [[Cell]].
-   * The coordinates are rounded to the nearest integer values.
+  /**
+   * transforms the [[Point2D]] into a [[Cell]]. The coordinates are rounded to the nearest integer values.
    * @return
-   *  a [[Cell]] representing the point's coordinates.
-   * */
+   *   a [[Cell]] representing the point's coordinates.
+   */
   def toCell: Cell = Cell(p.x.round.toInt, p.y.round.toInt)
 
 end extension
