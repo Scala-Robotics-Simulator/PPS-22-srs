@@ -60,6 +60,8 @@ object WheelMotor:
     def applyActions(actions: Seq[Action]): Robot =
       actions.foldLeft(robot)((r, a) => a.applyTo(r).move)
 
+  end extension
+
   /**
    * Creates a new instance of [[WheelMotor]] with the specified time step and wheel configurations.
    * @param dt

@@ -1,6 +1,6 @@
 package io.github.srs.model.environment
 
-import io.github.srs.model.Entity
+import io.github.srs.model.entity.Entity
 import io.github.srs.model.validation.Validation.*
 import io.github.srs.model.validation.Validation
 
