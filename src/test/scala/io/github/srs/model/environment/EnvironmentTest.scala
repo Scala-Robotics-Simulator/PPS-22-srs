@@ -1,6 +1,6 @@
 package io.github.srs.model.environment
 
-import io.github.srs.model.{ Entity, Orientation, ShapeType }
+import io.github.srs.model.entity.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 import org.scalatest.Inside.inside
