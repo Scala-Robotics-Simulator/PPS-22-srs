@@ -1,7 +1,10 @@
 package io.github.srs.model.entity.dynamicentity
 
+import io.github.srs.model.validation.Validation
+
 /**
  * Represents an actuator for a dynamic entity.
+ *
  * @tparam E
  *   the type of dynamic entity that the actuator can act upon.
  */
@@ -16,4 +19,4 @@ trait Actuator[E <: DynamicEntity]:
    * @return
    *   a new instance of the entity with the modifications applied.
    */
-  def act(entity: E): E
+  def act(entity: E): Validation[E]
