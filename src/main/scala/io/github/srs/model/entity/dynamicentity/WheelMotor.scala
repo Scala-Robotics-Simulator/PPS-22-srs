@@ -100,26 +100,26 @@ object WheelMotor:
      *
      *   - The linear velocity of each wheel is obtained by:
      *     {{{
-     * v_left = left.speed * left.radius
-     * v_right = right.speed * right.radius
+     * vLeft = left.speed * left.radius
+     * vRight = right.speed * right.radius
      *     }}}
      *   - The linear velocity of the robot is the average of the two:
      *     {{{
-     * v = (v_right + v_left) / 2
+     * v = (vRight + vLeft) / 2
      *     }}}
      *   - The angular velocity (omega) is proportional to the difference of the wheel velocities:
      *     {{{
-     * omega = (v_right - v_left) / d
+     * omega = (vRight - vLeft) / d
      *     }}}
      *     Where `d` is the distance between the wheels (assumed to be robot.shape.radius * 2)
      *   - The new position is computed as:
      *     {{{
-     * x_new = x + v * cos(theta) * dt
-     * y_new = y + v * sin(theta) * dt
+     * xNew = x + v * cos(theta) * dt
+     * yNew = y + v * sin(theta) * dt
      *     }}}
      *   - The new orientation is:
      *     {{{
-     * theta_new = theta + omega * dt
+     * thetaNew = theta + omega * dt
      *     }}}
      *
      * @param robot
