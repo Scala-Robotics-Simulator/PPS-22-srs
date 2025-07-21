@@ -51,6 +51,19 @@ object Validation:
       DomainError.NegativeOrZero(field, n.toDouble(v)), // error
     )
 
+  /**
+   * Ensures the given numeric value is non-negative, the value can be zero.
+   * @param field
+   *   the name of the field being validated.
+   * @param v
+   *   the numeric value to validate.
+   * @param n
+   *   the numeric type class instance for the type of `v`.
+   * @tparam T
+   *   the [[Numeric]] type.
+   * @return
+   *   [[Right]] with the value if it is non-negative, otherwise [[Left]] with a [[DomainError.Negative]] error.
+   */
   def positiveWithZero[T](field: String, v: T)(using n: Numeric[T]): Validation[T] =
     Either.cond(
       n.gteq(v, n.zero),
@@ -58,6 +71,23 @@ object Validation:
       DomainError.Negative(field, n.toDouble(v)),
     )
 
+  /**
+   * Ensures the given numeric value is within a specified range (inclusive of min, exclusive of max).
+   * @param field
+   *   the name of the field being validated.
+   * @param v
+   *   the numeric value to validate.
+   * @param min
+   *   the minimum value (inclusive).
+   * @param max
+   *   the maximum value (exclusive).
+   * @param n
+   *   the numeric type class instance for the type of `v`.
+   * @tparam T
+   *   the [[Numeric]] type.
+   * @return
+   *   [[Right]] with the value if it is within the bounds, otherwise [[Left]] with a [[DomainError.OutOfBounds]] error.
+   */
   private def bounded[T](field: String, v: T, min: T, max: T)(using n: Numeric[T]): Validation[T] =
     Either.cond(
       n.gteq(v, min) && n.lt(v, max),
@@ -65,6 +95,19 @@ object Validation:
       DomainError.OutOfBounds(field, n.toDouble(v), n.toDouble(min), n.toDouble(max)),
     )
 
+  /**
+   * Ensures the given numeric value is not NaN (Not a Number).
+   * @param field
+   *   the name of the field being validated.
+   * @param v
+   *   the numeric value to validate.
+   * @param n
+   *   the numeric type class instance for the type of `v`.
+   * @tparam T
+   *   the [[Numeric]] type.
+   * @return
+   *   [[Right]] with the value if it is not NaN, otherwise [[Left]] with a [[DomainError.NotANumber]] error.
+   */
   def notNaN[T](field: String, v: T)(using n: Numeric[T]): Validation[T] =
     Either.cond(
       !n.toDouble(v).isNaN,
@@ -72,6 +115,19 @@ object Validation:
       DomainError.NotANumber(field, n.toDouble(v)),
     )
 
+  /**
+   * Ensures the given numeric value is not infinite.
+   * @param field
+   *   the name of the field being validated.
+   * @param v
+   *   the numeric value to validate.
+   * @param n
+   *   the numeric type class instance for the type of `v`.
+   * @tparam T
+   *   the [[Numeric]] type.
+   * @return
+   *   [[Right]] with the value if it is not infinite, otherwise [[Left]] with a [[DomainError.Infinite]] error.
+   */
   def notInfinite[T](field: String, v: T)(using n: Numeric[T]): Validation[T] =
     Either.cond(
       !n.toDouble(v).isInfinite,
@@ -79,6 +135,22 @@ object Validation:
       DomainError.Infinite(field, n.toDouble(v)),
     )
 
+  /**
+   * Ensures the count of elements of a specific type in a sequence is within a specified range.
+   * @param field
+   *   the name of the field being validated.
+   * @param elements
+   *   the sequence of elements to validate.
+   * @param min
+   *   the minimum count of elements of type `A` (inclusive).
+   * @param max
+   *   the maximum count of elements of type `A` (inclusive).
+   * @tparam A
+   *   the type of elements to count (must be a subtype of `A`).
+   * @return
+   *   [[Right]] with the original sequence if the count is within bounds, otherwise [[Left]] with a
+   *   [[DomainError.InvalidCount]] error.
+   */
   def validateCountOfType[A: ClassTag](
       field: String,
       elements: Seq[?],
