@@ -1,7 +1,7 @@
 package io.github.srs.model.entity
 
 import io.github.srs.model.validation.Validation
-import io.github.srs.model.validation.Validation.{ notInfinite, notNaN, positiveWithZero }
+import io.github.srs.model.validation.Validation.{ notInfinite, notNaN }
 
 /**
  * Represents a point in a two-dimensional Cartesian coordinate system.
@@ -29,10 +29,8 @@ object Point2D:
     for
       x <- notNaN("x", x)
       x <- notInfinite("x", x)
-      x <- positiveWithZero("x", x)
       y <- notNaN("y", y)
       y <- notInfinite("y", y)
-      y <- positiveWithZero("y", y)
     yield (x, y)
 
 end Point2D
