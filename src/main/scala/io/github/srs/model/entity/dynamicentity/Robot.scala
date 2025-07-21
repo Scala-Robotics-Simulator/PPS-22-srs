@@ -1,6 +1,8 @@
 package io.github.srs.model.entity.dynamicentity
 
 import io.github.srs.model.entity.*
+import io.github.srs.model.validation.Validation
+import io.github.srs.model.validation.Validation.validateCountOfType
 
 /**
  * Represents a robot entity in the simulation.
@@ -24,6 +26,14 @@ trait Robot extends DynamicEntity:
  * Companion object for the [[Robot]] trait.
  */
 object Robot:
+
+  extension (robot: Robot)
+
+    def copy(
+        position: Point2D = robot.position,
+        orientation: Orientation = robot.orientation,
+        actuators: Seq[Actuator[Robot]] = robot.actuators,
+    ): Validation[Robot] = Robot(position, robot.shape, orientation, actuators)
 
   /**
    * Creates a new instance of a robot.
@@ -65,7 +75,9 @@ object Robot:
       shape: ShapeType.Circle,
       orientation: Orientation,
       actuators: Seq[Actuator[Robot]],
-  ): Robot = RobotImpl(position, shape, orientation, actuators)
+  ): Validation[Robot] =
+    for _ <- validateCountOfType[WheelMotor]("actuators", actuators, 0, 1)
+    yield RobotImpl(position, shape, orientation, actuators)
 
   /**
    * Extractor method to deconstruct a [[Robot]] instance.
@@ -77,4 +89,5 @@ object Robot:
    */
   def unapply(robot: Robot): Option[(Point2D, ShapeType.Circle, Orientation, Seq[Actuator[Robot]])] =
     Some((robot.position, robot.shape, robot.orientation, robot.actuators))
+
 end Robot

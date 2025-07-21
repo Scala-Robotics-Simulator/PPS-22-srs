@@ -1,17 +1,15 @@
 package io.github.srs.model.entity
 
+import io.github.srs.model.validation.Validation
+import io.github.srs.model.validation.Validation.*
+
 /**
  * Represents an orientation in a two-dimensional plane.
  *
  * The orientation is expressed in degrees but can also be converted to radians.
  */
 trait Orientation:
-  /**
-   * The value of this orientation in degrees, it assu.
-   *
-   * @return
-   *   the orientation angle in degrees.
-   */
+
   /**
    * The value of this orientation in degrees, in the range [0, 360).
    *
@@ -21,7 +19,7 @@ trait Orientation:
   def degrees: Double
 
   /**
-   * Converts this orientation to radians.
+   * Converts this orientation to radians, in the range [0, 2π).
    *
    * @return
    *   the orientation angle in radians.
@@ -43,7 +41,7 @@ object Orientation:
    * @return
    *   the normalized angle in degrees.
    */
-  private def normalize(degree: Double): Double =
+  private def normalizeDegree(degree: Double): Double =
     val d = degree % 360
     if d < 0 then d + 360 else d
 
@@ -55,7 +53,11 @@ object Orientation:
    * @return
    *   a new [[Orientation]] representing the given angle.
    */
-  def apply(degree: Double): Orientation = OrientationImpl(normalize(degree))
+  def apply(degree: Double): Validation[Orientation] =
+    for
+      d <- notNaN("degree", degree)
+      d <- notInfinite("degree", d)
+    yield OrientationImpl(normalizeDegree(d))
 
   /**
    * Creates a new [[Orientation]] instance from an angle in radians.
@@ -65,8 +67,11 @@ object Orientation:
    * @return
    *   a new [[Orientation]] representing the given angle.
    */
-  def fromRadians(radians: Double): Orientation =
-    OrientationImpl(normalize(Math.toDegrees(radians)))
+  def fromRadians(radians: Double): Validation[Orientation] =
+    for
+      r <- notNaN("radians", radians)
+      r <- notInfinite("radians", r)
+    yield OrientationImpl(normalizeDegree(Math.toDegrees(r)))
 
   /**
    * Default implementation of [[Orientation]].
