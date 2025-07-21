@@ -1,13 +1,15 @@
 package io.github.srs.model.entity.dynamicentity
 
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
+import io.github.srs.model.validation.Validation
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.OptionValues.convertOptionToValuable
 
 class DynamicEntityTest extends AnyFlatSpec with Matchers:
 
-  val initialPosition: Point2D = Point2D(0.0, 0.0)
-  val initialOrientation: Orientation = Orientation(0.0)
+  val initialPosition: Point2D = Point2D(0.0, 0.0).toOption.value
+  val initialOrientation: Orientation = Orientation(0.0).toOption.value
   val shape: ShapeType.Circle = ShapeType.Circle(0.5)
 
   class Dummy(
@@ -16,10 +18,10 @@ class DynamicEntityTest extends AnyFlatSpec with Matchers:
       val orientation: Orientation,
       val actuators: Seq[Actuator[Dummy]],
   ) extends DynamicEntity:
-    def act(): Dummy = this
+    def act(): Validation[Dummy] = Right(this)
 
   class DummyActuator extends Actuator[Dummy]:
-    override def act(entity: Dummy): Dummy = entity
+    override def act(entity: Dummy): Validation[Dummy] = Right(entity)
 
   "DynamicEntity" should "support having no actuators" in:
     val entity = new Dummy(initialPosition, shape, initialOrientation, Seq.empty)

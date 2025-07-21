@@ -1,5 +1,8 @@
 package io.github.srs.model.entity
 
+import io.github.srs.model.validation.Validation
+import io.github.srs.model.validation.Validation.{ notInfinite, notNaN, positiveWithZero }
+
 /**
  * Represents a point in a two-dimensional Cartesian coordinate system.
  *
@@ -11,6 +14,7 @@ type Point2D = (Double, Double)
  * Companion object for [[Point2D]], providing convenient factory methods.
  */
 object Point2D:
+
   /**
    * Creates a new [[Point2D]] instance given x and y coordinates.
    *
@@ -21,7 +25,17 @@ object Point2D:
    * @return
    *   a new [[Point2D]] representing the given coordinates.
    */
-  def apply(x: Double, y: Double): Point2D = (x, y)
+  def apply(x: Double, y: Double): Validation[Point2D] =
+    for
+      x <- notNaN("x", x)
+      x <- notInfinite("x", x)
+      x <- positiveWithZero("x", x)
+      y <- notNaN("y", y)
+      y <- notInfinite("y", y)
+      y <- positiveWithZero("y", y)
+    yield (x, y)
+
+end Point2D
 
 /**
  * Extension methods for [[Point2D]], providing additional geometric operations.

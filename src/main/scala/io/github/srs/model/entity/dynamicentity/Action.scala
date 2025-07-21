@@ -5,9 +5,9 @@ package io.github.srs.model.entity.dynamicentity
  * wheels.
  *
  * @param speedLeft
- *   the speed to apply to the left wheel motor.
+ *   the speed to apply to the left-wheel motor.
  * @param speedRight
- *   the speed to apply to the right wheel motor.
+ *   the speed to apply to the right-wheel motor.
  */
 enum Action(val speedLeft: Double, val speedRight: Double):
   /**
@@ -39,7 +39,7 @@ enum Action(val speedLeft: Double, val speedRight: Double):
    * Returns the speeds for the left and right wheels as a tuple.
    *
    * @return
-   *   a tuple containing the left and right wheel speeds.
+   *   a tuple containing the left-wheel and right-wheel speeds.
    */
   def speeds: (Double, Double) = (speedLeft, speedRight)
 
@@ -51,12 +51,7 @@ end Action
 object Action:
 
   /**
-   * Extension method to apply the action to a robot, updating its wheel motors accordingly.
-   *
-   * @param action
-   *   the action to apply.
-   * @return
-   *   a new [[Robot]] instance with updated wheel motor speeds.
+   * Extension method for the [[Action]] enum to apply the action to a robot.
    */
   extension (action: Action)
 
@@ -69,21 +64,22 @@ object Action:
      *   a new instance of [[Robot]] with updated wheel motor speeds.
      */
     def applyTo(robot: Robot): Robot =
-      robot.actuators.collectFirst { case wm: WheelMotor =>
-        val (leftSpeed, rightSpeed) = action.speeds
 
-        val updatedActuator = WheelMotor(
-          wm.dt,
-          wm.left.updatedSpeed(leftSpeed),
-          wm.right.updatedSpeed(rightSpeed),
-        )
+      robot.actuators.collectFirst { case wm: WheelMotor => wm } match
+        case Some(wm) =>
+          val (leftSpeed, rightSpeed) = action.speeds
 
-        val updatedActuators: Seq[Actuator[Robot]] =
-          robot.actuators.map:
-            case _: WheelMotor => updatedActuator
-            case other => other
+          val updatedActuator = WheelMotor(
+            wm.dt,
+            wm.left.updatedSpeed(leftSpeed),
+            wm.right.updatedSpeed(rightSpeed),
+          )
 
-        Robot(robot.position, robot.shape, robot.orientation, updatedActuators)
-      }.getOrElse(robot)
+          val updatedActuators: Seq[Actuator[Robot]] =
+            robot.actuators.map:
+              case _: WheelMotor => updatedActuator
+              case other => other
+          Robot(robot.position, robot.shape, robot.orientation, updatedActuators).getOrElse(robot)
+        case None => robot
   end extension
 end Action

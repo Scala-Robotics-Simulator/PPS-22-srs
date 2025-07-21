@@ -2,6 +2,18 @@ package io.github.srs.model.entity.dynamicentity
 
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.Action.applyTo
+import io.github.srs.model.validation.Validation
+import io.github.srs.model.validation.Validation.positive
+
+opaque type DeltaTime = Double
+
+object DeltaTime:
+
+  def apply(dt: Double): Validation[DeltaTime] =
+    for dt <- positive("dt", dt)
+    yield dt
+
+  extension (dt: DeltaTime) def toSeconds: Double = dt
 
 /**
  * WheelMotor is an actuator that controls the movement of a robot.
@@ -12,7 +24,7 @@ trait WheelMotor extends Actuator[Robot]:
    * @return
    *   the delta time in seconds.
    */
-  def dt: Double
+  def dt: DeltaTime
 
   /**
    * The left wheel of the motor.
@@ -42,12 +54,13 @@ object WheelMotor:
 
     /**
      * Moves the robot based on the current state of its wheel motors.
+     *
      * @return
      *   a new instance of the robot with updated position and orientation.
      */
     def move: Robot =
       robot.actuators.collectFirst { case wm: WheelMotor => wm } match
-        case Some(wm) => wm.act(robot)
+        case Some(wm) => wm.act(robot).getOrElse(robot)
         case None => robot
 
     /**
@@ -73,8 +86,8 @@ object WheelMotor:
    * @return
    *   a new instance of [[WheelMotor]].
    */
-  def apply(dt: Double, left: Wheel, right: Wheel): WheelMotor =
-    new DifferentialWheelMotor(dt, left, right)
+  def apply(dt: DeltaTime, left: Wheel, right: Wheel): WheelMotor =
+    DifferentialWheelMotor(dt, left, right)
 
   /**
    * Implementation of the [[WheelMotor]] trait that uses differential drive to move the robot.
@@ -85,7 +98,7 @@ object WheelMotor:
    * @param right
    *   the right wheel of the motor.
    */
-  private case class DifferentialWheelMotor(val dt: Double, val left: Wheel, val right: Wheel) extends WheelMotor:
+  private case class DifferentialWheelMotor(dt: DeltaTime, left: Wheel, right: Wheel) extends WheelMotor:
 
     /**
      * Computes the updated position and orientation of a differential-drive robot based on the speeds of its wheels and
@@ -108,7 +121,7 @@ object WheelMotor:
      *     {{{
      * omega = (v_right - v_left) / d
      *     }}}
-     *     where `d` is the distance between the wheels (assumed to be robot.shape.radius * 2)
+     *     Where `d` is the distance between the wheels (assumed to be robot.shape.radius * 2)
      *   - The new position is computed as:
      *     {{{
      * x_new = x + v * cos(theta) * dt
@@ -124,18 +137,20 @@ object WheelMotor:
      * @return
      *   a new [[Robot]] instance with updated position and orientation.
      */
-    override def act(robot: Robot): Robot =
+    override def act(robot: Robot): Validation[Robot] =
       val vLeft = this.left.speed * this.left.shape.radius
       val vRight = this.right.speed * this.right.shape.radius
       val wheelDistance = robot.shape.radius * 2
       val velocity = (vLeft + vRight) / 2
       val omega = (vRight - vLeft) / wheelDistance
       val theta = robot.orientation.toRadians
-      val dx = velocity * math.cos(theta) * dt
-      val dy = velocity * math.sin(theta) * dt
-      val newPosition = Point2D(robot.position.x + dx, robot.position.y + dy)
-      val newOrientation = Orientation.fromRadians(theta + omega * dt)
-      Robot(newPosition, robot.shape, newOrientation, robot.actuators)
+      val dx = velocity * math.cos(theta) * dt.toSeconds
+      val dy = velocity * math.sin(theta) * dt.toSeconds
+      for
+        newPosition <- Point2D(robot.position.x + dx, robot.position.y + dy)
+        newOrientation <- Orientation.fromRadians(theta + omega * dt.toSeconds)
+        robot <- robot.copy(position = newPosition, orientation = newOrientation)
+      yield robot
 
   end DifferentialWheelMotor
 end WheelMotor
