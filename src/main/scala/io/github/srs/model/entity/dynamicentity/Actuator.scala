@@ -17,6 +17,6 @@ trait Actuator[E <: DynamicEntity]:
    * @param entity
    *   the entity to act upon.
    * @return
-   *   a new instance of the entity with the modifications applied.
+   *   a new instance of the entity with the updated state, wrapped in a `Validation` to handle any potential errors.
    */
   def act(entity: E): Validation[E]

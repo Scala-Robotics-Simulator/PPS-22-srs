@@ -27,14 +27,6 @@ trait Robot extends DynamicEntity:
  */
 object Robot:
 
-  extension (robot: Robot)
-
-    def copy(
-        position: Point2D = robot.position,
-        orientation: Orientation = robot.orientation,
-        actuators: Seq[Actuator[Robot]] = robot.actuators,
-    ): Validation[Robot] = Robot(position, robot.shape, orientation, actuators)
-
   /**
    * Creates a new instance of a robot.
    *
@@ -68,7 +60,7 @@ object Robot:
    * @param actuators
    *   the sequence of actuators that control the robot.
    * @return
-   *   a new [[Robot]] instance.
+   *   a `Validation` that either contains a new instance of [[Robot]] or an error if the validation fails.
    */
   def apply(
       position: Point2D,
@@ -89,5 +81,27 @@ object Robot:
    */
   def unapply(robot: Robot): Option[(Point2D, ShapeType.Circle, Orientation, Seq[Actuator[Robot]])] =
     Some((robot.position, robot.shape, robot.orientation, robot.actuators))
+
+  /**
+   * Extension method for the [[Robot]] trait to provide additional functionality.
+   */
+  extension (robot: Robot)
+
+    /**
+     * Copies the current robot instance with the specified parameters.
+     * @param position
+     *   the new position of the robot in the simulation.
+     * @param orientation
+     *   the new orientation of the robot.
+     * @param actuators
+     *   the new sequence of actuators that control the robot.
+     * @return
+     *   the new instance of [[Robot]] with the updated parameters or a validation error if the parameters are invalid.
+     */
+    def copy(
+        position: Point2D = robot.position,
+        orientation: Orientation = robot.orientation,
+        actuators: Seq[Actuator[Robot]] = robot.actuators,
+    ): Validation[Robot] = Robot(position, robot.shape, orientation, actuators)
 
 end Robot

@@ -3,26 +3,16 @@ package io.github.srs.model.entity.dynamicentity
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.Action.applyTo
 import io.github.srs.model.validation.Validation
-import io.github.srs.model.validation.Validation.positive
-
-opaque type DeltaTime = Double
-
-object DeltaTime:
-
-  def apply(dt: Double): Validation[DeltaTime] =
-    for dt <- positive("dt", dt)
-    yield dt
-
-  extension (dt: DeltaTime) def toSeconds: Double = dt
 
 /**
  * WheelMotor is an actuator that controls the movement of a robot.
  */
 trait WheelMotor extends Actuator[Robot]:
+
   /**
    * The time step for the motor's operation, in seconds.
    * @return
-   *   the delta time in seconds.
+   *   the time step as a [[DeltaTime]].
    */
   def dt: DeltaTime
 
