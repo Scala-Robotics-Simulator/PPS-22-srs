@@ -1,9 +1,9 @@
 package io.github.srs.model.entity.dynamicentity.sensor
 
+import io.github.srs.model.PositiveDouble
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
-import io.github.srs.model.entity.{Orientation, Point2D}
+import io.github.srs.model.entity.{ Orientation, Point2D }
 import io.github.srs.model.environment.Environment
-import io.github.srs.utils.PositiveDouble
 import io.github.srs.utils.Ray.intersectRay
 
 /**
@@ -15,6 +15,30 @@ type Range = PositiveDouble
  * Represents the distance from the center of a dynamic entity to a sensor.
  */
 type Distance = PositiveDouble
+
+/**
+ * Represents a sensor reading for a specific sensor type and value.
+ *
+ * @tparam S
+ *   the type of sensor.
+ * @tparam A
+ *   the type of value that the sensor returns.
+ * @param sensor
+ *   the sensor that produced the reading.
+ * @param value
+ *   the value sensed by the sensor.
+ */
+final case class SensorReading[S <: Sensor[?, ?, A], A](sensor: S, value: A)
+
+/**
+ * Represents a collection of sensor readings for a dynamic entity.
+ *
+ * @param proximity
+ *   a sequence of proximity sensor readings, each containing the sensor and its sensed value.
+ */
+final case class SensorReadings(
+    proximity: Vector[SensorReading[ProximitySensor, Double]],
+)
 
 /**
  * Represents a sensor for a dynamic entity.
@@ -69,4 +93,30 @@ final case class ProximitySensor(
     override val range: Range,
 ) extends Sensor[DynamicEntity, Environment, Double]:
 
-  def sense(entity: DynamicEntity)(env: Environment): Double = 42.0 // Dummy implementation for testing purposes
+  def sense(entity: DynamicEntity)(env: Environment): Double =
+    import Point2D.*
+    val globalOrientation = entity.orientation.toRadians + offset.toRadians
+    val direction = Point2D(math.cos(globalOrientation), math.sin(globalOrientation))
+    val origin = entity.position + direction * distance.toDouble
+    val end = origin + direction * range.toDouble
+
+    val distances = env.entities.filter(!_.equals(entity)).flatMap(intersectRay(_, origin, end))
+
+    distances.filter(_ <= range.toDouble).minOption.getOrElse(range.toDouble) / range.toDouble
+
+end ProximitySensor
+
+object Sensor:
+
+  extension (e: DynamicEntity)
+
+    /**
+     * Senses the environment using the entity's sensors.
+     *
+     * @param env
+     *   the environment in which the entity is operating.
+     * @return
+     *   a collection of sensor readings.
+     */
+    def sense(env: Environment): SensorReadings =
+      e.sensors.sense(e, env)

@@ -1,4 +1,4 @@
-package io.github.srs.utils
+package io.github.srs.model
 
 import io.github.srs.model.validation.Validation
 
@@ -15,7 +15,7 @@ object PositiveDouble:
    *   a Validation containing the PositiveDouble if valid, or an error if invalid.
    */
   def apply(value: Double): Validation[PositiveDouble] =
-    import io.github.srs.model.validation.Validation.{notInfinite, notNaN, positive}
+    import io.github.srs.model.validation.Validation.{ notInfinite, notNaN, positive }
     for
       value <- notNaN("value", value)
       value <- notInfinite("value", value)

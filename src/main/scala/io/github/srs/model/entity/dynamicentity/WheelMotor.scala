@@ -128,6 +128,7 @@ object WheelMotor:
      *   a new [[Robot]] instance with updated position and orientation.
      */
     override def act(robot: Robot): Validation[Robot] =
+      import io.github.srs.model.entity.Point2D.*
       val vLeft = this.left.speed * this.left.shape.radius
       val vRight = this.right.speed * this.right.shape.radius
       val wheelDistance = robot.shape.radius * 2

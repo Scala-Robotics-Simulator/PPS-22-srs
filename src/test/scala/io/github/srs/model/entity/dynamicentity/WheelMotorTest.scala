@@ -23,7 +23,8 @@ class WheelMotorTest extends AnyFlatSpec with Matchers:
       Wheel(leftSpeed, ShapeType.Circle(wheelRadius)),
       Wheel(rightSpeed, ShapeType.Circle(wheelRadius)),
     )
-    val robot: Robot = Robot(initialPosition, shape, initialOrientation, Seq(wheelMotor)).toOption.value
+    val robot: Robot =
+      Robot(initialPosition, shape, initialOrientation, Seq(wheelMotor)).toOption.value
     val movedRobot: Robot = robot.move
 
     val expectedMovement: (Point2D, Orientation) = calculateMovement(robot)
@@ -37,7 +38,8 @@ class WheelMotorTest extends AnyFlatSpec with Matchers:
       Wheel(leftSpeed, ShapeType.Circle(wheelRadius)),
       Wheel(rightSpeed, ShapeType.Circle(wheelRadius)),
     )
-    val robot: Robot = Robot(initialPosition, shape, initialOrientation, Seq(wheelMotor)).toOption.value
+    val robot: Robot =
+      Robot(initialPosition, shape, initialOrientation, Seq(wheelMotor)).toOption.value
     val movedRobot: Robot = robot.move
 
     val expectedMovement: (Point2D, Orientation) = calculateMovement(robot)
