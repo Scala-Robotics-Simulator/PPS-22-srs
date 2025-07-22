@@ -5,6 +5,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 class Point2DTest extends AnyFlatSpec with Matchers:
+  import Point2D.*
 
   "Point2D" should "wrap coordinates into a tuple correctly" in:
     Point2D(1.0, 2.0) should be(Point2D(1.0, 2.0))

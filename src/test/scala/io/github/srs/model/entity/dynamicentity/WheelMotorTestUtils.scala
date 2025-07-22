@@ -7,6 +7,7 @@ object WheelMotorTestUtils:
   def calculateMovement(robot: Robot): (Point2D, Orientation) =
     robot.actuators.collectFirst { case wm: WheelMotor => wm } match
       case Some(wm) =>
+        import Point2D.*
         val vLeft = wm.left.speed * wm.left.shape.radius
         val vRight = wm.right.speed * wm.right.shape.radius
         val velocity = (vLeft + vRight) / 2

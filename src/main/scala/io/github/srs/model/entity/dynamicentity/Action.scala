@@ -79,7 +79,7 @@ object Action:
             robot.actuators.map:
               case _: WheelMotor => updatedActuator
               case other => other
-          Robot(robot.position, robot.shape, robot.orientation, updatedActuators).getOrElse(robot)
+          Robot(robot.position, robot.shape, robot.orientation, updatedActuators, robot.sensors).getOrElse(robot)
         case None => robot
   end extension
 end Action

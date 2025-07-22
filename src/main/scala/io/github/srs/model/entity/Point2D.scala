@@ -24,38 +24,59 @@ object Point2D:
    */
   def apply(x: Double, y: Double): Point2D = (x, y)
 
+  private def create(x: Double, y: Double): Point2D =
+    (x, y)
+
+  /**
+   * Extension methods for [[Point2D]], providing additional geometric operations.
+   *
+   * These methods enrich `Point2D` with utility functions.
+   */
+  extension (p: Point2D)
+    /**
+     * The x-coordinate of this point.
+     */
+    def x: Double = p._1
+
+    /**
+     * The y-coordinate of this point.
+     */
+    def y: Double = p._2
+
+    infix def +(other: Point2D): Point2D =
+      create(p.x + other.x, p.y + other.y)
+
+    infix def -(other: Point2D): Point2D =
+      create(p.x - other.x, p.y - other.y)
+
+    infix def *(scalar: Double): Point2D =
+      create(p.x * scalar, p.y * scalar)
+
+    infix def dot(other: Point2D): Double =
+      p.x * other.x + p.y * other.y
+
+    def magnitude: Double =
+      math.sqrt(p.x * p.x + p.y * p.y)
+
+    def normalize: Point2D =
+      val mag = p.magnitude
+      if mag == 0 then p else create(p.x / mag, p.y / mag)
+
+    /**
+     * Computes the Euclidean distance between this point and another point.
+     *
+     * The Euclidean distance is calculated as:
+     * {{{
+     * sqrt((x2 - x1)^2 + (y2 - y1)^2)
+     * }}}
+     *
+     * @param other
+     *   the other point to which the distance is measured.
+     * @return
+     *   the Euclidean distance between this point and `other`.
+     */
+    def distanceTo(other: Point2D): Double =
+      math.sqrt(math.pow(other.x - p.x, 2) + math.pow(other.y - p.y, 2))
+
+  end extension
 end Point2D
-
-/**
- * Extension methods for [[Point2D]], providing additional geometric operations.
- *
- * These methods enrich `Point2D` with utility functions.
- */
-extension (p: Point2D)
-  /**
-   * The x-coordinate of this point.
-   */
-  def x: Double = p._1
-
-  /**
-   * The y-coordinate of this point.
-   */
-  def y: Double = p._2
-
-  /**
-   * Computes the Euclidean distance between this point and another point.
-   *
-   * The Euclidean distance is calculated as:
-   * {{{
-   * sqrt((x2 - x1)^2 + (y2 - y1)^2)
-   * }}}
-   *
-   * @param other
-   *   the other point to which the distance is measured.
-   * @return
-   *   the Euclidean distance between this point and `other`.
-   */
-  def distanceTo(other: Point2D): Double =
-    math.sqrt(math.pow(other.x - p.x, 2) + math.pow(other.y - p.y, 2))
-
-end extension

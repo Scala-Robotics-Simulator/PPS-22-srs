@@ -1,6 +1,7 @@
 package io.github.srs.model.entity.dynamicentity
 
 import io.github.srs.model.entity.*
+import io.github.srs.model.entity.dynamicentity.sensor.SensorSuite
 import io.github.srs.model.validation.Validation
 import io.github.srs.model.validation.Validation.{ notInfinite, notNaN, validateCountOfType }
 
@@ -46,6 +47,7 @@ object Robot:
       shape: ShapeType.Circle,
       orientation: Orientation,
       actuators: Seq[Actuator[Robot]],
+      sensors: SensorSuite,
   ) extends Robot
 
   /**
@@ -67,7 +69,9 @@ object Robot:
       shape: ShapeType.Circle,
       orientation: Orientation,
       actuators: Seq[Actuator[Robot]],
+      sensors: SensorSuite = SensorSuite.empty,
   ): Validation[Robot] =
+    import Point2D.*
     for
       _ <- notNaN("x", position.x)
       _ <- notInfinite("x", position.x)
@@ -75,7 +79,7 @@ object Robot:
       _ <- notInfinite("y", position.y)
       _ <- notNaN("degrees", orientation.degrees)
       _ <- validateCountOfType[WheelMotor]("actuators", actuators, 0, 1)
-    yield RobotImpl(position, shape, orientation, actuators)
+    yield RobotImpl(position, shape, orientation, actuators, sensors)
 
   /**
    * Extractor method to deconstruct a [[Robot]] instance.
@@ -85,8 +89,8 @@ object Robot:
    * @return
    *   an option containing the position, shape, orientation, and actuators of the robot.
    */
-  def unapply(robot: Robot): Option[(Point2D, ShapeType.Circle, Orientation, Seq[Actuator[Robot]])] =
-    Some((robot.position, robot.shape, robot.orientation, robot.actuators))
+  def unapply(robot: Robot): Option[(Point2D, ShapeType.Circle, Orientation, Seq[Actuator[Robot]], SensorSuite)] =
+    Some((robot.position, robot.shape, robot.orientation, robot.actuators, robot.sensors))
 
   /**
    * Extension method for the [[Robot]] trait to provide additional functionality.
@@ -108,6 +112,7 @@ object Robot:
         position: Point2D = robot.position,
         orientation: Orientation = robot.orientation,
         actuators: Seq[Actuator[Robot]] = robot.actuators,
-    ): Validation[Robot] = Robot(position, robot.shape, orientation, actuators)
+        sensors: SensorSuite = robot.sensors,
+    ): Validation[Robot] = Robot(position, robot.shape, orientation, actuators, sensors)
 
 end Robot
