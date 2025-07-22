@@ -1,7 +1,7 @@
 # DVCS
 
 Si è utilizzato Git e GitHub come sistema di controllo versione distribuito (DVCS) per gestire il codice sorgente del progetto.
-Il modello di branching adottato è stato **Trunk Based Development**, che prevede l'utilizzo di un branch principale (main) per lo sviluppo continuo e la creazione di branch secondari per le funzionalità specifiche.
+Il modello di branching adottato è stato **Trunk Based Development**, che prevede l'utilizzo di un branch principale (`main`) per lo sviluppo continuo e la creazione di branch secondari per le funzionalità specifiche.
 
 ## Branching Model
 
