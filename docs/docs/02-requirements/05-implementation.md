@@ -1,4 +1,6 @@
 ---
+sidebar_label: 2.5. Di implementazione
+sidebar_position: 5
 description: "Requisiti di implementazione del progetto."
 ---
 
