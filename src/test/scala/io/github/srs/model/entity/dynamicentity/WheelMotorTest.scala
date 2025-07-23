@@ -12,8 +12,8 @@ class WheelMotorTest extends AnyFlatSpec with Matchers:
   val dt: DeltaTime = DeltaTime(0.1).toOption.value
   val wheelRadius: Double = 0.5
   val shape: ShapeType.Circle = ShapeType.Circle(1.0)
-  val initialPosition: Point2D = Point2D(0.0, 0.0).toOption.value
-  val initialOrientation: Orientation = Orientation(0.0).toOption.value
+  val initialPosition: Point2D = Point2D(0.0, 0.0)
+  val initialOrientation: Orientation = Orientation(0.0)
 
   "WheelMotor" should "update its position based on the wheel speeds" in:
     val leftSpeed: Double = 1.0

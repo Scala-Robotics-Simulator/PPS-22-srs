@@ -2,7 +2,7 @@ package io.github.srs.model.entity.dynamicentity
 
 import io.github.srs.model.entity.*
 import io.github.srs.model.validation.Validation
-import io.github.srs.model.validation.Validation.validateCountOfType
+import io.github.srs.model.validation.Validation.{ notInfinite, notNaN, validateCountOfType }
 
 /**
  * Represents a robot entity in the simulation.
@@ -68,7 +68,14 @@ object Robot:
       orientation: Orientation,
       actuators: Seq[Actuator[Robot]],
   ): Validation[Robot] =
-    for _ <- validateCountOfType[WheelMotor]("actuators", actuators, 0, 1)
+    for
+      _ <- notNaN("x", position.x)
+      _ <- notInfinite("x", position.x)
+      _ <- notNaN("y", position.y)
+      _ <- notInfinite("y", position.y)
+      _ <- notNaN("degree", orientation.degrees)
+      _ <- notInfinite("degree", orientation.degrees)
+      _ <- validateCountOfType[WheelMotor]("actuators", actuators, 0, 1)
     yield RobotImpl(position, shape, orientation, actuators)
 
   /**

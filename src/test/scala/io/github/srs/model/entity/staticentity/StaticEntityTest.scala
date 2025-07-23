@@ -7,14 +7,13 @@ import org.scalatest.EitherValues.*
 import org.scalatest.Inside.inside
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers.*
-import org.scalatest.OptionValues.convertOptionToValuable
 
 class StaticEntityTest extends AnyFlatSpec:
 
   given CanEqual[StaticEntity, StaticEntity] = CanEqual.derived
 
-  val origin: (Double, Double) = Point2D(0, 0).toOption.value
-  val orientation: Orientation = Orientation(0).toOption.value
+  val origin: (Double, Double) = Point2D(0, 0)
+  val orientation: Orientation = Orientation(0)
 
   // Obstacle
   val width = 2
