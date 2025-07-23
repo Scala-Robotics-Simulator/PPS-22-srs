@@ -136,10 +136,9 @@ object WheelMotor:
       val theta = robot.orientation.toRadians
       val dx = velocity * math.cos(theta) * dt.toSeconds
       val dy = velocity * math.sin(theta) * dt.toSeconds
-      for
-        newPosition <- Point2D(robot.position.x + dx, robot.position.y + dy)
-        newOrientation <- Orientation.fromRadians(theta + omega * dt.toSeconds)
-        robot <- robot.copy(position = newPosition, orientation = newOrientation)
+      val newPosition = Point2D(robot.position.x + dx, robot.position.y + dy)
+      val newOrientation = Orientation.fromRadians(theta + omega * dt.toSeconds)
+      for robot <- robot.copy(position = newPosition, orientation = newOrientation)
       yield robot
 
   end DifferentialWheelMotor

@@ -1,8 +1,6 @@
 package io.github.srs.model.entity.dynamicentity
 
-import io.github.srs.model.entity.{ Orientation, Point2D }
 import io.github.srs.model.entity.*
-import org.scalatest.OptionValues.convertOptionToValuable
 
 object WheelMotorTestUtils:
 
@@ -18,7 +16,7 @@ object WheelMotorTestUtils:
         val dx = velocity * math.cos(theta) * wm.dt.toSeconds
         val dy = velocity * math.sin(theta) * wm.dt.toSeconds
         (
-          Point2D(robot.position.x + dx, robot.position.y + dy).toOption.value,
-          Orientation.fromRadians(theta + omega * wm.dt.toSeconds).toOption.value,
+          Point2D(robot.position.x + dx, robot.position.y + dy),
+          Orientation.fromRadians(theta + omega * wm.dt.toSeconds),
         )
       case None => (robot.position, robot.orientation)

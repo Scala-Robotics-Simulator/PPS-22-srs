@@ -1,8 +1,5 @@
 package io.github.srs.model.entity
 
-import io.github.srs.model.validation.Validation
-import io.github.srs.model.validation.Validation.*
-
 /**
  * Represents an orientation in a two-dimensional plane.
  *
@@ -53,11 +50,7 @@ object Orientation:
    * @return
    *   a new [[Orientation]] representing the given angle.
    */
-  def apply(degree: Double): Validation[Orientation] =
-    for
-      d <- notNaN("degree", degree)
-      d <- notInfinite("degree", d)
-    yield OrientationImpl(normalizeDegree(d))
+  def apply(degree: Double): Orientation = OrientationImpl(normalizeDegree(degree))
 
   /**
    * Creates a new [[Orientation]] instance from an angle in radians.
@@ -67,11 +60,7 @@ object Orientation:
    * @return
    *   a new [[Orientation]] representing the given angle.
    */
-  def fromRadians(radians: Double): Validation[Orientation] =
-    for
-      r <- notNaN("radians", radians)
-      r <- notInfinite("radians", r)
-    yield OrientationImpl(normalizeDegree(Math.toDegrees(r)))
+  def fromRadians(radians: Double): Orientation = OrientationImpl(normalizeDegree(Math.toDegrees(radians)))
 
   /**
    * Default implementation of [[Orientation]].
