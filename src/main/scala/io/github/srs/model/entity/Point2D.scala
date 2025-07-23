@@ -1,8 +1,5 @@
 package io.github.srs.model
 
-import io.github.srs.model.validation.Validation
-import io.github.srs.model.validation.Validation.{ notInfinite, notNaN }
-
 /**
  * Represents a point in a two-dimensional Cartesian coordinate system.
  *
@@ -25,13 +22,7 @@ object Point2D:
    * @return
    *   a new [[Point2D]] representing the given coordinates.
    */
-  def apply(x: Double, y: Double): Validation[Point2D] =
-    for
-      x <- notNaN("x", x)
-      x <- notInfinite("x", x)
-      y <- notNaN("y", y)
-      y <- notInfinite("y", y)
-    yield (x, y)
+  def apply(x: Double, y: Double): Point2D = (x, y)
 
 end Point2D
 

@@ -4,12 +4,11 @@ import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.validation.{ DomainError, Validation }
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.OptionValues.convertOptionToValuable
 
 class DynamicEntityTest extends AnyFlatSpec with Matchers:
 
-  val initialPosition: Point2D = Point2D(0.0, 0.0).toOption.value
-  val initialOrientation: Orientation = Orientation(0.0).toOption.value
+  val initialPosition: Point2D = Point2D(0.0, 0.0)
+  val initialOrientation: Orientation = Orientation(0.0)
   val shape: ShapeType.Circle = ShapeType.Circle(0.5)
 
   class Dummy(

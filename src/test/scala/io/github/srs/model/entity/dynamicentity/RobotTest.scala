@@ -11,8 +11,8 @@ import org.scalatest.matchers.should.Matchers
 
 class RobotTest extends AnyFlatSpec with Matchers:
 
-  val initialPosition: Point2D = Point2D(0.0, 0.0).toOption.value
-  val initialOrientation: Orientation = Orientation(0.0).toOption.value
+  val initialPosition: Point2D = Point2D(0.0, 0.0)
+  val initialOrientation: Orientation = Orientation(0.0)
   val shape: ShapeType.Circle = ShapeType.Circle(0.5)
 
   val wheelMotor: WheelMotor =
