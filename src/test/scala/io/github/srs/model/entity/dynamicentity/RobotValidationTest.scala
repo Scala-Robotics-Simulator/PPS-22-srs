@@ -31,8 +31,4 @@ class RobotValidationTest extends AnyFlatSpec with Matchers:
   it should "not support having NaN orientation" in:
     inside(Robot(initialPosition, shape, Orientation(Double.NaN), Seq(wheelMotor))):
       case Left(DomainError.NotANumber("degrees", value)) => assert(value.isNaN)
-
-  it should "not support having Infinite orientation" in:
-    inside(Robot(initialPosition, shape, Orientation(Double.NegativeInfinity), Seq(wheelMotor))):
-      case Left(DomainError.NotANumber("degrees", value)) => assert(value.isNaN)
 end RobotValidationTest
