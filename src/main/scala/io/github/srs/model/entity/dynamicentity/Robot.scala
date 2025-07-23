@@ -73,8 +73,7 @@ object Robot:
       _ <- notInfinite("x", position.x)
       _ <- notNaN("y", position.y)
       _ <- notInfinite("y", position.y)
-      _ <- notNaN("degree", orientation.degrees)
-      _ <- notInfinite("degree", orientation.degrees)
+      _ <- notNaN("degrees", orientation.degrees)
       _ <- validateCountOfType[WheelMotor]("actuators", actuators, 0, 1)
     yield RobotImpl(position, shape, orientation, actuators)
 

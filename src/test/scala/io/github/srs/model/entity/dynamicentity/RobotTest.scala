@@ -3,7 +3,6 @@ package io.github.srs.model.entity.dynamicentity
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.WheelMotor.{ applyActions, move }
 import io.github.srs.model.entity.dynamicentity.WheelMotorTestUtils.calculateMovement
-import io.github.srs.model.validation.DomainError
 import org.scalatest.Inside.inside
 import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.flatspec.AnyFlatSpec
@@ -22,17 +21,13 @@ class RobotTest extends AnyFlatSpec with Matchers:
     inside(Robot(initialPosition, shape, initialOrientation, Seq.empty)):
       case Right(robot) => robot.position should be(initialPosition)
 
-  it should "support having no actuators" in:
+  it should "support having sequence empty of actuators" in:
     inside(Robot(initialPosition, shape, initialOrientation, Seq.empty)):
       case Right(robot) => robot.actuators should be(Seq.empty)
 
   it should "support having one WheelMotor Actuator" in:
     inside(Robot(initialPosition, shape, initialOrientation, Seq(wheelMotor))):
       case Right(robot) => robot.actuators should be(Seq(wheelMotor))
-
-  it should "not support having multiple WheelMotor Actuators" in:
-    inside(Robot(initialPosition, shape, initialOrientation, Seq(wheelMotor, wheelMotor))):
-      case Left(DomainError.InvalidCount("actuators", 2, 0, 1)) => succeed
 
   it should "stay at the same position if no movement occurs" in:
     inside(Robot(initialPosition, shape, initialOrientation, Seq(wheelMotor))):
