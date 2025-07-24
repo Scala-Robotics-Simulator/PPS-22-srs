@@ -25,6 +25,22 @@ export function validateBacklogConsistency(backlogData, sprintData) {
     return results;
   }
 
+  // Validate that days array sums match effettivo for each sprint task
+  sprintData.forEach(task => {
+    if (task.days && Array.isArray(task.days)) {
+      const daysSum = task.days.reduce((sum, day) => sum + (typeof day === 'number' ? day : 0), 0);
+      const effettivo = typeof task.effettivo === 'number' ? task.effettivo : 0;
+      const difference = Math.abs(daysSum - effettivo);
+      
+      if (difference > 0.01) { // Use small threshold for floating point comparison
+        results.isValid = false;
+        results.errors.push(
+          `Task "${task.task}" (ID: ${task.id}): Days sum is ${daysSum}h but effettivo is ${effettivo}h (difference: ${difference.toFixed(2)}h)`
+        );
+      }
+    }
+  });
+
   // Group sprint tasks by backlogItem and sum their effettivo hours
   const sprintTotals = sprintData.reduce((acc, task) => {
     const backlogItem = task.backlogItem || '';
