@@ -1,4 +1,7 @@
 export function BacklogTable({ data }) {
+  // Determine the maximum number of sprints from the data
+  const maxSprints = data.length > 0 ? Math.max(...data.map(item => item.sprints.length)) : 0;
+  
   const totals = data.reduce(
     (acc, item) => {
       acc.stima += item.stima;
@@ -6,7 +9,7 @@ export function BacklogTable({ data }) {
       acc.sprints = acc.sprints.map((s, i) => s + (item.sprints[i] || 0));
       return acc;
     },
-    { stima: 0, effettivo: 0, sprints: Array(5).fill(0) }
+    { stima: 0, effettivo: 0, sprints: Array(maxSprints).fill(0) }
   );
 
   return (
@@ -17,11 +20,9 @@ export function BacklogTable({ data }) {
           <th>Item</th>
           <th>Stima (h)</th>
           <th>Effettivo (h)</th>
-          <th>S1</th>
-          <th>S2</th>
-          <th>S3</th>
-          <th>S4</th>
-          <th>S5</th>
+          {Array.from({ length: maxSprints }, (_, i) => (
+            <th key={i}>S{i + 1}</th>
+          ))}
         </tr>
       </thead>
       <tbody>

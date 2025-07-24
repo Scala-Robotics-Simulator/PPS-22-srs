@@ -1,11 +1,13 @@
 export function SprintTable({ data }) {
-  const dayTotals = Array(8).fill(0);
+  // Determine the maximum number of days from the data
+  const maxDays = data.length > 0 ? Math.max(...data.map(task => task.days.length)) : 0;
+  const dayTotals = Array(maxDays).fill(0);
+  
   const effettivoTot = data.reduce((acc, task) => {
     task.days.forEach((d, i) => (dayTotals[i] += d));
     return acc + task.effettivo;
   }, 0);
   const stimaTot = data.reduce((acc, task) => {
-    task.days.forEach((d, i) => (dayTotals[i] += d));
     return acc + task.stima;
   }, 0);
   // TODO: calculate days and effective time programmatically
@@ -19,14 +21,9 @@ export function SprintTable({ data }) {
           <th>Volontario</th>
           <th>Stima (h)</th>
           <th>Effettivo (h)</th>
-          <th>D1</th>
-          <th>D2</th>
-          <th>D3</th>
-          <th>D4</th>
-          <th>D5</th>
-          <th>D6</th>
-          <th>D7</th>
-          <th>D8</th>
+          {Array.from({ length: maxDays }, (_, i) => (
+            <th key={i}>D{i + 1}</th>
+          ))}
         </tr>
       </thead>
       <tbody>
