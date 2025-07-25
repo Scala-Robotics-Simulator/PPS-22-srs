@@ -2,18 +2,20 @@ package io.github.srs.model
 
 object ModelModule:
 
-  trait Model:
-    def getData: Int
+  trait State
 
-  trait Provider:
-    val model: Model
+  trait Model[S <: State]:
+    def update(s: S): Option[S]
 
-  trait Component:
+  trait Provider[S <: State]:
+    val model: Model[S]
+
+  trait Component[S <: State]:
 
     object Model:
-      def apply(): Model = new ModelImpl()
+      def apply(updateFunc: S => Option[S]): Model[S] = new ModelImpl(updateFunc)
 
-      private class ModelImpl extends Model:
-        def getData: Int = 1
+      private class ModelImpl(updateFunc: S => Option[S]) extends Model[S]:
+        override def update(s: S): Option[S] = updateFunc(s)
 
-  trait Interface extends Provider with Component
+  trait Interface[S <: State] extends Provider[S] with Component[S]
