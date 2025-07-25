@@ -12,7 +12,7 @@ trait SensorSuite:
    *
    * Each sensor in this sequence is capable of detecting objects within its range.
    */
-  val proximitySensors: Vector[ProximitySensor]
+  val proximitySensors: Vector[ProximitySensor[DynamicEntity, Environment]]
 
   /**
    * Senses the environment using the entity's sensors.
@@ -41,7 +41,7 @@ object SensorSuite:
    *   a new instance of `SensorSuite` containing the provided proximity sensors.
    */
   def apply(
-      proximitySensors: ProximitySensor*,
+      proximitySensors: ProximitySensor[DynamicEntity, Environment]*,
   ): SensorSuite =
     new SensorSuiteImpl(proximitySensors.toVector)
 
@@ -49,6 +49,6 @@ object SensorSuite:
     SensorSuite()
 
   private class SensorSuiteImpl(
-      override val proximitySensors: Vector[ProximitySensor],
+      override val proximitySensors: Vector[ProximitySensor[DynamicEntity, Environment]],
   ) extends SensorSuite
 end SensorSuite

@@ -4,6 +4,7 @@ import io.github.srs.model.PositiveDouble
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
 import io.github.srs.model.entity.{ Orientation, Point2D }
 import io.github.srs.model.environment.Environment
+import io.github.srs.model.validation.Validation
 import io.github.srs.utils.Ray.intersectRay
 
 /**
@@ -37,7 +38,7 @@ final case class SensorReading[S <: Sensor[?, ?, A], A](sensor: S, value: A)
  *   a sequence of proximity sensor readings, each containing the sensor and its sensed value.
  */
 final case class SensorReadings(
-    proximity: Vector[SensorReading[ProximitySensor, Double]],
+    proximity: Vector[SensorReading[ProximitySensor[?, ?], Double]],
 )
 
 /**
@@ -82,27 +83,66 @@ trait Sensor[-Entity <: DynamicEntity, -Env <: Environment, +Data]:
 
 end Sensor
 
-/**
- * Represents a proximity sensor for a dynamic entity.
- * @param offset
- *   the offset orientation of the sensor relative to the entity.
- */
-final case class ProximitySensor(
-    override val offset: Orientation,
-    override val distance: Distance,
-    override val range: Range,
-) extends Sensor[DynamicEntity, Environment, Double]:
+trait ProximitySensor[Entity <: DynamicEntity, Env <: Environment] extends Sensor[Entity, Env, Double]:
 
-  def sense(entity: DynamicEntity)(env: Environment): Double =
+  override val offset: Orientation
+
+  override val distance: Distance
+
+  override val range: Range
+
+  /**
+   * Senses the environment using the given entity.
+   *
+   * @param entity
+   *   the entity that is sensing the environment.
+   * @param environment
+   *   the environment in which the entity is operating.
+   * @return
+   *   the data sensed by the sensor, which is a normalized distance to the nearest obstacle.
+   */
+  def sense(entity: Entity)(environment: Env): Double =
     import Point2D.*
     val globalOrientation = entity.orientation.toRadians + offset.toRadians
     val direction = Point2D(math.cos(globalOrientation), math.sin(globalOrientation))
     val origin = entity.position + direction * distance.toDouble
     val end = origin + direction * range.toDouble
 
-    val distances = env.entities.filter(!_.equals(entity)).flatMap(intersectRay(_, origin, end))
+    val distances = environment.entities.filter(!_.equals(entity)).flatMap(intersectRay(_, origin, end))
 
     distances.filter(_ <= range.toDouble).minOption.getOrElse(range.toDouble) / range.toDouble
+
+end ProximitySensor
+
+object ProximitySensor:
+
+  /**
+   * Creates a new `ProximitySensor` with the specified offset, distance, and range.
+   *
+   * @param offset
+   *   the offset orientation of the sensor relative to the entity.
+   * @param distance
+   *   the distance from the center of the entity to the sensor.
+   * @param range
+   *   the range of the sensor.
+   * @return
+   *   a new instance of `ProximitySensor`.
+   */
+  def apply(
+      offset: Orientation,
+      distance: Double,
+      range: Double,
+  ): Validation[ProximitySensor[DynamicEntity, Environment]] =
+    for
+      distance <- PositiveDouble(distance)
+      range <- PositiveDouble(range)
+    yield new ProximitySensorImpl(offset, distance, range)
+
+  private class ProximitySensorImpl(
+      override val offset: Orientation,
+      override val distance: Distance,
+      override val range: Range,
+  ) extends ProximitySensor[DynamicEntity, Environment]
 
 end ProximitySensor
 

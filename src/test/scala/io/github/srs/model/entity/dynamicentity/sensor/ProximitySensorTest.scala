@@ -1,21 +1,23 @@
 package io.github.srs.model.entity.dynamicentity.sensor
 
-import io.github.srs.model.PositiveDouble
-import io.github.srs.model.entity.dynamicentity.{ Actuator, Robot }
+import io.github.srs.model.entity.dynamicentity.{ Actuator, DynamicEntity, Robot }
 import io.github.srs.model.entity.staticentity.StaticEntity.Obstacle
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.environment.Environment
+import org.scalatest.Inside.inside
 import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 class ProximitySensorTest extends AnyFlatSpec with Matchers:
-  given CanEqual[ProximitySensor, ProximitySensor] = CanEqual.derived
+
+  given CanEqual[ProximitySensor[DynamicEntity, Environment], ProximitySensor[DynamicEntity, Environment]] =
+    CanEqual.derived
 
   val offset: Orientation = Orientation(0.0)
-  val distance: Distance = PositiveDouble(0.5).toOption.value
-  val range: Range = PositiveDouble(5.0).toOption.value
-  val sensor: ProximitySensor = ProximitySensor(offset, distance, range)
+  val distance: Double = 0.5
+  val range: Double = 5.0
+  val sensor: ProximitySensor[DynamicEntity, Environment] = ProximitySensor(offset, distance, range).toOption.value
 
   val robot: Robot = Robot(
     position = Point2D(0.5, 1),
@@ -26,10 +28,11 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
   ).toOption.value
 
   "ProximitySensor" should "have a valid offset, distance, and range" in:
-    val sensor = ProximitySensor(offset, distance, range)
-    (sensor.offset, sensor.distance, sensor.range) should be(
-      (offset, distance, range),
-    )
+    inside(ProximitySensor(offset, distance, range)):
+      case Right(sensor) =>
+        (sensor.offset, sensor.distance, sensor.range) should be(
+          (offset, distance, range),
+        )
 
   it should "be able to sense an obstacle in front" in:
     val obstacle: Obstacle = Obstacle((1.5, 1.5), Orientation(0.0), 1.0, 1.0)

@@ -1,8 +1,8 @@
 package io.github.srs.model.entity.dynamicentity
 
-import io.github.srs.model.PositiveDouble
 import io.github.srs.model.entity.dynamicentity.sensor.*
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
+import io.github.srs.model.environment.Environment
 import io.github.srs.model.validation.{ DomainError, Validation }
 import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.flatspec.AnyFlatSpec
@@ -15,14 +15,14 @@ class DynamicEntityTest extends AnyFlatSpec with Matchers:
   val shape: ShapeType.Circle = ShapeType.Circle(0.5)
 
   val sensorOffset: Orientation = Orientation(0.0)
-  val sensorDistance: Distance = PositiveDouble(0.5).toOption.value
-  val sensorRange: Range = PositiveDouble(1.0).toOption.value
+  val sensorDistance: Double = 0.5
+  val sensorRange: Double = 1.0
 
-  val sensor: ProximitySensor = ProximitySensor(
+  val sensor: ProximitySensor[DynamicEntity, Environment] = ProximitySensor(
     offset = sensorOffset,
     distance = sensorDistance,
     range = sensorRange,
-  )
+  ).toOption.value
 
   class Dummy(
       override val position: Point2D,
