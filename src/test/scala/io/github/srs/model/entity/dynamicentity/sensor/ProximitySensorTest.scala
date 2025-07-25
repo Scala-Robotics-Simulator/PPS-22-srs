@@ -20,12 +20,15 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
   val range: Double = 5.0
   val sensor: ProximitySensor[DynamicEntity, Environment] = ProximitySensor(offset, distance, range).toOption.value
 
+  val pointingDownSensor: ProximitySensor[DynamicEntity, Environment] =
+    ProximitySensor(Orientation(270), 0.5, 5.0).toOption.value
+
   val robot: Robot = Robot(
     position = Point2D(0.5, 1),
     shape = ShapeType.Circle(0.5),
     orientation = Orientation(0.0),
     actuators = Seq.empty[Actuator[Robot]],
-    sensors = SensorSuite(sensor),
+    sensors = SensorSuite(sensor, pointingDownSensor),
   ).toOption.value
 
   "ProximitySensor" should "have a valid offset, distance, and range" in:
@@ -46,7 +49,7 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
         error shouldBe a[DomainError.NegativeOrZero]
 
   it should "be able to sense an obstacle in front" in:
-    val obstacle: Obstacle = Obstacle((1.5, 1.5), Orientation(0.0), 1.0, 1.0)
+    val obstacle: Obstacle = Obstacle((1.5, 1), Orientation(0.0), 1.0, 1.0)
     val environment: Environment = Environment(
       width = 10.0,
       height = 10.0,
@@ -95,6 +98,26 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
       entities = Set(farRobot, robot),
     ).toOption.value
     val sensorReading = sensor.sense(robot)(environment)
+    sensorReading should be(1.0)
+
+  it should "sense an obstacle directly below" in:
+    val obstacleBelow: Obstacle = Obstacle((0.5, 2.0), Orientation(0.0), 1.0, 1.0)
+    val environment: Environment = Environment(
+      width = 10.0,
+      height = 10.0,
+      entities = Set(obstacleBelow, robot),
+    ).toOption.value
+    val sensorReading = pointingDownSensor.sense(robot)(environment)
+    sensorReading should be(0.0)
+
+  it should "not sense an obstacle below outside its range" in:
+    val farObstacleBelow: Obstacle = Obstacle((0.5, 7.0), Orientation(0.0), 1.0, 1.0)
+    val environment: Environment = Environment(
+      width = 10.0,
+      height = 10.0,
+      entities = Set(farObstacleBelow, robot),
+    ).toOption.value
+    val sensorReading = pointingDownSensor.sense(robot)(environment)
     sensorReading should be(1.0)
 
 end ProximitySensorTest
