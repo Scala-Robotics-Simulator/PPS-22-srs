@@ -4,6 +4,7 @@ import io.github.srs.model.entity.dynamicentity.{ Actuator, DynamicEntity, Robot
 import io.github.srs.model.entity.staticentity.StaticEntity.Obstacle
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.environment.Environment
+import io.github.srs.model.validation.DomainError
 import org.scalatest.Inside.inside
 import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.flatspec.AnyFlatSpec
@@ -33,6 +34,16 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
         (sensor.offset, sensor.distance, sensor.range) should be(
           (offset, distance, range),
         )
+
+  it should "not be able to create a sensor with negative distance" in:
+    inside(ProximitySensor(offset, -1.0, range)):
+      case Left(error: DomainError) =>
+        error shouldBe a[DomainError.NegativeOrZero]
+
+  it should "not be able to create a sensor with negative range" in:
+    inside(ProximitySensor(offset, distance, -1.0)):
+      case Left(error: DomainError) =>
+        error shouldBe a[DomainError.NegativeOrZero]
 
   it should "be able to sense an obstacle in front" in:
     val obstacle: Obstacle = Obstacle((1.5, 1.5), Orientation(0.0), 1.0, 1.0)
