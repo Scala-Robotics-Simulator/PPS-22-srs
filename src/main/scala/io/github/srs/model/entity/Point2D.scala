@@ -24,9 +24,6 @@ object Point2D:
    */
   def apply(x: Double, y: Double): Point2D = (x, y)
 
-  private def create(x: Double, y: Double): Point2D =
-    (x, y)
-
   /**
    * Extension methods for [[Point2D]], providing additional geometric operations.
    *
@@ -44,13 +41,13 @@ object Point2D:
     def y: Double = p._2
 
     infix def +(other: Point2D): Point2D =
-      create(p.x + other.x, p.y + other.y)
+      Point2D(p.x + other.x, p.y + other.y)
 
     infix def -(other: Point2D): Point2D =
-      create(p.x - other.x, p.y - other.y)
+      Point2D(p.x - other.x, p.y - other.y)
 
     infix def *(scalar: Double): Point2D =
-      create(p.x * scalar, p.y * scalar)
+      Point2D(p.x * scalar, p.y * scalar)
 
     infix def dot(other: Point2D): Double =
       p.x * other.x + p.y * other.y
@@ -60,7 +57,7 @@ object Point2D:
 
     def normalize: Point2D =
       val mag = p.magnitude
-      if mag == 0 then p else create(p.x / mag, p.y / mag)
+      if mag == 0 then p else Point2D(p.x / mag, p.y / mag)
 
     /**
      * Computes the Euclidean distance between this point and another point.
