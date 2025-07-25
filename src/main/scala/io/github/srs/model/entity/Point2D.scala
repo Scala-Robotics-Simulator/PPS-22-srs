@@ -57,7 +57,7 @@ object Point2D:
 
     def normalize: Point2D =
       val mag = p.magnitude
-      if mag == 0 then p else Point2D(p.x / mag, p.y / mag)
+      if math.abs(mag) < 1e-10 then p else Point2D(p.x / mag, p.y / mag)
 
     /**
      * Computes the Euclidean distance between this point and another point.

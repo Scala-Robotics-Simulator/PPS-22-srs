@@ -19,7 +19,7 @@ object Ray:
       val dir = end - origin
       val lineDir = p2 - p1
       val denom = dir.x * lineDir.y - dir.y * lineDir.x
-      if denom == 0 then None // Lines are parallel
+      if math.abs(denom) < 1e-10 then None // Lines are parallel
       else
         val t = ((p1.x - origin.x) * lineDir.y - (p1.y - origin.y) * lineDir.x) / denom
         if t < 0 then None else Some(t * dir.magnitude)
@@ -35,7 +35,7 @@ object Ray:
 
         val discriminant = b * b - 4 * a * c
 
-        if discriminant < 0 then None
+        if discriminant < -1e-10 then None
         else
           val sqrtDisc = math.sqrt(discriminant)
           val t1 = (-b - sqrtDisc) / (2 * a)
