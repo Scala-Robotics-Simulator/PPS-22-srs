@@ -1,28 +1,31 @@
 package io.github.srs.view
 
+import io.github.srs.model.ModelModule
+
 object ViewModule:
 
-  trait View:
+  trait View[S <: ModelModule.State]:
     def init(): Unit
-    def plotData(data: Int): Unit
+    def render(state: S): Unit
 
-  trait Provider:
-    val view: View
+  trait Provider[S <: ModelModule.State]:
+    val view: View[S]
 
-  type Requirements = io.github.srs.controller.ControllerModule.Provider
+  type Requirements[S <: ModelModule.State] = io.github.srs.controller.ControllerModule.Provider[S]
 
-  trait Component:
-    context: Requirements =>
+  trait Component[S <: ModelModule.State]:
+    context: Requirements[S] =>
 
     object View:
-      def apply(): View = new ViewImpl
+      def apply(): View[S] = new ViewImpl
 
-      private class ViewImpl extends View:
-        private val gui = new SimpleView
+      private class ViewImpl extends View[S]:
+        private val gui = new SimpleView[S]
 
-        def init(): Unit = gui.init()
-        def plotData(data: Int): Unit = gui.plotData(data)
+        override def init(): Unit = gui.init()
 
-  trait Interface extends Provider with Component:
-    self: Requirements =>
+        override def render(state: S): Unit = gui.render(state)
+
+  trait Interface[S <: ModelModule.State] extends Provider[S] with Component[S]:
+    self: Requirements[S] =>
 end ViewModule

@@ -1,31 +1,44 @@
 package io.github.srs.controller
 
+import io.github.srs.model.ModelModule
+
 object ControllerModule:
 
-  trait Controller:
-    def start(): Unit
-    def plotData(): Unit
+  trait Controller[S <: ModelModule.State]:
+    def start(initialState: S): Unit
+    def simulationLoop(s: S): Unit
 
-  trait Provider:
-    val controller: Controller
+  trait Provider[S <: ModelModule.State]:
+    val controller: Controller[S]
 
-  type Requirements = io.github.srs.view.ViewModule.Provider & io.github.srs.model.ModelModule.Provider
+  type Requirements[S <: ModelModule.State] =
+    io.github.srs.view.ViewModule.Provider[S] & io.github.srs.model.ModelModule.Provider[S]
 
-  trait Component:
-    context: Requirements =>
+  trait Component[S <: ModelModule.State]:
+    context: Requirements[S] =>
 
     object Controller:
-      def apply(): Controller = new ControllerImpl
+      def apply(): Controller[S] = new ControllerImpl
 
-      private class ControllerImpl extends Controller:
+      private class ControllerImpl extends Controller[S]:
 
-        def start(): Unit =
+        override def start(initialState: S): Unit =
           context.view.init()
-          plotData()
+          simulationLoop(initialState)
 
-        def plotData(): Unit =
-          context.view.plotData(context.model.getData)
+        @annotation.tailrec
+        override final def simulationLoop(s: S): Unit =
+          val state = for
+            newState <- context.model.update(s)
+            _ <- Some(context.view.render(newState))
+          yield newState
 
-  trait Interface extends Provider with Component:
-    self: Requirements =>
+          state match
+            case Some(ns) => simulationLoop(ns)
+            case None => ()
+
+  end Component
+
+  trait Interface[S <: ModelModule.State] extends Provider[S] with Component[S]:
+    self: Requirements[S] =>
 end ControllerModule
