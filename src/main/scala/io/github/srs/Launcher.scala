@@ -8,6 +8,9 @@ import io.github.srs.model.SimulationState.SimulationState
 import io.github.srs.view.ViewModule
 import io.github.srs.view.ViewModule.View
 
+/**
+ * Launcher object that initializes the simulation.
+ */
 object Launcher
     extends ModelModule.Interface[SimulationState]
     with ViewModule.Interface[SimulationState]
