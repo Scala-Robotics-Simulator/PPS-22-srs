@@ -104,7 +104,7 @@ trait ProximitySensor[Entity <: DynamicEntity, Env <: Environment] extends Senso
   def sense(entity: Entity)(environment: Env): Double =
     import Point2D.*
     val globalOrientation = entity.orientation.toRadians + offset.toRadians
-    val direction = Point2D(math.cos(globalOrientation), math.sin(globalOrientation))
+    val direction = Point2D(math.cos(globalOrientation), -math.sin(globalOrientation)) // x is right, y is down
     val origin = entity.position + direction * distance.toDouble
     val end = origin + direction * range.toDouble
 
