@@ -3,7 +3,9 @@ package io.github.srs.view
 import javax.swing.*
 import java.awt.*
 
-class SimpleView:
+import io.github.srs.model.ModelModule
+
+class SimpleView[S <: ModelModule.State]:
   private val frame = new JFrame("Scala Robotics Simulator")
   private val lblText = new JLabel("Hello World!", SwingConstants.CENTER)
 
@@ -17,8 +19,8 @@ class SimpleView:
   private def setLabelText(text: String): Unit =
     lblText.setText(text)
 
-  def plotData(data: Int): Unit =
-    setLabelText(s"${lblText.getText} ${data.toString}")
+  def render(state: S): Unit =
+    setLabelText(s"$state")
 
   def close(): Unit =
     frame.dispose()
