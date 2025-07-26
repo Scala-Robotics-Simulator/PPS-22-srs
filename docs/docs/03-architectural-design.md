@@ -16,6 +16,10 @@ injection* che permette di definire i componenti Model, View e Controller come m
 specificando in modo esplicito le dipendenze tra di essi. Questo approccio facilita la composizione, la testabilità e la
 sostituzione dei singoli componenti.
 
+L’intera architettura è definita in modo generico rispetto al tipo di stato `S`, che rappresenta l’informazione mantenuta
+e gestita durante la simulazione. I trait `Model`, `View` e `Controller` sono parametrizzati rispetto a `S`, garantendo
+riusabilità e indipendenza rispetto a una specifica rappresentazione dello stato.
+
 ![MVC](../static/img/03-architectural-design/mvc.png)
 
 ## Componenti dell'architettura
