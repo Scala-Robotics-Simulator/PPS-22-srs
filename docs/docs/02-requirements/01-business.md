@@ -1,4 +1,6 @@
 ---
+sidebar_label: 2.1. Requisiti di Business
+sidebar_position: 1
 description: "Requisiti di business del progetto."
 ---
 
