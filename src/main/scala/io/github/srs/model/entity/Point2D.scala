@@ -40,21 +40,62 @@ object Point2D:
      */
     def y: Double = p._2
 
+    /**
+     * Adds two points together, resulting in a new point whose coordinates are the sum of the respective coordinates of
+     * the two points.
+     * @param other
+     *   the other point to add.
+     * @return
+     *   a new [[Point2D]] representing the sum of this point and `other`.
+     */
     infix def +(other: Point2D): Point2D =
       Point2D(p.x + other.x, p.y + other.y)
 
+    /**
+     * Subtracts another point from this point, resulting in a new point whose coordinates are the difference of the
+     * respective coordinates of the two points.
+     * @param other
+     *   the other point to subtract.
+     * @return
+     *   a new [[Point2D]] representing the difference of this point and `other`.
+     */
     infix def -(other: Point2D): Point2D =
       Point2D(p.x - other.x, p.y - other.y)
 
+    /**
+     * Multiplies this point by a scalar value, resulting in a new point whose coordinates are the product of the
+     * respective coordinates of this point and the scalar.
+     * @param scalar
+     *   scalar value to multiply the point by.
+     * @return
+     *   a new [[Point2D]] representing the scaled point.
+     */
     infix def *(scalar: Double): Point2D =
       Point2D(p.x * scalar, p.y * scalar)
 
+    /**
+     * Calculates the dot product of this point with another point.
+     * @param other
+     *   the other point to compute the dot product with.
+     * @return
+     *   the dot product as a `Double`, which is the sum of the products of the corresponding coordinates.
+     */
     infix def dot(other: Point2D): Double =
       p.x * other.x + p.y * other.y
 
+    /**
+     * Calculates the magnitude (length) of this point vector.
+     * @return
+     *   the magnitude as a `Double`, which is the square root of the sum of the squares of the coordinates.
+     */
     def magnitude: Double =
       math.sqrt(p.x * p.x + p.y * p.y)
 
+    /**
+     * Normalizes this point to a unit vector.
+     * @return
+     *   a new [[Point2D]] representing the normalized point.
+     */
     def normalize: Point2D =
       val mag = p.magnitude
       if math.abs(mag) < 1e-10 then p else Point2D(p.x / mag, p.y / mag)
