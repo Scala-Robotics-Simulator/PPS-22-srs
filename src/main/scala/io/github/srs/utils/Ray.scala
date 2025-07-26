@@ -17,12 +17,21 @@ object Ray:
       import Point2D.*
       val (p1, p2) = line
       val dir = end - origin
-      val lineDir = p2 - p1
-      val denom = dir.x * lineDir.y - dir.y * lineDir.x
-      if math.abs(denom) < 1e-10 then None // Lines are parallel
+      val segDir = p2 - p1
+
+      val denom = dir.x * segDir.y - dir.y * segDir.x
+      if math.abs(denom) < 1e-10
+      then None // Parallel
       else
-        val t = ((p1.x - origin.x) * lineDir.y - (p1.y - origin.y) * lineDir.x) / denom
-        if t < 0 then None else Some(t * dir.magnitude)
+        val dx = p1.x - origin.x
+        val dy = p1.y - origin.y
+
+        val t = (dx * segDir.y - dy * segDir.x) / denom
+        val u = (dx * dir.y - dy * dir.x) / denom
+
+        if t >= 0 && u >= 0 && u <= 1
+        then Some(t * dir.magnitude)
+        else None
 
     entity.shape match
       case ShapeType.Circle(radius) =>
