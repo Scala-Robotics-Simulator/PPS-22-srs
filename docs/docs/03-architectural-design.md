@@ -39,7 +39,9 @@ L'architettura è costituita da tre componenti principali:
 
 - ### Controller
   È il componente che gestisce la logica di controllo dell'applicazione. Funge da intermediario tra Model e View,
-  mantenendo una chiara separazione delle responsabilità. Si occupa di interpretare i comandi provenienti dalla View,
-  tradurli in funzioni di aggiornamento da applicare al Model tramite `update` e infine aggiornare la View chiamando
-  `render`. Questo approccio consente di separare la logica di controllo da quella di presentazione e di business,
-  rendendo l'applicazione più modulare ed estendibile.
+  mantenendo una chiara separazione delle responsabilità. Il Controller espone la funzione `simulationLoop`,
+  che rappresenta il ciclo principale della simulazione. All'interno di questo ciclo, il Controller riceve l'attuale stato
+  dell'applicazione, elabora gli eventi provenienti dalla View, costruisce le funzioni di aggiornamento da applicare al
+  Model e richiama la View per visualizzare i risultati tramite `render`. 
+  Questo approccio consente di centralizzare la logica del flusso di simulazione, separando chiaramente il controllo
+  dalla logica di business e dalla presentazione, rendendo l'applicazione più modulare ed estendibile.
