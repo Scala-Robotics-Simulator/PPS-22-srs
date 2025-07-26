@@ -20,7 +20,7 @@ object Launcher
 
   val model: Model[SimulationState] = Model(s =>
     if s.i >= MaxIterations then None
-    else Some(s.copy(s.i + 1)),
+    else Some(s.copy(i = s.i + 1)),
   )
   val view: View[SimulationState] = View()
   val controller: Controller[SimulationState] = Controller()
