@@ -16,7 +16,12 @@ object Launcher
     with ViewModule.Interface[SimulationState]
     with ControllerModule.Interface[SimulationState]:
 
-  val model: Model[SimulationState] = Model(s => Some(s.copy(s.i + 1)))
+  private val MaxIterations = 10_000_000
+
+  val model: Model[SimulationState] = Model(s =>
+    if s.i >= MaxIterations then None
+    else Some(s.copy(s.i + 1)),
+  )
   val view: View[SimulationState] = View()
   val controller: Controller[SimulationState] = Controller()
 
