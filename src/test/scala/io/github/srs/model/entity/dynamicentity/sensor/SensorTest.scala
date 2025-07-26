@@ -36,15 +36,15 @@ class SensorTest extends AnyFlatSpec with should.Matchers:
       // Dummy implementation for testing purposes
       42.0
 
-    "Sensor" should "have an offset orientation, distance, and range" in:
-      val sensor = new DummySensor(offset, distance, range)
-      (sensor.offset, sensor.distance, sensor.range) should be((offset, distance, range))
+  "Sensor" should "have an offset orientation, distance, and range" in:
+    val sensor = new DummySensor(offset, distance, range)
+    (sensor.offset, sensor.distance, sensor.range) should be((offset, distance, range))
 
-    it should "sense the environment and return data" in:
-      val sensor = new DummySensor(offset, distance, range)
-      val entity = new Dummy(initialPosition, shape, initialOrientation, Seq.empty, SensorSuite.empty)
-      val environment = Environment(10.0, 10.0).toOption.value
-      val data = sensor.sense(entity)(environment)
-      data should be(42.0)
+  it should "sense the environment and return data" in:
+    val sensor = new DummySensor(offset, distance, range)
+    val entity = new Dummy(initialPosition, shape, initialOrientation, Seq.empty, SensorSuite.empty)
+    val environment = Environment(10.0, 10.0).toOption.value
+    val data = sensor.sense(entity)(environment)
+    data should be(42.0)
 
 end SensorTest
