@@ -62,6 +62,7 @@ object ModelModule:
          * @inheritdoc
          */
         override def update(s: S): Option[S] = updateFunc(s)
+  end Component
 
   /**
    * Interface trait that combines the provider and component traits.
