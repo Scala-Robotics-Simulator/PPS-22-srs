@@ -10,11 +10,11 @@ import io.github.srs.model.entity.Point2D.*
 /**
  * Implements light diffusion with shadow calculation using a Field of View (FOV) engine.
  *
- * The Diffuser calculates how light spreads through the environment, taking into account obstacles that create shadows
- * and light attenuation over distance.
+ * The [[Diffuser]] calculates how light spreads through the environment, taking into account obstacles that create
+ * shadows and light attenuation over distance.
  *
  * @param fov
- *   The Field of View engine used for computing light visibility (defaults to SquidLibFov)
+ *   The Field of View engine used for computing light visibility (defaults to [[SquidLibFov]])
  */
 final class ShadowFovDiffuser(fov: FovEngine = SquidLibFov) extends Diffuser[EnvironmentView, LightState]:
 

@@ -5,8 +5,8 @@ import io.github.srs.model.Cell
 /**
  * Diffuser trait for calculating light diffusion in an environment.
  *
- * Represents a pure functional capability that calculates how light spreads through an environment over
- * time. It takes a view of the world at time t and produces the next immutable light state.
+ * Represents a pure functional capability that calculates how light spreads through an environment over time. It takes
+ * a view of the world at time t and produces the next immutable light state.
  *
  * @tparam V
  *   The type of the environment view

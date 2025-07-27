@@ -2,19 +2,17 @@ package io.github.srs.model.environment
 
 import io.github.srs.model.*
 import io.github.srs.model.entity.staticentity.StaticEntity
-import io.github.srs.model.entity.staticentity.StaticEntity.{Light, Obstacle}
+import io.github.srs.model.entity.staticentity.StaticEntity.{ Light, Obstacle }
 import io.github.srs.model.entity.Point2D.*
 import io.github.srs.model.entity.dynamicentity.Robot
 
 /**
  * Represents a view of the environment at a specific tick.
  *
- * This view contains all the necessary data to understand the state of the environment
- * at a given moment, including:
- * * - The dimensions of the environment (width and height)
- * * - The set of obstacles present in the environment
- * * - The static lights that illuminate the environment
- * * - The resistance grid, which indicates the resistance of each cell in the environment
+ * This view contains all the necessary data to understand the state of the environment at a given moment, including: * -
+ * The dimensions of the environment (width and height) * - The set of obstacles present in the environment * - The
+ * static lights that illuminate the environment * - The resistance grid, which indicates the resistance of each cell in
+ * the environment
  */
 final case class EnvironmentView(
     width: Int,
@@ -28,35 +26,33 @@ final case class EnvironmentView(
 object EnvironmentView:
 
   /**
-   * Static snapshot: robots **ARE NOT** considered opaque.
-   * This means that robots do not block light.
+   * Static snapshot: robots **ARE NOT** considered opaque. This means that robots do not block light.
    *
-   *  @param env
-   *  the environment to build the view from.
+   * @param env
+   *   the environment to build the view from.
    *
-   *  @return
-   *  an [[EnvironmentView]] representing the static state of the environment.
+   * @return
+   *   an [[EnvironmentView]] representing the static state of the environment.
    */
   def static(env: Environment): EnvironmentView =
     build(env, blockRobots = false)
 
   /**
-   * Dynamic snapshot: robots **ARE** considered opaque.
-   * This means that robots block light.
+   * Dynamic snapshot: robots **ARE** considered opaque. This means that robots block light.
    *
    * @param env
-   * the environment to build the view from.
+   *   the environment to build the view from.
    *
    * @return
-   * an [[EnvironmentView]] representing the dynamic state of the environment.
+   *   an [[EnvironmentView]] representing the dynamic state of the environment.
    */
   def dynamic(env: Environment): EnvironmentView =
     build(env, blockRobots = true)
 
   private def build(
-                     env: Environment,
-                     blockRobots: Boolean
-                   ): EnvironmentView =
+      env: Environment,
+      blockRobots: Boolean,
+  ): EnvironmentView =
     val (width, height) = (env.width, env.height)
 
     val obstacles: Set[Cell] =
@@ -71,7 +67,7 @@ object EnvironmentView:
 
     val lights: Vector[Light] =
       env.entities.collect { case l: Light => l }.toVector
-    
+
     val robotCells: Set[Cell] = robots.map(_.position.toCell).toSet
 
     val resistance: Array[Array[Double]] =
@@ -82,6 +78,7 @@ object EnvironmentView:
             (blockRobots && robotCells.contains(cell))
         if solid then 1.0 else 0.0
       }
-    
+
     EnvironmentView(width, height, obstacles, robots, lights, resistance)
+  end build
 end EnvironmentView
