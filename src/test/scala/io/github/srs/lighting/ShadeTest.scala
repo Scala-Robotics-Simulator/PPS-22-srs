@@ -1,5 +1,6 @@
 package io.github.srs.lighting
 
+import io.github.srs.model.lighting.Shade
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers.*
 

@@ -1,4 +1,4 @@
-package io.github.srs.lighting
+package io.github.srs.model.lighting
 
 /**
  * Utility object for converting light intensity values to ASCII art characters. Provides visual representation of

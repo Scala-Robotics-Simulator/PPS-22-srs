@@ -1,4 +1,4 @@
-package io.github.srs.lighting
+package io.github.srs.model.lighting
 
 import scala.collection.immutable.ArraySeq
 

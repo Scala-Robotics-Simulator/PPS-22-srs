@@ -1,4 +1,4 @@
-package io.github.srs.lighting
+package io.github.srs.model.lighting
 
 /**
  * Lux is the SI unit of illuminance, measuring luminous flux per unit area. In this implementation, it's represented as

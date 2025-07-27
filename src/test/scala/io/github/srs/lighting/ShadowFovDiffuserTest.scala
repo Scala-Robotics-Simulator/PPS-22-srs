@@ -1,9 +1,10 @@
 package io.github.srs.lighting
 
 import io.github.srs.model.*
-import io.github.srs.model.entity.{ Entity, Orientation }
+import io.github.srs.model.entity.{Entity, Orientation}
 import io.github.srs.model.entity.staticentity.StaticEntity.*
 import io.github.srs.model.environment.*
+import io.github.srs.model.lighting.{LightState, ShadowFovDiffuser}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers.*
 

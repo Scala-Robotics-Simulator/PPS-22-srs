@@ -1,6 +1,7 @@
 package io.github.srs.lighting
 
 import io.github.srs.model.Cell
+import io.github.srs.model.lighting.SquidLibFov
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers.*
 
