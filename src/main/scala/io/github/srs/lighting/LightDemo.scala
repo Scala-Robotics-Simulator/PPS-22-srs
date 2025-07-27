@@ -7,7 +7,7 @@ import io.github.srs.model.environment.*
 /**
  * An object that demonstrates a simulation of light diffusion within an environment containing lights and obstacles.
  *
- * This example uses the `ShadowFovDiffuser` to compute light propagation, including shadowing and attenuation, in a
+ * This example uses the [[ShadowFovDiffuser]] to compute light propagation, including shadowing and attenuation, in a
  * grid-based environment. The environment consists of obstacles and light sources, both of which influence the
  * resulting light map. The final light map is visualized in both ASCII and numeric formats.
  *
