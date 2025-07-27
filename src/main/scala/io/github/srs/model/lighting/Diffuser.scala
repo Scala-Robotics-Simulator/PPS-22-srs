@@ -3,13 +3,13 @@ package io.github.srs.model.lighting
 import io.github.srs.model.Cell
 
 /**
- * A trait that defines the behavior of light diffusion in an environment.
+ * Diffuser trait for calculating light diffusion in an environment.
  *
- * This trait represents a pure functional capability that calculates how light spreads through an environment over
+ * Represents a pure functional capability that calculates how light spreads through an environment over
  * time. It takes a view of the world at time t and produces the next immutable light state.
  *
  * @tparam V
- *   The type of the environment view (contravariant)
+ *   The type of the environment view
  * @tparam S
  *   The type of the light state
  */
@@ -17,10 +17,6 @@ trait Diffuser[-V, S]:
 
   /**
    * Calculates the lighting state for the next time step.
-   *
-   * This is a curried function that takes:
-   *   - A view of the current environment
-   *   - The current lighting state And produces the next lighting state.
    *
    * @param view
    *   The current view of the environment
