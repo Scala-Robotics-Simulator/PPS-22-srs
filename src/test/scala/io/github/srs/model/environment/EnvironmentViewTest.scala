@@ -5,9 +5,11 @@ import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.OptionValues.*
 import io.github.srs.model.*
 import io.github.srs.model.entity.staticentity.StaticEntity
-import io.github.srs.model.entity.{ Orientation, Point2D }
-import io.github.srs.model.entity.staticentity.StaticEntity.{ Light, Obstacle }
+import io.github.srs.model.entity.{Orientation, Point2D, ShapeType}
+import io.github.srs.model.entity.staticentity.StaticEntity.{Light, Obstacle}
 import io.github.srs.model.entity.Point2D.*
+import io.github.srs.model.entity.dynamicentity.sensor.SensorSuite
+import io.github.srs.model.entity.dynamicentity.{Robot, WheelMotor}
 
 class EnvironmentViewTest extends AnyFlatSpec:
 
@@ -21,12 +23,6 @@ class EnvironmentViewTest extends AnyFlatSpec:
   private val obstacleWidth = 2
   private val obstacleHeight = 1
 
-  private val lightOrigin = Point2D(4.0, 4.0)
-  private val lightRadius = 3.0
-  private val lightIntensity = 1.0
-  private val lightAttenuation = 0.2
-
-  // Pre‑compute exactly which cells should be occupied by the obstacle
   private val obstacleCells: Set[Cell] =
     val tl = obsOrigin.toCell
     (for
@@ -34,10 +30,29 @@ class EnvironmentViewTest extends AnyFlatSpec:
       dy <- 0 until obstacleHeight
     yield Cell(tl.x + dx, tl.y + dy)).toSet
 
+  private val lightOrigin = Point2D(4.0, 4.0)
+  private val lightRadius = 3.0
+  private val lightIntensity = 1.0
+  private val lightAttenuation = 0.2
   private val expectedLight =
-    Light(lightOrigin, Orientation(0), lightRadius, lightIntensity, lightAttenuation)
+    Light(
+      lightOrigin,
+      Orientation(0),
+      radius = lightRadius,
+      intensity = lightIntensity,
+      attenuation = lightAttenuation
+    )
 
-  // Build Environment
+  private val robotPos = Point2D(5.0, 5.0)
+  private val robot: Robot =
+    Robot(
+      position = robotPos,
+      shape = ShapeType.Circle(0.5),
+      orientation = Orientation(0),
+      actuators = Seq.empty[WheelMotor], // no motors needed for the test
+      sensors = SensorSuite.empty
+    ).toOption.value
+
   private val env: Environment =
     Environment(
       W,
@@ -45,33 +60,39 @@ class EnvironmentViewTest extends AnyFlatSpec:
       Set(
         Obstacle(obsOrigin, Orientation(0), obstacleWidth, obstacleHeight),
         expectedLight,
-      ),
-    ).toOption.value // fails if invalid
+        robot
+      )
+    ).toOption.value
 
-  private val view: EnvironmentView = env.view
+  private val viewStatic  : EnvironmentView = env.view               // robots are transparent
+  private val viewDynamic : EnvironmentView = EnvironmentView.dynamic(env) // robots are solid
 
-  "EnvironmentView.static" should "report the correct dimensions" in:
-    (view.width, view.height) shouldBe (W, H)
+  "EnvironmentView.static" should "report correct dimensions" in :
+    (viewStatic.width, viewStatic.height) shouldBe(W, H)
 
-  it should "contain exactly the obstacle cells" in:
-    view.obstacles should contain theSameElementsAs obstacleCells
+  it should "contain exactly the obstacle cells" in :
+    viewStatic.obstacles should contain theSameElementsAs obstacleCells
 
-  it should "not include any light cell among the obstacles" in:
-    view.obstacles should not contain lightOrigin.toCell
+  it should "list robot correctly" in :
+    viewStatic.robots should contain theSameElementsAs Vector(robot)
 
-  it should "list exactly the static lights declared" in:
-    view.lights should contain theSameElementsAs Vector(expectedLight)
+  it should "list the robot but NOT block its cell in resistance grid" in :
+    val rc = robotPos.toCell
+    viewStatic.resistance(rc.x)(rc.y) shouldBe 0.0 // transparent
 
-  it should "produce a resistance grid with correct values" in:
-    val grid = view.resistance
+  it should "list exactly the static lights declared" in :
+    viewStatic.lights should contain only expectedLight
 
-    // free cells is 0.0
-    Seq(Cell(0, 0), Cell(3, 3), Cell(W - 1, H - 1)).foreach { c =>
-      grid(c.x)(c.y) shouldBe 0.0
-    }
+  it should "set resistance = 1.0 only on obstacle cells" in :
+    val grid = viewStatic.resistance
+    obstacleCells.foreach(c => grid(c.x)(c.y) shouldBe 1.0)
+    Seq(Cell(0, 0), Cell(3, 3)).foreach(c => grid(c.x)(c.y) shouldBe 0.0)
 
-    // obstacle cells is 1.0
-    obstacleCells.foreach { c =>
-      grid(c.x)(c.y) shouldBe 1.0
-    }
+  "EnvironmentView.dynamic" should "make robot cells opaque" in :
+    val rc = robotPos.toCell
+    viewDynamic.resistance(rc.x)(rc.y) shouldBe 1.0 // robot blocks light
+
+  it should "list the robot as opaque" in :
+    obstacleCells.foreach(c => viewDynamic.resistance(c.x)(c.y) shouldBe 1.0)
+
 end EnvironmentViewTest
