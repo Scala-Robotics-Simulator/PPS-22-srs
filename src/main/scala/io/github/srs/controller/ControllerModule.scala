@@ -1,114 +1,102 @@
 package io.github.srs.controller
 
-import io.github.srs.model.Cell
-import io.github.srs.model.entity.Orientation
-import io.github.srs.model.entity.staticentity.StaticEntity.{ Light, Obstacle }
-import io.github.srs.model.environment.Environment
-import io.github.srs.model.lighting.{ LightState, ShadowFovDiffuser }
-import io.github.srs.view.ViewModule
+import io.github.srs.model.ModelModule
 
+/**
+ * Module that defines the controller logic for the Scala Robotics Simulator.
+ */
 object ControllerModule:
 
-  /** Public controller interface */
-  trait Controller:
-    def start(): Unit
+  /**
+   * Controller trait that defines the interface for the controller.
+   *
+   * @tparam S
+   *   the type of the state, which must extend [[ModelModule.State]].
+   */
+  trait Controller[S <: ModelModule.State]:
+    /**
+     * Starts the controller with the initial state.
+     *
+     * @param initialState
+     *   the initial state of the simulation.
+     */
+    def start(initialState: S): Unit
 
-  /** Will be mixed in by the launcher to provide a `controller` */
-  trait Provider:
-    val controller: Controller
+    /**
+     * Runs the simulation loop, updating the state and rendering the view.
+     * @param s
+     *   the current state of the simulation.
+     */
+    def simulationLoop(s: S): Unit
 
-  /** The dependencies this module needs: a View and a Model */
-  type Requirements = ViewModule.Provider & io.github.srs.model.ModelModule.Provider
+  /**
+   * Provider trait that defines the interface for providing a controller.
+   * @tparam S
+   *   the type of the state, which must extend [[ModelModule.State]].
+   */
+  trait Provider[S <: ModelModule.State]:
+    val controller: Controller[S]
 
-  /** The implementation */
-  trait Component:
-    context: Requirements =>
+  /**
+   * Defines the dependencies required by the controller module. In particular, it requires a
+   * [[io.github.srs.view.ViewModule.Provider]] and a [[io.github.srs.model.ModelModule.Provider]].
+   */
+  type Requirements[S <: ModelModule.State] =
+    io.github.srs.view.ViewModule.Provider[S] & io.github.srs.model.ModelModule.Provider[S]
+
+  /**
+   * Component trait that defines the interface for creating a controller.
+   * @tparam S
+   *   the type of the simulation state, which must extend [[ModelModule.State]].
+   */
+  trait Component[S <: ModelModule.State]:
+    context: Requirements[S] =>
 
     object Controller:
-      def apply(): Controller = new ControllerImpl
+      /**
+       * Creates a controller instance.
+       *
+       * @return
+       *   a [[Controller]] instance.
+       */
+      def apply(): Controller[S] = new ControllerImpl
 
-      private class ControllerImpl extends Controller:
+      /**
+       * Private controller implementation that delegates the simulation loop to the provided model and view.
+       */
+      private class ControllerImpl extends Controller[S]:
 
-        def start(): Unit =
+        /**
+         * @inheritdoc
+         */
+        override def start(initialState: S): Unit =
           context.view.init()
-          showLightMap()
+          simulationLoop(initialState)
 
-        private def showLightMap(): Unit =
-          import io.github.srs.model.environment.view
-          import io.github.srs.model.entity.Point2D.toCell
+        /**
+         * @inheritdoc
+         */
+        @annotation.tailrec
+        override final def simulationLoop(s: S): Unit =
+          val state = for
+            newState <- context.model.update(s)
+            _ <- Some(context.view.render(newState))
+          yield newState
 
-          // 1) build & validate environment
-          val env = Environment(
-            width = 10,
-            height = 10,
-            entities = Set(
-              Obstacle((2.0, 1.0), Orientation(0), 1, 1),
-              Obstacle((2.0, 2.0), Orientation(0), 1, 1),
-              Obstacle((6.0, 4.0), Orientation(0), 1, 1),
-              Light((0.0, 0.0), Orientation(0), 8.0, intensity = 1.0, attenuation = 0.2),
-              Light((9.0, 9.0), Orientation(0), 2.0, intensity = 1.0, attenuation = 0.2),
-            ),
-          ).fold(err => sys.error(err.errorMessage), identity)
-
-          val view = env.view
-          val diffuser = ShadowFovDiffuser()
-          val lightInit = LightState.empty(view.width, view.height)
-          val lightMap = diffuser.step(view)(lightInit)
-
-          val obstacles = env.entities.collect { case Obstacle((x, y), _, w, h) =>
-            f"(${x}%.2f, ${y}%.2f)  size=${w}×$h"
-          }.toVector
-
-          val lights = env.entities.collect { case Light((x, y), _, r, i, k) =>
-            f"(${x}%.2f, ${y}%.2f)  r=$r%.1f  I=$i%.1f  k=$k%.2f"
-          }.toVector
-
-          val header =
-            s"""|Grid      : ${env.width}×${env.height}
-                |
-                |Obstacles : ${obstacles.size}
-                |${obstacles.map("  • " + _).mkString("\n")}
-                |
-                |Lights    : ${lights.size}
-                |${lights.map("  • " + _).mkString("\n")}
-                |
-                |Legend
-                |  #  obstacle
-                |  L  light source
-                |  .░▒▓█  darkest → brightest
-                |
-                |""".stripMargin
-
-          val asciiRaw = lightMap.render(view)
-          val numeric = lightMap.render(view, ascii = false)
-
-          val lightCells = view.lights.map(_.position.toCell).toSet
-          val ascii = overlayLights(asciiRaw, lightCells)
-
-          context.view.plotData(
-            header +
-              ascii + "\n\n" +
-              numeric,
-          )
-
-        end showLightMap
-
-        /** Replace the shade‐char at each light‐cell with 'L' */
-        private def overlayLights(ascii: String, lights: Set[Cell]): String =
-          ascii.linesIterator.zipWithIndex.map { case (line, y) =>
-            line.zipWithIndex.map { case (ch, x) =>
-              if lights.contains(Cell(x, y)) then 'L' else ch
-            }.mkString
-          }
-            .mkString("\n")
-
+          state match
+            case Some(ns) => simulationLoop(ns)
+            case None => ()
       end ControllerImpl
-
     end Controller
 
   end Component
 
-  /** Glue the provider + component together */
-  trait Interface extends Provider with Component:
-    self: Requirements =>
+  /**
+   * Interface trait that combines the provider and component traits for the controller module.
+   *
+   * @tparam S
+   *   the type of the simulation state, which must extend [[ModelModule.State]].
+   */
+  trait Interface[S <: ModelModule.State] extends Provider[S] with Component[S]:
+    self: Requirements[S] =>
 end ControllerModule

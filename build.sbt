@@ -62,7 +62,8 @@ lazy val root = project
       Wart.DefaultArguments,
       Wart.Equals,
       Wart.Any,
-      Wart.MutableDataStructures   // ← disables the “mutable lock”
+      Wart.MutableDataStructures,
+      Wart.IsInstanceOf
     ),
     jacocoReportSettings := JacocoReportSettings(
       title = "PR report",

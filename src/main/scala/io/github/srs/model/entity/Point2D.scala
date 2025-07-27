@@ -31,11 +31,6 @@ object Point2D:
    *
    * These methods enrich `Point2D` with utility functions.
    */
-  /**
-   */
-  /**
-   * The x-coordinate of this point.
-   */
   extension (p: Point2D)
     /**
      * The x-coordinate of this point.
