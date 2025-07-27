@@ -2,7 +2,8 @@ package io.github.srs.model.lighting
 
 import scala.collection.immutable.ArraySeq
 
-import io.github.srs.model.{ environment, Cell }
+import io.github.srs.model.environment.EnvironmentView
+import io.github.srs.model.Cell
 
 /**
  * Represents the state of light in a two-dimensional grid.
@@ -45,21 +46,27 @@ final case class LightState private (width: Int, data: ArraySeq[Lux]):
    * @return
    *   A string representation of the light state, formatted as rows of characters or numbers.
    */
-  def render(view: environment.EnvironmentView, ascii: Boolean = true): String =
-    val max = data.maxOption.getOrElse(0.0).max(1e-9) // avoid /0
-    val rows =
-      (0 until height).map { y =>
-        val cols =
-          (0 until width).map { x =>
-            val c = Cell(x, y)
-            val raw = intensity(c) / max
-            if view.obstacles.contains(c) then '#'
-            else if ascii then Shade.char(raw)
-            else f"$raw%1.2f"
-          }
-        cols.mkString(if ascii then "" else " ")
+  def render(view: EnvironmentView, ascii: Boolean): String =
+    import io.github.srs.model.entity.Point2D.toCell
+
+    val max = data.maxOption.getOrElse(0.0).max(1e-9)
+    val lightSet = view.lights.iterator.map(_.position.toCell).toSet
+    val robotSet = view.robots.map(_.position.toCell).toSet
+    val obstacleS = view.obstacles
+    (0 until height).iterator.map { y =>
+      (0 until width).iterator.map { x =>
+        val c = Cell(x, y)
+        val raw = intensity(c) / max
+        if obstacleS(c) then "#"
+        else if lightSet(c) then "L"
+        else if robotSet(c) then "R"
+        else if ascii then Shade.char(raw).toString
+        else java.lang.String.format(java.util.Locale.US, "%.2f", raw)
       }
-    rows.mkString("\n")
+        .mkString(if ascii then "" else " ")
+    }
+      .mkString("\n")
+  end render
 
 end LightState
 
