@@ -1,10 +1,14 @@
 package io.github.srs.view
 
+/**
+ * The [[ViewModule]] provides abstractions and implementations for the application's viewing component.
+ * It is responsible for initializing and displaying formatted data through the GUI.
+ */
 object ViewModule:
 
   trait View:
     def init(): Unit
-    def plotData(data: Int): Unit
+    def plotData(text: String): Unit          // ← renamed API
 
   trait Provider:
     val view: View
@@ -19,9 +23,9 @@ object ViewModule:
 
       private class ViewImpl extends View:
         private val gui = new SimpleView
-
-        def init(): Unit = gui.init()
-        def plotData(data: Int): Unit = gui.plotData(data)
+        def init(): Unit                     = gui.init()
+        def plotData(text: String): Unit     = gui.plotData(text)
+  end Component
 
   trait Interface extends Provider with Component:
     self: Requirements =>

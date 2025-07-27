@@ -1,24 +1,39 @@
 package io.github.srs.view
 
+import java.awt.{ Dimension, Font }
 import javax.swing.*
-import java.awt.*
 
+
+/**
+ * The [[SimpleView]] provides a basic GUI setup to visualize formatted data in a non-editable text area.
+ * It is primarily used as part of the view implementation in the [[ViewModule]], offering methods to
+ * initialize the GUI, display data, and properly close the window.
+ */
 class SimpleView:
-  private val frame = new JFrame("Scala Robotics Simulator")
-  private val lblText = new JLabel("Hello World!", SwingConstants.CENTER)
+
+  private val frame  = new JFrame("Scala Robotics Simulator")
+  private val area   = new JTextArea()
+  private val pane   =
+    new JScrollPane(
+      area,
+      ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+      ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED,
+    )
+
 
   def init(): Unit =
-    frame.setMinimumSize(new Dimension(800, 600))
-    frame.getContentPane.add(lblText)
+    area.setEditable(false)
+    area.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 14))
+    frame.setMinimumSize(new Dimension(820, 640))
+    frame.getContentPane.add(pane)
     frame.pack()
     frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
     frame.setVisible(true)
 
-  private def setLabelText(text: String): Unit =
-    lblText.setText(text)
 
-  def plotData(data: Int): Unit =
-    setLabelText(s"${lblText.getText} ${data.toString}")
+  def plotData(fullDump: String): Unit =
+    area.setText(fullDump)
+    area.setCaretPosition(0)                             // jump to top
 
-  def close(): Unit =
-    frame.dispose()
+  def close(): Unit = frame.dispose()
+end SimpleView
