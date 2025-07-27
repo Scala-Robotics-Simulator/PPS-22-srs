@@ -62,7 +62,6 @@ lazy val root = project
       Wart.DefaultArguments,
       Wart.Equals,
       Wart.Any,
-      Wart.MutableDataStructures,
       Wart.IsInstanceOf
     ),
     jacocoReportSettings := JacocoReportSettings(
