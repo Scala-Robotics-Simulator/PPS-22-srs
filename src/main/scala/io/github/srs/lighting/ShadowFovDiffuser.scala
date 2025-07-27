@@ -2,10 +2,10 @@ package io.github.srs.lighting
 
 import scala.collection.immutable.ArraySeq
 
-import io.github.srs.model.*
 import io.github.srs.model.entity.staticentity.StaticEntity
 import io.github.srs.model.environment.EnvironmentView
-import io.github.srs.model.toCell
+import io.github.srs.model.*
+import io.github.srs.model.entity.Point2D.*
 
 /**
  * Implements light diffusion with shadow calculation using a Field of View (FOV) engine.

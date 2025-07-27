@@ -1,5 +1,7 @@
 package io.github.srs.model
 
+import io.github.srs.model.entity.Point2D
+import io.github.srs.model.entity.Point2D.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 

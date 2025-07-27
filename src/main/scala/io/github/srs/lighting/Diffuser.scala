@@ -20,7 +20,6 @@ trait Diffuser[-V, S]:
    *
    * This is a curried function that takes:
    *   - A view of the current environment
-   *
    *   - The current lighting state And produces the next lighting state.
    *
    * @param view

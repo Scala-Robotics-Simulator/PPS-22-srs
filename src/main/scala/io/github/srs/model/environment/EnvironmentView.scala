@@ -1,7 +1,9 @@
 package io.github.srs.model.environment
 
 import io.github.srs.model.*
-import io.github.srs.model.StaticEntity.*
+import io.github.srs.model.entity.staticentity.StaticEntity
+import io.github.srs.model.entity.staticentity.StaticEntity.{ Light, Obstacle }
+import io.github.srs.model.entity.Point2D.*
 
 /**
  * All the per‑tick world data in one place: • grid dims • static & dynamic obstacles • static & carried lights • the

@@ -2,7 +2,7 @@ package io.github.srs.lighting
 
 import scala.collection.immutable.ArraySeq
 
-import io.github.srs.model.{Cell, environment}
+import io.github.srs.model.{ environment, Cell }
 
 /**
  * Represents the state of light in a two-dimensional grid.

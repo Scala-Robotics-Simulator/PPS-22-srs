@@ -43,7 +43,7 @@ class SensorTest extends AnyFlatSpec with should.Matchers:
   it should "sense the environment and return data" in:
     val sensor = new DummySensor(offset, distance, range)
     val entity = new Dummy(initialPosition, shape, initialOrientation, Seq.empty, SensorSuite.empty)
-    val environment = Environment(10.0, 10.0).toOption.value
+    val environment = Environment(10, 10).toOption.value
     val data = sensor.sense(entity)(environment)
     data should be(42.0)
 

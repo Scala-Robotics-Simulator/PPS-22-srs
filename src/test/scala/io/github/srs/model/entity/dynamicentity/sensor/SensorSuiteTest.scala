@@ -34,8 +34,8 @@ class SensorSuiteTest extends AnyFlatSpec with Matchers:
 
   private def createEnvironment(entities: Set[Entity]): Environment =
     Environment(
-      width = 20.0,
-      height = 20.0,
+      width = 20,
+      height = 20,
       entities = entities,
     ).toOption.value
 
