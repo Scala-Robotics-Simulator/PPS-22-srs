@@ -72,6 +72,15 @@ export const sprint1Data = [
     days: [0, 0, 0, 0, 0, 0, 0, 0]
   },
   {
+    backlogItem: "Come utente, voglio gestire i sensori di prossimità, in modo aggiungerli, o rimuoverli, dal robot",
+    id: "9.3",
+    task: "Implementazione logica di sensing dei sensori di prossimità",
+    volontario: "Ceredi",
+    stima: 0,
+    effettivo: 0,
+    days: [0, 0, 0, 0, 0, 0, 0, 0]
+  },
+  {
     backlogItem: "Come utente, voglio gestire le luci, così da configurare il numero, la posizione e l'intensità di essi",
     id: "10.1",
     task: "Modellazione luci (entità statiche)",
