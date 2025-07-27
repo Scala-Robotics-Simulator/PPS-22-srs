@@ -14,8 +14,9 @@ enum DomainError:
   case InvalidCount(field: String, count: Int, min: Int, max: Int)
 
 object DomainError:
-  
+
   extension (e: DomainError)
+
     def errorMessage: String = e match
       case Negative(f, v) => s"$f is negative ($v)"
       case NegativeOrZero(f, v) => s"$f is ≤ 0 ($v)"
