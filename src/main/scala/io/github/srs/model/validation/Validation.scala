@@ -13,6 +13,9 @@ enum DomainError:
   case Infinite(field: String, value: Double)
   case InvalidCount(field: String, count: Int, min: Int, max: Int)
 
+/**
+ * Companion object for [[DomainError]] that provides an extension method to get a human-readable error message.
+ */
 object DomainError:
 
   extension (e: DomainError)
