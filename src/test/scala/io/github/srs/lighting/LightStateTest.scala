@@ -1,10 +1,10 @@
 package io.github.srs.lighting
 
 import scala.collection.immutable.ArraySeq
-import io.github.srs.model.*
-import io.github.srs.model.lighting.LightState
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers.*
+import io.github.srs.model.*
+import io.github.srs.model.lighting.LightState
 
 class LightStateTest extends AnyFlatSpec:
 
