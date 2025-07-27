@@ -13,6 +13,17 @@ enum DomainError:
   case Infinite(field: String, value: Double)
   case InvalidCount(field: String, count: Int, min: Int, max: Int)
 
+object DomainError:
+  
+  extension (e: DomainError)
+    def errorMessage: String = e match
+      case Negative(f, v) => s"$f is negative ($v)"
+      case NegativeOrZero(f, v) => s"$f is ≤ 0 ($v)"
+      case OutOfBounds(f, v, lo, hi) => s"$f = $v is outside [$lo, $hi)"
+      case NotANumber(f, _) => s"$f is NaN"
+      case Infinite(f, _) => s"$f is infinite"
+      case InvalidCount(f, c, lo, hi) => s"$f has $c elements, allowed $lo $hi"
+
 /**
  * Type alias for domain‑level validations: `Right` = valid, `Left` = error.
  */
