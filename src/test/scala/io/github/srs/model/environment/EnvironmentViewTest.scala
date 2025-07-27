@@ -4,7 +4,9 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.OptionValues.*
 import io.github.srs.model.*
-import io.github.srs.model.StaticEntity.*
+import io.github.srs.model.entity.staticentity.StaticEntity
+import io.github.srs.model.entity.Orientation
+import io.github.srs.model.entity.staticentity.StaticEntity.{ Light, Obstacle }
 
 class EnvironmentViewTest extends AnyFlatSpec:
 
