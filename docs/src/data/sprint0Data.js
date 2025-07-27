@@ -1,4 +1,3 @@
-// Shared data for backlog and sprint tables with validation
 export const sprint0Data = [
   {
     backlogItem: "Setup repository",
@@ -172,7 +171,7 @@ export const sprint0Data = [
     days: [0.5, 0, 0, 0, 0, 0, 0, 0]
   },
   {
-    backlogItem: "Deliverable sprint-1 (GUI con messaggio di welcome)",
+    backlogItem: "Deliverable sprint-0 (GUI con messaggio di welcome)",
     id: "5.1",
     task: "Implementazione GUI con messaggio di welcome",
     volontario: "Cohen, Nardicchia",
