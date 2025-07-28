@@ -89,5 +89,47 @@ export const backlogData = [
     stima: 1,
     effettivo: 1,
     sprints: [0, 1, 0, 0, 0]
+  },
+  {
+    id: 14,
+    item: "Come utente, voglio gestire i fotosensori, in modo aggiungerli, o rimuoverli, dal robot",
+    stima: 8,
+    effettivo: 0,
+    sprints: [0, 0, 0, 0, 0]
+  },
+  {
+    id: 15,
+    item: "Come utente, voglio modificare il comportamento dei robot, indicandone il Behavior",
+    stima: 12,
+    effettivo: 0,
+    sprints: [0, 0, 0, 0, 0]
+  },
+  {
+    id: 16,
+    item: "Come un utente, voglio poter scegliere il seed, così da poter riprodurre la stessa simulazione",
+    stima: 8,
+    effettivo: 0,
+    sprints: [0, 0, 0, 0, 0]
+  },
+  {
+    id: 17,
+    item: "Come un utente, voglio poter caricare un file di configurazione personalizzato della simulazione, così che possa verificare nuovamente comportamenti eseguiti precedentemente",
+    stima: 5,
+    effettivo: 0,
+    sprints: [0, 0, 0, 0, 0]
+  },
+  {
+    id: 18,
+    item: "Come un utente, voglio poter salvare la configurazione in un file, così da poterla riutilizzare nelle simulazioni successive",
+    stima: 1,
+    effettivo: 0,
+    sprints: [0, 0, 0, 0, 0]
+  },
+  {
+    id: 19,
+    item: "Deliverable sprint-2",
+    stima: 1,
+    effettivo: 0,
+    sprints: [0, 0, 0, 0, 0]
   }
 ];
