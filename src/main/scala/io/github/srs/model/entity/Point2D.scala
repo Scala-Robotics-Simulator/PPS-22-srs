@@ -1,5 +1,7 @@
 package io.github.srs.model.entity
 
+import io.github.srs.model.Cell
+
 /**
  * Represents a point in a two-dimensional Cartesian coordinate system.
  *
@@ -115,6 +117,16 @@ object Point2D:
      */
     def distanceTo(other: Point2D): Double =
       math.sqrt(math.pow(other.x - p.x, 2) + math.pow(other.y - p.y, 2))
+
+    /**
+     * Converts this point to a [[Cell]] by rounding its coordinates.
+     *
+     * The x and y coordinates of the point are rounded to the nearest integer to create a new cell in the grid.
+     *
+     * @return
+     *   a new [[Cell]] with the rounded coordinates of this point
+     */
+    def toCell: Cell = Cell(p.x.round.toInt, p.y.round.toInt)
 
   end extension
 end Point2D

@@ -53,8 +53,8 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
 
   private def createEnvironment(entities: Set[Entity]): Environment =
     Environment(
-      width = 10.0,
-      height = 10.0,
+      width = 10,
+      height = 10,
       entities = entities,
     ).toOption.value
 

@@ -62,7 +62,7 @@ lazy val root = project
       Wart.DefaultArguments,
       Wart.Equals,
       Wart.Any,
-      Wart.IsInstanceOf,
+      Wart.IsInstanceOf
     ),
     jacocoReportSettings := JacocoReportSettings(
       title = "PR report",
@@ -81,4 +81,5 @@ lazy val root = project
      */
     libraryDependencies ++= scalaTestBundle,
     libraryDependencies += scalaTestJUnit5,
+    libraryDependencies += squidLib,
   )
