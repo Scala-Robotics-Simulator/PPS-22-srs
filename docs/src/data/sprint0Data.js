@@ -65,7 +65,7 @@ export const sprint0Data = [
   {
     backlogItem: "Setup repository",
     id: "1.8",
-    task: "Configurazione e integrazione MendRenovate",
+    task: "Configurazione e integrazione Mend Renovate",
     volontario: "Ceredi",
     stima: 0.5,
     effettivo: 0.5,
@@ -74,7 +74,7 @@ export const sprint0Data = [
   {
     backlogItem: "Comprensione e Modellazione del dominio",
     id: "2.1",
-    task: "Mokup interfaccia grafica",
+    task: "Mockup interfaccia grafica",
     volontario: "Cohen, Nardicchia",
     stima: 2,
     effettivo: 2,

@@ -3,7 +3,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/Scala-Robotics-Simulator/PPS-22-srs/badge.svg?branch=main)](https://coveralls.io/github/Scala-Robotics-Simulator/PPS-22-srs?branch=main)
 ![CI status](https://github.com/Scala-Robotics-Simulator/PPS-22-srs/actions/workflows/dispatcher.yml/badge.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-![Version](https://img.shields.io/github/v/release/letsstreamit/profile-service)
+![Version](https://img.shields.io/github/v/release/Scala-Robotics-Simulator/PPS-22-srs)
 
 A robotics simulator written in Scala.
 
