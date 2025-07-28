@@ -1,0 +1,42 @@
+---
+sidebar_label: Sprint 1
+---
+
+
+import {SprintTable} from '@site/src/components/tables/SprintTable'
+import {sprint1Data} from '@site/src/data/sprint1Data'
+
+# Sprint 1 [14/07/2025 - 27/07/2025]
+
+<SprintTable data={sprint1Data} />
+
+## Sprint Goal
+
+Gli obiettivi dello Sprint 1 sono stati:
+- Implementazione di una parte di modellazione del dominio;
+- Creazione del modello di dominio iniziale, comprendente le entità principali e le loro relazioni;
+- Prima implementazione della logica di:
+  - diffusione della luce;
+  - dei sensori di prossimità;
+  - degli attuatori di movimento;
+- Revisione dell'implementazione del MVC generico, con l'obiettivo di migliorare la struttura del codice e la
+separazione delle responsabilità.
+
+## Sprint Deadline
+
+Lo Sprint 1 è iniziato il 14 Luglio 2025 e si è concluso il 27 Luglio 2025.
+
+## Sprint Review
+
+Lo Sprint 1 ha portato a termine tutti i task previsti e ha raggiunto gli obiettivi prefissati.
+
+## Sprint Retrospective
+
+- La gestione della logica del sensore di prossimità si è rivelata più complessa del previsto, a causa della difficoltà
+dell'implementazione di un sistema di ray casting per rilevare gli ostacoli.
+
+- L'integrazione della libreria di FOV (Field of View) basata su buffer mutabili, ha richiesto più tempo per adattarsi
+all'approccio funzionale.
+
+- La gestione della logica di movimento degli attuatori non ha presentato particolari difficoltà, sono state utilizzate
+conoscenze pregresse apprese dal corso di **Intelligent Robotic Systems** (IRS).
