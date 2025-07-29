@@ -56,12 +56,19 @@ class EnvironmentTest extends AnyFlatSpec with Matchers:
       case Left(DomainError.OutOfBounds("height", _, _, _)) => succeed
 
   it should "not be created with width exceeding maximum" in:
-    inside(Environment(501, 10)):
+    import io.github.srs.utils.SimulationDefaults.Environment.maxWidth
+    inside(Environment(maxWidth + 1, 10)):
       case Left(DomainError.OutOfBounds("width", _, _, _)) => succeed
 
   it should "not be created with height exceeding maximum" in:
-    inside(Environment(10, 501)):
+    import io.github.srs.utils.SimulationDefaults.Environment.maxHeight
+    inside(Environment(10, maxHeight + 1)):
       case Left(DomainError.OutOfBounds("height", _, _, _)) => succeed
+
+  it should "not be created with too many entities" in:
+    import io.github.srs.utils.SimulationDefaults.Environment.maxEntities
+    inside(Environment(10, 10, (1 to maxEntities + 1).map(i => createEntity((i.toDouble, i.toDouble), ShapeType.Circle(1.0), Orientation(0.0))).toSet)):
+      case Left(DomainError.OutOfBounds("entities", _, _, _)) => succeed
 
   it should "validate collisions in circular entities" in:
     val entity1 = createEntity((1.0, 1.0), ShapeType.Circle(1.0), Orientation(0.0))
