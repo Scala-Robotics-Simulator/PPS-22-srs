@@ -32,7 +32,7 @@ object DomainError:
       case InvalidCount(f, c, lo, hi) => s"$f has $c elements, allowed $lo $hi"
       case Collision(f, elements) =>
         val count = elements.size
-        s"$f has $count collisions, expected none"
+        s"$f have $count collision(s), expected none"
 
 /**
  * Type alias for domain‑level validations: `Right` = valid, `Left` = error.
