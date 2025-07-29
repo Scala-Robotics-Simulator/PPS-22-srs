@@ -1,6 +1,7 @@
 package io.github.srs.model.environment
 
 import io.github.srs.model.entity.*
+import io.github.srs.model.validation.DomainError
 import org.scalatest.Inside.inside
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -38,13 +39,29 @@ class EnvironmentTest extends AnyFlatSpec with Matchers:
           case _ => fail("Pattern match failed")
         result shouldBe (20.0, 15.0, Set(entity))
 
-  it should "validate positive width" in:
+  it should "not be created with negative width" in:
     inside(Environment(-10, 10)):
-        case Left(error) => error.errorMessage shouldBe "width is ≤ 0 (-10.0)"
+        case Left(DomainError.OutOfBounds("width", _, _, _)) => succeed
 
-  it should "validate positive height" in:
+  it should "not be created with negative height" in:
     inside(Environment(10, -10)):
-      case Left(error) => error.errorMessage shouldBe "height is ≤ 0 (-10.0)"
+      case Left(DomainError.OutOfBounds("height", _, _, _)) => succeed
+
+  it should "not be created with zero width" in:
+    inside(Environment(0, 10)):
+      case Left(DomainError.OutOfBounds("width", _, _, _)) => succeed
+
+  it should "not be created with zero height" in:
+    inside(Environment(10, 0)):
+      case Left(DomainError.OutOfBounds("height", _, _, _)) => succeed
+
+  it should "not be created with width exceeding maximum" in:
+    inside(Environment(501, 10)):
+      case Left(DomainError.OutOfBounds("width", _, _, _)) => succeed
+
+  it should "not be created with height exceeding maximum" in:
+    inside(Environment(10, 501)):
+      case Left(DomainError.OutOfBounds("height", _, _, _)) => succeed
 
   it should "validate collisions in circular entities" in:
     val entity1 = createEntity((1.0, 1.0), ShapeType.Circle(1.0), Orientation(0.0))

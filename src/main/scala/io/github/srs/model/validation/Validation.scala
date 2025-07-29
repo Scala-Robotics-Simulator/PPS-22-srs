@@ -109,7 +109,7 @@ object Validation:
    * @return
    *   [[Right]] with the value if it is within the bounds, otherwise [[Left]] with a [[DomainError.OutOfBounds]] error.
    */
-  private def bounded[T](field: String, v: T, min: T, max: T)(using n: Numeric[T]): Validation[T] =
+  def bounded[T](field: String, v: T, min: T, max: T)(using n: Numeric[T]): Validation[T] =
     Either.cond(
       n.gteq(v, min) && n.lt(v, max),
       v,
