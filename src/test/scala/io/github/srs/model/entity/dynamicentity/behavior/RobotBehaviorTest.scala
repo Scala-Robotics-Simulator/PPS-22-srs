@@ -1,16 +1,15 @@
-package io.github.srs.behavior
+package io.github.srs.model.entity.dynamicentity.behavior
 
+import io.github.srs.model.entity.dynamicentity.behavior.RobotBehaviors.idle
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers.shouldBe
 import org.scalatest.OptionValues.*
-import io.github.srs.model.behavior.RobotBehaviors.idle
 
 /**
  * Test suite for the `RobotBehavior` functionality.
  */
 final class RobotBehaviorTest extends AnyFlatSpec:
 
-  import io.github.srs.model.behavior.Behavior.*
   import io.github.srs.model.entity.Orientation
   import io.github.srs.model.entity.dynamicentity.Action
   import io.github.srs.model.entity.dynamicentity.Action.Stop
@@ -29,4 +28,5 @@ final class RobotBehaviorTest extends AnyFlatSpec:
 
   "idle" should "always stop" in:
     idle.execute(readings(0.1)) shouldBe Seq(Stop)
+
 end RobotBehaviorTest
