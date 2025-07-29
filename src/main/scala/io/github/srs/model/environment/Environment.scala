@@ -4,6 +4,12 @@ import io.github.srs.model.entity.Entity
 import io.github.srs.model.validation.Validation.*
 import io.github.srs.model.validation.Validation
 
+private val minWidth: Int = 1
+private val maxWidth: Int = 500
+private val minHeight: Int = 1
+private val maxHeight: Int = 500
+
+
 /**
  * Represents the environment in which entities exist.
  *
@@ -54,8 +60,8 @@ object Environment:
    */
   def apply(width: Int, height: Int, entities: Set[Entity] = Set.empty): Validation[Environment] =
     for
-      width <- positive("width", width)
-      height <- positive("height", height)
+      width <- bounded("width", width, minWidth, maxWidth)
+      height <- bounded("height", height, minHeight, maxHeight)
       entities <- noCollisions("entities", entities)
     yield EnvironmentImpl(width, height, entities)
 
