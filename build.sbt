@@ -83,6 +83,7 @@ lazy val root = project
      * Dependencies
      */
     libraryDependencies ++= scalaTestBundle,
-    libraryDependencies += scalaTestJUnit5,
+    libraryDependencies += scalaTestPlusJUnit5,
     libraryDependencies += squidLib,
+    libraryDependencies += monix,
   )
