@@ -1,6 +1,6 @@
 package io.github.srs.model.entity
 
-import io.github.srs.model.entity.{ Orientation, ShapeType }
+import io.github.srs.model.entity.{Orientation, ShapeType}
 
 /**
  * Represents a generic entity in a two-dimensional space.
@@ -32,3 +32,14 @@ trait Entity:
    */
   def orientation: Orientation
 end Entity
+
+object Entity:
+
+  extension (e: Entity)
+
+    def collidesWith(other: Entity): Boolean =
+      import Point2D.*
+      (e.shape, other.shape) match
+        case (ShapeType.Circle(eRadius), ShapeType.Circle(otherRadius)) =>
+          e.position.distanceTo(other.position) <= (eRadius + otherRadius)
+        case _ => false
