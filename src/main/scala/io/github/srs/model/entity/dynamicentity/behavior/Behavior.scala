@@ -1,4 +1,4 @@
-package io.github.srs.model.behavior
+package io.github.srs.model.entity.dynamicentity.behavior
 
 import scala.annotation.targetName
 
@@ -87,6 +87,17 @@ object Behavior:
      *   a sequence of actions produced by the behavior
      */
     inline def execute(in: I): Seq[A] = self(in)
+
+    /**
+     * Transform the actions produced by the behavior using a function.
+     *
+     * @param f
+     *   the function to apply to each action
+     * @tparam B
+     *   the type of the transformed actions
+     * @return
+     *   a new Behavior that produces actions of type `B`
+     */
     def map[B](f: A => B): Behavior[I, B] = (i: I) => self(i).map(f)
 
     /**
@@ -142,4 +153,5 @@ object Behavior:
      */
     infix def orElse(that: Behavior[I, A]): Behavior[I, A] = self <|> that
   end extension
+
 end Behavior

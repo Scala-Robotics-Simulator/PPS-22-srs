@@ -1,16 +1,16 @@
-package io.github.srs.behavior
+package io.github.srs.model.entity.dynamicentity.behavior
 
+import io.github.srs.model.entity.dynamicentity.behavior.Behavior
+import io.github.srs.model.entity.dynamicentity.behavior.Behavior.{ empty, pure, when }
 import org.scalatest.OptionValues.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers.shouldBe
-import io.github.srs.model.behavior.Behavior
 
 /**
  * Test suite for the `Behavior` trait and its related functionality.
  */
 final class BehaviorTest extends AnyFlatSpec:
 
-  import io.github.srs.model.behavior.Behavior.*
   import io.github.srs.model.entity.Orientation
   import io.github.srs.model.entity.dynamicentity.Action
   import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, SensorReading, SensorReadings }
