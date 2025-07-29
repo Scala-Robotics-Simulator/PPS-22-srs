@@ -33,7 +33,9 @@ object Collision:
         val rectA = RectangleCollider(position, shape, orientation)
         val rectB = RectangleCollider(otherPosition, ShapeType.Rectangle(otherWidth, otherHeight), otherOrientation)
         isRectColliding(rectA, rectB)
-      case Circle(_) => false
+      case Circle(radius) =>
+        val rect = RectangleCollider(position, shape, orientation)
+        isRectCircleColliding(rect, otherPosition, radius)
 
   /**
    * Utility method to check if two rectangles are colliding.
@@ -104,5 +106,38 @@ object Collision:
     }
 
   end isProjectionCollide
+
+  /**
+   * Checks if a rectangle collider is colliding with a circle.
+   * @param rect
+   *   the rectangle collider to check for collision
+   * @param circleCenter
+   *   the center of the circle in 2D space
+   * @param circleRadius
+   *   the radius of the circle
+   * @return
+   *   true if the rectangle collider is colliding with the circle, false otherwise
+   */
+  private def isRectCircleColliding(rect: RectangleCollider, circleCenter: Point2D, circleRadius: Double): Boolean =
+    import Point2D.*
+
+    // Translate circle center into rectangle's local space
+    val relative = circleCenter - rect.center
+    val localX = relative.dot(rect.axis.x.direction)
+    val localY = relative.dot(rect.axis.y.direction)
+
+    val halfWidth = rect.size.x / 2
+    val halfHeight = rect.size.y / 2
+
+    // Clamp the local point to rectangle's bounds
+    val closestX = Math.max(-halfWidth, Math.min(localX, halfWidth))
+    val closestY = Math.max(-halfHeight, Math.min(localY, halfHeight))
+
+    // Compute distance from closest point to circle center in local space
+    val dx = localX - closestX
+    val dy = localY - closestY
+    val distanceSq = dx * dx + dy * dy
+
+    distanceSq <= circleRadius * circleRadius
 
 end Collision

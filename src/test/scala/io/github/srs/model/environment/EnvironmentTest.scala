@@ -70,5 +70,23 @@ class EnvironmentTest extends AnyFlatSpec with Matchers:
     inside(Environment(10, 10, Set(entity1, entity2))):
       case Right(environment) => environment.entities should contain theSameElementsAs Set(entity1, entity2)
 
+  it should "validate collisions in mixed entities" in:
+    val circularEntity = createEntity((1.0, 1.0), ShapeType.Circle(1.0), Orientation(0.0))
+    val rectangularEntity = createEntity((1.5, 1.5), ShapeType.Rectangle(2.0, 2.0), Orientation(90.0))
+    inside(Environment(10, 10, Set(circularEntity, rectangularEntity))):
+      case Left(error) => error.errorMessage shouldBe "entities have 1 collision(s), expected none"
+
+  it should "validate collisions between circular and rectangular entities" in:
+    val circularEntity = createEntity((1.0, 1.0), ShapeType.Circle(1.0), Orientation(0.0))
+    val rectangularEntity = createEntity((1.5, 1.5), ShapeType.Rectangle(2.0, 2.0), Orientation(90.0))
+    inside(Environment(10, 10, Set(rectangularEntity, circularEntity))):
+      case Left(error) => error.errorMessage shouldBe "entities have 1 collision(s), expected none"
+
+  it should "not validate collisions in mixed entities when they do not overlap" in:
+    val circularEntity = createEntity((1.0, 1.0), ShapeType.Circle(1.0), Orientation(0.0))
+    val rectangularEntity = createEntity((3.0, 3.0), ShapeType.Rectangle(2.0, 2.0), Orientation(90.0))
+    inside(Environment(10, 10, Set(circularEntity, rectangularEntity))):
+      case Right(environment) => environment.entities should contain theSameElementsAs Set(circularEntity, rectangularEntity)
+
 
 end EnvironmentTest
