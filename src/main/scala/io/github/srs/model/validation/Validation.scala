@@ -1,5 +1,7 @@
 package io.github.srs.model.validation
 
+import io.github.srs.model.entity.Entity
+
 import scala.reflect.ClassTag
 
 /**
@@ -12,6 +14,7 @@ enum DomainError:
   case NotANumber(field: String, value: Double)
   case Infinite(field: String, value: Double)
   case InvalidCount(field: String, count: Int, min: Int, max: Int)
+  case Collision(field: String, elements: Set[Entity])
 
 /**
  * Companion object for [[DomainError]] that provides an extension method to get a human-readable error message.
@@ -27,6 +30,9 @@ object DomainError:
       case NotANumber(f, _) => s"$f is NaN"
       case Infinite(f, _) => s"$f is infinite"
       case InvalidCount(f, c, lo, hi) => s"$f has $c elements, allowed $lo $hi"
+      case Collision(f, elements) =>
+        val count = elements.size
+        s"$f has $count collisions, expected none"
 
 /**
  * Type alias for domain‑level validations: `Right` = valid, `Left` = error.
@@ -179,5 +185,22 @@ object Validation:
     }.left.map { _ =>
       DomainError.InvalidCount(field, count, min, max)
     }
+
+  /**
+   * Checks if there are no collisions among a set of entities.
+   * @param field
+   *   the name of the field being validated (for error reporting).
+   * @param elements
+   *   the set of entities to check for collisions.
+   * @return
+   *   [[Right]] with the original set of entities if there are no collisions, otherwise [[Left]] with a
+   *   [[DomainError.Collision]] error containing the colliding entities.
+   */
+  def noCollisions(field: String, elements: Set[Entity]): Validation[Set[Entity]] =
+    elements.toSeq.combinations(2).collectFirst:
+      case Seq(a, b) if a.collidesWith(b) => DomainError.Collision(field, Set(b))
+    match
+      case Some(error) => Left[DomainError, Set[Entity]](error)
+      case None => Right[DomainError, Set[Entity]](elements)
 
 end Validation

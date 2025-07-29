@@ -24,8 +24,9 @@ class EnvironmentTest extends AnyFlatSpec with Matchers:
 
   it should "allow adding entities" in:
     val entity1 = createEntity((1.0, 1.0), ShapeType.Circle(1.0), Orientation(0.0))
-    val entity2 = createEntity((1.0, 1.0), ShapeType.Rectangle(2.0, 3.0), Orientation(90.0))
-    inside(Environment(10, 10, Set(entity1, entity2))):
+    val entity2 = createEntity((5.0, 1.0), ShapeType.Circle(1.0), Orientation(90.0))
+    val env = Environment(10, 10, Set(entity1, entity2))
+    inside(env):
       case Right(environment) => environment.entities should contain theSameElementsAs Set(entity1, entity2)
 
   it should "extract environment fields correctly" in:

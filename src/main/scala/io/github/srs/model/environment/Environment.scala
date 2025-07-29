@@ -56,6 +56,7 @@ object Environment:
     for
       width <- positive("width", width)
       height <- positive("height", height)
+      entities <- noCollisions("entities", entities)
     yield EnvironmentImpl(width, height, entities)
 
   /**
