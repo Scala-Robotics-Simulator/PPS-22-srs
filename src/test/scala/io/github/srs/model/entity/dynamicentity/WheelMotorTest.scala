@@ -5,6 +5,8 @@ import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
 import cats.Id
 import io.github.srs.model.entity.dynamicentity.DifferentialWheelMotor.move
 import io.github.srs.model.entity.dynamicentity.WheelMotorTestUtils.calculateMovement
+import io.github.srs.model.entity.dynamicentity.actuator.{ Wheel, WheelMotor }
+import io.github.srs.model.entity.dynamicentity.actuator.WheelMotor.move
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.flatspec.AnyFlatSpec
