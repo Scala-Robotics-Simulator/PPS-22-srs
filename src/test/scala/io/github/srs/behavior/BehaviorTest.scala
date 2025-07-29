@@ -1,11 +1,9 @@
 package io.github.srs.behavior
 
-import io.github.srs.model.behavior.Behavior
-import io.github.srs.model.entity.Orientation
-import io.github.srs.model.entity.dynamicentity.Action
 import org.scalatest.OptionValues.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers.shouldBe
+import io.github.srs.model.behavior.Behavior
 
 /**
  * Test suite for the `Behavior` trait and its related functionality.
@@ -13,7 +11,9 @@ import org.scalatest.matchers.should.Matchers.shouldBe
 final class BehaviorTest extends AnyFlatSpec:
 
   import io.github.srs.model.behavior.Behavior.*
-  import io.github.srs.model.entity.dynamicentity.sensor.{ProximitySensor, SensorReading, SensorReadings}
+  import io.github.srs.model.entity.Orientation
+  import io.github.srs.model.entity.dynamicentity.Action
+  import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, SensorReading, SensorReadings }
 
   /** Build a dummy proximity sensor. */
   private def mkSensor() =
@@ -45,30 +45,30 @@ final class BehaviorTest extends AnyFlatSpec:
     when[SensorReadings, Action](_ => false)(Seq(Action.TurnRight))
       .execute(readings(0.2)) shouldBe Seq.empty[Action]
 
-  "map" should "transform produced actions" in :
+  "map" should "transform produced actions" in:
     pure[SensorReadings, Action](Action.MoveBackward).map {
       case Action.MoveBackward => Action.Stop
       case a => a
     }.execute(readings()) shouldBe Seq(Action.Stop)
 
-  "filter" should "keep only actions that satisfy predicate" in :
+  "filter" should "keep only actions that satisfy predicate" in:
     Behavior[SensorReadings, Action]((_: SensorReadings) => Seq(Action.MoveForward, Action.Stop))
       .filter(_ == Action.Stop)
       .execute(readings()) shouldBe Seq(Action.Stop)
 
-  "++" should "concat two behaviours" in :
+  "++" should "concat two behaviours" in:
     (pure[SensorReadings, Action](Action.Stop) ++ pure[SensorReadings, Action](Action.MoveForward))
       .execute(readings()) shouldBe Seq(Action.Stop, Action.MoveForward)
 
-  "andAlso" should "alias ++ (concatenation)" in :
+  "andAlso" should "alias ++ (concatenation)" in:
     (pure[SensorReadings, Action](Action.Stop) andAlso pure[SensorReadings, Action](Action.MoveForward))
       .execute(readings()) shouldBe Seq(Action.Stop, Action.MoveForward)
 
-  "<|>" should "pick the first non-empty" in :
+  "<|>" should "pick the first non-empty" in:
     (pure[SensorReadings, Action](Action.MoveForward) <|> pure[SensorReadings, Action](Action.Stop))
       .execute(readings()) shouldBe Seq(Action.MoveForward)
 
-  "orElse" should "alias <|> (first non-empty wins)" in :
+  "orElse" should "alias <|> (first non-empty wins)" in:
     (pure[SensorReadings, Action](Action.TurnLeft) orElse pure[SensorReadings, Action](Action.Stop))
       .execute(readings()) shouldBe Seq(Action.TurnLeft)
 end BehaviorTest
