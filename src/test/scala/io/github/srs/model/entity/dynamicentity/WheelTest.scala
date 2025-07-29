@@ -1,7 +1,7 @@
 package io.github.srs.model.entity.dynamicentity
 
 import io.github.srs.model.entity.ShapeType
-import io.github.srs.model.entity.dynamicentity.Wheel
+import io.github.srs.model.entity.dynamicentity.actuator.Wheel
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 

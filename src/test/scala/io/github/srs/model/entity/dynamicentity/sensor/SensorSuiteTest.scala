@@ -1,7 +1,8 @@
 package io.github.srs.model.entity.dynamicentity.sensor
 
-import io.github.srs.model.entity.dynamicentity.{ Actuator, DynamicEntity, Robot }
+import io.github.srs.model.entity.dynamicentity.{ DynamicEntity, Robot }
 import io.github.srs.model.entity.Entity
+import io.github.srs.model.entity.dynamicentity.actuator.Actuator
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.environment.Environment
 import org.scalatest.OptionValues.convertOptionToValuable

@@ -1,8 +1,11 @@
-package io.github.srs.model.entity.dynamicentity
+package io.github.srs.model.entity.dynamicentity.actuator
 
 import io.github.srs.model.entity.*
-import io.github.srs.model.entity.dynamicentity.Action.applyTo
+import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.validation.Validation
+import io.github.srs.utils.DeltaTime
+
+import Action.applyTo
 
 /**
  * WheelMotor is an actuator that controls the movement of a robot.

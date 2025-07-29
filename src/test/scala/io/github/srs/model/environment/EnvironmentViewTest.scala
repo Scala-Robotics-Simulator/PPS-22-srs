@@ -9,8 +9,9 @@ import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.entity.staticentity.StaticEntity.{ Light, Obstacle }
 import io.github.srs.model.entity.Point2D.*
 import io.github.srs.model.entity.dynamicentity.sensor.SensorSuite
-import io.github.srs.model.entity.dynamicentity.{ Robot, WheelMotor }
 import io.github.srs.model.environment.dsl.CreationDSL.*
+import io.github.srs.model.entity.dynamicentity.Robot
+import io.github.srs.model.entity.dynamicentity.actuator.WheelMotor
 
 class EnvironmentViewTest extends AnyFlatSpec:
 

@@ -1,6 +1,7 @@
 package io.github.srs.model.entity.dynamicentity
 
 import io.github.srs.model.entity.*
+import io.github.srs.model.entity.dynamicentity.actuator.WheelMotor
 
 object WheelMotorTestUtils:
 

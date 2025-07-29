@@ -1,6 +1,7 @@
 package io.github.srs.model.entity.dynamicentity
 
 import io.github.srs.model.entity.*
+import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, WheelMotor }
 import io.github.srs.model.entity.dynamicentity.sensor.SensorSuite
 import io.github.srs.model.validation.Validation
 import io.github.srs.model.validation.Validation.{ notInfinite, notNaN, validateCountOfType }
