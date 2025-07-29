@@ -1,0 +1,108 @@
+package io.github.srs.utils.collision
+
+import io.github.srs.model.entity.ShapeType.Circle
+import io.github.srs.model.entity.{Orientation, Point2D, ShapeType}
+import io.github.srs.utils.*
+
+object Collision:
+
+  /**
+   * Checks if a rectangle is colliding with another shape.
+   * @param position
+   *   the position of the rectangle in 2D space
+   * @param shape
+   *   the shape of the rectangle
+   * @param orientation
+   *   the orientation of the rectangle in 2D space
+   * @param otherPosition
+   *   the position of the other shape in 2D space
+   * @param otherShape
+   *   the shape of the other entity
+   * @param otherOrientation
+   *   the orientation of the other entity in 2D space
+   * @return
+   *   true if the rectangle is colliding with the other shape, false otherwise
+   */
+  def isColliding(position: Point2D, shape: ShapeType.Rectangle, orientation: Orientation)(
+      otherPosition: Point2D,
+      otherShape: ShapeType,
+      otherOrientation: Orientation,
+  ): Boolean =
+    otherShape match
+      case ShapeType.Rectangle(otherWidth, otherHeight) =>
+        val rectA = RectangleCollider(position, shape, orientation)
+        val rectB = RectangleCollider(otherPosition, ShapeType.Rectangle(otherWidth, otherHeight), otherOrientation)
+        isRectColliding(rectA, rectB)
+      case Circle(_) => false
+
+  /**
+   * Utility method to check if two rectangles are colliding.
+   * @param rectA
+   *   the first rectangle collider
+   * @param rectB
+   *   the second rectangle collider
+   * @return
+   *   true if the rectangles are colliding, false otherwise
+   */
+  private def isRectColliding(rectA: RectangleCollider, rectB: RectangleCollider): Boolean =
+    isProjectionCollide(rectA, rectB) && isProjectionCollide(rectB, rectA)
+
+  /**
+   * Checks if the projection of a rectangle collides with another rectangle.
+   * @param rect
+   *   the rectangle collider to check for collision
+   * @param onRect
+   *   the rectangle collider to check against
+   * @return
+   *   true if the projection of the rectangle collides with the other rectangle, false otherwise
+   */
+  private def isProjectionCollide(rect: RectangleCollider, onRect: RectangleCollider): Boolean =
+    import Point2D.*
+    val axis = onRect.axis
+    val lines = List(axis.x, axis.y)
+    val corners = rect.corners
+
+    lines.zipWithIndex.forall { case (line, dimension) =>
+      // Size of onRect half-size on line direction
+      val rectHalfSize = if dimension == 0 then onRect.size.x / 2 else onRect.size.y / 2
+
+      // Project corners of rect on line
+      // and calculate signed distance from center of onRect.
+      val projections = corners.map { corner =>
+        import Vector2D.project
+        val projected = corner.project(line)
+        val CP = projected - onRect.center
+
+        // Sign: Same direction of onRect axis: true.
+        val sign = (CP.x * line.direction.x) + (CP.y * line.direction.y) > 0
+        val signedDistance = CP.magnitude * (if sign then 1 else -1)
+
+        signedDistance
+      }
+
+      // This will always return the correct distance, projections will never be empty
+      val distance = projections.headOption.getOrElse(
+        0.0,
+      )
+
+      // Find the minimum and maximum projection distances
+      val (minProjection, maxProjection) = projections.foldLeft((distance, distance)):
+        case ((currentMin, currentMax), distance) =>
+          val newMin = if distance < currentMin then distance else currentMin
+          val newMax = if distance > currentMax then distance else currentMax
+          (newMin, newMax)
+
+      // Check if the projections collide
+      // Condition 1: One projection is negative and the other is positive
+      val condition1 = minProjection < 0 && maxProjection > 0
+      // Condition 2: Minimum projection is within the half-size of the rectangle
+      val condition2 = Math.abs(minProjection) < rectHalfSize
+      // Condition 3: Maximum projection is within the half-size of the rectangle
+      val condition3 = Math.abs(maxProjection) < rectHalfSize
+
+      condition1 || condition2 || condition3
+    }
+
+  end isProjectionCollide
+
+end Collision
