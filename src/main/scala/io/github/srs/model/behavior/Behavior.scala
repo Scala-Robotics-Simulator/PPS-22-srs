@@ -91,12 +91,13 @@ object Behavior:
 
     /**
      * Filter the actions produced by the behavior based on a predicate.
-     * @param p the predicate function to filter actions
-     * @return 
-     *  a new Behavior that only produces actions satisfying the predicate
+     * @param p
+     *   the predicate function to filter actions
+     * @return
+     *   a new Behavior that only produces actions satisfying the predicate
      */
     def filter(p: A => Boolean): Behavior[I, A] = (i: I) => self(i).filter(p)
-  
+
     /**
      * Combine two behaviors into one.
      *
@@ -111,13 +112,13 @@ object Behavior:
 
     /**
      * Alias for `++`, providing a more readable syntax for combining behaviors.
-     * @param that 
-     *      the other behavior to combine with
-     * @return 
-     *  a new [[Behavior]] that produces actions from both behaviors
+     * @param that
+     *   the other behavior to combine with
+     * @return
+     *   a new [[Behavior]] that produces actions from both behaviors
      */
     infix def andAlso[B](that: Behavior[I, A]): Behavior[I, A] = (i: I) => self(i) ++ that(i)
-  
+
     /**
      * Combine two behaviors such that the second behavior is executed only if the first produces no actions.
      *
@@ -134,10 +135,11 @@ object Behavior:
 
     /**
      * Alias for `<|>`, providing a more readable syntax for combining behaviors.
-     * @param that 
-     *     the other behavior to combine with
+     * @param that
+     *   the other behavior to combine with
      * @return
-     *  a new [[Behavior]] that produces actions from the first behavior, or from the second if the first is empty
+     *   a new [[Behavior]] that produces actions from the first behavior, or from the second if the first is empty
      */
     infix def orElse(that: Behavior[I, A]): Behavior[I, A] = self <|> that
+  end extension
 end Behavior
