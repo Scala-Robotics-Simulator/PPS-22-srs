@@ -31,7 +31,7 @@ class EnvironmentViewTest extends AnyFlatSpec:
     yield Cell(tl.x + dx, tl.y + dy)).toSet
 
   private val lightOrigin = Point2D(4.0, 4.0)
-  private val lightRadius = 3.0
+  private val illuminationRadius = 3.0
   private val lightIntensity = 1.0
   private val lightAttenuation = 0.2
 
@@ -39,7 +39,7 @@ class EnvironmentViewTest extends AnyFlatSpec:
     Light(
       lightOrigin,
       Orientation(0),
-      radius = lightRadius,
+      illuminationRadius = illuminationRadius,
       intensity = lightIntensity,
       attenuation = lightAttenuation,
     )

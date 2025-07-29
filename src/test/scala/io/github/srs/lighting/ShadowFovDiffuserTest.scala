@@ -19,7 +19,8 @@ class ShadowFovDiffuserTest extends AnyFlatSpec:
       .fold(err => fail(s"Environment invalid in test‑fixture: $err"), _.view)
 
   "ShadowFovDiffuser" should "illuminate symmetric cells in an empty room" in:
-    val light = Light((2.0, 2.0), Orientation(0), 4.0, 1.0, 0.0)
+    val light =
+      Light(pos = (2.0, 2.0), orient = Orientation(0), illuminationRadius = 4.0, intensity = 1.0, attenuation = 0.0)
     val ls = Diffuser.step(viewOf(light))(EmptyMap)
 
     val symmetricPairs = List(
@@ -32,7 +33,8 @@ class ShadowFovDiffuserTest extends AnyFlatSpec:
     }
 
   it should "cast a shadow behind an obstacle" in:
-    val light = Light((0.0, 2.0), Orientation(0), 5.0, 1.0, 0.0)
+    val light =
+      Light(pos = (0.0, 2.0), orient = Orientation(0), illuminationRadius = 5.0, intensity = 1.0, attenuation = 0.0)
     val wall = Obstacle((2.0, 2.0), Orientation(0), 1, 1)
     val ls = Diffuser.step(viewOf(light, wall))(EmptyMap)
 

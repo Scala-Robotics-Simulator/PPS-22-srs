@@ -41,7 +41,7 @@ class EnvironmentTest extends AnyFlatSpec with Matchers:
 
   it should "not be created with negative width" in:
     inside(Environment(-10, 10)):
-        case Left(DomainError.OutOfBounds("width", _, _, _)) => succeed
+      case Left(DomainError.OutOfBounds("width", _, _, _)) => succeed
 
   it should "not be created with negative height" in:
     inside(Environment(10, -10)):
@@ -67,7 +67,15 @@ class EnvironmentTest extends AnyFlatSpec with Matchers:
 
   it should "not be created with too many entities" in:
     import io.github.srs.utils.SimulationDefaults.Environment.maxEntities
-    inside(Environment(10, 10, (1 to maxEntities + 1).map(i => createEntity((i.toDouble, i.toDouble), ShapeType.Circle(1.0), Orientation(0.0))).toSet)):
+    inside(
+      Environment(
+        10,
+        10,
+        (1 to maxEntities + 1)
+          .map(i => createEntity((i.toDouble, i.toDouble), ShapeType.Circle(1.0), Orientation(0.0)))
+          .toSet,
+      ),
+    ):
       case Left(DomainError.OutOfBounds("entities", _, _, _)) => succeed
 
   it should "validate collisions in circular entities" in:
@@ -110,7 +118,7 @@ class EnvironmentTest extends AnyFlatSpec with Matchers:
     val circularEntity = createEntity((1.0, 1.0), ShapeType.Circle(1.0), Orientation(0.0))
     val rectangularEntity = createEntity((3.0, 3.0), ShapeType.Rectangle(2.0, 2.0), Orientation(90.0))
     inside(Environment(10, 10, Set(circularEntity, rectangularEntity))):
-      case Right(environment) => environment.entities should contain theSameElementsAs Set(circularEntity, rectangularEntity)
-
+      case Right(environment) =>
+        environment.entities should contain theSameElementsAs Set(circularEntity, rectangularEntity)
 
 end EnvironmentTest

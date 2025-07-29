@@ -1,8 +1,8 @@
 package io.github.srs.model.validation
 
-import io.github.srs.model.entity.Entity
-
 import scala.reflect.ClassTag
+
+import io.github.srs.model.entity.Entity
 
 /**
  * ADT collecting validation failures that are meaningful in the domain.
@@ -197,8 +197,10 @@ object Validation:
    *   [[DomainError.Collision]] error containing the colliding entities.
    */
   def noCollisions(field: String, elements: Set[Entity]): Validation[Set[Entity]] =
-    elements.toSeq.combinations(2).collectFirst:
-      case Seq(a, b) if a.collidesWith(b) => DomainError.Collision(field, Set(b))
+    elements.toSeq
+      .combinations(2)
+      .collectFirst:
+        case Seq(a, b) if a.collidesWith(b) => DomainError.Collision(field, Set(b))
     match
       case Some(error) => Left[DomainError, Set[Entity]](error)
       case None => Right[DomainError, Set[Entity]](elements)

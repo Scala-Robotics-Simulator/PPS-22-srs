@@ -1,6 +1,6 @@
 package io.github.srs.utils.collision
 
-import io.github.srs.model.entity.{Orientation, Point2D, ShapeType}
+import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.utils.*
 
 /**
@@ -206,39 +206,42 @@ private[collision] final case class RectangleCollider(
     orientation: Orientation,
 ):
   /**
-   * The axis of the rectangle collider, defined by its position and orientation.
-   * This axis is used to determine the orientation of the rectangle in 2D space.
+   * The axis of the rectangle collider, defined by its position and orientation. This axis is used to determine the
+   * orientation of the rectangle in 2D space.
    * @return
    *   an Axis instance representing the oriented axis of the rectangle
    */
   private[collision] lazy val axis: Axis = Axis.oriented(position, orientation)
-    /**
-     * The rectangle defined by the axis and shape of the rectangle collider.
-     * This rectangle is used for collision detection against other entities.
-     * @return
-     *   a Rectangle instance representing the rectangle collider in 2D space
-     */
+
+  /**
+   * The rectangle defined by the axis and shape of the rectangle collider. This rectangle is used for collision
+   * detection against other entities.
+   * @return
+   *   a Rectangle instance representing the rectangle collider in 2D space
+   */
   private lazy val rectangle = Rectangle.fromAxisAndShape(axis, shape)
   import Rectangle.*
+
   /**
-   * The corners of the rectangle collider, represented as a sequence of Point2D.
-   * These corners are used for collision detection and spatial queries.
+   * The corners of the rectangle collider, represented as a sequence of Point2D. These corners are used for collision
+   * detection and spatial queries.
    * @return
    *   a Seq of Point2D representing the corners of the rectangle collider, in the order of top-left, top-right,
-   * bottom-right, and bottom-left.
+   *   bottom-right, and bottom-left.
    */
   private[collision] lazy val corners: Seq[Point2D] = rectangle.getCornersList
 
   /**
    * The center point of the rectangle.
    * @return
-   *  a Point2D representing the center of the rectangle.
+   *   a Point2D representing the center of the rectangle.
    */
   def center: Point2D = position
 
   /**
    * Returns the size of the rectangle as a Point2D.
    * @return
-   * a Point2D representing the width and height of the rectangle.
+   *   a Point2D representing the width and height of the rectangle.
    */
   def size: Point2D = Point2D(shape.width, shape.height)
+end RectangleCollider
