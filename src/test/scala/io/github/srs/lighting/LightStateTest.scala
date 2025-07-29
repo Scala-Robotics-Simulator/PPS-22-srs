@@ -28,7 +28,7 @@ class LightStateTest extends AnyFlatSpec:
   private val light = Light(
     lightPos,
     Orientation(0),
-    radius = 1.0,
+    illuminationRadius = 1.0,
     intensity = 1.0,
     attenuation = 0.0,
   )

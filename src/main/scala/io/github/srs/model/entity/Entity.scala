@@ -1,10 +1,10 @@
 package io.github.srs.model.entity
 
-import io.github.srs.model.entity.ShapeType.Rectangle
-import io.github.srs.model.entity.{Orientation, ShapeType}
-import io.github.srs.utils.collision.Collision.isColliding
-
 import scala.annotation.tailrec
+
+import io.github.srs.model.entity.ShapeType.Rectangle
+import io.github.srs.model.entity.{ Orientation, ShapeType }
+import io.github.srs.utils.collision.Collision.isColliding
 
 /**
  * Represents a generic entity in a two-dimensional space.

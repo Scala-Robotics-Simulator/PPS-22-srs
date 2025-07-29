@@ -3,6 +3,7 @@ package io.github.srs.model.entity.staticentity
 import io.github.srs.model.entity.*
 import io.github.srs.model.validation.Validation
 import io.github.srs.model.validation.Validation.*
+import io.github.srs.utils.SimulationDefaults
 
 /**
  * Represents a static entity in a two-dimensional space.
@@ -47,7 +48,8 @@ enum StaticEntity(val position: Point2D, val orientation: Orientation) extends E
   case Light(
       pos: Point2D,
       orient: Orientation,
-      radius: Double,
+      radius: Double = SimulationDefaults.StaticEntity.Light.radius,
+      illuminationRadius: Double,
       intensity: Double,
       attenuation: Double,
   ) extends StaticEntity(pos, orient)
@@ -60,7 +62,7 @@ enum StaticEntity(val position: Point2D, val orientation: Orientation) extends E
    */
   override def shape: ShapeType = this match
     case Obstacle(_, _, w, h) => ShapeType.Rectangle(w, h)
-    case Light(_, _, r, _, _) => ShapeType.Circle(r)
+    case Light(_, _, r, _, _, _) => ShapeType.Circle(r)
 
 end StaticEntity
 
@@ -112,7 +114,8 @@ object StaticEntity:
   def light(
       pos: Point2D,
       orient: Orientation,
-      radius: Double,
+      radius: Double = SimulationDefaults.StaticEntity.Light.radius,
+      illuminationRadius: Double,
       intensity: Double,
       attenuation: Double,
   ): Validation[StaticEntity] =
@@ -120,5 +123,5 @@ object StaticEntity:
       r <- positive("radius", radius)
       i <- positive("intensity", intensity)
       a <- positive("attenuation", attenuation)
-    yield StaticEntity.Light(pos, orient, r, i, a)
+    yield StaticEntity.Light(pos, orient, r, illuminationRadius, i, a)
 end StaticEntity

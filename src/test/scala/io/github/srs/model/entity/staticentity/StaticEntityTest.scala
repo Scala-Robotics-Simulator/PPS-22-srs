@@ -24,7 +24,14 @@ class StaticEntityTest extends AnyFlatSpec:
   val radius = 1.0
   val intensity = 1.0
   val attenuation = 1.0
-  val expectedLight: StaticEntity = StaticEntity.Light(origin, orientation, radius, intensity, attenuation)
+
+  val expectedLight: StaticEntity = StaticEntity.Light(
+    pos = origin,
+    orient = orientation,
+    illuminationRadius = radius,
+    intensity = intensity,
+    attenuation = attenuation,
+  )
 
   "obstacle" should "create a valid entity" in:
     inside(StaticEntity.obstacle(origin, orientation, width, height)):
@@ -39,19 +46,46 @@ class StaticEntityTest extends AnyFlatSpec:
     inside(res.left.value) { case DomainError.NegativeOrZero("height", _) => succeed }
 
   "light" should "create a valid entity" in:
-    inside(StaticEntity.light(origin, orientation, radius, intensity, attenuation)):
+    inside(
+      StaticEntity.light(
+        pos = origin,
+        orient = orientation,
+        illuminationRadius = radius,
+        intensity = intensity,
+        attenuation = attenuation,
+      ),
+    ):
       case Right(entity) => entity shouldBe expectedLight
 
   it should "fail when radius is not positive" in:
-    val res = StaticEntity.light(origin, orientation, 0.0, intensity, attenuation)
+    val res = StaticEntity.light(
+      pos = origin,
+      orient = orientation,
+      radius = 0.0,
+      illuminationRadius = radius,
+      intensity = intensity,
+      attenuation = attenuation,
+    )
     inside(res.left.value) { case DomainError.NegativeOrZero("radius", _) => succeed }
 
   it should "fail when intensity is not positive" in:
-    val res = StaticEntity.light(origin, orientation, radius, 0.0, attenuation)
+    val res = StaticEntity.light(
+      pos = origin,
+      orient = orientation,
+      illuminationRadius = radius,
+      intensity = 0.0,
+      attenuation = attenuation,
+    )
     inside(res.left.value) { case DomainError.NegativeOrZero("intensity", _) => succeed }
 
   it should "fail when attenuation is not positive" in:
-    val res = StaticEntity.light(origin, orientation, radius, intensity, 0.0)
+    val res = StaticEntity.light(
+      pos = origin,
+      orient = orientation,
+      illuminationRadius = radius,
+      intensity = intensity,
+      attenuation = 0.0,
+    )
     inside(res.left.value) { case DomainError.NegativeOrZero("attenuation", _) => succeed }
 
 end StaticEntityTest

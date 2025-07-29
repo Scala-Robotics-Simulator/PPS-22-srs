@@ -1,7 +1,7 @@
 package io.github.srs.utils.collision
 
 import io.github.srs.model.entity.ShapeType.Circle
-import io.github.srs.model.entity.{Orientation, Point2D, ShapeType}
+import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.utils.*
 
 object Collision:
@@ -139,5 +139,6 @@ object Collision:
     val distanceSq = dx * dx + dy * dy
 
     distanceSq <= circleRadius * circleRadius
+  end isRectCircleColliding
 
 end Collision
