@@ -103,15 +103,20 @@ object Validation:
     )
 
   /**
-   * Ensures the given numeric value is within a specified range (inclusive of min, exclusive of max).
+   * Ensures the given numeric value is within a specified range.
+   *
    * @param field
    *   the name of the field being validated.
    * @param v
    *   the numeric value to validate.
    * @param min
-   *   the minimum value (inclusive).
+   *   the minimum value.
    * @param max
-   *   the maximum value (exclusive).
+   *   the maximum value.
+   * @param includeMin
+   *   whether the minimum value is inclusive.
+   * @param includeMax
+   *   whether the maximum value is inclusive.
    * @param n
    *   the numeric type class instance for the type of `v`.
    * @tparam T
@@ -119,9 +124,19 @@ object Validation:
    * @return
    *   [[Right]] with the value if it is within the bounds, otherwise [[Left]] with a [[DomainError.OutOfBounds]] error.
    */
-  def bounded[T](field: String, v: T, min: T, max: T)(using n: Numeric[T]): Validation[T] =
+  def bounded[T](
+      field: String,
+      v: T,
+      min: T,
+      max: T,
+      includeMin: Boolean = true,
+      includeMax: Boolean = false,
+  )(using n: Numeric[T]): Validation[T] =
+    val minOk = if includeMin then n.gteq(v, min) else n.gt(v, min)
+    val maxOk = if includeMax then n.lteq(v, max) else n.lt(v, max)
+
     Either.cond(
-      n.gteq(v, min) && n.lt(v, max),
+      minOk && maxOk,
       v,
       DomainError.OutOfBounds(field, n.toDouble(v), n.toDouble(min), n.toDouble(max)),
     )
