@@ -47,21 +47,21 @@ object ModelModule:
       /**
        * Creates a model from the provided update function.
        *
-       * @param updateFunc
+       * @param updateState
        *   a function that defines how the state is updated.
        * @return
        *   a [[Model]] instance using the given update logic.
        */
-      def apply(updateFunc: S => Option[S]): Model[S] = new ModelImpl(updateFunc)
+      def apply(updateState: S => Option[S]): Model[S] = new ModelImpl(updateState)
 
       /**
        * Private model implementation that delegates state updates to the provided function.
        */
-      private class ModelImpl(updateFunc: S => Option[S]) extends Model[S]:
+      private class ModelImpl(updateState: S => Option[S]) extends Model[S]:
         /**
          * @inheritdoc
          */
-        override def update(s: S): Option[S] = updateFunc(s)
+        override def update(s: S): Option[S] = updateState(s)
   end Component
 
   /**
