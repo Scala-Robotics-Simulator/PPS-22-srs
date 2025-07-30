@@ -1,7 +1,7 @@
 package io.github.srs.model.entity.staticentity
 
 import io.github.srs.model.entity.staticentity.StaticEntity
-import io.github.srs.model.entity.{ Orientation, Point2D }
+import io.github.srs.model.entity.{Orientation, Point2D}
 import io.github.srs.model.validation.DomainError
 import org.scalatest.EitherValues.*
 import org.scalatest.Inside.inside
@@ -87,5 +87,22 @@ class StaticEntityTest extends AnyFlatSpec:
       attenuation = 0.0,
     )
     inside(res.left.value) { case DomainError.NegativeOrZero("attenuation", _) => succeed }
+
+  "boundary" should "create a valid entity" in:
+    val expectedBoundary: StaticEntity = StaticEntity.Boundary(origin, orientation, width, height)
+    inside(StaticEntity.boundary(origin, orientation, width, height)):
+      case Right(entity) => entity shouldBe expectedBoundary
+
+  it should "fail when width is negative" in:
+    val res = StaticEntity.boundary(origin, orientation, -1, height)
+    inside(res.left.value) { case DomainError.Negative("width", _) => succeed }
+
+  it should "fail when height is negative" in:
+    val res = StaticEntity.boundary(origin, orientation, width, -1)
+    inside(res.left.value) { case DomainError.Negative("height", _) => succeed }
+
+  it should "succeed when width and height are zero" in:
+    inside(StaticEntity.boundary(origin, orientation, 0, 0)):
+      case Right(entity) => entity shouldBe StaticEntity.Boundary(origin, orientation, 0, 0)
 
 end StaticEntityTest
