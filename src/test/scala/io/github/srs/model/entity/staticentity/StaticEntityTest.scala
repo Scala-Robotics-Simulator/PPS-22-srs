@@ -1,7 +1,7 @@
 package io.github.srs.model.entity.staticentity
 
 import io.github.srs.model.entity.staticentity.StaticEntity
-import io.github.srs.model.entity.{Orientation, Point2D}
+import io.github.srs.model.entity.{ Orientation, Point2D }
 import io.github.srs.model.validation.DomainError
 import org.scalatest.EitherValues.*
 import org.scalatest.Inside.inside

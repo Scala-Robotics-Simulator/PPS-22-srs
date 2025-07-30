@@ -1,8 +1,9 @@
 package io.github.srs.model.environment
 
 import io.github.srs.model.entity.Entity
-import io.github.srs.model.validation.Validation.*
+import io.github.srs.model.entity.staticentity.StaticEntity.Boundary
 import io.github.srs.model.validation.Validation
+import io.github.srs.model.validation.Validation.*
 
 /**
  * Represents the environment in which entities exist.
@@ -54,12 +55,13 @@ object Environment:
    */
   def apply(width: Int, height: Int, entities: Set[Entity] = Set.empty): Validation[Environment] =
     import io.github.srs.utils.SimulationDefaults.Environment.*
+    val boundaries = Boundary.createBoundaries(width, height)
     for
       width <- bounded("width", width, minWidth, maxWidth + 1)
       height <- bounded("height", height, minHeight, maxHeight + 1)
       _ <- bounded("entities", entities.size, 0, maxEntities + 1)
       entities <- withinBounds("entities", entities, width, height)
-      entities <- noCollisions("entities", entities)
+      entities <- noCollisions("entities", entities ++ boundaries)
     yield EnvironmentImpl(width, height, entities)
 
   /**

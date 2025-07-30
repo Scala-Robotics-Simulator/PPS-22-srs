@@ -34,7 +34,14 @@ class ShadowFovDiffuserTest extends AnyFlatSpec:
 
   it should "cast a shadow behind an obstacle" in:
     val light =
-      Light(pos = (0.0, 2.0), orient = Orientation(0), illuminationRadius = 5.0, intensity = 1.0, attenuation = 0.0)
+      Light(
+        pos = (0.2, 2.0),
+        orient = Orientation(0),
+        radius = 0.1,
+        illuminationRadius = 5.0,
+        intensity = 1.0,
+        attenuation = 0.0,
+      )
     val wall = Obstacle((2.0, 2.0), Orientation(0), 1, 1)
     val ls = Diffuser.step(viewOf(light, wall))(EmptyMap)
 
