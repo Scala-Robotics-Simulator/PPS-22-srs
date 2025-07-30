@@ -55,6 +55,24 @@ enum StaticEntity(val position: Point2D, val orientation: Orientation) extends E
   ) extends StaticEntity(pos, orient)
 
   /**
+   * The [[StaticEntity.Boundary]] represents a rectangular boundary in the simulation environment.
+   * @param pos
+   *   center position of the boundary
+   * @param orient
+   *   orientation of the boundary
+   * @param width
+   *   width of the boundary
+   * @param height
+   *   height of the boundary
+   */
+  case Boundary(
+      pos: Point2D,
+      orient: Orientation,
+      width: Double,
+      height: Double,
+  ) extends StaticEntity(pos, orient)
+
+  /**
    * The shape type of the static entity.
    *
    * @return
@@ -63,6 +81,7 @@ enum StaticEntity(val position: Point2D, val orientation: Orientation) extends E
   override def shape: ShapeType = this match
     case Obstacle(_, _, w, h) => ShapeType.Rectangle(w, h)
     case Light(_, _, r, _, _, _) => ShapeType.Circle(r)
+    case Boundary(_, _, w, h) => ShapeType.Rectangle(w, h)
 
 end StaticEntity
 
@@ -124,4 +143,28 @@ object StaticEntity:
       i <- positive("intensity", intensity)
       a <- positive("attenuation", attenuation)
     yield StaticEntity.Light(pos, orient, r, illuminationRadius, i, a)
+
+  /**
+   * Safely build a [[StaticEntity.Boundary]], reflecting the domain constraints.
+   * @param pos
+   *   center position of the boundary
+   * @param orient
+   *   orientation of the boundary
+   * @param width
+   *   width of the boundary
+   * @param height
+   *   height of the boundary
+   * @return
+   *   [[Right]] with the created [[StaticEntity.Boundary]] if valid, otherwise [[Left]] with a validation error.
+   */
+  def boundary(
+      pos: Point2D,
+      orient: Orientation,
+      width: Double,
+      height: Double,
+  ): Validation[StaticEntity] =
+    for
+      w <- positiveWithZero("width", width)
+      h <- positiveWithZero("height", height)
+    yield StaticEntity.Boundary(pos, orient, w, h)
 end StaticEntity
