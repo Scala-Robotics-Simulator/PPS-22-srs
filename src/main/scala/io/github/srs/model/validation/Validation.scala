@@ -16,6 +16,14 @@ enum DomainError:
   case InvalidCount(field: String, count: Int, min: Int, max: Int)
   case Collision(field: String, elements: Set[Entity])
 
+  case OutsideBounds[A](
+      field: String,
+      value: A,
+      width: (Double, Double),
+      height: (Double, Double),
+      stringify: A => String,
+  )
+
 /**
  * Companion object for [[DomainError]] that provides an extension method to get a human-readable error message.
  */
@@ -33,6 +41,8 @@ object DomainError:
       case Collision(f, elements) =>
         val count = elements.size
         s"$f have $count collision(s), expected none"
+      case OutsideBounds(f, v, w, h, stringify) =>
+        s"$f = ${stringify(v)} is outside the bounds (width: [${w._1}, ${w._2}], height: [${h._1}, ${h._2}])"
 
 /**
  * Type alias for domain‑level validations: `Right` = valid, `Left` = error.
@@ -204,5 +214,32 @@ object Validation:
     match
       case Some(error) => Left[DomainError, Set[Entity]](error)
       case None => Right[DomainError, Set[Entity]](elements)
+
+  def withinBounds(
+      field: String,
+      entities: Set[Entity],
+      width: Int,
+      height: Int,
+  ): Validation[Set[Entity]] =
+    import io.github.srs.model.entity.Point2D.*
+
+    val failures = entities.collectFirst:
+      case entity
+          if bounded("x", entity.position.x, 0.0, width.toDouble).isLeft ||
+            bounded("y", entity.position.y, 0.0, height.toDouble).isLeft =>
+        entity
+    failures match
+      case Some(entity) =>
+        Left[DomainError, Set[Entity]](
+          DomainError.OutsideBounds(
+            field,
+            entity,
+            (0.0, width.toDouble),
+            (0.0, height.toDouble),
+            e => s"(${e.position.x}, ${e.position.y})",
+          ),
+        )
+      case None => Right[DomainError, Set[Entity]](entities)
+  end withinBounds
 
 end Validation

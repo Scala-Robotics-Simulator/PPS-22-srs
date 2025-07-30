@@ -58,6 +58,7 @@ object Environment:
       width <- bounded("width", width, minWidth, maxWidth + 1)
       height <- bounded("height", height, minHeight, maxHeight + 1)
       _ <- bounded("entities", entities.size, 0, maxEntities + 1)
+      entities <- withinBounds("entities", entities, width, height)
       entities <- noCollisions("entities", entities)
     yield EnvironmentImpl(width, height, entities)
 
