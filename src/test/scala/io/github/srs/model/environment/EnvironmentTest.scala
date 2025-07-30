@@ -121,4 +121,35 @@ class EnvironmentTest extends AnyFlatSpec with Matchers:
       case Right(environment) =>
         environment.entities should contain theSameElementsAs Set(circularEntity, rectangularEntity)
 
+  it should "validate entities within bounds" in:
+    val entity1 = createEntity((1.0, 1.0), ShapeType.Circle(1.0), Orientation(0.0))
+    val entity2 = createEntity((5.0, 5.0), ShapeType.Circle(1.0), Orientation(90.0))
+    inside(Environment(10, 10, Set(entity1, entity2))):
+      case Right(environment) => environment.entities should contain theSameElementsAs Set(entity1, entity2)
+
+  it should "not validate entities out of bounds" in:
+    val entity1 = createEntity((-1.0, 1.0), ShapeType.Circle(1.0), Orientation(0.0))
+    val entity2 = createEntity((5.0, 5.0), ShapeType.Circle(1.0), Orientation(90.0))
+    inside(Environment(10, 10, Set(entity1, entity2))):
+      case Left(error) =>
+        error.errorMessage shouldBe "entities = (-1.0, 1.0) is outside the bounds (width: [0.0, 10.0], height: [0.0, 10.0])"
+
+  it should "not validate entities out of x axis bounds" in:
+    val entity1 = createEntity((11.0, 1.0), ShapeType.Circle(1.0), Orientation(0.0))
+    val entity2 = createEntity((5.0, 5.0), ShapeType.Circle(1.0), Orientation(90.0))
+    inside(Environment(10, 10, Set(entity1, entity2))):
+      case Left(_) => succeed
+
+  it should "not validate entities out of y axis bounds" in:
+    val entity1 = createEntity((1.0, 11.0), ShapeType.Circle(1.0), Orientation(0.0))
+    val entity2 = createEntity((5.0, 5.0), ShapeType.Circle(1.0), Orientation(90.0))
+    inside(Environment(10, 10, Set(entity1, entity2))):
+      case Left(_) => succeed
+
+  it should "not validate entities out of bounds with negative coordinates" in:
+    val entity1 = createEntity((1.0, -1.0), ShapeType.Circle(1.0), Orientation(0.0))
+    val entity2 = createEntity((5.0, 5.0), ShapeType.Circle(1.0), Orientation(90.0))
+    inside(Environment(10, 10, Set(entity1, entity2))):
+      case Left(_) => succeed
+
 end EnvironmentTest
