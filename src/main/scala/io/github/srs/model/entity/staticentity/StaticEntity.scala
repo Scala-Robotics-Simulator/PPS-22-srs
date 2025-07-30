@@ -167,4 +167,49 @@ object StaticEntity:
       w <- positiveWithZero("width", width)
       h <- positiveWithZero("height", height)
     yield StaticEntity.Boundary(pos, orient, w, h)
+
+  object Boundary:
+
+    /**
+     * Creates boundaries for the environment based on its width and height.
+     *
+     * @param width
+     *   the width of the environment
+     * @param height
+     *   the height of the environment
+     * @return
+     *   a Validation containing a set of boundaries if successful, otherwise an error.
+     */
+    def createBoundaries(width: Int, height: Int): Set[StaticEntity] =
+      Set(
+        // Top boundary
+        StaticEntity.Boundary(
+          pos = Point2D(width / 2.0, 0.0),
+          orient = Orientation(0.0),
+          width = width.toDouble,
+          height = 0.0,
+        ),
+        // Bottom boundary
+        StaticEntity.Boundary(
+          pos = Point2D(width / 2.0, height),
+          orient = Orientation(0.0),
+          width = width.toDouble,
+          height = 0.0,
+        ),
+        // Left boundary
+        StaticEntity.Boundary(
+          pos = Point2D(0.0, height / 2.0),
+          orient = Orientation(0.0),
+          width = 0.0,
+          height = height.toDouble,
+        ),
+        // Right boundary
+        StaticEntity.Boundary(
+          pos = Point2D(width, height / 2.0),
+          orient = Orientation(0.0),
+          width = 0.0,
+          height = height.toDouble,
+        ),
+      )
+  end Boundary
 end StaticEntity
