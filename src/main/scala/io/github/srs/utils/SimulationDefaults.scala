@@ -15,3 +15,7 @@ object SimulationDefaults:
 
     object Light:
       val radius: Double = 0.05
+
+  object DynamicEntity:
+    val minSpeed: Double = -1.0
+    val maxSpeed: Double = 1.0

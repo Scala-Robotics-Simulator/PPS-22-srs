@@ -57,9 +57,9 @@ object Environment:
     import io.github.srs.utils.SimulationDefaults.Environment.*
     val boundaries = Boundary.createBoundaries(width, height)
     for
-      width <- bounded("width", width, minWidth, maxWidth + 1)
-      height <- bounded("height", height, minHeight, maxHeight + 1)
-      _ <- bounded("entities", entities.size, 0, maxEntities + 1)
+      width <- bounded("width", width, minWidth, maxWidth, includeMax = true)
+      height <- bounded("height", height, minHeight, maxHeight, includeMax = true)
+      _ <- bounded("entities", entities.size, 0, maxEntities, includeMax = true)
       entities <- withinBounds("entities", entities, width, height)
       entities <- noCollisions("entities", entities ++ boundaries)
     yield EnvironmentImpl(width, height, entities)

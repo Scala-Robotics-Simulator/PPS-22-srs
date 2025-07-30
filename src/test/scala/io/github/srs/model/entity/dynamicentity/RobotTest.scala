@@ -97,4 +97,12 @@ class RobotTest extends AnyFlatSpec with Matchers:
         val movedRobot = robot.applyActions(Seq(Action.MoveForward, Action.TurnLeft, Action.Stop))
         movedRobot.orientation.degrees shouldBe expectedOrientation.degrees
 
+  it should "move correctly with custom actions" in:
+    inside(Robot(initialPosition, shape, initialOrientation, Seq(wheelMotor))):
+      case Right(robot) =>
+        val customAction = Action.move(0.5, 0.5).toOption.value
+        val movedRobot = robot.applyActions(Seq(customAction, customAction))
+        val expectedMovement: (Point2D, Orientation) = calculateMovement(robot)
+        movedRobot.position shouldBe expectedMovement._1
+
 end RobotTest
