@@ -1,5 +1,7 @@
 package io.github.srs.model
 
+import monix.eval.Task
+
 /**
  * Module that defines the model logic for the Scala Robotics Simulator.
  */
@@ -25,7 +27,7 @@ object ModelModule:
      * @return
      *   an optional new state, or None if the simulation should end.
      */
-    def update(s: S): Option[S]
+    def update(s: S): Task[S]
 
   /**
    * Provider trait that defines the interface for providing a model.
@@ -52,16 +54,16 @@ object ModelModule:
        * @return
        *   a [[Model]] instance using the given update logic.
        */
-      def apply(updateState: S => Option[S]): Model[S] = new ModelImpl(updateState)
+      def apply(updateState: S => Task[S]): Model[S] = new ModelImpl(updateState)
 
       /**
        * Private model implementation that delegates state updates to the provided function.
        */
-      private class ModelImpl(updateState: S => Option[S]) extends Model[S]:
+      private class ModelImpl(updateState: S => Task[S]) extends Model[S]:
         /**
          * @inheritdoc
          */
-        override def update(s: S): Option[S] = updateState(s)
+        override def update(s: S): Task[S] = updateState(s)
   end Component
 
   /**
