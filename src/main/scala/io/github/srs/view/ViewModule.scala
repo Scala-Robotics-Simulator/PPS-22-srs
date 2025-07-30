@@ -1,6 +1,7 @@
 package io.github.srs.view
 
 import io.github.srs.model.ModelModule
+import monix.eval.Task
 
 /**
  * Module that defines the view logic for the Scala Robotics Simulator.
@@ -25,7 +26,7 @@ object ViewModule:
      * @param state
      *   the current state of the simulation.
      */
-    def render(state: S): Unit
+    def render(state: S): Task[Unit]
 
   /**
    * Provider trait that defines the interface for providing a view.
@@ -76,7 +77,7 @@ object ViewModule:
          * @param state
          *   the current state of the simulation.
          */
-        override def render(state: S): Unit = gui.render(state)
+        override def render(state: S): Task[Unit] = gui.render(state)
 
     end View
 
