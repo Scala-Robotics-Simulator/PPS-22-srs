@@ -5,7 +5,7 @@ enablePlugins(JacocoCoverallsPlugin)
 lazy val root = project
   .in(file("."))
   .settings(
-    scalaVersion := "3.7.1",
+    scalaVersion := "3.7.2",
     organization := "io.github.scala-robotics-simulator",
     description := "A robotics simulator written in scala.",
     homepage := Some(
