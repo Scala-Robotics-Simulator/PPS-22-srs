@@ -2,8 +2,8 @@ package io.github.srs.view
 
 import javax.swing.*
 import java.awt.*
-
 import io.github.srs.model.ModelModule
+import monix.eval.Task
 
 class SimpleView[S <: ModelModule.State]:
   private val frame = new JFrame("Scala Robotics Simulator")
@@ -19,8 +19,8 @@ class SimpleView[S <: ModelModule.State]:
   private def setLabelText(text: String): Unit =
     lblText.setText(text)
 
-  def render(state: S): Unit =
-    setLabelText(s"$state")
+  def render(state: S): Task[Unit] =
+    Task(setLabelText(s"$state"))
 
   def close(): Unit =
     frame.dispose()

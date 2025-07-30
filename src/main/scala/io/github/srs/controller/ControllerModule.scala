@@ -1,6 +1,11 @@
 package io.github.srs.controller
 
+import scala.concurrent.duration.DurationInt
+
 import io.github.srs.model.ModelModule
+import monix.eval.Task
+import monix.execution.Scheduler.Implicits.global
+import monix.reactive.Observable
 
 /**
  * Module that defines the controller logic for the Scala Robotics Simulator.
@@ -27,7 +32,7 @@ object ControllerModule:
      * @param s
      *   the current state of the simulation.
      */
-    def simulationLoop(s: S): Unit
+    def simulationLoop(s: S): Task[Unit]
 
   /**
    * Provider trait that defines the interface for providing a controller.
@@ -71,21 +76,28 @@ object ControllerModule:
          */
         override def start(initialState: S): Unit =
           context.view.init()
-          simulationLoop(initialState)
+          simulationLoop(initialState).runAsyncAndForget
 
         /**
          * @inheritdoc
          */
-        @annotation.tailrec
-        override final def simulationLoop(s: S): Unit =
-          val state = for
-            newState <- context.model.update(s)
-            _ <- Some(context.view.render(newState))
-          yield newState
+        override final def simulationLoop(s: S): Task[Unit] =
+          val events: Observable[Event] = Observable
+            .fromIterable(List.fill(5)(Event.Increment) ::: List(Event.Stop))
+            .delayOnNext(500.millis)
 
-          state match
-            case Some(ns) => simulationLoop(ns)
-            case None => ()
+          events
+            .scanEval(Task.pure(s)) { (currentState, event) =>
+              event match
+                case Event.Increment =>
+                  for
+                    newState <- context.model.update(currentState)
+                    _ <- context.view.render(newState)
+                  yield newState
+                case Event.Stop =>
+                  Task.pure(currentState)
+            }
+            .completedL
       end ControllerImpl
     end Controller
 
