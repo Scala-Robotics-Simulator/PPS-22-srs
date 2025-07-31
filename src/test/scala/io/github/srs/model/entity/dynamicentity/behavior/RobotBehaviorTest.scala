@@ -11,8 +11,8 @@ import org.scalatest.OptionValues.*
 final class RobotBehaviorTest extends AnyFlatSpec:
 
   import io.github.srs.model.entity.Orientation
-  import io.github.srs.model.entity.dynamicentity.Action
-  import io.github.srs.model.entity.dynamicentity.Action.Stop
+  import io.github.srs.model.entity.dynamicentity.actuator.Action
+  import io.github.srs.model.entity.dynamicentity.actuator.Action.Stop
   import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, SensorReading, SensorReadings }
 
   private def mkSensor() =

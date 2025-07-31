@@ -1,6 +1,6 @@
 package io.github.srs.model.entity.dynamicentity.behavior
 
-import io.github.srs.model.entity.dynamicentity.Action
+import io.github.srs.model.entity.dynamicentity.actuator.Action
 import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings
 
 /**
