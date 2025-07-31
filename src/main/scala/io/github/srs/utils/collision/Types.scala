@@ -6,12 +6,12 @@ import io.github.srs.utils.*
 /**
  * Represents a 2D vector in the collision system.
  */
-private[collision] type Vector2D = Point2D
+type Vector2D = Point2D
 
 /**
  * Companion object for Vector2D, providing utility methods for vector operations.
  */
-private[collision] object Vector2D:
+object Vector2D:
 
   /**
    * Creates a new Vector2D instance from the given x and y coordinates.

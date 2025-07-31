@@ -39,8 +39,13 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
   private def createSensor(orientationDegrees: Double): ProximitySensor[DynamicEntity, Environment] =
     ProximitySensor(Orientation(orientationDegrees), 0.5, 5.0).toOption.value
 
-  private def createObstacle(position: Point2D, width: Double = 1.0, height: Double = 1.0): Obstacle =
-    Obstacle(position, Orientation(0.0), width, height)
+  private def createObstacle(
+      position: Point2D,
+      orientation: Orientation = Orientation(0.0),
+      width: Double = 1.0,
+      height: Double = 1.0,
+  ): Obstacle =
+    Obstacle(position, orientation, width, height)
 
   private def createRobot(position: Point2D, orientation: Orientation = Orientation(0.0), radius: Double = 0.5): Robot =
     Robot(
@@ -290,6 +295,54 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
     // Forward sensor should now point south due to 270-degree rotation
     val forwardSensorReading = sensor.sense(rotatedRobot)(envWithObstacle)
     forwardSensorReading should be < 0.01 // Should detect obstacle to the south
+
+  it should "sense correctly when obstacle is rotated 90 degrees" in:
+    // Horizontal obstacle rotated to vertical
+    val rotatedObstacle = createObstacle(Point2D(7.01, 7), orientation = Orientation(90), width = 2)
+    val envWithRotatedObstacle = createEnvironment(Set(robot, rotatedObstacle))
+
+    // If the obstacle is vertical, the forward sensor should detect it
+    // since it is now aligned with the robot's forward direction
+    val forwardSensorReading = sensor.sense(robot)(envWithRotatedObstacle)
+    forwardSensorReading should be < 0.01 // Should detect the rotated obstacle
+
+  it should "sense correctly when obstacle is rotated 180 degrees" in:
+    // Horizontal obstacle rotated to horizontal (no change)
+    val rotatedObstacle = createObstacle(Point2D(7.01, 6.0), orientation = Orientation(180), height = 2)
+    val envWithRotatedObstacle = createEnvironment(Set(robot, rotatedObstacle))
+
+    // Forward sensor should still detect the obstacle
+    val forwardSensorReading = sensor.sense(robot)(envWithRotatedObstacle)
+    forwardSensorReading should be < 0.01 // Should detect the rotated obstacle
+
+  it should "sense correctly when obstacle is rotated 270 degrees" in:
+    // Horizontal obstacle rotated to vertical
+    val rotatedObstacle = createObstacle(Point2D(7.01, 6), orientation = Orientation(270), width = 2)
+    val envWithRotatedObstacle = createEnvironment(Set(robot, rotatedObstacle))
+
+    // Forward sensor should now point south due to 270-degree rotation
+    val forwardSensorReading = sensor.sense(robot)(envWithRotatedObstacle)
+    forwardSensorReading should be < 0.01 // Should detect the rotated obstacle
+
+  it should "sense an obstacle rotated by 45 degrees" in:
+    val rotatedObstacle =
+      createObstacle(Point2D(7.0, 5.25), orientation = Orientation(45), height = 0.5) // Northeast diagonal
+    val envWithRotatedObstacle = createEnvironment(Set(robot, rotatedObstacle))
+
+    // Forward sensor should now point northeast due to 45-degree rotation
+    val forwardSensorReading = pointingNorthEastSensor.sense(robot)(envWithRotatedObstacle)
+    forwardSensorReading should be < 0.1 // Should detect obstacle in the northeast direction
+
+  it should "sense an obstacle rotated by 45 degrees at the edge of its range" in:
+    val farRotatedObstacle = createObstacle(Point2D(10, 2), orientation = Orientation(45))
+    val reading = getSensorReading(pointingNorthEastSensor, Set(farRotatedObstacle))
+    val _ = reading should be > 0.9
+    reading should be < 1.0 // Should detect very close to range boundary
+
+  it should "not sense an obstacle rotated by 45 degrees outside its range" in:
+    val farRotatedObstacle = createObstacle(Point2D(10.5, 1.5), orientation = Orientation(45))
+    val reading = getSensorReading(pointingNorthEastSensor, Set(farRotatedObstacle))
+    reading should be(1.0) // Should not detect obstacle outside range
 
   it should "sense correctly when robot is rotated 45 degrees" in:
     val rotatedRobot = createRobot(Point2D(6.0, 6.0), Orientation(45))
