@@ -1,27 +1,9 @@
 package io.github.srs.utils
 
 import io.github.srs.model.entity.{ Entity, Point2D, ShapeType }
-import io.github.srs.utils.collision.Vector2D
+import io.github.srs.utils.geometry2d.{ Line, Vector2D }
 
 object Ray:
-
-  /**
-   * Represents a line segment defined by two points.
-   */
-  opaque type Line = (p1: Point2D, p2: Point2D)
-
-  object Line:
-    /**
-     * Creates a Line from two points.
-     *
-     * @param p1
-     *   The first point of the line segment.
-     * @param p2
-     *   The second point of the line segment.
-     * @return
-     *   A Line defined by the two points.
-     */
-    def apply(p1: Point2D, p2: Point2D): Line = (p1, p2)
 
   /**
    * Calculates the intersection of a ray defined by an origin and an end point with an entity.

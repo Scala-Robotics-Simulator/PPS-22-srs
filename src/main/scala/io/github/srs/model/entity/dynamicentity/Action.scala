@@ -26,8 +26,6 @@ sealed trait Action:
    */
   def speeds: (Double, Double) = (leftSpeed, rightSpeed)
 
-end Action
-
 object Action:
 
   /**
