@@ -1,6 +1,7 @@
 package io.github.srs.utils
 
 import io.github.srs.model.entity.{ Entity, Point2D, ShapeType }
+import io.github.srs.utils.collision.Vector2D
 
 object Ray:
 
@@ -150,20 +151,39 @@ object Ray:
         intersectRayWithCircle(radius)
       case ShapeType.Rectangle(width, height) =>
         import Point2D.*
-        val topLineStart = Point2D(entity.position.x + width / 2, entity.position.y + height / 2)
-        val topLineEnd = Point2D(entity.position.x - width / 2, entity.position.y + height / 2)
-        val topLine = Line(topLineStart, topLineEnd)
-        val bottomLineStart = Point2D(entity.position.x - width / 2, entity.position.y - height / 2)
-        val bottomLineEnd = Point2D(entity.position.x + width / 2, entity.position.y - height / 2)
-        val bottomLine = Line(bottomLineStart, bottomLineEnd)
-        val leftLineStart = topLineEnd
-        val leftLineEnd = bottomLineStart
-        val leftLine = Line(leftLineStart, leftLineEnd)
-        val rightLineStart = topLineStart
-        val rightLineEnd = bottomLineEnd
-        val rightLine = Line(rightLineStart, rightLineEnd)
+
+        val center = entity.position
+        val angle = entity.orientation
+
+        val halfWidth = width / 2
+        val halfHeight = height / 2
+
+        // Define the 4 corners as vectors relative to center
+        val topRightRel = Point2D(halfWidth, halfHeight)
+        val topLeftRel = Point2D(-halfWidth, halfHeight)
+        val bottomLeftRel = Point2D(-halfWidth, -halfHeight)
+        val bottomRightRel = Point2D(halfWidth, -halfHeight)
+
+        // Rotate and then translate each corner
+        def rotateAroundCenter(relative: Vector2D): Point2D =
+          import Vector2D.*
+          val rotated = relative.rotate(angle)
+          Point2D(center.x + rotated.x, center.y + rotated.y)
+
+        val topRight = rotateAroundCenter(topRightRel)
+        val topLeft = rotateAroundCenter(topLeftRel)
+        val bottomLeft = rotateAroundCenter(bottomLeftRel)
+        val bottomRight = rotateAroundCenter(bottomRightRel)
+
+        // Create lines
+        val topLine = Line(topLeft, topRight)
+        val bottomLine = Line(bottomLeft, bottomRight)
+        val leftLine = Line(topLeft, bottomLeft)
+        val rightLine = Line(topRight, bottomRight)
+
         val lines = Seq(topLine, bottomLine, leftLine, rightLine)
         lines.flatMap(intersectRayWithLine).minOption
     end match
+
   end intersectRay
 end Ray
