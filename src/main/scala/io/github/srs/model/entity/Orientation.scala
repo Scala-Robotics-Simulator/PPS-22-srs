@@ -23,8 +23,6 @@ trait Orientation:
    */
   def toRadians: Double
 
-end Orientation
-
 /**
  * Companion object for [[Orientation]], providing a factory method.
  */

@@ -71,7 +71,7 @@ object Collision:
       // Project corners of rect on line
       // and calculate signed distance from center of onRect.
       val projections = corners.map { corner =>
-        import Vector2D.project
+        import io.github.srs.utils.geometry2d.Vector2D.project
         val projected = corner.project(line)
         val CP = projected - onRect.center
 
