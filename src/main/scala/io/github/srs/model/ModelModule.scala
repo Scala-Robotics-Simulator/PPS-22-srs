@@ -19,15 +19,17 @@ object ModelModule:
    *   the type of the simulation state, which must extend [[State]].
    */
   trait Model[S <: State]:
+
     /**
-     * Updates the state of the simulation.
-     *
+     * Updates the state of the simulation using the provided function.
      * @param s
      *   the current state of the simulation.
+     * @param f
+     *   the function that takes the current state and returns a new state wrapped in a [[Task]].
      * @return
-     *   an optional new state, or None if the simulation should end.
+     *   the updated state wrapped in a [[Task]].
      */
-    def update(s: S): Task[S]
+    def update(s: S)(using f: S => Task[S]): Task[S]
 
   /**
    * Provider trait that defines the interface for providing a model.
@@ -46,24 +48,23 @@ object ModelModule:
   trait Component[S <: State]:
 
     object Model:
+
       /**
-       * Creates a model from the provided update function.
+       * Factory method to create a new instance of the model.
        *
-       * @param updateState
-       *   a function that defines how the state is updated.
        * @return
-       *   a [[Model]] instance using the given update logic.
+       *   a new instance of [[Model]].
        */
-      def apply(updateState: S => Task[S]): Model[S] = new ModelImpl(updateState)
+      def apply(): Model[S] = new ModelImpl
 
       /**
        * Private model implementation that delegates state updates to the provided function.
        */
-      private class ModelImpl(updateState: S => Task[S]) extends Model[S]:
+      private class ModelImpl extends Model[S]:
         /**
          * @inheritdoc
          */
-        override def update(s: S): Task[S] = updateState(s)
+        override def update(s: S)(using updateLogic: S => Task[S]): Task[S] = updateLogic(s)
   end Component
 
   /**
