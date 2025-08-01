@@ -1,11 +1,13 @@
 package io.github.srs.controller
 
+import scala.compiletime.deferred
 import scala.concurrent.duration.DurationInt
 
-import io.github.srs.model.ModelModule
+import io.github.srs.model.UpdateLogic.increment
+import io.github.srs.model.{ IncrementLogic, ModelModule }
+import monix.catnap.ConcurrentQueue
 import monix.eval.Task
-import monix.execution.Scheduler.Implicits.global
-import monix.reactive.Observable
+import cats.syntax.foldable.toFoldableOps
 
 /**
  * Module that defines the controller logic for the Scala Robotics Simulator.
@@ -25,14 +27,14 @@ object ControllerModule:
      * @param initialState
      *   the initial state of the simulation.
      */
-    def start(initialState: S): Unit
+    def start(initialState: S): Task[Unit]
 
     /**
      * Runs the simulation loop, updating the state and rendering the view.
      * @param s
      *   the current state of the simulation.
      */
-    def simulationLoop(s: S): Task[Unit]
+    def simulationLoop(s: S, queue: ConcurrentQueue[Task, Event]): Task[Unit]
 
   /**
    * Provider trait that defines the interface for providing a controller.
@@ -56,6 +58,7 @@ object ControllerModule:
    */
   trait Component[S <: ModelModule.State]:
     context: Requirements[S] =>
+    given inc: IncrementLogic[S] = deferred
 
     object Controller:
       /**
@@ -71,33 +74,51 @@ object ControllerModule:
        */
       private class ControllerImpl extends Controller[S]:
 
-        /**
-         * @inheritdoc
-         */
-        override def start(initialState: S): Unit =
+        override def start(initialState: S): Task[Unit] =
           context.view.init()
-          simulationLoop(initialState).runAsyncAndForget
+          val list = List.fill(1_000)(Event.Increment) ::: List(Event.Stop)
+          for
+            queueSim <- ConcurrentQueue.unbounded[Task, Event]()
+            //            queueLog <- ConcurrentQueue.unbounded[Task, Event]()
+            _ <- produceEvents(queueSim, list)
+            _ <- simulationLoop(initialState, queueSim)
+          //            _ <- Task.parMap2(
+          //              simulationLoop(initialState, queueSim),
+          //              consumeStream(queueLog)(event => Task(println(s"Received: $event")))
+          //            )((_, _) => ())
+          yield ()
 
-        /**
-         * @inheritdoc
-         */
-        override final def simulationLoop(s: S): Task[Unit] =
-          val events: Observable[Event] = Observable
-            .fromIterable(List.fill(5)(Event.Increment) ::: List(Event.Stop))
-            .delayOnNext(500.millis)
+        override def simulationLoop(s: S, queue: ConcurrentQueue[Task, Event]): Task[Unit] =
+          def loop(state: S): Task[Unit] =
+            for
+              events <- queue.drain(0, 50)
+              stop = events.contains(Event.Stop)
+              newState <- handleEvents(events, state)
+              _ <- context.view.render(newState)
+              _ <- Task.sleep(100.millis)
+              _ <- if stop then Task.unit else loop(newState)
+            yield ()
 
-          events
-            .scanEval(Task.pure(s)) { (currentState, event) =>
-              event match
-                case Event.Increment =>
-                  for
-                    newState <- context.model.update(currentState)
-                    _ <- context.view.render(newState)
-                  yield newState
-                case Event.Stop =>
-                  Task.pure(currentState)
-            }
-            .completedL
+          loop(s)
+
+        //        private def consumeStream[A](queue: ConcurrentQueue[Task, A])(consume: A => Task[Unit]): Task[Unit] =
+        //          Observable
+        //            .repeatEvalF(queue.poll)
+        //            .mapEval(consume)
+        //            .completedL
+
+        private def produceEvents[A](queue: ConcurrentQueue[Task, A], events: List[A]): Task[Unit] =
+          events.traverse_(queue.offer)
+
+        private def handleEvents(events: Seq[Event], state: S): Task[S] =
+          events.foldLeft(Task.pure(state)) { (taskState, event) =>
+            taskState.flatMap(currentState => handleEvent(event, currentState))
+          }
+
+        private def handleEvent(event: Event, state: S): Task[S] =
+          event match
+            case Event.Increment => context.model.increment(state)
+            case Event.Stop => Task.pure(state)
       end ControllerImpl
     end Controller
 
