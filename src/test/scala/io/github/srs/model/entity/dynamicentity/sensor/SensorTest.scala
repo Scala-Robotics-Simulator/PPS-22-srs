@@ -1,13 +1,15 @@
 package io.github.srs.model.entity.dynamicentity.sensor
 
 import io.github.srs.model.PositiveDouble
-import io.github.srs.model.entity.dynamicentity.{ Actuator, DynamicEntity }
+import io.github.srs.model.entity.dynamicentity.DynamicEntity
+import io.github.srs.model.entity.dynamicentity.actuator.Actuator
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.validation.{ DomainError, Validation }
 import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
+import io.github.srs.model.environment.dsl.CreationDSL.*
 
 class SensorTest extends AnyFlatSpec with should.Matchers:
   given CanEqual[Sensor[?, ?, ?], Sensor[?, ?, ?]] = CanEqual.derived
@@ -43,7 +45,7 @@ class SensorTest extends AnyFlatSpec with should.Matchers:
   it should "sense the environment and return data" in:
     val sensor = new DummySensor(offset, distance, range)
     val entity = new Dummy(initialPosition, shape, initialOrientation, Seq.empty, SensorSuite.empty)
-    val environment = Environment(10, 10).toOption.value
+    val environment = Environment(10, 10).validate.toOption.value
     val data = sensor.sense(entity)(environment)
     data should be(42.0)
 

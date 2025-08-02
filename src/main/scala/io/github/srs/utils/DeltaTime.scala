@@ -1,4 +1,4 @@
-package io.github.srs.model.entity.dynamicentity
+package io.github.srs.utils
 
 import io.github.srs.model.validation.Validation
 import io.github.srs.model.validation.Validation.{ notInfinite, notNaN, positive }

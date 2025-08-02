@@ -1,6 +1,16 @@
 package io.github.srs.controller
 
-import io.github.srs.model.ModelModule
+import scala.compiletime.deferred
+import scala.concurrent.duration.DurationInt
+
+import cats.syntax.foldable.toFoldableOps
+import io.github.srs.model.UpdateLogic.tick
+import io.github.srs.model.UpdateLogic.changeTime
+import io.github.srs.model.UpdateLogic.increment
+import io.github.srs.model.*
+import monix.catnap.ConcurrentQueue
+import monix.eval.Task
+import monix.reactive.Observable
 
 /**
  * Module that defines the controller logic for the Scala Robotics Simulator.
@@ -20,14 +30,21 @@ object ControllerModule:
      * @param initialState
      *   the initial state of the simulation.
      */
-    def start(initialState: S): Unit
+    def start(initialState: S): Task[Unit]
 
     /**
-     * Runs the simulation loop, updating the state and rendering the view.
+     * Runs the simulation loop, processing events from the queue and updating the state.
+     *
      * @param s
      *   the current state of the simulation.
+     * @param queue
+     *   a concurrent queue that holds events to be processed.
+     * @return
+     *   a task that completes when the simulation loop ends.
      */
-    def simulationLoop(s: S): Unit
+    def simulationLoop(s: S, queue: ConcurrentQueue[Task, Event]): Task[Unit]
+
+  end Controller
 
   /**
    * Provider trait that defines the interface for providing a controller.
@@ -51,6 +68,9 @@ object ControllerModule:
    */
   trait Component[S <: ModelModule.State]:
     context: Requirements[S] =>
+    given inc: IncrementLogic[S] = deferred
+    given start: ChangeTimeLogic[S] = deferred
+    given tick: TickLogic[S] = deferred
 
     object Controller:
       /**
@@ -66,27 +86,70 @@ object ControllerModule:
        */
       private class ControllerImpl extends Controller[S]:
 
-        /**
-         * @inheritdoc
-         */
-        override def start(initialState: S): Unit =
-          context.view.init()
-          simulationLoop(initialState)
+        override def start(initialState: S): Task[Unit] =
+          val tickInterval = 100.millis
+          val list = List.fill(1_000)(Event.Increment)
+          for
+            queueSim <- ConcurrentQueue.unbounded[Task, Event]()
+            _ <- context.view.init(queueSim)
+            //            queueLog <- ConcurrentQueue.unbounded[Task, Event]()
+            _ <- produceEvents(queueSim, list)
+//            _ <- simulationLoop(initialState, queueSim)
+            //            _ <- Task.parMap2(
+            //              simulationLoop(initialState, queueSim),
+            //              consumeStream(queueLog)(event => Task(println(s"Received: $event")))
+            //            )((_, _) => ())
+            tickStream = Observable
+              .intervalAtFixedRate(tickInterval)
+              .map(_ => Event.Tick(tickInterval))
+              .mapEval(queueSim.offer)
+              .completedL
+//            _ <- Task.parZip2(tickStream, simulationLoop(initialState, queueSim))
+            _ <- Task.parMap2(tickStream, simulationLoop(initialState, queueSim))((_, _) => ())
+          yield ()
 
-        /**
-         * @inheritdoc
-         */
-        @annotation.tailrec
-        override final def simulationLoop(s: S): Unit =
-          val state = for
-            newState <- context.model.update(s)
-            _ <- Some(context.view.render(newState))
-          yield newState
+        end start
 
-          state match
-            case Some(ns) => simulationLoop(ns)
-            case None => ()
+        override def simulationLoop(s: S, queue: ConcurrentQueue[Task, Event]): Task[Unit] =
+          def loop(state: S): Task[Unit] =
+            for
+              events <- queue.drain(0, 50)
+              stop = events.contains(Event.Stop)
+              newState <- handleEvents(events, state)
+              _ <- context.view.render(newState)
+              _ <- Task.sleep(100.millis)
+              _ <- if stop then Task.unit else loop(newState)
+            yield ()
+
+          loop(s)
+
+        //        private def consumeStream[A](queue: ConcurrentQueue[Task, A])(consume: A => Task[Unit]): Task[Unit] =
+        //          Observable
+        //            .repeatEvalF(queue.poll)
+        //            .mapEval(consume)
+        //            .completedL
+
+        private def produceEvents[A](queue: ConcurrentQueue[Task, A], events: List[A]): Task[Unit] =
+          events.traverse_(queue.offer)
+
+        private def handleEvents(events: Seq[Event], state: S): Task[S] =
+          for finalState <- events.foldLeft(Task.pure(state)) { (taskState, event) =>
+              for
+                currentState <- taskState
+                newState <- handleEvent(event, currentState)
+              yield newState
+            }
+          yield finalState
+
+        private def handleEvent(event: Event, state: S): Task[S] =
+          event match
+            case Event.ChangeTime(simulationTime) => context.model.changeTime(state, simulationTime)
+            case Event.Increment => context.model.increment(state)
+            case Event.Stop => Task.pure(state)
+            case Event.Tick(deltaTime) => context.model.tick(state, deltaTime)
+
       end ControllerImpl
+
     end Controller
 
   end Component

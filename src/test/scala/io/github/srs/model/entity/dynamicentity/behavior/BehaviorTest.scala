@@ -12,7 +12,7 @@ import org.scalatest.matchers.should.Matchers.shouldBe
 final class BehaviorTest extends AnyFlatSpec:
 
   import io.github.srs.model.entity.Orientation
-  import io.github.srs.model.entity.dynamicentity.Action
+  import io.github.srs.model.entity.dynamicentity.actuator.Action
   import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, SensorReading, SensorReadings }
 
   /** Build a dummy proximity sensor. */

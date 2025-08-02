@@ -1,8 +1,10 @@
 package io.github.srs.model.entity.dynamicentity
 
-import io.github.srs.model.entity.dynamicentity.WheelMotor.move
+import io.github.srs.model.entity.dynamicentity.actuator.WheelMotor.move
 import io.github.srs.model.entity.dynamicentity.WheelMotorTestUtils.calculateMovement
+import io.github.srs.model.entity.dynamicentity.actuator.{ Wheel, WheelMotor }
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
+import io.github.srs.utils.DeltaTime
 import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers

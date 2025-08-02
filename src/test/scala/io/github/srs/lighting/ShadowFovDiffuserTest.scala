@@ -4,6 +4,7 @@ import io.github.srs.model.*
 import io.github.srs.model.entity.{ Entity, Orientation }
 import io.github.srs.model.entity.staticentity.StaticEntity.*
 import io.github.srs.model.environment.*
+import io.github.srs.model.environment.dsl.CreationDSL.*
 import io.github.srs.model.lighting.{ LightState, ShadowFovDiffuser }
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers.*
@@ -15,7 +16,7 @@ class ShadowFovDiffuserTest extends AnyFlatSpec:
   private val Diffuser = ShadowFovDiffuser()
 
   private def viewOf(entities: Entity*): EnvironmentView =
-    Environment(GridSide, GridSide, entities.toSet)
+    Environment(GridSide, GridSide, entities.toSet).validate
       .fold(err => fail(s"Environment invalid in test‑fixture: $err"), _.view)
 
   "ShadowFovDiffuser" should "illuminate symmetric cells in an empty room" in:

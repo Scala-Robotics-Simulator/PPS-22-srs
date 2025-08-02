@@ -1,5 +1,6 @@
-package io.github.srs.model.entity.dynamicentity
+package io.github.srs.model.entity.dynamicentity.actuator
 
+import io.github.srs.model.entity.dynamicentity.DynamicEntity
 import io.github.srs.model.validation.Validation
 
 /**

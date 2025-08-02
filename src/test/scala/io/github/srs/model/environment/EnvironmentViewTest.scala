@@ -9,7 +9,9 @@ import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.entity.staticentity.StaticEntity.{ Light, Obstacle }
 import io.github.srs.model.entity.Point2D.*
 import io.github.srs.model.entity.dynamicentity.sensor.SensorSuite
-import io.github.srs.model.entity.dynamicentity.{ Robot, WheelMotor }
+import io.github.srs.model.environment.dsl.CreationDSL.*
+import io.github.srs.model.entity.dynamicentity.Robot
+import io.github.srs.model.entity.dynamicentity.actuator.WheelMotor
 
 class EnvironmentViewTest extends AnyFlatSpec:
 
@@ -64,7 +66,7 @@ class EnvironmentViewTest extends AnyFlatSpec:
         expectedLight,
         robot,
       ),
-    ).toOption.value
+    ).validate.toOption.value
 
   private val viewStatic: EnvironmentView = env.view // robots are transparent
   private val viewDynamic: EnvironmentView = EnvironmentView.dynamic(env) // robots are solid
