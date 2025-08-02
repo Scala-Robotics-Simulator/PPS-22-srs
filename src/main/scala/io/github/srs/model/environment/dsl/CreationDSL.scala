@@ -11,6 +11,11 @@ import io.github.srs.model.validation.Validation.{ bounded, noCollisions, within
  */
 object CreationDSL:
 
+  /**
+   * Creates a new environment with default properties.
+   * @return
+   *   A new instance of [[Environment]] with default values.
+   */
   def environment: Environment = Environment()
 
   /**
