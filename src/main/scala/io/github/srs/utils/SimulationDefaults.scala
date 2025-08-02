@@ -32,6 +32,14 @@ object SimulationDefaults:
       val defaultIntensity: Double = 1.0
       val defaultAttenuation: Double = 1.0
 
+    object Boundary:
+      val defaultPosition: Point2D = (0.0, 0.0)
+      val defaultOrientation: Orientation = Orientation(0.0)
+      val defaultWidth: Double = 1.0
+      val defaultHeight: Double = 1.0
+
+  end StaticEntity
+
   object DynamicEntity:
     val minSpeed: Double = -1.0
     val maxSpeed: Double = 1.0

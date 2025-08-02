@@ -1,7 +1,7 @@
 package io.github.srs.model.entity.staticentity.dsl
 
 import io.github.srs.model.entity.staticentity.StaticEntity.Light
-import io.github.srs.model.entity.{Orientation, Point2D}
+import io.github.srs.model.entity.{ Orientation, Point2D }
 import io.github.srs.model.validation.Validation
 import io.github.srs.model.validation.Validation.positive
 
