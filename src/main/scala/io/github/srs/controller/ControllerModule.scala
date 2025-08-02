@@ -3,11 +3,11 @@ package io.github.srs.controller
 import scala.compiletime.deferred
 import scala.concurrent.duration.DurationInt
 
+import cats.syntax.foldable.toFoldableOps
 import io.github.srs.model.UpdateLogic.increment
 import io.github.srs.model.{ IncrementLogic, ModelModule }
 import monix.catnap.ConcurrentQueue
 import monix.eval.Task
-import cats.syntax.foldable.toFoldableOps
 
 /**
  * Module that defines the controller logic for the Scala Robotics Simulator.
@@ -30,11 +30,18 @@ object ControllerModule:
     def start(initialState: S): Task[Unit]
 
     /**
-     * Runs the simulation loop, updating the state and rendering the view.
+     * Runs the simulation loop, processing events from the queue and updating the state.
+     *
      * @param s
      *   the current state of the simulation.
+     * @param queue
+     *   a concurrent queue that holds events to be processed.
+     * @return
+     *   a task that completes when the simulation loop ends.
      */
     def simulationLoop(s: S, queue: ConcurrentQueue[Task, Event]): Task[Unit]
+
+  end Controller
 
   /**
    * Provider trait that defines the interface for providing a controller.
@@ -111,15 +118,21 @@ object ControllerModule:
           events.traverse_(queue.offer)
 
         private def handleEvents(events: Seq[Event], state: S): Task[S] =
-          events.foldLeft(Task.pure(state)) { (taskState, event) =>
-            taskState.flatMap(currentState => handleEvent(event, currentState))
-          }
+          for finalState <- events.foldLeft(Task.pure(state)) { (taskState, event) =>
+              for
+                currentState <- taskState
+                newState <- handleEvent(event, currentState)
+              yield newState
+            }
+          yield finalState
 
         private def handleEvent(event: Event, state: S): Task[S] =
           event match
             case Event.Increment => context.model.increment(state)
             case Event.Stop => Task.pure(state)
+
       end ControllerImpl
+
     end Controller
 
   end Component
