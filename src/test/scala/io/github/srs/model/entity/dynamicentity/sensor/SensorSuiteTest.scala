@@ -7,6 +7,7 @@ import io.github.srs.model.environment.Environment
 import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import io.github.srs.model.environment.dsl.CreationDSL.*
 
 class SensorSuiteTest extends AnyFlatSpec with Matchers:
   given CanEqual[ProximitySensor[?, ?], ProximitySensor[?, ?]] = CanEqual.derived
@@ -37,7 +38,7 @@ class SensorSuiteTest extends AnyFlatSpec with Matchers:
       width = 20,
       height = 20,
       entities = entities,
-    ).toOption.value
+    ).validate.toOption.value
 
   "SensorSuite" should "be created with no sensors (empty)" in:
     val emptySuite = SensorSuite.empty

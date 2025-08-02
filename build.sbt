@@ -65,6 +65,7 @@ lazy val root = project
       Wart.Any,
       Wart.IsInstanceOf,
       Wart.ListUnapply,
+      Wart.Overloading,
     ),
     jacocoReportSettings := JacocoReportSettings(
       title = "PR report",
