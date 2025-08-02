@@ -8,6 +8,7 @@ import io.github.srs.model.SimulationState
 import io.github.srs.view.ViewModule
 import io.github.srs.view.ViewModule.View
 import monix.execution.Scheduler.Implicits.global
+import io.github.srs.model.SimulationLogic.given
 
 /**
  * Launcher object that initializes the simulation.
