@@ -82,10 +82,10 @@ object ControllerModule:
       private class ControllerImpl extends Controller[S]:
 
         override def start(initialState: S): Task[Unit] =
-          context.view.init()
-          val list = List.fill(1_000)(Event.Increment) ::: List(Event.Stop)
+          val list = List.fill(1_000)(Event.Increment)
           for
             queueSim <- ConcurrentQueue.unbounded[Task, Event]()
+            _ <- context.view.init(queueSim)
             //            queueLog <- ConcurrentQueue.unbounded[Task, Event]()
             _ <- produceEvents(queueSim, list)
             _ <- simulationLoop(initialState, queueSim)
