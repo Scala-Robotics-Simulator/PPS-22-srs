@@ -25,7 +25,12 @@ object SimulationDefaults:
       val defaultHeight: Double = 1.0
 
     object Light:
-      val radius: Double = 0.05
+      val defaultPosition: Point2D = (0.0, 0.0)
+      val defaultOrientation: Orientation = Orientation(0.0)
+      val defaultRadius: Double = 0.05
+      val defaultIlluminationRadius: Double = 1.0
+      val defaultIntensity: Double = 1.0
+      val defaultAttenuation: Double = 1.0
 
   object DynamicEntity:
     val minSpeed: Double = -1.0
