@@ -40,19 +40,21 @@ enum StaticEntity(val position: Point2D, val orientation: Orientation) extends E
    * @param orient
    *   orientation of the light
    * @param radius
-   *   radius of the light's influence
+   *   radius of the light's bulb
+   * @param illuminationRadius
+   *   radius of the light's illumination area
    * @param intensity
    *   intensity of the light
    * @param attenuation
    *   attenuation factor of the light
    */
   case Light(
-      pos: Point2D,
-      orient: Orientation,
-      radius: Double = SimulationDefaults.StaticEntity.Light.radius,
-      illuminationRadius: Double,
-      intensity: Double,
-      attenuation: Double,
+      pos: Point2D = Defaults.Light.defaultPosition,
+      orient: Orientation = Defaults.Light.defaultOrientation,
+      radius: Double = SimulationDefaults.StaticEntity.Light.defaultRadius,
+      illuminationRadius: Double = SimulationDefaults.StaticEntity.Light.defaultIlluminationRadius,
+      intensity: Double = SimulationDefaults.StaticEntity.Light.defaultIntensity,
+      attenuation: Double = SimulationDefaults.StaticEntity.Light.defaultAttenuation,
   ) extends StaticEntity(pos, orient)
 
   /**
@@ -90,35 +92,6 @@ end StaticEntity
  * Companion object for [[StaticEntity]], providing factory methods for creating instances.
  */
 object StaticEntity:
-
-  /**
-   * Safely build a [[Light]], reflecting the domain constraints.
-   * @param pos
-   *   center position of the light
-   * @param orient
-   *   orientation of the light
-   * @param radius
-   *   radius of the light's influence
-   * @param intensity
-   *   intensity of the light
-   * @param attenuation
-   *   attenuation factor of the light
-   * @return
-   *   [[Right]] with the created [[StaticEntity.Light]] if valid, otherwise [[Left]] with a validation error.
-   */
-  def light(
-      pos: Point2D,
-      orient: Orientation,
-      radius: Double = SimulationDefaults.StaticEntity.Light.radius,
-      illuminationRadius: Double,
-      intensity: Double,
-      attenuation: Double,
-  ): Validation[StaticEntity] =
-    for
-      r <- positive("radius", radius)
-      i <- positive("intensity", intensity)
-      a <- positive("attenuation", attenuation)
-    yield StaticEntity.Light(pos, orient, r, illuminationRadius, i, a)
 
   /**
    * Safely build a [[StaticEntity.Boundary]], reflecting the domain constraints.
