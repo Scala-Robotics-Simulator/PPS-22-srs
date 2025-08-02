@@ -1,6 +1,7 @@
 package io.github.srs.model.entity.staticentity
 
 import io.github.srs.model.entity.staticentity.StaticEntity
+import io.github.srs.model.entity.staticentity.dsl.ObstacleDsl.*
 import io.github.srs.model.entity.{ Orientation, Point2D }
 import io.github.srs.model.validation.DomainError
 import org.scalatest.EitherValues.*
@@ -34,16 +35,17 @@ class StaticEntityTest extends AnyFlatSpec:
   )
 
   "obstacle" should "create a valid entity" in:
-    inside(StaticEntity.obstacle(origin, orientation, width, height)):
+    val res = obstacle at origin withOrientation orientation withWidth width withHeight height
+    inside(res.validate):
       case Right(entity) => entity shouldBe expectedObstacle
 
   it should "fail when width is not positive" in:
-    val res = StaticEntity.obstacle(origin, orientation, 0, height)
-    inside(res.left.value) { case DomainError.NegativeOrZero("width", _) => succeed }
+    val res = obstacle at origin withOrientation orientation withWidth 0 withHeight height
+    inside(res.validate.left.value) { case DomainError.NegativeOrZero("width", _) => succeed }
 
   it should "fail when height is not positive" in:
-    val res = StaticEntity.obstacle(origin, orientation, width, 0)
-    inside(res.left.value) { case DomainError.NegativeOrZero("height", _) => succeed }
+    val res = obstacle at origin withOrientation orientation withWidth width withHeight 0
+    inside(res.validate.left.value) { case DomainError.NegativeOrZero("height", _) => succeed }
 
   "light" should "create a valid entity" in:
     inside(
