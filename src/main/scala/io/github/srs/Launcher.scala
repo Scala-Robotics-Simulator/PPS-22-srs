@@ -1,14 +1,16 @@
 package io.github.srs
 
+import scala.concurrent.duration.DurationInt
+
 import io.github.srs.controller.ControllerModule
 import io.github.srs.controller.ControllerModule.Controller
-import io.github.srs.model.ModelModule
 import io.github.srs.model.ModelModule.Model
-import io.github.srs.model.SimulationState
+import io.github.srs.model.SimulationLogic.given
+import io.github.srs.model.TimeLogic.given
+import io.github.srs.model.{ ModelModule, SimulationState }
 import io.github.srs.view.ViewModule
 import io.github.srs.view.ViewModule.View
 import monix.execution.Scheduler.Implicits.global
-import io.github.srs.model.SimulationLogic.given
 
 /**
  * Launcher object that initializes the simulation.
@@ -23,4 +25,4 @@ object Launcher
   val controller: Controller[SimulationState] = Controller()
 
   @main def run(): Unit =
-    controller.start(SimulationState(0)).runAsyncAndForget
+    controller.start(SimulationState(0, 10000.millis)).runAsyncAndForget

@@ -4,10 +4,13 @@ import scala.compiletime.deferred
 import scala.concurrent.duration.DurationInt
 
 import cats.syntax.foldable.toFoldableOps
+import io.github.srs.model.UpdateLogic.tick
+import io.github.srs.model.UpdateLogic.changeTime
 import io.github.srs.model.UpdateLogic.increment
-import io.github.srs.model.{ IncrementLogic, ModelModule }
+import io.github.srs.model.*
 import monix.catnap.ConcurrentQueue
 import monix.eval.Task
+import monix.reactive.Observable
 
 /**
  * Module that defines the controller logic for the Scala Robotics Simulator.
@@ -66,6 +69,8 @@ object ControllerModule:
   trait Component[S <: ModelModule.State]:
     context: Requirements[S] =>
     given inc: IncrementLogic[S] = deferred
+    given start: ChangeTimeLogic[S] = deferred
+    given tick: TickLogic[S] = deferred
 
     object Controller:
       /**
@@ -82,18 +87,28 @@ object ControllerModule:
       private class ControllerImpl extends Controller[S]:
 
         override def start(initialState: S): Task[Unit] =
+          val tickInterval = 100.millis
           val list = List.fill(1_000)(Event.Increment)
           for
             queueSim <- ConcurrentQueue.unbounded[Task, Event]()
             _ <- context.view.init(queueSim)
             //            queueLog <- ConcurrentQueue.unbounded[Task, Event]()
             _ <- produceEvents(queueSim, list)
-            _ <- simulationLoop(initialState, queueSim)
-          //            _ <- Task.parMap2(
-          //              simulationLoop(initialState, queueSim),
-          //              consumeStream(queueLog)(event => Task(println(s"Received: $event")))
-          //            )((_, _) => ())
+//            _ <- simulationLoop(initialState, queueSim)
+            //            _ <- Task.parMap2(
+            //              simulationLoop(initialState, queueSim),
+            //              consumeStream(queueLog)(event => Task(println(s"Received: $event")))
+            //            )((_, _) => ())
+            tickStream = Observable
+              .intervalAtFixedRate(tickInterval)
+              .map(_ => Event.Tick(tickInterval))
+              .mapEval(queueSim.offer)
+              .completedL
+//            _ <- Task.parZip2(tickStream, simulationLoop(initialState, queueSim))
+            _ <- Task.parMap2(tickStream, simulationLoop(initialState, queueSim))((_, _) => ())
           yield ()
+
+        end start
 
         override def simulationLoop(s: S, queue: ConcurrentQueue[Task, Event]): Task[Unit] =
           def loop(state: S): Task[Unit] =
@@ -128,8 +143,10 @@ object ControllerModule:
 
         private def handleEvent(event: Event, state: S): Task[S] =
           event match
+            case Event.ChangeTime(simulationTime) => context.model.changeTime(state, simulationTime)
             case Event.Increment => context.model.increment(state)
             case Event.Stop => Task.pure(state)
+            case Event.Tick(deltaTime) => context.model.tick(state, deltaTime)
 
       end ControllerImpl
 

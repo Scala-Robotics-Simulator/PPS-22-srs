@@ -1,3 +1,5 @@
 package io.github.srs.model
 
-final case class SimulationState(i: Int) extends ModelModule.State
+import scala.concurrent.duration.FiniteDuration
+
+final case class SimulationState(i: Int, simulationTime: FiniteDuration) extends ModelModule.State
