@@ -1,6 +1,7 @@
 package io.github.srs.model.entity.staticentity
 
 import io.github.srs.model.entity.staticentity.StaticEntity
+import io.github.srs.model.entity.staticentity.dsl.LightDsl.*
 import io.github.srs.model.entity.staticentity.dsl.ObstacleDsl.*
 import io.github.srs.model.entity.{ Orientation, Point2D }
 import io.github.srs.model.validation.DomainError
@@ -48,47 +49,27 @@ class StaticEntityTest extends AnyFlatSpec:
     inside(res.validate.left.value) { case DomainError.NegativeOrZero("height", _) => succeed }
 
   "light" should "create a valid entity" in:
+    val res =
+      light at origin withOrientation orientation withIlluminationRadius radius withIntensity intensity withAttenuation attenuation
     inside(
-      StaticEntity.light(
-        pos = origin,
-        orient = orientation,
-        illuminationRadius = radius,
-        intensity = intensity,
-        attenuation = attenuation,
-      ),
+      res.validate,
     ):
       case Right(entity) => entity shouldBe expectedLight
 
   it should "fail when radius is not positive" in:
-    val res = StaticEntity.light(
-      pos = origin,
-      orient = orientation,
-      radius = 0.0,
-      illuminationRadius = radius,
-      intensity = intensity,
-      attenuation = attenuation,
-    )
-    inside(res.left.value) { case DomainError.NegativeOrZero("radius", _) => succeed }
+    val res =
+      light at origin withOrientation orientation withRadius 0.0 withIlluminationRadius radius withIntensity intensity withAttenuation attenuation
+    inside(res.validate.left.value) { case DomainError.NegativeOrZero("radius", _) => succeed }
 
   it should "fail when intensity is not positive" in:
-    val res = StaticEntity.light(
-      pos = origin,
-      orient = orientation,
-      illuminationRadius = radius,
-      intensity = 0.0,
-      attenuation = attenuation,
-    )
-    inside(res.left.value) { case DomainError.NegativeOrZero("intensity", _) => succeed }
+    val res =
+      light at origin withOrientation orientation withIlluminationRadius radius withIntensity 0.0 withAttenuation attenuation
+    inside(res.validate.left.value) { case DomainError.NegativeOrZero("intensity", _) => succeed }
 
   it should "fail when attenuation is not positive" in:
-    val res = StaticEntity.light(
-      pos = origin,
-      orient = orientation,
-      illuminationRadius = radius,
-      intensity = intensity,
-      attenuation = 0.0,
-    )
-    inside(res.left.value) { case DomainError.NegativeOrZero("attenuation", _) => succeed }
+    val res =
+      light at origin withOrientation orientation withIlluminationRadius radius withIntensity intensity withAttenuation 0.0
+    inside(res.validate.left.value) { case DomainError.NegativeOrZero("attenuation", _) => succeed }
 
   "boundary" should "create a valid entity" in:
     val expectedBoundary: StaticEntity = StaticEntity.Boundary(origin, orientation, width, height)
