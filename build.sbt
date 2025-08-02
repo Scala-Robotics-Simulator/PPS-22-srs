@@ -5,6 +5,7 @@ enablePlugins(JacocoCoverallsPlugin)
 lazy val root = project
   .in(file("."))
   .settings(
+    name := "PPS-22-srs",
     scalaVersion := "3.7.2",
     organization := "io.github.scala-robotics-simulator",
     description := "A robotics simulator written in scala.",
@@ -64,6 +65,7 @@ lazy val root = project
       Wart.Any,
       Wart.IsInstanceOf,
       Wart.ListUnapply,
+      Wart.Overloading,
     ),
     jacocoReportSettings := JacocoReportSettings(
       title = "PR report",

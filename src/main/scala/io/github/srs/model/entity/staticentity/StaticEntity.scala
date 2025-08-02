@@ -1,9 +1,8 @@
 package io.github.srs.model.entity.staticentity
 
 import io.github.srs.model.entity.*
-import io.github.srs.model.validation.Validation
-import io.github.srs.model.validation.Validation.*
 import io.github.srs.utils.SimulationDefaults
+import io.github.srs.utils.SimulationDefaults.StaticEntity as Defaults
 
 /**
  * Represents a static entity in a two-dimensional space.
@@ -25,10 +24,10 @@ enum StaticEntity(val position: Point2D, val orientation: Orientation) extends E
    *   height of the obstacle
    */
   case Obstacle(
-      pos: Point2D,
-      orient: Orientation,
-      width: Double,
-      height: Double,
+      pos: Point2D = Defaults.Obstacle.defaultPosition,
+      orient: Orientation = Defaults.Obstacle.defaultOrientation,
+      width: Double = Defaults.Obstacle.defaultWidth,
+      height: Double = Defaults.Obstacle.defaultHeight,
   ) extends StaticEntity(pos, orient)
 
   /**
@@ -39,19 +38,21 @@ enum StaticEntity(val position: Point2D, val orientation: Orientation) extends E
    * @param orient
    *   orientation of the light
    * @param radius
-   *   radius of the light's influence
+   *   radius of the light's bulb
+   * @param illuminationRadius
+   *   radius of the light's illumination area
    * @param intensity
    *   intensity of the light
    * @param attenuation
    *   attenuation factor of the light
    */
   case Light(
-      pos: Point2D,
-      orient: Orientation,
-      radius: Double = SimulationDefaults.StaticEntity.Light.radius,
-      illuminationRadius: Double,
-      intensity: Double,
-      attenuation: Double,
+      pos: Point2D = Defaults.Light.defaultPosition,
+      orient: Orientation = Defaults.Light.defaultOrientation,
+      radius: Double = SimulationDefaults.StaticEntity.Light.defaultRadius,
+      illuminationRadius: Double = SimulationDefaults.StaticEntity.Light.defaultIlluminationRadius,
+      intensity: Double = SimulationDefaults.StaticEntity.Light.defaultIntensity,
+      attenuation: Double = SimulationDefaults.StaticEntity.Light.defaultAttenuation,
   ) extends StaticEntity(pos, orient)
 
   /**
@@ -66,10 +67,10 @@ enum StaticEntity(val position: Point2D, val orientation: Orientation) extends E
    *   height of the boundary
    */
   case Boundary(
-      pos: Point2D,
-      orient: Orientation,
-      width: Double,
-      height: Double,
+      pos: Point2D = Defaults.Boundary.defaultPosition,
+      orient: Orientation = Defaults.Boundary.defaultOrientation,
+      width: Double = Defaults.Boundary.defaultWidth,
+      height: Double = Defaults.Boundary.defaultHeight,
   ) extends StaticEntity(pos, orient)
 
   /**
@@ -90,84 +91,6 @@ end StaticEntity
  */
 object StaticEntity:
 
-  /**
-   * Safely build an [[Obstacle]], reflecting the domain constraints.
-   *
-   * @param pos
-   *   center position of the obstacle
-   * @param orient
-   *   orientation of the obstacle
-   * @param width
-   *   width of the obstacle
-   * @param height
-   *   height of the obstacle
-   * @return
-   *   [[Right]] with the created [[StaticEntity.Obstacle]] if valid, otherwise [[Left]] with a validation error.
-   */
-  def obstacle(
-      pos: Point2D,
-      orient: Orientation,
-      width: Double,
-      height: Double,
-  ): Validation[StaticEntity] =
-    for
-      w <- positive("width", width)
-      h <- positive("height", height)
-    yield StaticEntity.Obstacle(pos, orient, w, h)
-
-  /**
-   * Safely build a [[Light]], reflecting the domain constraints.
-   * @param pos
-   *   center position of the light
-   * @param orient
-   *   orientation of the light
-   * @param radius
-   *   radius of the light's influence
-   * @param intensity
-   *   intensity of the light
-   * @param attenuation
-   *   attenuation factor of the light
-   * @return
-   *   [[Right]] with the created [[StaticEntity.Light]] if valid, otherwise [[Left]] with a validation error.
-   */
-  def light(
-      pos: Point2D,
-      orient: Orientation,
-      radius: Double = SimulationDefaults.StaticEntity.Light.radius,
-      illuminationRadius: Double,
-      intensity: Double,
-      attenuation: Double,
-  ): Validation[StaticEntity] =
-    for
-      r <- positive("radius", radius)
-      i <- positive("intensity", intensity)
-      a <- positive("attenuation", attenuation)
-    yield StaticEntity.Light(pos, orient, r, illuminationRadius, i, a)
-
-  /**
-   * Safely build a [[StaticEntity.Boundary]], reflecting the domain constraints.
-   * @param pos
-   *   center position of the boundary
-   * @param orient
-   *   orientation of the boundary
-   * @param width
-   *   width of the boundary
-   * @param height
-   *   height of the boundary
-   * @return
-   *   [[Right]] with the created [[StaticEntity.Boundary]] if valid, otherwise [[Left]] with a validation error.
-   */
-  def boundary(
-      pos: Point2D,
-      orient: Orientation,
-      width: Double,
-      height: Double,
-  ): Validation[StaticEntity] =
-    for
-      w <- positiveWithZero("width", width)
-      h <- positiveWithZero("height", height)
-    yield StaticEntity.Boundary(pos, orient, w, h)
-
   object Boundary:
 
     /**
@@ -181,35 +104,29 @@ object StaticEntity:
      *   a Validation containing a set of boundaries if successful, otherwise an error.
      */
     def createBoundaries(width: Int, height: Int): Set[StaticEntity] =
+      import dsl.BoundaryDsl.*
       Set(
         // Top boundary
-        StaticEntity.Boundary(
-          pos = Point2D(width / 2.0, 0.0),
-          orient = Orientation(0.0),
-          width = width.toDouble,
-          height = 0.0,
-        ),
+        boundary at Point2D(width / 2.0, 0.0)
+          withOrientation Orientation(0.0)
+          withWidth width.toDouble
+          withHeight 0.0,
         // Bottom boundary
-        StaticEntity.Boundary(
-          pos = Point2D(width / 2.0, height),
-          orient = Orientation(0.0),
-          width = width.toDouble,
-          height = 0.0,
-        ),
+        boundary at Point2D(width / 2.0, height)
+          withOrientation Orientation(0.0)
+          withWidth width.toDouble
+          withHeight 0.0,
         // Left boundary
-        StaticEntity.Boundary(
-          pos = Point2D(0.0, height / 2.0),
-          orient = Orientation(0.0),
-          width = 0.0,
-          height = height.toDouble,
-        ),
+        boundary at Point2D(0.0, height / 2.0)
+          withOrientation Orientation(0.0)
+          withWidth 0.0
+          withHeight height.toDouble,
         // Right boundary
-        StaticEntity.Boundary(
-          pos = Point2D(width, height / 2.0),
-          orient = Orientation(0.0),
-          width = 0.0,
-          height = height.toDouble,
-        ),
+        boundary at Point2D(width, height / 2.0)
+          withOrientation Orientation(0.0)
+          withWidth 0.0
+          withHeight height.toDouble,
       )
+    end createBoundaries
   end Boundary
 end StaticEntity
