@@ -1,9 +1,12 @@
 package io.github.srs.model.entity.dynamicentity.sensor
 
+import scala.language.postfixOps
+
+import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.{ Actuator, DynamicEntity, Robot }
 import io.github.srs.model.entity.staticentity.StaticEntity.Obstacle
-import io.github.srs.model.entity.*
 import io.github.srs.model.environment.Environment
+import io.github.srs.model.environment.dsl.CreationDSL.*
 import io.github.srs.model.validation.DomainError
 import org.scalatest.Inside.inside
 import org.scalatest.OptionValues.convertOptionToValuable
@@ -57,11 +60,11 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
     ).toOption.value
 
   private def createEnvironment(entities: Set[Entity], width: Int = 20, height: Int = 20): Environment =
-    Environment(
-      width = width,
-      height = height,
-      entities = entities,
-    ).toOption.value
+    (Environment()
+      withWidth width
+      withHeight height
+      containing entities).validate
+      .fold(err => fail(s"Environment invalid in test fixture: $err"), identity)
 
   private def getSensorReading(
       sensor: ProximitySensor[DynamicEntity, Environment],

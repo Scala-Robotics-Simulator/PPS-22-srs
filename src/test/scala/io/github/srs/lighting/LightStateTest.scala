@@ -2,17 +2,17 @@ package io.github.srs.lighting
 
 import scala.collection.immutable.ArraySeq
 
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should.Matchers.*
-import org.scalatest.OptionValues.*
 import io.github.srs.model.Cell
-import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.sensor.SensorSuite
 import io.github.srs.model.entity.staticentity.StaticEntity.{ Light, Obstacle }
-import io.github.srs.model.environment.{ Environment, EnvironmentView }
-import io.github.srs.model.environment.view
+import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
+import io.github.srs.model.environment.dsl.CreationDSL.*
+import io.github.srs.model.environment.{ view, Environment, EnvironmentView }
 import io.github.srs.model.lighting.LightState
+import org.scalatest.OptionValues.*
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers.*
 
 class LightStateTest extends AnyFlatSpec:
 
@@ -50,7 +50,7 @@ class LightStateTest extends AnyFlatSpec:
       robot,
       Obstacle(obstaclePos, Orientation(0), 1.0, 0.1),
     ),
-  ).toOption.value
+  ).validate.toOption.value
 
   private val view: EnvironmentView = env.view
 
