@@ -13,20 +13,31 @@ class SimpleView[S <: ModelModule.State]:
   private val frame = new JFrame("Scala Robotics Simulator")
   private val lblText = new JLabel("Hello World!", SwingConstants.CENTER)
   private val btnStart = new JButton("Start")
+  private val btnStop = new JButton("Stop")
 
   private def setLabelText(text: String): Unit =
     lblText.setText(text)
 
   def init(queue: ConcurrentQueue[Task, Event]): Task[Unit] = Task:
     frame.setMinimumSize(new Dimension(800, 600))
-    frame.getContentPane.add(lblText)
-    frame.getContentPane.add(btnStart, BorderLayout.SOUTH)
+    frame.setLayout(new BorderLayout())
+    frame.getContentPane.add(lblText, BorderLayout.CENTER)
+
+    val buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER))
+    buttonPanel.add(btnStart)
+    buttonPanel.add(btnStop)
+    frame.getContentPane.add(buttonPanel, BorderLayout.SOUTH)
+
     frame.pack()
     frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
     frame.setVisible(true)
 
     btnStart.addActionListener { _ =>
       queue.offer(Event.Increment).runAsyncAndForget
+    }
+
+    btnStop.addActionListener { _ =>
+      queue.offer(Event.Stop).runAsyncAndForget
     }
 
   def render(state: S): Task[Unit] =
