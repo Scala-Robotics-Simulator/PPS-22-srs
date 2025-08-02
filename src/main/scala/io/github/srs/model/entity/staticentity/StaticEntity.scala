@@ -4,6 +4,7 @@ import io.github.srs.model.entity.*
 import io.github.srs.model.validation.Validation
 import io.github.srs.model.validation.Validation.*
 import io.github.srs.utils.SimulationDefaults
+import io.github.srs.utils.SimulationDefaults.StaticEntity as Defaults
 
 /**
  * Represents a static entity in a two-dimensional space.
@@ -25,10 +26,10 @@ enum StaticEntity(val position: Point2D, val orientation: Orientation) extends E
    *   height of the obstacle
    */
   case Obstacle(
-      pos: Point2D,
-      orient: Orientation,
-      width: Double,
-      height: Double,
+      pos: Point2D = Defaults.Obstacle.defaultPosition,
+      orient: Orientation = Defaults.Obstacle.defaultOrientation,
+      width: Double = Defaults.Obstacle.defaultWidth,
+      height: Double = Defaults.Obstacle.defaultHeight,
   ) extends StaticEntity(pos, orient)
 
   /**
@@ -89,31 +90,6 @@ end StaticEntity
  * Companion object for [[StaticEntity]], providing factory methods for creating instances.
  */
 object StaticEntity:
-
-  /**
-   * Safely build an [[Obstacle]], reflecting the domain constraints.
-   *
-   * @param pos
-   *   center position of the obstacle
-   * @param orient
-   *   orientation of the obstacle
-   * @param width
-   *   width of the obstacle
-   * @param height
-   *   height of the obstacle
-   * @return
-   *   [[Right]] with the created [[StaticEntity.Obstacle]] if valid, otherwise [[Left]] with a validation error.
-   */
-  def obstacle(
-      pos: Point2D,
-      orient: Orientation,
-      width: Double,
-      height: Double,
-  ): Validation[StaticEntity] =
-    for
-      w <- positive("width", width)
-      h <- positive("height", height)
-    yield StaticEntity.Obstacle(pos, orient, w, h)
 
   /**
    * Safely build a [[Light]], reflecting the domain constraints.
