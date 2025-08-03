@@ -4,9 +4,9 @@ import scala.compiletime.deferred
 import scala.concurrent.duration.{ Duration, DurationInt }
 
 import cats.syntax.foldable.toFoldableOps
-import io.github.srs.model.UpdateLogic.tick
-import io.github.srs.model.UpdateLogic.increment
 import io.github.srs.model.*
+import io.github.srs.model.UpdateLogic.{ increment, tick }
+import io.github.srs.model.logic.{ IncrementLogic, TickLogic }
 import monix.catnap.ConcurrentQueue
 import monix.eval.Task
 import monix.reactive.Observable
@@ -82,7 +82,7 @@ object ControllerModule:
       /**
        * Private controller implementation that delegates the simulation loop to the provided model and view.
        */
-      private class ControllerImpl extends Controller[S]: // (using config: SimulationConfig)
+      private class ControllerImpl extends Controller[S]:
 
         override def start(initialState: S): Task[Unit] =
           val tickInterval = 100.millis

@@ -2,8 +2,11 @@ package io.github.srs.model.logic
 
 import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
 
-import io.github.srs.model.{ SimulationState, TickLogic }
+import io.github.srs.model.{ ModelModule, SimulationState }
 import monix.eval.Task
+
+trait TickLogic[S <: ModelModule.State]:
+  def tick(s: S, delta: FiniteDuration): Task[S]
 
 object TimeLogic:
 
