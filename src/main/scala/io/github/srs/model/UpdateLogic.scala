@@ -6,6 +6,7 @@ import io.github.srs.model.ModelModule
 import io.github.srs.model.ModelModule.Model
 import io.github.srs.model.logic.{ IncrementLogic, TickLogic }
 import monix.eval.Task
+import io.github.srs.model.logic.{ PauseLogic, ResumeLogic, StopLogic }
 
 object UpdateLogic:
 
@@ -16,3 +17,12 @@ object UpdateLogic:
 
     def tick(s: S, delta: FiniteDuration)(using logic: TickLogic[S]): Task[S] =
       logic.tick(s, delta)
+
+    def pause(s: S)(using logic: PauseLogic[S]): Task[S] =
+      logic.pause(s)
+
+    def resume(s: S)(using logic: ResumeLogic[S]): Task[S] =
+      logic.resume(s)
+
+    def stop(s: S)(using logic: StopLogic[S]): Task[S] =
+      logic.stop(s)

@@ -19,6 +19,11 @@ object ModelModule:
      */
     def simulationTime: FiniteDuration
 
+    /**
+     * The current simulation status.
+     */
+    def simulationStatus: SimulationStatus
+
   /**
    * Trait representing the core model logic for updating the simulation state.
    *

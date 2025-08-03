@@ -5,11 +5,12 @@ import scala.concurrent.duration.{ Duration, DurationInt }
 
 import cats.syntax.foldable.toFoldableOps
 import io.github.srs.model.*
-import io.github.srs.model.UpdateLogic.{ increment, tick }
-import io.github.srs.model.logic.{ IncrementLogic, TickLogic }
+import io.github.srs.model.UpdateLogic.*
+import io.github.srs.model.logic.*
 import monix.catnap.ConcurrentQueue
 import monix.eval.Task
 import monix.reactive.Observable
+import io.github.srs.model.logic.{ PauseLogic, ResumeLogic, StopLogic }
 
 /**
  * Module that defines the controller logic for the Scala Robotics Simulator.
@@ -69,6 +70,9 @@ object ControllerModule:
     context: Requirements[S] =>
     given inc: IncrementLogic[S] = deferred
     given tick: TickLogic[S] = deferred
+    given pause: PauseLogic[S] = deferred
+    given resume: ResumeLogic[S] = deferred
+    given stop: StopLogic[S] = deferred
 
     object Controller:
       /**
@@ -112,7 +116,9 @@ object ControllerModule:
           def loop(state: S): Task[Unit] =
             for
               events <- queue.drain(0, 50)
-              stop = events.contains(Event.Stop) || state.simulationTime.equals(Duration.Zero)
+              stop = state.simulationStatus.equals(SimulationStatus.STOPPED) || state.simulationTime.equals(
+                Duration.Zero,
+              )
               newState <- handleEvents(events, state)
               _ <- context.view.render(newState)
               _ <- Task.sleep(100.millis)
@@ -141,9 +147,14 @@ object ControllerModule:
 
         private def handleEvent(event: Event, state: S): Task[S] =
           event match
-            case Event.Increment => context.model.increment(state)
-            case Event.Stop => Task.pure(state)
-            case Event.Tick(deltaTime) => context.model.tick(state, deltaTime)
+            case Event.Increment if state.simulationStatus == SimulationStatus.RUNNING =>
+              context.model.increment(state)
+            case Event.Tick(deltaTime) if state.simulationStatus == SimulationStatus.RUNNING =>
+              context.model.tick(state, deltaTime)
+            case Event.Pause => context.model.pause(state)
+            case Event.Resume => context.model.resume(state)
+            case Event.Stop => context.model.stop(state)
+            case _ => Task.pure(state)
 
       end ControllerImpl
 
