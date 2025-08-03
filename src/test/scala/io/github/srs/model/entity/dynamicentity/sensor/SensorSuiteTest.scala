@@ -1,13 +1,13 @@
 package io.github.srs.model.entity.dynamicentity.sensor
 
-import io.github.srs.model.entity.dynamicentity.{ Actuator, DynamicEntity, Robot }
-import io.github.srs.model.entity.Entity
-import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
+import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
+import io.github.srs.model.entity.dynamicentity.{ DynamicEntity, Robot }
+import io.github.srs.model.entity.{ Entity, Orientation, Point2D }
 import io.github.srs.model.environment.Environment
+import io.github.srs.model.environment.dsl.CreationDSL.*
 import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import io.github.srs.model.environment.dsl.CreationDSL.*
 
 class SensorSuiteTest extends AnyFlatSpec with Matchers:
   given CanEqual[ProximitySensor[?, ?], ProximitySensor[?, ?]] = CanEqual.derived
@@ -25,13 +25,7 @@ class SensorSuiteTest extends AnyFlatSpec with Matchers:
     ProximitySensor(Orientation(orientationDegrees), 0.5, 3.0).toOption.value
 
   private def createRobot(position: Point2D, orientation: Orientation = Orientation(0.0)): Robot =
-    Robot(
-      position = position,
-      shape = ShapeType.Circle(0.5),
-      orientation = orientation,
-      actuators = Seq.empty[Actuator[Robot]],
-      sensors = SensorSuite.empty,
-    ).toOption.value
+    Robot() at position withOrientation orientation
 
   private def createEnvironment(entities: Set[Entity]): Environment =
     Environment(

@@ -6,6 +6,7 @@ import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 
 class WheelMotorTest extends AnyFlatSpec with Matchers:
 
@@ -24,7 +25,7 @@ class WheelMotorTest extends AnyFlatSpec with Matchers:
       Wheel(rightSpeed, ShapeType.Circle(wheelRadius)),
     )
     val robot: Robot =
-      Robot(initialPosition, shape, initialOrientation, Seq(wheelMotor)).toOption.value
+      Robot(initialPosition, shape, initialOrientation, Seq(wheelMotor)).validate.toOption.value
     val movedRobot: Robot = robot.move
 
     val expectedMovement: (Point2D, Orientation) = calculateMovement(robot)
@@ -39,7 +40,7 @@ class WheelMotorTest extends AnyFlatSpec with Matchers:
       Wheel(rightSpeed, ShapeType.Circle(wheelRadius)),
     )
     val robot: Robot =
-      Robot(initialPosition, shape, initialOrientation, Seq(wheelMotor)).toOption.value
+      Robot(initialPosition, shape, initialOrientation, Seq(wheelMotor)).validate.toOption.value
     val movedRobot: Robot = robot.move
 
     val expectedMovement: (Point2D, Orientation) = calculateMovement(robot)

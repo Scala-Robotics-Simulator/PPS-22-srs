@@ -1,6 +1,7 @@
 package io.github.srs.model.entity.dynamicentity
 
 import io.github.srs.model.validation.Validation
+import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 
 /**
  * Represents a set of predefined robot movement actions, each characterized by the speeds applied to the left and right
@@ -116,8 +117,9 @@ object Action:
           val updatedActuators = robot.actuators.map:
             case _: WheelMotor => updatedActuator
             case other => other
-          Robot(robot.position, robot.shape, robot.orientation, updatedActuators, robot.sensors)
-            .getOrElse(robot)
+          (robot withActuators updatedActuators).validate.getOrElse(robot)
+//          Robot(robot.position, robot.shape, robot.orientation, updatedActuators, robot.sensors)
+//            .getOrElse(robot)
         case None => robot
   end extension
 end Action

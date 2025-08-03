@@ -13,6 +13,7 @@ import io.github.srs.model.lighting.LightState
 import org.scalatest.OptionValues.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers.*
+import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 
 class LightStateTest extends AnyFlatSpec:
 
@@ -40,7 +41,7 @@ class LightStateTest extends AnyFlatSpec:
     Orientation(0),
     Seq.empty,
     SensorSuite.empty,
-  ).toOption.value
+  ).validate.toOption.value
 
   private val env: Environment = Environment(
     width = W,

@@ -3,6 +3,7 @@ package io.github.srs.model.entity.dynamicentity
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.Action.applyTo
 import io.github.srs.model.validation.Validation
+import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 
 /**
  * WheelMotor is an actuator that controls the movement of a robot.
@@ -139,7 +140,7 @@ object WheelMotor:
       val dy = velocity * math.sin(theta) * dt.toSeconds
       val newPosition = Point2D(robot.position.x + dx, robot.position.y + dy)
       val newOrientation = Orientation.fromRadians(theta + omega * dt.toSeconds)
-      for robot <- robot.copy(position = newPosition, orientation = newOrientation)
+      for robot <- (robot at newPosition withOrientation newOrientation).validate
       yield robot
 
   end DifferentialWheelMotor

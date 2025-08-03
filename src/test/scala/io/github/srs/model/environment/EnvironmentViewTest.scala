@@ -11,6 +11,7 @@ import io.github.srs.model.entity.Point2D.*
 import io.github.srs.model.entity.dynamicentity.sensor.SensorSuite
 import io.github.srs.model.entity.dynamicentity.{ Robot, WheelMotor }
 import io.github.srs.model.environment.dsl.CreationDSL.*
+import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 
 class EnvironmentViewTest extends AnyFlatSpec:
 
@@ -54,7 +55,7 @@ class EnvironmentViewTest extends AnyFlatSpec:
       orientation = Orientation(0),
       actuators = Seq.empty[WheelMotor], // no motors needed for the test
       sensors = SensorSuite.empty,
-    ).toOption.value
+    ).validate.toOption.value
 
   private val env: Environment =
     Environment(
