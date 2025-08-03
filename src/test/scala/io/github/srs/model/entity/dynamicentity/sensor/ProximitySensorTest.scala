@@ -13,6 +13,7 @@ import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.compatible.Assertion
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 
 class ProximitySensorTest extends AnyFlatSpec with Matchers:
 
@@ -37,7 +38,7 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
     orientation = Orientation(0.0),
     actuators = Seq.empty[Actuator[Robot]],
     sensors = SensorSuite(sensor, pointingDownSensor, pointingBackwardSensor, pointingLeftSensor),
-  ).toOption.value
+  ).validate.toOption.value
 
   private def createSensor(orientationDegrees: Double): ProximitySensor[DynamicEntity, Environment] =
     ProximitySensor(Orientation(orientationDegrees), 0.5, 5.0).toOption.value
@@ -51,16 +52,10 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
     Obstacle(position, orientation, width, height)
 
   private def createRobot(position: Point2D, orientation: Orientation = Orientation(0.0), radius: Double = 0.5): Robot =
-    Robot(
-      position = position,
-      shape = ShapeType.Circle(radius),
-      orientation = orientation,
-      actuators = Seq.empty[Actuator[Robot]],
-      sensors = SensorSuite.empty,
-    ).toOption.value
+    robot at position withShape ShapeType.Circle(radius) withOrientation orientation
 
   private def createEnvironment(entities: Set[Entity], width: Int = 20, height: Int = 20): Environment =
-    (Environment()
+    (environment
       withWidth width
       withHeight height
       containing entities).validate
@@ -163,7 +158,7 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
       orientation = Orientation(0.0),
       actuators = Seq.empty[Actuator[Robot]],
       sensors = SensorSuite.empty,
-    ).toOption.value
+    ).validate.toOption.value
     val reading = getSensorReading(sensor, Set(smallRobot))
     reading should be < 0.2 // Should detect the small robot close
 
@@ -402,7 +397,7 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
       orientation = Orientation(0.0),
       actuators = Seq.empty[Actuator[Robot]],
       sensors = SensorSuite.empty,
-    ).toOption.value
+    ).validate.toOption.value
     val reading = getSensorReading(sensor, Set(tinyRobot))
     reading should be > 0.99
 
