@@ -5,7 +5,6 @@ import scala.concurrent.duration.DurationInt
 
 import cats.syntax.foldable.toFoldableOps
 import io.github.srs.model.UpdateLogic.tick
-import io.github.srs.model.UpdateLogic.changeTime
 import io.github.srs.model.UpdateLogic.increment
 import io.github.srs.model.*
 import monix.catnap.ConcurrentQueue
@@ -69,7 +68,6 @@ object ControllerModule:
   trait Component[S <: ModelModule.State]:
     context: Requirements[S] =>
     given inc: IncrementLogic[S] = deferred
-    given start: ChangeTimeLogic[S] = deferred
     given tick: TickLogic[S] = deferred
 
     object Controller:
@@ -143,7 +141,6 @@ object ControllerModule:
 
         private def handleEvent(event: Event, state: S): Task[S] =
           event match
-            case Event.ChangeTime(simulationTime) => context.model.changeTime(state, simulationTime)
             case Event.Increment => context.model.increment(state)
             case Event.Stop => Task.pure(state)
             case Event.Tick(deltaTime) => context.model.tick(state, deltaTime)
