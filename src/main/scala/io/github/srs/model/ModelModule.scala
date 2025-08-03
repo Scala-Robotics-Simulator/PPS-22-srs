@@ -1,5 +1,7 @@
 package io.github.srs.model
 
+import scala.concurrent.duration.FiniteDuration
+
 import monix.eval.Task
 
 /**
@@ -10,7 +12,12 @@ object ModelModule:
   /**
    * State trait that defines the base state for the simulation.
    */
-  trait State
+  trait State:
+
+    /**
+     * The total simulation time for the simulation.
+     */
+    def simulationTime: FiniteDuration
 
   /**
    * Trait representing the core model logic for updating the simulation state.
