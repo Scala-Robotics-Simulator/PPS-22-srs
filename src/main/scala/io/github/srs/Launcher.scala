@@ -5,8 +5,8 @@ import scala.concurrent.duration.DurationInt
 import io.github.srs.controller.ControllerModule
 import io.github.srs.controller.ControllerModule.Controller
 import io.github.srs.model.ModelModule.Model
-import io.github.srs.model.SimulationLogic.given
-import io.github.srs.model.TimeLogic.given
+import io.github.srs.model.logic.IncreaseLogic.given
+import io.github.srs.model.logic.TimeLogic.given
 import io.github.srs.model.{ ModelModule, SimulationState }
 import io.github.srs.view.ViewModule
 import io.github.srs.view.ViewModule.View

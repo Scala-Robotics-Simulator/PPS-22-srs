@@ -1,7 +1,8 @@
-package io.github.srs.model
+package io.github.srs.model.logic
 
 import scala.concurrent.duration.FiniteDuration
 
+import io.github.srs.model.{ SimulationState, TickLogic }
 import monix.eval.Task
 
 object TimeLogic:
