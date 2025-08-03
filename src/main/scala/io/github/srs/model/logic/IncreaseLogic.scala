@@ -1,7 +1,10 @@
 package io.github.srs.model.logic
 
-import io.github.srs.model.{ IncrementLogic, SimulationState }
+import io.github.srs.model.{ ModelModule, SimulationState }
 import monix.eval.Task
+
+trait IncrementLogic[S <: ModelModule.State]:
+  def increment(s: S): Task[S]
 
 object IncreaseLogic:
 
