@@ -1,6 +1,6 @@
 package io.github.srs
 
-import scala.concurrent.duration.DurationInt
+import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
 
 import io.github.srs.controller.ControllerModule
 import io.github.srs.controller.ControllerModule.Controller
@@ -25,4 +25,4 @@ object Launcher
   val controller: Controller[SimulationState] = Controller()
 
   @main def run(): Unit =
-    controller.start(SimulationState(0, 10000.millis)).runAsyncAndForget
+    controller.start(SimulationState(0, FiniteDuration(10000, MILLISECONDS))).runAsyncAndForget

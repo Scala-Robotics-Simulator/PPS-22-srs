@@ -1,7 +1,7 @@
 package io.github.srs.controller
 
 import scala.compiletime.deferred
-import scala.concurrent.duration.DurationInt
+import scala.concurrent.duration.{ Duration, DurationInt }
 
 import cats.syntax.foldable.toFoldableOps
 import io.github.srs.model.UpdateLogic.tick
@@ -82,7 +82,7 @@ object ControllerModule:
       /**
        * Private controller implementation that delegates the simulation loop to the provided model and view.
        */
-      private class ControllerImpl extends Controller[S]:
+      private class ControllerImpl extends Controller[S]: // (using config: SimulationConfig)
 
         override def start(initialState: S): Task[Unit] =
           val tickInterval = 100.millis
@@ -112,7 +112,7 @@ object ControllerModule:
           def loop(state: S): Task[Unit] =
             for
               events <- queue.drain(0, 50)
-              stop = events.contains(Event.Stop)
+              stop = events.contains(Event.Stop) || state.simulationTime.equals(Duration.Zero)
               newState <- handleEvents(events, state)
               _ <- context.view.render(newState)
               _ <- Task.sleep(100.millis)
