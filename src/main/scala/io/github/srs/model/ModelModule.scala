@@ -2,6 +2,7 @@ package io.github.srs.model
 
 import scala.concurrent.duration.FiniteDuration
 
+import io.github.srs.model.SimulationConfig.{ SimulationSpeed, SimulationStatus }
 import monix.eval.Task
 
 /**
@@ -18,6 +19,11 @@ object ModelModule:
      * The total simulation time for the simulation.
      */
     def simulationTime: FiniteDuration
+
+    /**
+     * The current simulation speed.
+     */
+    def simulationSpeed: SimulationSpeed
 
     /**
      * The current simulation status.

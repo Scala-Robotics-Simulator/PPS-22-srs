@@ -7,11 +7,15 @@ import io.github.srs.model.ModelModule
 import monix.catnap.ConcurrentQueue
 import monix.eval.Task
 import io.github.srs.controller.Event
+import io.github.srs.model.SimulationConfig.SimulationSpeed
 import monix.execution.Scheduler.Implicits.global
 
 class SimpleView[S <: ModelModule.State]:
   private val frame = new JFrame("Scala Robotics Simulator")
   private val lblText = new JLabel("Hello World!", SwingConstants.CENTER)
+  private val rbtnSlow = new JRadioButton("Slow")
+  private val rbtnNormal = new JRadioButton("Normal", true)
+  private val rbtnFast = new JRadioButton("Fast")
   private val btnIncrement = new JButton("Increment")
   private val btnPause = new JButton("Pause")
   private val btnResume = new JButton("Resume")
@@ -32,9 +36,30 @@ class SimpleView[S <: ModelModule.State]:
     buttonPanel.add(btnStop)
     frame.getContentPane.add(buttonPanel, BorderLayout.SOUTH)
 
+    val speedPanel = new JPanel(new FlowLayout(FlowLayout.CENTER))
+    speedPanel.setBorder(BorderFactory.createTitledBorder("Speed"))
+    val speedGroup = new ButtonGroup()
+    speedGroup.add(rbtnSlow)
+    speedGroup.add(rbtnNormal)
+    speedGroup.add(rbtnFast)
+    speedPanel.add(rbtnSlow)
+    speedPanel.add(rbtnNormal)
+    speedPanel.add(rbtnFast)
+    frame.getContentPane.add(speedPanel, BorderLayout.NORTH)
+
     frame.pack()
     frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
     frame.setVisible(true)
+
+    rbtnSlow.addActionListener { _ =>
+      queue.offer(Event.TickSpeed(SimulationSpeed.SLOW)).runAsyncAndForget
+    }
+    rbtnNormal.addActionListener { _ =>
+      queue.offer(Event.TickSpeed(SimulationSpeed.NORMAL)).runAsyncAndForget
+    }
+    rbtnFast.addActionListener { _ =>
+      queue.offer(Event.TickSpeed(SimulationSpeed.FAST)).runAsyncAndForget
+    }
 
     btnIncrement.addActionListener { _ =>
       queue.offer(Event.Increment).runAsyncAndForget
