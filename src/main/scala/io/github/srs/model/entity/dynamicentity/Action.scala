@@ -110,7 +110,6 @@ object Action:
         case Some(wm) =>
           val (leftSpeed, rightSpeed) = action.speeds
           val updatedActuator = WheelMotor(
-            wm.dt,
             wm.left.updatedSpeed(leftSpeed),
             wm.right.updatedSpeed(rightSpeed),
           )

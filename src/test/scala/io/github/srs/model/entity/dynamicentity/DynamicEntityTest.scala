@@ -1,5 +1,7 @@
 package io.github.srs.model.entity.dynamicentity
 
+import scala.concurrent.duration.FiniteDuration
+
 import io.github.srs.model.entity.dynamicentity.sensor.*
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.environment.Environment
@@ -34,7 +36,7 @@ class DynamicEntityTest extends AnyFlatSpec with Matchers:
     def act(): Validation[Dummy] = Right[DomainError, Dummy](this)
 
   class DummyActuator extends Actuator[Dummy]:
-    override def act(entity: Dummy): Validation[Dummy] = Right[DomainError, Dummy](entity)
+    override def act(dt: FiniteDuration, entity: Dummy): Validation[Dummy] = Right[DomainError, Dummy](entity)
 
   "DynamicEntity" should "support having no actuators" in:
     val entity = new Dummy(initialPosition, shape, initialOrientation, Seq.empty, SensorSuite.empty)
