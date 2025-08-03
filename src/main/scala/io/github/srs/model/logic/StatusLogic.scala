@@ -1,6 +1,7 @@
 package io.github.srs.model.logic
 
-import io.github.srs.model.{ ModelModule, SimulationState, SimulationStatus }
+import io.github.srs.model.SimulationConfig.SimulationStatus
+import io.github.srs.model.{ ModelModule, SimulationState }
 import monix.eval.Task
 
 trait PauseLogic[S <: ModelModule.State]:

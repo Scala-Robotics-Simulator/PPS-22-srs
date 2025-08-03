@@ -1,16 +1,15 @@
 package io.github.srs.controller
 
 import scala.compiletime.deferred
-import scala.concurrent.duration.{ Duration, DurationInt }
+import scala.concurrent.duration.{ Duration, FiniteDuration }
 
 import cats.syntax.foldable.toFoldableOps
 import io.github.srs.model.*
+import io.github.srs.model.SimulationConfig.SimulationStatus
 import io.github.srs.model.UpdateLogic.*
 import io.github.srs.model.logic.*
 import monix.catnap.ConcurrentQueue
 import monix.eval.Task
-import monix.reactive.Observable
-import io.github.srs.model.logic.{ PauseLogic, ResumeLogic, StopLogic }
 
 /**
  * Module that defines the controller logic for the Scala Robotics Simulator.
@@ -89,40 +88,33 @@ object ControllerModule:
       private class ControllerImpl extends Controller[S]:
 
         override def start(initialState: S): Task[Unit] =
-          val tickInterval = 100.millis
           val list = List.fill(1_000)(Event.Increment)
           for
             queueSim <- ConcurrentQueue.unbounded[Task, Event]()
             _ <- context.view.init(queueSim)
             //            queueLog <- ConcurrentQueue.unbounded[Task, Event]()
             _ <- produceEvents(queueSim, list)
-//            _ <- simulationLoop(initialState, queueSim)
-            //            _ <- Task.parMap2(
-            //              simulationLoop(initialState, queueSim),
-            //              consumeStream(queueLog)(event => Task(println(s"Received: $event")))
-            //            )((_, _) => ())
-            tickStream = Observable
-              .intervalAtFixedRate(tickInterval)
-              .map(_ => Event.Tick(tickInterval))
-              .mapEval(queueSim.offer)
-              .completedL
-//            _ <- Task.parZip2(tickStream, simulationLoop(initialState, queueSim))
-            _ <- Task.parMap2(tickStream, simulationLoop(initialState, queueSim))((_, _) => ())
+            _ <- simulationLoop(initialState, queueSim)
+          //            _ <- Task.parMap2(
+          //              simulationLoop(initialState, queueSim),
+          //              consumeStream(queueLog)(event => Task(println(s"Received: $event")))
+          //            )((_, _) => ())
           yield ()
-
-        end start
 
         override def simulationLoop(s: S, queue: ConcurrentQueue[Task, Event]): Task[Unit] =
           def loop(state: S): Task[Unit] =
             for
               events <- queue.drain(0, 50)
-              stop = state.simulationStatus.equals(SimulationStatus.STOPPED) || state.simulationTime.equals(
-                Duration.Zero,
-              )
               newState <- handleEvents(events, state)
               _ <- context.view.render(newState)
-              _ <- Task.sleep(100.millis)
-              _ <- if stop then Task.unit else loop(newState)
+              nextState <-
+                if newState.simulationStatus == SimulationStatus.RUNNING then
+                  tickEvents(newState.simulationSpeed.tickSpeed, newState)
+                else Task.pure(newState)
+              stop = newState.simulationStatus == SimulationStatus.STOPPED || newState.simulationTime.equals(
+                Duration.Zero,
+              )
+              _ <- if stop then Task.unit else loop(nextState)
             yield ()
 
           loop(s)
@@ -135,6 +127,12 @@ object ControllerModule:
 
         private def produceEvents[A](queue: ConcurrentQueue[Task, A], events: List[A]): Task[Unit] =
           events.traverse_(queue.offer)
+
+        private def tickEvents(tickSpeed: FiniteDuration, state: S): Task[S] =
+          for
+            _ <- Task.sleep(tickSpeed)
+            tick <- handleEvent(Event.Tick(tickSpeed), state)
+          yield tick
 
         private def handleEvents(events: Seq[Event], state: S): Task[S] =
           for finalState <- events.foldLeft(Task.pure(state)) { (taskState, event) =>
@@ -154,6 +152,7 @@ object ControllerModule:
             case Event.Pause => context.model.pause(state)
             case Event.Resume => context.model.resume(state)
             case Event.Stop => context.model.stop(state)
+            case Event.TickSpeed(speed) => context.model.tickSpeed(state, speed)
             case _ => Task.pure(state)
 
       end ControllerImpl
