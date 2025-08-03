@@ -3,7 +3,6 @@ package io.github.srs.model.entity.dynamicentity
 import io.github.srs.model.entity.*
 import io.github.srs.model.validation.DomainError
 import org.scalatest.Inside.inside
-import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
@@ -11,7 +10,7 @@ import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 class RobotValidationTest extends AnyFlatSpec with Matchers:
 
   val wheelMotor: WheelMotor =
-    WheelMotor(DeltaTime(0.1).toOption.value, Wheel(1.0, ShapeType.Circle(0.5)), Wheel(1.0, ShapeType.Circle(0.5)))
+    WheelMotor(Wheel(1.0, ShapeType.Circle(0.5)), Wheel(1.0, ShapeType.Circle(0.5)))
 
   it should "not support having multiple WheelMotor Actuators" in:
     inside((robot containing wheelMotor and wheelMotor).validate):

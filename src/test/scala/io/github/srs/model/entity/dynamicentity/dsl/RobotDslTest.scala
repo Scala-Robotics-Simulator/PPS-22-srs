@@ -1,5 +1,7 @@
 package io.github.srs.model.entity.dynamicentity.dsl
 
+import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
+
 import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, SensorSuite }
 import io.github.srs.model.entity.dynamicentity.*
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
@@ -15,14 +17,14 @@ class RobotDslTest extends AnyFlatSpec with Matchers:
 
   import RobotDsl.*
 
-  val dt: DeltaTime = DeltaTime(0.1).toOption.value
+  val dt: FiniteDuration = FiniteDuration(100, MILLISECONDS)
   val wheelRadius: Double = 0.5
 
   val wheelMotor: WheelMotor =
-    WheelMotor(dt, Wheel(1.0, ShapeType.Circle(wheelRadius)), Wheel(2.0, ShapeType.Circle(wheelRadius)))
+    WheelMotor(Wheel(1.0, ShapeType.Circle(wheelRadius)), Wheel(2.0, ShapeType.Circle(wheelRadius)))
 
   val wheelMotor2: WheelMotor =
-    WheelMotor(dt, Wheel(3.0, ShapeType.Circle(wheelRadius)), Wheel(4.0, ShapeType.Circle(wheelRadius)))
+    WheelMotor(Wheel(3.0, ShapeType.Circle(wheelRadius)), Wheel(4.0, ShapeType.Circle(wheelRadius)))
 
   "Robot DSL" should "create a robot with default properties" in:
     import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.*
