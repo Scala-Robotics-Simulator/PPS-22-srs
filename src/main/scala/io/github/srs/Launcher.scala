@@ -10,6 +10,7 @@ import io.github.srs.model.logic.IncreaseLogic.given
 import io.github.srs.model.logic.StatusLogic.given
 import io.github.srs.model.logic.TimeLogic.given
 import io.github.srs.model.{ ModelModule, SimulationState }
+import io.github.srs.utils.SimpleRNG
 import io.github.srs.view.ViewModule
 import io.github.srs.view.ViewModule.View
 import monix.execution.Scheduler.Implicits.global
@@ -33,6 +34,7 @@ object Launcher
           0,
           FiniteDuration(10000, MILLISECONDS),
           SimulationSpeed.NORMAL,
+          SimpleRNG(42L),
           SimulationStatus.RUNNING,
         ),
       )

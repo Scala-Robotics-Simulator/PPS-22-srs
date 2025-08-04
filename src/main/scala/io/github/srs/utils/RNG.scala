@@ -2,6 +2,7 @@ package io.github.srs.utils
 
 trait RNG:
   def nextInt: (Int, RNG)
+  def nextIntBetween(min: Int, max: Int): (Int, RNG)
   def nextDouble: (Double, RNG)
   def nextDoubleBetween(min: Double, max: Double, isMaxExcluded: Boolean = true): (Double, RNG)
   def nextLong: (Long, RNG)
@@ -12,24 +13,28 @@ final case class SimpleRNG(seed: Long) extends RNG:
   private def nextRNG: RNG = SimpleRNG(rng.nextLong())
 
   override def nextInt: (Int, RNG) =
-    val nextValue = rng.nextInt()
-    (nextValue, nextRNG)
+    val nextInt = rng.nextInt()
+    (nextInt, nextRNG)
+
+  override def nextIntBetween(min: Int, max: Int): (Int, RNG) =
+    val nextInt = rng.between(min, max)
+    (nextInt, nextRNG)
 
   override def nextDouble: (Double, RNG) =
-    val nextValue = rng.nextDouble()
-    (nextValue, nextRNG)
+    val nextDouble = rng.nextDouble()
+    (nextDouble, nextRNG)
 
   override def nextDoubleBetween(min: Double, max: Double, isMaxExcluded: Boolean = true): (Double, RNG) =
-    val base = rng.nextDouble
-    val scaled = min + (max - min) * base
-    val result = if !isMaxExcluded && base > 0.999999999999999 then max else scaled
+    val nextDouble = rng.nextDouble
+    val scaled = min + (max - min) * nextDouble
+    val result = if !isMaxExcluded && nextDouble > 0.999999999999999 then max else scaled
     (result, nextRNG)
 
   override def nextLong: (Long, RNG) =
-    val nextValue = rng.nextLong()
-    (nextValue, nextRNG)
+    val nextLong = rng.nextLong()
+    (nextLong, nextRNG)
 
   override def nextString(length: Int): (String, RNG) =
-    val nextValue = rng.nextString(length)
-    (nextValue, nextRNG)
+    val nextString = rng.nextString(length)
+    (nextString, nextRNG)
 end SimpleRNG
