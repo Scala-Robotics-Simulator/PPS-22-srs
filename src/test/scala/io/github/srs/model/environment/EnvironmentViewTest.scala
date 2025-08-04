@@ -8,10 +8,10 @@ import io.github.srs.model.entity.staticentity.StaticEntity
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.entity.staticentity.StaticEntity.{ Light, Obstacle }
 import io.github.srs.model.entity.Point2D.*
-import io.github.srs.model.entity.dynamicentity.sensor.SensorSuite
 import io.github.srs.model.entity.dynamicentity.{ Robot, WheelMotor }
 import io.github.srs.model.environment.dsl.CreationDSL.*
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
+import io.github.srs.model.entity.dynamicentity.sensor.Sensor
 
 class EnvironmentViewTest extends AnyFlatSpec:
 
@@ -54,7 +54,7 @@ class EnvironmentViewTest extends AnyFlatSpec:
       shape = ShapeType.Circle(0.5),
       orientation = Orientation(0),
       actuators = Seq.empty[WheelMotor], // no motors needed for the test
-      sensors = SensorSuite.empty,
+      sensors = Vector.empty[Sensor[Robot, Environment]], // no sensors needed for the test
     ).validate.toOption.value
 
   private val env: Environment =

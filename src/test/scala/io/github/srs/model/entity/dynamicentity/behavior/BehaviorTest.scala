@@ -2,7 +2,6 @@ package io.github.srs.model.entity.dynamicentity.behavior
 
 import io.github.srs.model.entity.dynamicentity.behavior.Behavior
 import io.github.srs.model.entity.dynamicentity.behavior.Behavior.{ empty, pure, when }
-import org.scalatest.OptionValues.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers.shouldBe
 
@@ -17,13 +16,12 @@ final class BehaviorTest extends AnyFlatSpec:
 
   /** Build a dummy proximity sensor. */
   private def mkSensor() =
-    ProximitySensor(Orientation(0.0), 0.1, 1.0).toOption.value
+    ProximitySensor(Orientation(0.0), 0.1, 1.0)
 
   /** SensorReadings with normalized proximity values (0..1). */
   private def readings(vals: Double*) =
     val s: ProximitySensor[?, ?] = mkSensor()
-    val rs = vals.toVector.map(v => SensorReading(s, v))
-    SensorReadings(proximity = rs)
+    vals.toVector.map(v => SensorReading(s, v))
 
   given CanEqual[Action, Action] = CanEqual.derived
 

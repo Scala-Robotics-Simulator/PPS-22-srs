@@ -1,7 +1,8 @@
 package io.github.srs.model.entity.dynamicentity
 
 import io.github.srs.model.entity.*
-import io.github.srs.model.entity.dynamicentity.sensor.SensorSuite
+import io.github.srs.model.entity.dynamicentity.sensor.Sensor
+import io.github.srs.model.environment.Environment
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.*
 
 /**
@@ -17,7 +18,7 @@ final case class Robot(
     override val shape: ShapeType.Circle = defaultShape,
     override val orientation: Orientation = defaultOrientation,
     override val actuators: Seq[Actuator[Robot]] = defaultActuators,
-    override val sensors: SensorSuite = defaultSensorSuite,
+    override val sensors: Vector[Sensor[Robot, Environment]] = defaultSensors,
 ) extends DynamicEntity
 
 ///**

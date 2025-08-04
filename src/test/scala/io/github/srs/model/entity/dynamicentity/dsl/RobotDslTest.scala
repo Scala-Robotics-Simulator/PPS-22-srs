@@ -2,10 +2,10 @@ package io.github.srs.model.entity.dynamicentity.dsl
 
 import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
 
-import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, SensorSuite }
 import io.github.srs.model.entity.dynamicentity.*
+import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, Sensor }
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
-import org.scalatest.OptionValues.convertOptionToValuable
+import io.github.srs.model.environment.Environment
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -13,7 +13,7 @@ class RobotDslTest extends AnyFlatSpec with Matchers:
   given CanEqual[ShapeType.Circle, ShapeType.Circle] = CanEqual.derived
   given CanEqual[Orientation, Orientation] = CanEqual.derived
   given CanEqual[Actuator[Robot], Actuator[Robot]] = CanEqual.derived
-  given CanEqual[SensorSuite, SensorSuite] = CanEqual.derived
+  given CanEqual[Sensor[Robot, Environment], Sensor[Robot, Environment]] = CanEqual.derived
 
   import RobotDsl.*
 
@@ -26,6 +26,10 @@ class RobotDslTest extends AnyFlatSpec with Matchers:
   val wheelMotor2: WheelMotor =
     WheelMotor(Wheel(3.0, ShapeType.Circle(wheelRadius)), Wheel(4.0, ShapeType.Circle(wheelRadius)))
 
+  val sensor: Sensor[Robot, Environment] = ProximitySensor(Orientation(0.0), 0.5, 3.0)
+
+  val sensor2: Sensor[Robot, Environment] = ProximitySensor(Orientation(90.0), 0.5, 3.0)
+
   "Robot DSL" should "create a robot with default properties" in:
     import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.*
     val entity = robot
@@ -33,7 +37,7 @@ class RobotDslTest extends AnyFlatSpec with Matchers:
     val _ = entity.shape shouldBe defaultShape
     val _ = entity.orientation shouldBe defaultOrientation
     val _ = entity.actuators shouldBe defaultActuators
-    entity.sensors shouldBe defaultSensorSuite
+    entity.sensors shouldBe defaultSensors
 
   it should "set the position of the robot" in:
     val pos = Point2D(5.0, 5.0)
@@ -56,8 +60,7 @@ class RobotDslTest extends AnyFlatSpec with Matchers:
     entity.actuators shouldBe actuators
 
   it should "set the sensors of the robot" in:
-    val sensor = ProximitySensor(Orientation(0.0), 0.5, 3.0).toOption.value
-    val sensors = SensorSuite(sensor)
+    val sensors = Seq(sensor)
     val entity = robot withSensors sensors
     entity.sensors shouldBe sensors
 
@@ -69,6 +72,14 @@ class RobotDslTest extends AnyFlatSpec with Matchers:
     val entity = robot containing wheelMotor and wheelMotor2
     entity.actuators should contain allOf (wheelMotor, wheelMotor2)
 
+  it should "add the sensor using convenience method" in:
+    val entity = robot containing sensor
+    entity.sensors should contain(sensor)
+
+  it should "add multiple sensors using convenience methods" in:
+    val entity = robot containing sensor and sensor2
+    entity.sensors should contain allOf (sensor, sensor2)
+
   it should "validate the robot with default properties" in:
     val entity = robot
     val validationResult = entity.validate
@@ -77,7 +88,7 @@ class RobotDslTest extends AnyFlatSpec with Matchers:
   it should "validate the robot with custom properties" in:
     val entity = robot at Point2D(1.0, 2.0) withShape ShapeType.Circle(0.5) withOrientation Orientation(
       90.0,
-    ) containing wheelMotor withSensors SensorSuite.empty
+    ) containing wheelMotor withSensors Seq.empty
     val validationResult = entity.validate
     validationResult.isRight shouldBe true
 
