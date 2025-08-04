@@ -2,14 +2,17 @@ package io.github.srs.model.entity.dynamicentity
 
 import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
 
+import cats.Id
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.WheelMotor.{ applyActions, move }
 import io.github.srs.model.entity.dynamicentity.WheelMotorTestUtils.calculateMovement
+import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
+import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, Sensor, SensorReading }
+import io.github.srs.model.environment.Environment
 import org.scalatest.Inside.inside
 import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 
 class RobotTest extends AnyFlatSpec with Matchers:
 
@@ -20,6 +23,9 @@ class RobotTest extends AnyFlatSpec with Matchers:
 
   val wheelMotor: WheelMotor =
     WheelMotor(Wheel(1.0, ShapeType.Circle(0.5)), Wheel(1.0, ShapeType.Circle(0.5)))
+
+  val proximitySensor: Sensor[Robot, Environment] =
+    ProximitySensor(Orientation(0.0), 0.5, 3.0)
 
   val defaultRobot: Robot = robot at initialPosition withShape shape withOrientation initialOrientation
 
@@ -110,5 +116,18 @@ class RobotTest extends AnyFlatSpec with Matchers:
         val movedRobot = robot.applyActions(deltaTime, Seq(customAction, customAction))
         val expectedMovement: (Point2D, Orientation) = calculateMovement(deltaTime, robot)
         movedRobot.position shouldBe expectedMovement._1
+
+  it should "support sensors" in:
+    inside((defaultRobot containing proximitySensor).validate):
+      case Right(robot) =>
+        robot.sensors should contain(proximitySensor)
+
+  it should "sense the environment using its sensors" in:
+    import Sensor.senseAll
+    inside((defaultRobot containing proximitySensor).validate):
+      case Right(robot) =>
+        val environment = Environment(10, 10)
+        val sensedData = robot.senseAll[Id](environment)
+        sensedData should contain only (SensorReading(proximitySensor, proximitySensor.sense[Id](robot, environment)))
 
 end RobotTest

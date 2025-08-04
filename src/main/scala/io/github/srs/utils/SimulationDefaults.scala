@@ -1,8 +1,9 @@
 package io.github.srs.utils
 
-import io.github.srs.model.entity.dynamicentity.{ Actuator, Robot }
-import io.github.srs.model.entity.dynamicentity.sensor.SensorSuite
 import io.github.srs.model.entity.*
+import io.github.srs.model.entity.dynamicentity.sensor.Sensor
+import io.github.srs.model.entity.dynamicentity.{ Actuator, Robot }
+import io.github.srs.model.environment.Environment
 
 object SimulationDefaults:
 
@@ -51,5 +52,5 @@ object SimulationDefaults:
       val defaultShape: ShapeType.Circle = ShapeType.Circle(0.5)
       val defaultOrientation: Orientation = Orientation(0.0)
       val defaultActuators: Seq[Actuator[Robot]] = Seq.empty
-      val defaultSensorSuite: SensorSuite = SensorSuite.empty
+      val defaultSensors: Vector[Sensor[Robot, Environment]] = Vector.empty
 end SimulationDefaults

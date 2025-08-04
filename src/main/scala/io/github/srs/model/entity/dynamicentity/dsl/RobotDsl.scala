@@ -1,8 +1,9 @@
 package io.github.srs.model.entity.dynamicentity.dsl
 
-import io.github.srs.model.entity.dynamicentity.sensor.SensorSuite
+import io.github.srs.model.entity.dynamicentity.sensor.Sensor
 import io.github.srs.model.entity.dynamicentity.{ Actuator, Robot, WheelMotor }
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
+import io.github.srs.model.environment.Environment
 import io.github.srs.model.validation.Validation
 import io.github.srs.model.validation.Validation.{ notInfinite, notNaN, validateCountOfType }
 
@@ -69,12 +70,12 @@ object RobotDsl:
     /**
      * Sets the sensors of the robot.
      * @param sensors
-     *   the new sensor suite for the robot. If the robot already has sensors, they will be replaced.
+     *   the new sequence of sensors for the robot.
      * @return
      *   a new [[Robot]] instance with the updated sensors.
      */
-    infix def withSensors(sensors: SensorSuite): Robot =
-      robot.copy(sensors = sensors)
+    infix def withSensors(sensors: Seq[Sensor[Robot, Environment]]): Robot =
+      robot.copy(sensors = sensors.toVector)
 
     /**
      * Adds an actuator to the robot.
@@ -95,6 +96,26 @@ object RobotDsl:
      */
     infix def and(actuator: Actuator[Robot]): Robot =
       containing(actuator)
+
+    /**
+     * Adds a sensor to the robot.
+     * @param sensor
+     *   the sensor to add.
+     * @return
+     *   a new [[Robot]] instance with the sensor added.
+     */
+    infix def containing(sensor: Sensor[Robot, Environment]): Robot =
+      robot.copy(sensors = robot.sensors :+ sensor)
+
+    /**
+     * Adds a sensor to the robot.
+     * @param sensor
+     *   the sensor to add.
+     * @return
+     *   a new [[Robot]] instance with the sensor added.
+     */
+    infix def and(sensor: Sensor[Robot, Environment]): Robot =
+      containing(sensor)
 
     /**
      * Validates the robot entity to ensure it meets the domain constraints.
