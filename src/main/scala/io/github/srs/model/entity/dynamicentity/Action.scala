@@ -106,15 +106,15 @@ object Action:
      *   a new instance of [[Robot]] with updated wheel motor speeds.
      */
     def applyTo(robot: Robot): Robot =
-      robot.actuators.collectFirst { case wm: WheelMotor => wm } match
+      robot.actuators.collectFirst { case wm: DifferentialWheelMotor => wm } match
         case Some(wm) =>
           val (leftSpeed, rightSpeed) = action.speeds
-          val updatedActuator = WheelMotor(
+          val updatedActuator = DifferentialWheelMotor(
             wm.left.updatedSpeed(leftSpeed),
             wm.right.updatedSpeed(rightSpeed),
           )
           val updatedActuators = robot.actuators.map:
-            case _: WheelMotor => updatedActuator
+            case _: DifferentialWheelMotor => updatedActuator
             case other => other
           (robot withActuators updatedActuators).validate.getOrElse(robot)
         case None => robot

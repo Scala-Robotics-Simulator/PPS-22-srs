@@ -2,15 +2,16 @@ package io.github.srs.model.entity.dynamicentity
 
 import scala.concurrent.duration.FiniteDuration
 
+import cats.Monad
+import cats.syntax.foldable.toFoldableOps
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.Action.applyTo
-import io.github.srs.model.validation.Validation
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 
 /**
  * WheelMotor is an actuator that controls the movement of a robot.
  */
-trait WheelMotor extends Actuator[Robot]:
+trait DifferentialWheelMotor extends Actuator[Robot]:
 
   /**
    * The left wheel of the motor.
@@ -27,62 +28,32 @@ trait WheelMotor extends Actuator[Robot]:
   def right: Wheel
 
 /**
- * Companion object for [[WheelMotor]] providing an extension method to move the robot.
+ * Companion object for [[DifferentialWheelMotor]] providing an extension method to move the robot.
  */
-object WheelMotor:
+object DifferentialWheelMotor:
 
   /**
-   * Extension method to move the robot using its wheel motors.
-   */
-  extension (robot: Robot)
-
-    /**
-     * Moves the robot based on the current state of its wheel motors.
-     *
-     * @return
-     *   a new instance of the robot with updated position and orientation.
-     */
-    def move(dt: FiniteDuration): Robot =
-      robot.actuators.collectFirst { case wm: WheelMotor => wm } match
-        case Some(wm) => wm.act(dt, robot).getOrElse(robot)
-        case None => robot
-
-    /**
-     * Applies a sequence of actions to the robot, updating its state accordingly.
-     * @param actions
-     *   the sequence of [[Action]] to apply to the robot.
-     * @return
-     *   the robot with updated state after applying the actions.
-     */
-    def applyActions(dt: FiniteDuration, actions: Seq[Action]): Robot =
-      actions.foldLeft(robot)((r, a) => a.applyTo(r).move(dt))
-
-  end extension
-
-  /**
-   * Creates a new instance of [[WheelMotor]] with the specified time step and wheel configurations.
-   * @param dt
-   *   the time step for the motor's operation, in seconds.
+   * Creates a new instance of [[DifferentialWheelMotor]] with the specified time step and wheel configurations.
+   *
    * @param left
    *   the left wheel of the motor.
    * @param right
    *   the right wheel of the motor.
    * @return
-   *   a new instance of [[WheelMotor]].
+   *   a new instance of [[DifferentialWheelMotor]].
    */
-  def apply(left: Wheel, right: Wheel): WheelMotor =
-    DifferentialWheelMotor(left, right)
+  def apply(left: Wheel, right: Wheel): DifferentialWheelMotor =
+    DifferentialWheelMotorImpl(left, right)
 
   /**
-   * Implementation of the [[WheelMotor]] trait that uses differential drive to move the robot.
-   * @param dt
-   *   the time step for the motor's operation, in seconds.
+   * Implementation of the [[DifferentialWheelMotor]] trait that uses differential drive to move the robot.
+   *
    * @param left
    *   the left wheel of the motor.
    * @param right
    *   the right wheel of the motor.
    */
-  private case class DifferentialWheelMotor(left: Wheel, right: Wheel) extends WheelMotor:
+  private case class DifferentialWheelMotorImpl(left: Wheel, right: Wheel) extends DifferentialWheelMotor:
 
     /**
      * Computes the updated position and orientation of a differential-drive robot based on the speeds of its wheels and
@@ -121,7 +92,7 @@ object WheelMotor:
      * @return
      *   a new [[Robot]] instance with updated position and orientation.
      */
-    override def act(dt: FiniteDuration, robot: Robot): Validation[Robot] =
+    override def act[F[_]: Monad](dt: FiniteDuration, robot: Robot): F[Robot] =
       import io.github.srs.model.entity.Point2D.*
       val vLeft = this.left.speed * this.left.shape.radius
       val vRight = this.right.speed * this.right.shape.radius
@@ -133,8 +104,36 @@ object WheelMotor:
       val dy = velocity * math.sin(theta) * dt.toSeconds
       val newPosition = Point2D(robot.position.x + dx, robot.position.y + dy)
       val newOrientation = Orientation.fromRadians(theta + omega * dt.toSeconds)
-      for robot <- (robot at newPosition withOrientation newOrientation).validate
-      yield robot
+      val validated = (robot at newPosition withOrientation newOrientation).validate
+      Monad[F].pure(validated.getOrElse(robot))
 
-  end DifferentialWheelMotor
-end WheelMotor
+  end DifferentialWheelMotorImpl
+
+  /**
+   * Extension method to move the robot using its wheel motors.
+   */
+  extension (robot: Robot)
+
+    /**
+     * Moves the robot based on the current state of its wheel motors.
+     *
+     * @return
+     *   a new instance of the robot with updated position and orientation.
+     */
+    def move[F[_]: Monad](dt: FiniteDuration): F[Robot] =
+      robot.actuators.collectFirst { case wm: DifferentialWheelMotor => wm } match
+        case Some(wm) => wm.act[F](dt, robot)
+        case None => Monad[F].pure(robot)
+
+    /**
+     * Applies a sequence of actions to the robot, updating its state accordingly.
+     *
+     * @param actions
+     *   the sequence of [[Action]] to apply to the robot.
+     * @return
+     *   the robot with updated state after applying the actions.
+     */
+    def applyActions[F[_]: Monad](dt: FiniteDuration, actions: Seq[Action]): F[Robot] =
+      actions.foldLeftM(robot)((r, a) => a.applyTo(r).move[F](dt))
+  end extension
+end DifferentialWheelMotor

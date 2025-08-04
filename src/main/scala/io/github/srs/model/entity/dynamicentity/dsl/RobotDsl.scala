@@ -1,7 +1,7 @@
 package io.github.srs.model.entity.dynamicentity.dsl
 
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor
-import io.github.srs.model.entity.dynamicentity.{ Actuator, Robot, WheelMotor }
+import io.github.srs.model.entity.dynamicentity.{ Actuator, DifferentialWheelMotor, Robot }
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.validation.Validation
@@ -130,7 +130,7 @@ object RobotDsl:
         y <- notNaN("y", robot.position.y)
         _ <- notInfinite("y", y)
         _ <- notNaN("degrees", robot.orientation.degrees)
-        _ <- validateCountOfType[WheelMotor]("actuators", robot.actuators, 0, 1)
+        _ <- validateCountOfType[DifferentialWheelMotor]("actuators", robot.actuators, 0, 1)
       yield robot
   end extension
 end RobotDsl

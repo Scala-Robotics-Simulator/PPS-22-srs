@@ -4,7 +4,6 @@ import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
 
 import cats.Id
 import io.github.srs.model.entity.*
-import io.github.srs.model.entity.dynamicentity.WheelMotor.{ applyActions, move }
 import io.github.srs.model.entity.dynamicentity.WheelMotorTestUtils.calculateMovement
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, Sensor, SensorReading }
@@ -13,6 +12,8 @@ import org.scalatest.Inside.inside
 import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import io.github.srs.model.entity.dynamicentity.DifferentialWheelMotor.move
+import io.github.srs.model.entity.dynamicentity.DifferentialWheelMotor.applyActions
 
 class RobotTest extends AnyFlatSpec with Matchers:
 
@@ -21,8 +22,8 @@ class RobotTest extends AnyFlatSpec with Matchers:
   val deltaTime: FiniteDuration = FiniteDuration(100, MILLISECONDS)
   val shape: ShapeType.Circle = ShapeType.Circle(0.5)
 
-  val wheelMotor: WheelMotor =
-    WheelMotor(Wheel(1.0, ShapeType.Circle(0.5)), Wheel(1.0, ShapeType.Circle(0.5)))
+  val wheelMotor: DifferentialWheelMotor =
+    DifferentialWheelMotor(Wheel(1.0, ShapeType.Circle(0.5)), Wheel(1.0, ShapeType.Circle(0.5)))
 
   val proximitySensor: Sensor[Robot, Environment] =
     ProximitySensor(Orientation(0.0), 0.5, 3.0)
@@ -52,70 +53,70 @@ class RobotTest extends AnyFlatSpec with Matchers:
   it should "stay at the same position if it has no wheel motors" in:
     inside(defaultRobot.validate):
       case Right(robot) =>
-        val movedRobot: Robot = robot.move(deltaTime)
+        val movedRobot: Robot = robot.move[Id](deltaTime)
         movedRobot.position should be(initialPosition)
 
   it should "return the same orientation if it has no wheel motors" in:
     inside(defaultRobot.validate):
       case Right(robot) =>
-        val movedRobot: Robot = robot.move(deltaTime)
+        val movedRobot: Robot = robot.move[Id](deltaTime)
         movedRobot.orientation should be(initialOrientation)
 
   it should "stay at the same position if it has no actions" in:
     inside((defaultRobot containing wheelMotor).validate):
       case Right(robot) =>
-        val movedRobot: Robot = robot.applyActions(deltaTime, Seq.empty)
+        val movedRobot: Robot = robot.applyActions[Id](deltaTime, Seq.empty)
         movedRobot.position should be(initialPosition)
 
   it should "return the same orientation if it has no actions" in:
     inside((defaultRobot containing wheelMotor).validate):
       case Right(robot) =>
-        val movedRobot: Robot = robot.applyActions(deltaTime, Seq.empty)
+        val movedRobot: Robot = robot.applyActions[Id](deltaTime, Seq.empty)
         movedRobot.orientation should be(initialOrientation)
 
   it should "update its position based on a single MoveForward action" in:
     inside((defaultRobot containing wheelMotor).validate):
       case Right(robot) =>
-        val movedRobot = robot.applyActions(deltaTime, Seq(Action.MoveForward))
+        val movedRobot = robot.applyActions[Id](deltaTime, Seq(Action.MoveForward))
         val expectedMovement: (Point2D, Orientation) = calculateMovement(deltaTime, robot)
-        movedRobot.position shouldBe expectedMovement._1
+        movedRobot.position should be(expectedMovement._1)
 
   it should "update its orientation based on a single MoveForward action" in:
     inside((defaultRobot containing wheelMotor).validate):
       case Right(robot) =>
-        val movedRobot = robot.applyActions(deltaTime, Seq(Action.MoveForward))
+        val movedRobot = robot.applyActions[Id](deltaTime, Seq(Action.MoveForward))
         val expectedMovement: (Point2D, Orientation) = calculateMovement(deltaTime, robot)
-        movedRobot.orientation.degrees shouldBe expectedMovement._2.degrees
+        movedRobot.orientation.degrees should be(expectedMovement._2.degrees)
 
   it should "update its position based on a sequence of actions" in:
     inside((defaultRobot containing wheelMotor).validate):
       case Right(robot) =>
-        val moved1 = robot.applyActions(deltaTime, Seq(Action.MoveForward))
-        val moved2 = moved1.applyActions(deltaTime, Seq(Action.TurnLeft))
-        val moved3 = moved2.applyActions(deltaTime, Seq(Action.Stop))
+        val moved1 = robot.applyActions[Id](deltaTime, Seq(Action.MoveForward))
+        val moved2 = moved1.applyActions[Id](deltaTime, Seq(Action.TurnLeft))
+        val moved3 = moved2.applyActions[Id](deltaTime, Seq(Action.Stop))
 
         val expectedPosition = moved3.position
-        val movedRobot = robot.applyActions(deltaTime, Seq(Action.MoveForward, Action.TurnLeft, Action.Stop))
-        movedRobot.position shouldBe expectedPosition
+        val movedRobot = robot.applyActions[Id](deltaTime, Seq(Action.MoveForward, Action.TurnLeft, Action.Stop))
+        movedRobot.position should be(expectedPosition)
 
   it should "update its orientation based on a sequence of actions" in:
     inside((defaultRobot containing wheelMotor).validate):
       case Right(robot) =>
-        val moved1 = robot.applyActions(deltaTime, Seq(Action.MoveForward))
-        val moved2 = moved1.applyActions(deltaTime, Seq(Action.TurnLeft))
-        val moved3 = moved2.applyActions(deltaTime, Seq(Action.Stop))
+        val moved1 = robot.applyActions[Id](deltaTime, Seq(Action.MoveForward))
+        val moved2 = moved1.applyActions[Id](deltaTime, Seq(Action.TurnLeft))
+        val moved3 = moved2.applyActions[Id](deltaTime, Seq(Action.Stop))
 
         val expectedOrientation = moved3.orientation
-        val movedRobot = robot.applyActions(deltaTime, Seq(Action.MoveForward, Action.TurnLeft, Action.Stop))
-        movedRobot.orientation.degrees shouldBe expectedOrientation.degrees
+        val movedRobot = robot.applyActions[Id](deltaTime, Seq(Action.MoveForward, Action.TurnLeft, Action.Stop))
+        movedRobot.orientation.degrees should be(expectedOrientation.degrees)
 
   it should "move correctly with custom actions" in:
     inside((defaultRobot containing wheelMotor).validate):
       case Right(robot) =>
         val customAction = Action.move(0.5, 0.5).toOption.value
-        val movedRobot = robot.applyActions(deltaTime, Seq(customAction, customAction))
+        val movedRobot = robot.applyActions[Id](deltaTime, Seq(customAction, customAction))
         val expectedMovement: (Point2D, Orientation) = calculateMovement(deltaTime, robot)
-        movedRobot.position shouldBe expectedMovement._1
+        movedRobot.position should be(expectedMovement._1)
 
   it should "support sensors" in:
     inside((defaultRobot containing proximitySensor).validate):
@@ -128,6 +129,6 @@ class RobotTest extends AnyFlatSpec with Matchers:
       case Right(robot) =>
         val environment = Environment(10, 10)
         val sensedData = robot.senseAll[Id](environment)
-        sensedData should contain only (SensorReading(proximitySensor, proximitySensor.sense[Id](robot, environment)))
+        sensedData should contain only SensorReading(proximitySensor, proximitySensor.sense[Id](robot, environment))
 
 end RobotTest

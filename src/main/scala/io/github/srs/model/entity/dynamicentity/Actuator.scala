@@ -2,7 +2,7 @@ package io.github.srs.model.entity.dynamicentity
 
 import scala.concurrent.duration.FiniteDuration
 
-import io.github.srs.model.validation.Validation
+import cats.Monad
 
 /**
  * Represents an actuator for a dynamic entity.
@@ -13,13 +13,15 @@ import io.github.srs.model.validation.Validation
 trait Actuator[E <: DynamicEntity]:
 
   /**
-   * Performs an action on the dynamic entity based on the specified time duration.
+   * Performs an action on the entity after a specified duration.
    *
    * @param dt
-   *   the time duration for which the action is performed.
+   *   the duration after which the action is performed.
    * @param entity
-   *   the dynamic entity to act upon.
+   *   the dynamic entity on which the action is performed.
+   * @tparam F
+   *   the effect type in which the action is performed, a Monad.
    * @return
-   *   a validation result containing the updated entity after the action is applied.
+   *   the updated entity after the action is performed.
    */
-  def act(dt: FiniteDuration, entity: E): Validation[E]
+  def act[F[_]: Monad](dt: FiniteDuration, entity: E): F[E]
