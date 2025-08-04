@@ -117,8 +117,6 @@ object Action:
             case _: WheelMotor => updatedActuator
             case other => other
           (robot withActuators updatedActuators).validate.getOrElse(robot)
-//          Robot(robot.position, robot.shape, robot.orientation, updatedActuators, robot.sensors)
-//            .getOrElse(robot)
         case None => robot
   end extension
 end Action
