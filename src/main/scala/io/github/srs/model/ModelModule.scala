@@ -3,6 +3,7 @@ package io.github.srs.model
 import scala.concurrent.duration.FiniteDuration
 
 import io.github.srs.model.SimulationConfig.{ SimulationSpeed, SimulationStatus }
+import io.github.srs.utils.SimpleRNG
 import monix.eval.Task
 
 /**
@@ -26,9 +27,16 @@ object ModelModule:
     def simulationSpeed: SimulationSpeed
 
     /**
+     * The random number generator used for the simulation.
+     */
+    def simulationRNG: SimpleRNG
+
+    /**
      * The current simulation status.
      */
     def simulationStatus: SimulationStatus
+
+  end State
 
   /**
    * Trait representing the core model logic for updating the simulation state.

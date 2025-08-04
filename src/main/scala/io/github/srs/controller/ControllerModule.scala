@@ -88,7 +88,8 @@ object ControllerModule:
       private class ControllerImpl extends Controller[S]:
 
         override def start(initialState: S): Task[Unit] =
-          val list = List.fill(1_000)(Event.Increment)
+          val randInt: Int = initialState.simulationRNG.nextIntBetween(0, 10_000)._1
+          val list = List.fill(randInt)(Event.Increment)
           for
             queueSim <- ConcurrentQueue.unbounded[Task, Event]()
             _ <- context.view.init(queueSim)
