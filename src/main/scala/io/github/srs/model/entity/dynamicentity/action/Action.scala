@@ -1,4 +1,6 @@
-package io.github.srs.model.entity.dynamicentity
+package io.github.srs.model.entity.dynamicentity.action
+
+import io.github.srs.model.entity.dynamicentity.Robot
 
 /**
  * Action trait represents an action that can be performed on a robot.

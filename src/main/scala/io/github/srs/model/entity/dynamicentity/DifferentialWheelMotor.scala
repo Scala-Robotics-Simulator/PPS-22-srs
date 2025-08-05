@@ -6,6 +6,7 @@ import cats.Monad
 import cats.syntax.flatMap.toFlatMapOps
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.Point2D.*
+import io.github.srs.model.entity.dynamicentity.action.{ Action, RobotAction }
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 
 /**

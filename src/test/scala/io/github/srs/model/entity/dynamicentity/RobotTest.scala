@@ -4,10 +4,11 @@ import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
 
 import cats.Id
 import io.github.srs.model.entity.*
-import io.github.srs.model.entity.dynamicentity.ActionDsl.thenDo
+import io.github.srs.model.entity.dynamicentity.action.ActionDsl.thenDo
 import io.github.srs.model.entity.dynamicentity.DifferentialWheelMotor.{ applyMovementActions, move }
-import io.github.srs.model.entity.dynamicentity.MovementActionDsl.{ customMove, moveForward }
+import io.github.srs.model.entity.dynamicentity.action.MovementActionDsl.{ customMove, moveForward }
 import io.github.srs.model.entity.dynamicentity.WheelMotorTestUtils.calculateMovement
+import io.github.srs.model.entity.dynamicentity.action.{ Action, NoAction, RobotAction }
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, Sensor, SensorReading }
 import io.github.srs.model.environment.Environment

@@ -1,6 +1,6 @@
-package io.github.srs.model.entity.dynamicentity
+package io.github.srs.model.entity.dynamicentity.action
 
-import io.github.srs.model.entity.dynamicentity.{ Action, Robot, RobotAction }
+import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.validation.Validation
 
 /**
