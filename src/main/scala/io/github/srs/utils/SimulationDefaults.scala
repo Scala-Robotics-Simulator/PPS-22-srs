@@ -1,8 +1,9 @@
 package io.github.srs.utils
 
 import io.github.srs.model.entity.*
+import io.github.srs.model.entity.dynamicentity.Robot
+import io.github.srs.model.entity.dynamicentity.actuator.Actuator
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor
-import io.github.srs.model.entity.dynamicentity.{ Actuator, Robot }
 import io.github.srs.model.environment.Environment
 
 object SimulationDefaults:

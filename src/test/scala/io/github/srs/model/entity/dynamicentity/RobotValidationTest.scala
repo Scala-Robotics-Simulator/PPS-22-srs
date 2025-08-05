@@ -3,7 +3,6 @@ package io.github.srs.model.entity.dynamicentity
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.actuator.{ Wheel, WheelMotor }
 import io.github.srs.model.validation.DomainError
-import io.github.srs.utils.DeltaTime
 import org.scalatest.Inside.inside
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers

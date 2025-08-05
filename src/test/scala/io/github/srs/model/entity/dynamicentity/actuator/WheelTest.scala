@@ -1,4 +1,4 @@
-package io.github.srs.model.entity.dynamicentity
+package io.github.srs.model.entity.dynamicentity.actuator
 
 import io.github.srs.model.entity.ShapeType
 import io.github.srs.model.entity.dynamicentity.actuator.Wheel
