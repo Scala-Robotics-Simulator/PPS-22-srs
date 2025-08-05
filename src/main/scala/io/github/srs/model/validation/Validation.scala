@@ -2,6 +2,8 @@ package io.github.srs.model.validation
 
 import scala.reflect.ClassTag
 
+import io.github.srs.model.entity.Entity
+
 /**
  * ADT collecting validation failures that are meaningful in the domain.
  */
@@ -12,6 +14,15 @@ enum DomainError:
   case NotANumber(field: String, value: Double)
   case Infinite(field: String, value: Double)
   case InvalidCount(field: String, count: Int, min: Int, max: Int)
+  case Collision(field: String, elements: Set[Entity])
+
+  case OutsideBounds[A](
+      field: String,
+      value: A,
+      width: (Double, Double),
+      height: (Double, Double),
+      stringify: A => String,
+  )
 
 /**
  * Companion object for [[DomainError]] that provides an extension method to get a human-readable error message.
@@ -27,6 +38,11 @@ object DomainError:
       case NotANumber(f, _) => s"$f is NaN"
       case Infinite(f, _) => s"$f is infinite"
       case InvalidCount(f, c, lo, hi) => s"$f has $c elements, allowed $lo $hi"
+      case Collision(f, elements) =>
+        val count = elements.size
+        s"$f have $count collision(s), expected none"
+      case OutsideBounds(f, v, w, h, stringify) =>
+        s"$f = ${stringify(v)} is outside the bounds (width: [${w._1}, ${w._2}], height: [${h._1}, ${h._2}])"
 
 /**
  * Type alias for domain‑level validations: `Right` = valid, `Left` = error.
@@ -87,15 +103,20 @@ object Validation:
     )
 
   /**
-   * Ensures the given numeric value is within a specified range (inclusive of min, exclusive of max).
+   * Ensures the given numeric value is within a specified range.
+   *
    * @param field
    *   the name of the field being validated.
    * @param v
    *   the numeric value to validate.
    * @param min
-   *   the minimum value (inclusive).
+   *   the minimum value.
    * @param max
-   *   the maximum value (exclusive).
+   *   the maximum value.
+   * @param includeMin
+   *   whether the minimum value is inclusive.
+   * @param includeMax
+   *   whether the maximum value is inclusive.
    * @param n
    *   the numeric type class instance for the type of `v`.
    * @tparam T
@@ -103,9 +124,19 @@ object Validation:
    * @return
    *   [[Right]] with the value if it is within the bounds, otherwise [[Left]] with a [[DomainError.OutOfBounds]] error.
    */
-  private def bounded[T](field: String, v: T, min: T, max: T)(using n: Numeric[T]): Validation[T] =
+  def bounded[T](
+      field: String,
+      v: T,
+      min: T,
+      max: T,
+      includeMin: Boolean = true,
+      includeMax: Boolean = false,
+  )(using n: Numeric[T]): Validation[T] =
+    val minOk = if includeMin then n.gteq(v, min) else n.gt(v, min)
+    val maxOk = if includeMax then n.lteq(v, max) else n.lt(v, max)
+
     Either.cond(
-      n.gteq(v, min) && n.lt(v, max),
+      minOk && maxOk,
       v,
       DomainError.OutOfBounds(field, n.toDouble(v), n.toDouble(min), n.toDouble(max)),
     )
@@ -179,5 +210,51 @@ object Validation:
     }.left.map { _ =>
       DomainError.InvalidCount(field, count, min, max)
     }
+
+  /**
+   * Checks if there are no collisions among a set of entities.
+   * @param field
+   *   the name of the field being validated (for error reporting).
+   * @param elements
+   *   the set of entities to check for collisions.
+   * @return
+   *   [[Right]] with the original set of entities if there are no collisions, otherwise [[Left]] with a
+   *   [[DomainError.Collision]] error containing the colliding entities.
+   */
+  def noCollisions(field: String, elements: Set[Entity]): Validation[Set[Entity]] =
+    elements.toSeq
+      .combinations(2)
+      .collectFirst:
+        case Seq(a, b) if a.collidesWith(b) => DomainError.Collision(field, Set(b))
+    match
+      case Some(error) => Left[DomainError, Set[Entity]](error)
+      case None => Right[DomainError, Set[Entity]](elements)
+
+  def withinBounds(
+      field: String,
+      entities: Set[Entity],
+      width: Int,
+      height: Int,
+  ): Validation[Set[Entity]] =
+    import io.github.srs.model.entity.Point2D.*
+
+    val failures = entities.collectFirst:
+      case entity
+          if bounded("x", entity.position.x, 0.0, width.toDouble).isLeft ||
+            bounded("y", entity.position.y, 0.0, height.toDouble).isLeft =>
+        entity
+    failures match
+      case Some(entity) =>
+        Left[DomainError, Set[Entity]](
+          DomainError.OutsideBounds(
+            field,
+            entity,
+            (0.0, width.toDouble),
+            (0.0, height.toDouble),
+            e => s"(${e.position.x}, ${e.position.y})",
+          ),
+        )
+      case None => Right[DomainError, Set[Entity]](entities)
+  end withinBounds
 
 end Validation

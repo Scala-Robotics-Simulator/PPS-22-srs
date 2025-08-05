@@ -1,20 +1,16 @@
 package io.github.srs.model.entity.dynamicentity
 
+import scala.concurrent.duration.FiniteDuration
+
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.Action.applyTo
 import io.github.srs.model.validation.Validation
+import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 
 /**
  * WheelMotor is an actuator that controls the movement of a robot.
  */
 trait WheelMotor extends Actuator[Robot]:
-
-  /**
-   * The time step for the motor's operation, in seconds.
-   * @return
-   *   the time step as a [[DeltaTime]].
-   */
-  def dt: DeltaTime
 
   /**
    * The left wheel of the motor.
@@ -29,8 +25,6 @@ trait WheelMotor extends Actuator[Robot]:
    *   the right wheel.
    */
   def right: Wheel
-
-end WheelMotor
 
 /**
  * Companion object for [[WheelMotor]] providing an extension method to move the robot.
@@ -48,9 +42,9 @@ object WheelMotor:
      * @return
      *   a new instance of the robot with updated position and orientation.
      */
-    def move: Robot =
+    def move(dt: FiniteDuration): Robot =
       robot.actuators.collectFirst { case wm: WheelMotor => wm } match
-        case Some(wm) => wm.act(robot).getOrElse(robot)
+        case Some(wm) => wm.act(dt, robot).getOrElse(robot)
         case None => robot
 
     /**
@@ -60,8 +54,8 @@ object WheelMotor:
      * @return
      *   the robot with updated state after applying the actions.
      */
-    def applyActions(actions: Seq[Action]): Robot =
-      actions.foldLeft(robot)((r, a) => a.applyTo(r).move)
+    def applyActions(dt: FiniteDuration, actions: Seq[Action]): Robot =
+      actions.foldLeft(robot)((r, a) => a.applyTo(r).move(dt))
 
   end extension
 
@@ -76,8 +70,8 @@ object WheelMotor:
    * @return
    *   a new instance of [[WheelMotor]].
    */
-  def apply(dt: DeltaTime, left: Wheel, right: Wheel): WheelMotor =
-    DifferentialWheelMotor(dt, left, right)
+  def apply(left: Wheel, right: Wheel): WheelMotor =
+    DifferentialWheelMotor(left, right)
 
   /**
    * Implementation of the [[WheelMotor]] trait that uses differential drive to move the robot.
@@ -88,7 +82,7 @@ object WheelMotor:
    * @param right
    *   the right wheel of the motor.
    */
-  private case class DifferentialWheelMotor(dt: DeltaTime, left: Wheel, right: Wheel) extends WheelMotor:
+  private case class DifferentialWheelMotor(left: Wheel, right: Wheel) extends WheelMotor:
 
     /**
      * Computes the updated position and orientation of a differential-drive robot based on the speeds of its wheels and
@@ -127,7 +121,7 @@ object WheelMotor:
      * @return
      *   a new [[Robot]] instance with updated position and orientation.
      */
-    override def act(robot: Robot): Validation[Robot] =
+    override def act(dt: FiniteDuration, robot: Robot): Validation[Robot] =
       import io.github.srs.model.entity.Point2D.*
       val vLeft = this.left.speed * this.left.shape.radius
       val vRight = this.right.speed * this.right.shape.radius
@@ -139,7 +133,7 @@ object WheelMotor:
       val dy = velocity * math.sin(theta) * dt.toSeconds
       val newPosition = Point2D(robot.position.x + dx, robot.position.y + dy)
       val newOrientation = Orientation.fromRadians(theta + omega * dt.toSeconds)
-      for robot <- robot.copy(position = newPosition, orientation = newOrientation)
+      for robot <- (robot at newPosition withOrientation newOrientation).validate
       yield robot
 
   end DifferentialWheelMotor

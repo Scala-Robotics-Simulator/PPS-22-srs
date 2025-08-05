@@ -76,11 +76,11 @@ final class ShadowFovDiffuser(fov: FovEngine = SquidLibFov) extends Diffuser[Env
       environment: EnvironmentView,
       width: Int,
   ): ArraySeq[Lux] =
-    val squaredRadius = light.radius * light.radius
+    val squaredRadius = light.illuminationRadius * light.illuminationRadius
     val (sourceX, sourceY) = light.position
     val lightVisibility = fov.compute(environment.resistance)(
       light.position.toCell,
-      light.radius.toInt,
+      light.illuminationRadius.toInt,
     )
 
     lightVisibility.iterator.zipWithIndex.map { case (visibilityFactor, index) =>

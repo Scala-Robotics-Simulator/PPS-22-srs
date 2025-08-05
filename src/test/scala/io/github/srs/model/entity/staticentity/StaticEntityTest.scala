@@ -1,6 +1,9 @@
 package io.github.srs.model.entity.staticentity
 
 import io.github.srs.model.entity.staticentity.StaticEntity
+import io.github.srs.model.entity.staticentity.dsl.LightDsl.*
+import io.github.srs.model.entity.staticentity.dsl.ObstacleDsl.*
+import io.github.srs.model.entity.staticentity.dsl.BoundaryDsl.*
 import io.github.srs.model.entity.{ Orientation, Point2D }
 import io.github.srs.model.validation.DomainError
 import org.scalatest.EitherValues.*
@@ -24,34 +27,68 @@ class StaticEntityTest extends AnyFlatSpec:
   val radius = 1.0
   val intensity = 1.0
   val attenuation = 1.0
-  val expectedLight: StaticEntity = StaticEntity.Light(origin, orientation, radius, intensity, attenuation)
+
+  val expectedLight: StaticEntity = StaticEntity.Light(
+    pos = origin,
+    orient = orientation,
+    illuminationRadius = radius,
+    intensity = intensity,
+    attenuation = attenuation,
+  )
 
   "obstacle" should "create a valid entity" in:
-    inside(StaticEntity.obstacle(origin, orientation, width, height)):
+    val res = obstacle at origin withOrientation orientation withWidth width withHeight height
+    inside(res.validate):
       case Right(entity) => entity shouldBe expectedObstacle
 
   it should "fail when width is not positive" in:
-    val res = StaticEntity.obstacle(origin, orientation, 0, height)
-    inside(res.left.value) { case DomainError.NegativeOrZero("width", _) => succeed }
+    val res = obstacle at origin withOrientation orientation withWidth 0 withHeight height
+    inside(res.validate.left.value) { case DomainError.NegativeOrZero("width", _) => succeed }
 
   it should "fail when height is not positive" in:
-    val res = StaticEntity.obstacle(origin, orientation, width, 0)
-    inside(res.left.value) { case DomainError.NegativeOrZero("height", _) => succeed }
+    val res = obstacle at origin withOrientation orientation withWidth width withHeight 0
+    inside(res.validate.left.value) { case DomainError.NegativeOrZero("height", _) => succeed }
 
   "light" should "create a valid entity" in:
-    inside(StaticEntity.light(origin, orientation, radius, intensity, attenuation)):
+    val res =
+      light at origin withOrientation orientation withIlluminationRadius radius withIntensity intensity withAttenuation attenuation
+    inside(
+      res.validate,
+    ):
       case Right(entity) => entity shouldBe expectedLight
 
   it should "fail when radius is not positive" in:
-    val res = StaticEntity.light(origin, orientation, 0.0, intensity, attenuation)
-    inside(res.left.value) { case DomainError.NegativeOrZero("radius", _) => succeed }
+    val res =
+      light at origin withOrientation orientation withRadius 0.0 withIlluminationRadius radius withIntensity intensity withAttenuation attenuation
+    inside(res.validate.left.value) { case DomainError.NegativeOrZero("radius", _) => succeed }
 
   it should "fail when intensity is not positive" in:
-    val res = StaticEntity.light(origin, orientation, radius, 0.0, attenuation)
-    inside(res.left.value) { case DomainError.NegativeOrZero("intensity", _) => succeed }
+    val res =
+      light at origin withOrientation orientation withIlluminationRadius radius withIntensity 0.0 withAttenuation attenuation
+    inside(res.validate.left.value) { case DomainError.NegativeOrZero("intensity", _) => succeed }
 
   it should "fail when attenuation is not positive" in:
-    val res = StaticEntity.light(origin, orientation, radius, intensity, 0.0)
-    inside(res.left.value) { case DomainError.NegativeOrZero("attenuation", _) => succeed }
+    val res =
+      light at origin withOrientation orientation withIlluminationRadius radius withIntensity intensity withAttenuation 0.0
+    inside(res.validate.left.value) { case DomainError.NegativeOrZero("attenuation", _) => succeed }
+
+  "boundary" should "create a valid entity" in:
+    val expectedBoundary: StaticEntity = StaticEntity.Boundary(origin, orientation, width, height)
+    val res = boundary at origin withOrientation orientation withWidth width withHeight height
+    inside(res.validate):
+      case Right(entity) => entity shouldBe expectedBoundary
+
+  it should "fail when width is negative" in:
+    val res = boundary at origin withOrientation orientation withWidth -1 withHeight height
+    inside(res.validate.left.value) { case DomainError.Negative("width", _) => succeed }
+
+  it should "fail when height is negative" in:
+    val res = boundary at origin withOrientation orientation withWidth width withHeight -1
+    inside(res.validate.left.value) { case DomainError.Negative("height", _) => succeed }
+
+  it should "succeed when width and height are zero" in:
+    val res = boundary at origin withOrientation orientation withWidth 0 withHeight 0
+    inside(res.validate):
+      case Right(entity) => entity shouldBe StaticEntity.Boundary(origin, orientation, 0, 0)
 
 end StaticEntityTest

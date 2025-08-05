@@ -2,17 +2,17 @@ package io.github.srs.lighting
 
 import scala.collection.immutable.ArraySeq
 
+import io.github.srs.model.Cell
+import io.github.srs.model.entity.dynamicentity.Robot
+import io.github.srs.model.entity.staticentity.StaticEntity.{ Light, Obstacle }
+import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
+import io.github.srs.model.environment.dsl.CreationDSL.*
+import io.github.srs.model.environment.{ view, Environment, EnvironmentView }
+import io.github.srs.model.lighting.LightState
+import org.scalatest.OptionValues.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers.*
-import org.scalatest.OptionValues.*
-import io.github.srs.model.Cell
-import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
-import io.github.srs.model.entity.dynamicentity.Robot
-import io.github.srs.model.entity.dynamicentity.sensor.SensorSuite
-import io.github.srs.model.entity.staticentity.StaticEntity.{ Light, Obstacle }
-import io.github.srs.model.environment.{ Environment, EnvironmentView }
-import io.github.srs.model.environment.view
-import io.github.srs.model.lighting.LightState
+import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 
 class LightStateTest extends AnyFlatSpec:
 
@@ -21,25 +21,25 @@ class LightStateTest extends AnyFlatSpec:
   private val values = ArraySeq(0.1, 0.2, 0.3, 0.4, 0.5, 0.6)
   private val state = LightState.fromArray(W, values)
 
-  private val obstaclePos = Point2D(1.0, 0.0)
-  private val lightPos = Point2D(2.0, 0.0)
-  private val robotPos = Point2D(0.0, 1.0)
+  private val obstaclePos = Point2D(1.0, 0.1)
+  private val lightPos = Point2D(2.0, 0.2)
+  private val robotPos = Point2D(0.5, 1.0)
 
   private val light = Light(
     lightPos,
     Orientation(0),
-    radius = 1.0,
+    radius = 0.1,
+    illuminationRadius = 1.0,
     intensity = 1.0,
     attenuation = 0.0,
   )
 
   private val robot = Robot(
     robotPos,
-    ShapeType.Circle(0.5),
+    ShapeType.Circle(0.4),
     Orientation(0),
     Seq.empty,
-    SensorSuite.empty,
-  ).toOption.value
+  ).validate.toOption.value
 
   private val env: Environment = Environment(
     width = W,
@@ -47,9 +47,9 @@ class LightStateTest extends AnyFlatSpec:
     entities = Set(
       light,
       robot,
-      Obstacle(obstaclePos, Orientation(0), 1.0, 1.0),
+      Obstacle(obstaclePos, Orientation(0), 1.0, 0.1),
     ),
-  ).toOption.value
+  ).validate.toOption.value
 
   private val view: EnvironmentView = env.view
 
@@ -74,15 +74,14 @@ class LightStateTest extends AnyFlatSpec:
 
   it should "render as ASCII with '#'=obstacle, 'L'=light, 'R'=robot" in:
     val expected =
-      """░#L
-        |R██""".stripMargin
-
+      """░▒L
+        |▓R█""".stripMargin
     state.render(view, ascii = true) shouldBe expected
 
   it should "render as raw numbers with same overrides" in:
     val expected =
-      """0.17 # L
-        |R 0.83 1.00""".stripMargin
+      """0.17 0.33 L
+        |0.67 R 1.00""".stripMargin
 
     state.render(view, ascii = false) shouldBe expected
 

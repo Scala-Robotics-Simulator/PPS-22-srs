@@ -1,7 +1,9 @@
 package io.github.srs.model.entity.dynamicentity.sensor
 
+import cats.Monad
+import cats.syntax.all.*
 import io.github.srs.model.PositiveDouble
-import io.github.srs.model.entity.dynamicentity.DynamicEntity
+import io.github.srs.model.entity.dynamicentity.{ DynamicEntity, Robot }
 import io.github.srs.model.entity.{ Orientation, Point2D }
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.validation.Validation
@@ -10,153 +12,146 @@ import io.github.srs.utils.Ray.intersectRay
 /**
  * Represents the range of a sensor.
  */
-type Range = PositiveDouble
+type Range = Double
 
 /**
  * Represents the distance from the center of a dynamic entity to a sensor.
  */
-type Distance = PositiveDouble
+type Distance = Double
 
 /**
- * Represents a sensor reading for a specific sensor type and value.
- *
- * @tparam S
- *   the type of sensor.
- * @tparam A
- *   the type of value that the sensor returns.
- * @param sensor
- *   the sensor that produced the reading.
- * @param value
- *   the value sensed by the sensor.
- */
-final case class SensorReading[S <: Sensor[?, ?, A], A](sensor: S, value: A)
-
-/**
- * Represents a collection of sensor readings for a dynamic entity.
- *
- * @param proximity
- *   a sequence of proximity sensor readings, each containing the sensor and its sensed value.
- */
-final case class SensorReadings(
-    proximity: Vector[SensorReading[ProximitySensor[?, ?], Double]],
-)
-
-/**
- * Represents a sensor for a dynamic entity.
- *
+ * Represents a sensor that can sense the environment for a dynamic entity.
  * @tparam Entity
- *   the type of dynamic entity that the sensor can sense.
+ *   the type of dynamic entity that the sensor can act upon.
  * @tparam Env
  *   the type of environment in which the sensor operates.
- * @tparam Data
- *   the type of data that the sensor returns.
  */
-trait Sensor[-Entity <: DynamicEntity, -Env <: Environment, +Data]:
+trait Sensor[-Entity <: DynamicEntity, -Env <: Environment]:
   /**
-   * The offset orientation of the sensor relative to the entity.
-   *
-   * This is used to determine the direction in which the sensor is oriented.
+   * The type of data that the sensor returns. This type can vary based on the specific sensor implementation.
    */
-  val offset: Orientation
+  type Data
+
+  /**
+   * The offset orientation of the sensor relative to the entity's orientation.
+   * @return
+   *   the orientation offset of the sensor.
+   */
+  def offset: Orientation
 
   /**
    * The distance from the center of the entity to the sensor.
+   * @return
+   *   the distance of the sensor from the entity's center.
    */
-  val distance: Distance
+  def distance: Distance
 
   /**
    * The range of the sensor, which defines how far it can sense.
+   * @note
+   *   The range is typically a positive value that indicates the maximum distance the sensor can detect.
+   * @return
+   *   the range of the sensor.
    */
-  val range: Range
+  def range: Range
 
   /**
-   * Senses the environment using the given entity.
-   *
+   * Senses the environment for the given entity and returns the data collected by the sensor.
    * @param entity
-   *   the entity that is sensing the environment.
-   * @param environment
-   *   the environment in which the entity is operating.
+   *   the dynamic entity that the sensor is attached to.
+   * @param env
+   *   the environment in which the sensor operates.
+   * @param x$3
+   *   the implicit Monad instance for the effect type `F`.
+   * @tparam F
+   *   the effect type in which the sensing operation is performed.
    * @return
-   *   the data sensed by the sensor.
+   *   a monadic effect containing the data sensed by the sensor.
    */
-  def sense(entity: Entity)(environment: Env): Data
-
+  def sense[F[_]](entity: Entity, env: Env)(using Monad[F]): F[Data]
 end Sensor
 
-trait ProximitySensor[Entity <: DynamicEntity, Env <: Environment] extends Sensor[Entity, Env, Double]:
+/**
+ * Represents a reading from a sensor. This case class encapsulates the sensor and the value it has sensed.
+ * @param sensor
+ *   the sensor that has taken the reading.
+ * @param value
+ *   the value sensed by the sensor.
+ * @tparam S
+ *   the type of sensor, which is a subtype of [[Sensor]].
+ * @tparam A
+ *   the type of data sensed by the sensor.
+ */
+final case class SensorReading[S <: Sensor[?, ?], A](sensor: S, value: A)
 
-  override val offset: Orientation
+/**
+ * A collection of sensor readings. This type is used to represent multiple sensor readings from a dynamic entity. It is
+ * a vector of [[SensorReading]] instances, allowing for efficient access and manipulation of sensor data.
+ */
+type SensorReadings = Vector[SensorReading[? <: Sensor[?, ?], ?]]
 
-  override val distance: Distance
+/**
+ * A proximity sensor that can sense the distance to other entities in the environment. It calculates the distance to
+ * the nearest entity within its range and returns a normalized value. The value is normalized to a range between 0.0
+ * (closest) and 1.0 (farthest).
+ * @param offset
+ *   the offset orientation of the sensor relative to the entity's orientation.
+ * @param distance
+ *   the distance from the center of the entity to the sensor.
+ * @param range
+ *   the range of the sensor, which defines how far it can sense.
+ * @tparam Entity
+ *   the type of dynamic entity that the sensor can act upon.
+ * @tparam Env
+ *   the type of environment in which the sensor operates.
+ */
+final case class ProximitySensor[Entity <: DynamicEntity, Env <: Environment](
+    offset: Orientation,
+    distance: Distance,
+    range: Range,
+) extends Sensor[Entity, Env]:
 
-  override val range: Range
+  override type Data = Double
 
-  /**
-   * Senses the environment using the given entity.
-   *
-   * @param entity
-   *   the entity that is sensing the environment.
-   * @param environment
-   *   the environment in which the entity is operating.
-   * @return
-   *   the data sensed by the sensor, which is a normalized distance to the nearest obstacle.
-   */
-  def sense(entity: Entity)(environment: Env): Double =
+  override def sense[F[_]](entity: Entity, env: Env)(using Monad[F]): F[Data] =
     import Point2D.*
     val globalOrientation = entity.orientation.toRadians + offset.toRadians
-    val direction = Point2D(math.cos(globalOrientation), -math.sin(globalOrientation)) // x is right, y is down
-    val origin = entity.position + direction * distance.toDouble
-    val end = origin + direction * range.toDouble
+    val direction = Point2D(math.cos(globalOrientation), -math.sin(globalOrientation))
+    val origin = entity.position + direction * distance
+    val end = origin + direction * range
 
-    val distances = environment.entities.filter(!_.equals(entity)).flatMap(intersectRay(_, origin, end))
+    val distances = env.entities
+      .filter(!_.equals(entity))
+      .flatMap(intersectRay(_, origin, end))
+      .filter(_ <= range)
 
-    distances.filter(_ <= range.toDouble).minOption.getOrElse(range.toDouble) / range.toDouble
-
-end ProximitySensor
-
-object ProximitySensor:
-
-  /**
-   * Creates a new `ProximitySensor` with the specified offset, distance, and range.
-   *
-   * @param offset
-   *   the offset orientation of the sensor relative to the entity.
-   * @param distance
-   *   the distance from the center of the entity to the sensor.
-   * @param range
-   *   the range of the sensor.
-   * @return
-   *   a new instance of `ProximitySensor`.
-   */
-  def apply(
-      offset: Orientation,
-      distance: Double,
-      range: Double,
-  ): Validation[ProximitySensor[DynamicEntity, Environment]] =
-    for
-      distance <- PositiveDouble(distance)
-      range <- PositiveDouble(range)
-    yield new ProximitySensorImpl(offset, distance, range)
-
-  private class ProximitySensorImpl(
-      override val offset: Orientation,
-      override val distance: Distance,
-      override val range: Range,
-  ) extends ProximitySensor[DynamicEntity, Environment]
+    summon[Monad[F]].pure(distances.minOption.map(_ / range).getOrElse(1.0))
 
 end ProximitySensor
 
 object Sensor:
 
-  extension (e: DynamicEntity)
+  extension [E <: DynamicEntity, Env <: Environment](s: Sensor[E, Env])
 
     /**
-     * Senses the environment using the entity's sensors.
-     *
-     * @param env
-     *   the environment in which the entity is operating.
-     * @return
-     *   a collection of sensor readings.
+     * Validates the properties of a sensor.
      */
-    def sense(env: Environment): SensorReadings =
-      e.sensors.sense(e, env)
+    def validate: Validation[Sensor[E, Env]] =
+      for
+        _ <- PositiveDouble(s.distance).validate
+        _ <- PositiveDouble(s.range).validate
+      yield s
+
+  extension (r: Robot)
+
+    /**
+     * Senses all sensors of the robot in the given environment.
+     * @param env
+     *   the environment in which to sense.
+     * @return
+     *   a vector of sensor readings.
+     */
+    def senseAll[F[_]: Monad](env: Environment): F[SensorReadings] =
+      r.sensors.traverse: sensor =>
+        sensor.sense(r, env).map(reading => SensorReading(sensor, reading))
+end Sensor

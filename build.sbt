@@ -5,7 +5,8 @@ enablePlugins(JacocoCoverallsPlugin)
 lazy val root = project
   .in(file("."))
   .settings(
-    scalaVersion := "3.7.1",
+    name := "PPS-22-srs",
+    scalaVersion := "3.7.2",
     organization := "io.github.scala-robotics-simulator",
     description := "A robotics simulator written in scala.",
     homepage := Some(
@@ -62,7 +63,9 @@ lazy val root = project
       Wart.DefaultArguments,
       Wart.Equals,
       Wart.Any,
-      Wart.IsInstanceOf
+      Wart.IsInstanceOf,
+      Wart.ListUnapply,
+      Wart.Overloading,
     ),
     jacocoReportSettings := JacocoReportSettings(
       title = "PR report",
@@ -82,4 +85,5 @@ lazy val root = project
     libraryDependencies ++= scalaTestBundle,
     libraryDependencies += scalaTestJUnit5,
     libraryDependencies += squidLib,
+    libraryDependencies += catsCore,
   )

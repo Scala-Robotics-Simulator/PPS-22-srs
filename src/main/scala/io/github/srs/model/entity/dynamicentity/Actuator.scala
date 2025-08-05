@@ -1,5 +1,7 @@
 package io.github.srs.model.entity.dynamicentity
 
+import scala.concurrent.duration.FiniteDuration
+
 import io.github.srs.model.validation.Validation
 
 /**
@@ -9,14 +11,15 @@ import io.github.srs.model.validation.Validation
  *   the type of dynamic entity that the actuator can act upon.
  */
 trait Actuator[E <: DynamicEntity]:
+
   /**
-   * Applies an action to the given entity, returning a new instance with the updated state.
+   * Performs an action on the dynamic entity based on the specified time duration.
    *
-   * This method is intended to modify the state of the entity based on the actuator's logic.
-   *
+   * @param dt
+   *   the time duration for which the action is performed.
    * @param entity
-   *   the entity to act upon.
+   *   the dynamic entity to act upon.
    * @return
-   *   a new instance of the entity with the updated state, wrapped in a `Validation` to handle any potential errors.
+   *   a validation result containing the updated entity after the action is applied.
    */
-  def act(entity: E): Validation[E]
+  def act(dt: FiniteDuration, entity: E): Validation[E]
