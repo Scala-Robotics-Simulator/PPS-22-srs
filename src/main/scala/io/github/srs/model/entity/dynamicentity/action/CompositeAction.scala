@@ -1,7 +1,9 @@
-package io.github.srs.model.entity.dynamicentity
+package io.github.srs.model.entity.dynamicentity.action
 
 import cats.Monad
 import cats.syntax.foldable.toFoldableOps
+import io.github.srs.model.entity.dynamicentity.Robot
+import io.github.srs.model.entity.dynamicentity.action.RobotAction
 
 private final case class CompositeAction[F[_]: Monad](actions: List[Action[F]]) extends Action[F]:
 
