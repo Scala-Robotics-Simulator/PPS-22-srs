@@ -7,6 +7,7 @@ import cats.syntax.foldable.toFoldableOps
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.Action.applyTo
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
+import io.github.srs.model.entity.Point2D.*
 
 /**
  * WheelMotor is an actuator that controls the movement of a robot.
@@ -61,51 +62,29 @@ object DifferentialWheelMotor:
      *
      * The robot is assumed to move on a 2D plane, and the orientation is in radians.
      *
-     * Physics model:
-     *
-     *   - The linear velocity of each wheel is obtained by:
-     *     {{{
-     * vLeft = left.speed * left.radius
-     * vRight = right.speed * right.radius
-     *     }}}
-     *   - The linear velocity of the robot is the average of the two:
-     *     {{{
-     * v = (vRight + vLeft) / 2
-     *     }}}
-     *   - The angular velocity (omega) is proportional to the difference of the wheel velocities:
-     *     {{{
-     * omega = (vRight - vLeft) / d
-     *     }}}
-     *     Where `d` is the distance between the wheels (assumed to be robot.shape.radius * 2)
-     *   - The new position is computed as:
-     *     {{{
-     * xNew = x + v * cos(theta) * dt
-     * yNew = y + v * sin(theta) * dt
-     *     }}}
-     *   - The new orientation is:
-     *     {{{
-     * thetaNew = theta + omega * dt
-     *     }}}
-     *
+     * @param dt
+     *   the time delta for which the robot is moving.
      * @param robot
      *   the robot whose state should be updated.
      * @return
      *   a new [[Robot]] instance with updated position and orientation.
      */
     override def act[F[_]: Monad](dt: FiniteDuration, robot: Robot): F[Robot] =
-      import io.github.srs.model.entity.Point2D.*
-      val vLeft = this.left.speed * this.left.shape.radius
-      val vRight = this.right.speed * this.right.shape.radius
+      import DifferentialKinematics.*
+
       val wheelDistance = robot.shape.radius * 2
-      val velocity = (vLeft + vRight) / 2
-      val omega = (vRight - vLeft) / wheelDistance
       val theta = robot.orientation.toRadians
-      val dx = velocity * math.cos(theta) * dt.toSeconds
-      val dy = velocity * math.sin(theta) * dt.toSeconds
-      val newPosition = Point2D(robot.position.x + dx, robot.position.y + dy)
-      val newOrientation = Orientation.fromRadians(theta + omega * dt.toSeconds)
-      val validated = (robot at newPosition withOrientation newOrientation).validate
-      Monad[F].pure(validated.getOrElse(robot))
+
+      val updatedRobot = (
+        computeWheelVelocities
+          andThen computeVelocities(wheelDistance)
+          andThen computePositionAndOrientation(theta, dt)
+          andThen { case (dx, dy, newOrientation) =>
+            val newPos = Point2D(robot.position.x + dx, robot.position.y + dy)
+            (robot at newPos withOrientation newOrientation).validate
+          }
+      )(this)
+      Monad[F].pure(updatedRobot.getOrElse(robot))
 
   end DifferentialWheelMotorImpl
 
