@@ -3,11 +3,10 @@ package io.github.srs.model.entity.dynamicentity
 import scala.concurrent.duration.FiniteDuration
 
 import cats.Monad
-import cats.syntax.foldable.toFoldableOps
+import cats.syntax.flatMap.toFlatMapOps
 import io.github.srs.model.entity.*
-import io.github.srs.model.entity.dynamicentity.Action.applyTo
-import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 import io.github.srs.model.entity.Point2D.*
+import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 
 /**
  * WheelMotor is an actuator that controls the movement of a robot.
@@ -105,14 +104,15 @@ object DifferentialWheelMotor:
         case None => Monad[F].pure(robot)
 
     /**
-     * Applies a sequence of actions to the robot, updating its state accordingly.
+     * Applies a list of actions to the robot, updating its state accordingly.
      *
      * @param actions
-     *   the sequence of [[Action]] to apply to the robot.
+     *   the list of [[MovementAction]] to apply to the robot.
      * @return
      *   the robot with updated state after applying the actions.
      */
-    def applyActions[F[_]: Monad](dt: FiniteDuration, actions: Seq[Action]): F[Robot] =
-      actions.foldLeftM(robot)((r, a) => a.applyTo(r).move[F](dt))
+    def applyMovementActions[F[_]: Monad](dt: FiniteDuration, action: Action[F])(using ra: RobotAction[F]): F[Robot] =
+//      actions.foldLeftM(robot)((r, a) => a.run(r).flatMap(_.move[F](dt)))
+      action.run(robot).flatMap(_.move(dt))
   end extension
 end DifferentialWheelMotor
