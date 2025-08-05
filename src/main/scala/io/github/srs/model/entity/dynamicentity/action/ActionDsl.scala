@@ -25,3 +25,4 @@ object ActionDsl:
      *   the combined action as a [[SequenceAction]].
      */
     infix def thenDo(next: List[Action[F]]): Action[F] = SequenceAction(a :: next)
+end ActionDsl
