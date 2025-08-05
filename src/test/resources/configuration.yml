@@ -1,5 +1,3 @@
-version: 0.1
-
 simulation:
   duration: 1000
   seed: 42
@@ -17,7 +15,7 @@ environment:
         position: [2, 2]
         illuminationRadius: 5.0
         intensity: 1.0
-        attenuation: 1
+        attenuation: 1.0
     - robot:
         position: [3, 1]
         orientation: 90.0

@@ -1,12 +1,15 @@
 package io.github.srs.model.entity.dynamicentity.dsl
 
-import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, DifferentialWheelMotor }
-import io.github.srs.model.entity.dynamicentity.sensor.Sensor
 import io.github.srs.model.entity.dynamicentity.Robot
-import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
+import io.github.srs.model.entity.dynamicentity.actuator.{Actuator, DifferentialWheelMotor}
+import io.github.srs.model.entity.dynamicentity.sensor.Sensor
+import io.github.srs.model.entity.{Orientation, Point2D, ShapeType}
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.validation.Validation
-import io.github.srs.model.validation.Validation.{ notInfinite, notNaN, validateCountOfType }
+import io.github.srs.model.validation.Validation.{notInfinite, notNaN, validateCountOfType}
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.*
+
+import scala.annotation.unused
 
 /**
  * The DSL for creating and configuring a Robot entity.
@@ -117,6 +120,15 @@ object RobotDsl:
      */
     infix def and(sensor: Sensor[Robot, Environment]): Robot =
       containing(sensor)
+
+    infix def withSpeed(@unused speed: Double): Robot =
+      robot // TODO: Implement speed setting logic
+
+    def withProximitySensors: Robot =
+      robot withSensors stdProximitySensors
+
+    def withLightSensors: Robot =
+      robot // TODO: Implement light sensors when available
 
     /**
      * Validates the robot entity to ensure it meets the domain constraints.

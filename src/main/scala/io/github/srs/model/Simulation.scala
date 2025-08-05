@@ -11,7 +11,7 @@ import io.github.srs.utils.SimulationDefaults
  */
 final case class Simulation(
     duration: Option[Int] = SimulationDefaults.duration,
-    seed: Option[Int] = SimulationDefaults.seed,
+    seed: Option[Long] = SimulationDefaults.seed,
 )
 
 /**
@@ -34,7 +34,7 @@ object Simulation:
      * @return
      *   A new simulation instance with the specified duration.
      */
-    def withDuration(duration: Int): Simulation =
+    infix def withDuration(duration: Int): Simulation =
       simulation.copy(duration = Some(duration))
 
     /**
@@ -44,7 +44,7 @@ object Simulation:
      * @return
      *   A new simulation instance with the specified seed.
      */
-    def withSeed(seed: Int): Simulation =
+    infix def withSeed(seed: Long): Simulation =
       simulation.copy(seed = Some(seed))
   end extension
 end Simulation

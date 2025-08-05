@@ -3,13 +3,13 @@ package io.github.srs.utils
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.actuator.Actuator
-import io.github.srs.model.entity.dynamicentity.sensor.Sensor
+import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, Sensor }
 import io.github.srs.model.environment.Environment
 
 object SimulationDefaults:
 
   val duration: Option[Int] = None
-  val seed: Option[Int] = None
+  val seed: Option[Long] = None
 
   object SimulationConfig:
     val maxCount = 10_000
@@ -57,9 +57,27 @@ object SimulationDefaults:
     val halfSpeed: Double = 0.5
 
     object Robot:
+      import SimulationDefaults.DynamicEntity.Robot.defaultShape.radius
+
       val defaultPosition: Point2D = (0.0, 0.0)
       val defaultShape: ShapeType.Circle = ShapeType.Circle(0.5)
       val defaultOrientation: Orientation = Orientation(0.0)
       val defaultActuators: Seq[Actuator[Robot]] = Seq.empty
       val defaultSensors: Vector[Sensor[Robot, Environment]] = Vector.empty
+
+      val stdProximitySensors: Vector[Sensor[Robot, Environment]] = Vector(
+        ProximitySensor(Orientation(0.0), radius, 5.0),
+        ProximitySensor(Orientation(45.0), radius, 5.0),
+        ProximitySensor(Orientation(90.0), radius, 5.0),
+        ProximitySensor(Orientation(135.0), radius, 5.0),
+        ProximitySensor(Orientation(180.0), radius, 5.0),
+        ProximitySensor(Orientation(225.0), radius, 5.0),
+        ProximitySensor(Orientation(270.0), radius, 5.0),
+        ProximitySensor(Orientation(315.0), radius, 5.0),
+      )
+
+      // TODO: Add light sensors when implemented
+      val stdLightSensors: Vector[Sensor[Robot, Environment]] = Vector.empty
+    end Robot
+  end DynamicEntity
 end SimulationDefaults
