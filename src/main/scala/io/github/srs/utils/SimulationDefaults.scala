@@ -8,6 +8,9 @@ import io.github.srs.model.environment.Environment
 
 object SimulationDefaults:
 
+  val duration: Option[Int] = None
+  val seed: Option[Int] = None
+
   object SimulationConfig:
     val maxCount = 10_000
 
