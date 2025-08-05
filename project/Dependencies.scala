@@ -17,7 +17,8 @@ object Dependencies {
   val squidLib = "com.squidpony" % "squidlib-util" % squidLibVersion
   val catsCore = "org.typelevel" %% "cats-core" % "2.13.0"
   val catsEffect = "org.typelevel" %% "cats-effect" % "3.7-4972921"
-
+  val scalaYaml = "org.virtuslab" %% "scala-yaml" % "0.3.0"
+  val fs2Io = "co.fs2" %% "fs2-io" % "3.12.0"
   /*
    * Bundles
    */
