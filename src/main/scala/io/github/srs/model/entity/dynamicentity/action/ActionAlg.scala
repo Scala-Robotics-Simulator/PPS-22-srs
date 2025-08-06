@@ -3,13 +3,14 @@ package io.github.srs.model.entity.dynamicentity.action
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
 
 /**
- * ActionAlg trait defines the actions that can be performed on a robot.
+ * ActionAlg trait defines the actions that can be performed on a dynamic entity.
  *
- * It represents the algebra of actions that can be executed on a robot, such as, for example, moving the wheels.
+ * It represents the algebra of actions that can be executed on a dynamic entity, such as, for example, moving the
+ * wheels.
  * @tparam F
  *   the effect type of the action.
  * @tparam E
- *   the type of dynamic entity on which the action is performed, extending DynamicEntity.
+ *   the type of dynamic entity on which the action is performed, extending [[DynamicEntity]].
  */
 trait ActionAlg[F[_], E <: DynamicEntity]:
   /**

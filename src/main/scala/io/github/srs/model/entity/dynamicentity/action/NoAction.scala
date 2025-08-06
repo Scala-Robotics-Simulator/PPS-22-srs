@@ -15,7 +15,7 @@ import io.github.srs.model.entity.dynamicentity.DynamicEntity
 final case class NoAction[F[_]: Monad, E <: DynamicEntity]() extends Action[F, E]:
 
   /**
-   * Runs the no-action on the given robot.
+   * Runs the no-action on the given dynamic entity.
    * @param dynamicEntity
    *   the dynamic entity on which the action will be executed.
    * @param a
