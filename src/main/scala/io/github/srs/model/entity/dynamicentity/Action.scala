@@ -1,6 +1,7 @@
 package io.github.srs.model.entity.dynamicentity
 
 import io.github.srs.model.entity.dynamicentity.Robot
+import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 import io.github.srs.model.validation.Validation
 
@@ -73,7 +74,7 @@ object Action:
    *   the speed to apply to the right-wheel motor.
    */
   private final case class CustomMovement(override val leftSpeed: Double, override val rightSpeed: Double)
-    extends Action
+      extends Action
 
   /**
    * Creates a custom movement action with specified speeds for the left and right wheels.
@@ -86,7 +87,7 @@ object Action:
    *   not.
    */
   def move(left: Double, right: Double): Validation[Action] =
-    import io.github.srs.utils.SimulationDefaults.DynamicEntity.{maxSpeed, minSpeed}
+    import io.github.srs.utils.SimulationDefaults.DynamicEntity.{ maxSpeed, minSpeed }
     for
       _ <- Validation.bounded("left wheel speed", left, minSpeed, maxSpeed, includeMax = true)
       _ <- Validation.bounded("right wheel speed", right, minSpeed, maxSpeed, includeMax = true)

@@ -3,7 +3,7 @@ package io.github.srs.model.entity.dynamicentity.dsl
 import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
 
 import io.github.srs.model.entity.dynamicentity.*
-import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, Wheel, WheelMotor }
+import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, DifferentialWheelMotor, Wheel }
 import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, Sensor }
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.environment.Environment

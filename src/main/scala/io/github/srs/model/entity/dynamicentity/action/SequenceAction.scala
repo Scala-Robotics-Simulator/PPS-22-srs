@@ -17,8 +17,7 @@ import io.github.srs.model.entity.dynamicentity.action.ActionAlg
  * @tparam E
  *   the type of dynamic entity on which the action will be executed, extending DynamicEntity.
  */
-private final case class SequenceAction[F[_]: Monad, E <: DynamicEntity](actions: List[Action[F, E]])
-    extends Action[F, E]:
+private final case class SequenceAction[F[_]: Monad](actions: List[Action[F]]) extends Action[F]:
 
   /**
    * Runs the sequence of actions on the given dynamic entity.
@@ -30,12 +29,12 @@ private final case class SequenceAction[F[_]: Monad, E <: DynamicEntity](actions
    * @return
    *   an effectful computation that results in the dynamic entity after all actions has been executed.
    */
-  override def run(dynamicEntity: E)(using a: ActionAlg[F, E]): F[E] =
+  override def run[E <: DynamicEntity](dynamicEntity: E)(using a: ActionAlg[F, E]): F[E] =
     actions.foldLeftM(dynamicEntity)((e, act) => act.run(e))
 
 object SequenceAction:
 
-  extension [F[_]: Monad, E <: DynamicEntity, A <: Action[F, E]](a: A)
+  extension [F[_]: Monad, E <: DynamicEntity, A <: Action[F]](a: A)
     /**
      * Chains the current action with the next action in a sequence.
      *
@@ -44,4 +43,4 @@ object SequenceAction:
      * @return
      *   the combined action as a [[SequenceAction]].
      */
-    infix def thenDo(next: A): Action[F, E] = SequenceAction(List(a, next))
+    infix def thenDo(next: A): Action[F] = SequenceAction(List(a, next))

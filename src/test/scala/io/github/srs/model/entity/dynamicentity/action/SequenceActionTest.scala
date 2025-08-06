@@ -4,8 +4,9 @@ import scala.concurrent.duration.FiniteDuration
 
 import cats.{ Id, Monad }
 import io.github.srs.model.entity.dynamicentity.action.MovementActionFactory.moveForward
+import io.github.srs.model.entity.dynamicentity.actuator.Actuator
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor
-import io.github.srs.model.entity.dynamicentity.{ Actuator, DynamicEntity }
+import io.github.srs.model.entity.dynamicentity.DynamicEntity
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.environment.Environment
 import org.scalatest.flatspec.AnyFlatSpec
@@ -48,14 +49,14 @@ class SequenceActionTest extends AnyFlatSpec with Matchers:
   )
 
   "SequenceAction" should "execute multiple actions in sequence" in:
-    val action1: Action[Id, Dummy] = NoAction[Id, Dummy]()
-    val action2: Action[Id, Dummy] = moveForward[Id, Dummy]
-    val sequenceAction: SequenceAction[Id, Dummy] = SequenceAction(List(action1, action2))
+    val action1: Action[Id] = NoAction[Id]()
+    val action2: Action[Id] = moveForward[Id]
+    val sequenceAction: SequenceAction[Id] = SequenceAction(List(action1, action2))
     val updatedEntity: Dummy = sequenceAction.run(dynamicEntity)
     dynamicEntity should be(updatedEntity)
 
   it should "handle an empty sequence of actions" in:
-    val emptySequenceAction: SequenceAction[Id, Dummy] = SequenceAction(List.empty)
+    val emptySequenceAction: SequenceAction[Id] = SequenceAction(List.empty)
     val updatedEntity: Dummy = emptySequenceAction.run(dynamicEntity)
     dynamicEntity should be(updatedEntity)
 end SequenceActionTest
