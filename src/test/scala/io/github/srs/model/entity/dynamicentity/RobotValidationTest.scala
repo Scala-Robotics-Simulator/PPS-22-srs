@@ -9,8 +9,8 @@ import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 
 class RobotValidationTest extends AnyFlatSpec with Matchers:
 
-  val wheelMotor: WheelMotor =
-    WheelMotor(Wheel(1.0, ShapeType.Circle(0.5)), Wheel(1.0, ShapeType.Circle(0.5)))
+  val wheelMotor: DifferentialWheelMotor =
+    DifferentialWheelMotor(Wheel(1.0, ShapeType.Circle(0.5)), Wheel(1.0, ShapeType.Circle(0.5)))
 
   it should "not support having multiple WheelMotor Actuators" in:
     inside((robot containing wheelMotor and wheelMotor).validate):

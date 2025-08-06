@@ -5,7 +5,6 @@ import io.github.srs.model.entity.dynamicentity.{ Actuator, DynamicEntity }
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.environment.dsl.CreationDSL.*
-import io.github.srs.model.validation.{ DomainError, Validation }
 import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
@@ -28,7 +27,7 @@ class SensorTest extends AnyFlatSpec with should.Matchers:
       val actuators: Seq[Actuator[Dummy]],
       val sensors: Vector[Sensor[Dummy, Environment]],
   ) extends DynamicEntity:
-    def act(): Validation[Dummy] = Right[DomainError, Dummy](this)
+    def act[F[_]: Monad](): F[Dummy] = Monad[F].pure(this)
 
   class DummySensor(override val offset: Orientation, override val distance: Distance, override val range: Range)
       extends Sensor[Dummy, Environment]:

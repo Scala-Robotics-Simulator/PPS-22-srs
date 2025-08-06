@@ -1,6 +1,8 @@
 package io.github.srs.model.entity.dynamicentity.behavior
 
-import io.github.srs.model.entity.dynamicentity.Action
+import io.github.srs.model.entity.dynamicentity.DynamicEntity
+import io.github.srs.model.entity.dynamicentity.action.Action
+import io.github.srs.model.entity.dynamicentity.action.MovementActionFactory.stop
 import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings
 
 /**
@@ -8,7 +10,7 @@ import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings
  *   - `I` is [[SensorReadings]], representing the data from the robot’s sensors
  *   - `A` is [[Action]], representing the actions the robot can take.
  */
-type RobotBehavior = Behavior[SensorReadings, Action]
+type RobotBehavior[F[_], E <: DynamicEntity] = Behavior[SensorReadings, Action[F, E]]
 
 /**
  * Collection of predefined behaviors for robots.
@@ -23,4 +25,4 @@ object RobotBehaviors:
    * @return
    *   a [[RobotBehavior]] that always returns `Action.Stop`
    */
-  def idle: RobotBehavior = Behavior.pure(Action.Stop)
+  def idle[F[_], E <: DynamicEntity]: RobotBehavior[F, E] = Behavior.pure(stop)
