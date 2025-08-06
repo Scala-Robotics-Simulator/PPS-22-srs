@@ -6,7 +6,7 @@ import cats.Monad
 import cats.syntax.flatMap.toFlatMapOps
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.Point2D.*
-import io.github.srs.model.entity.dynamicentity.action.{ Action, RobotAction }
+import io.github.srs.model.entity.dynamicentity.action.{ Action, ActionAlg }
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 
 /**
@@ -106,14 +106,16 @@ object DifferentialWheelMotor:
 
     /**
      * Applies a list of actions to the robot, updating its state accordingly.
-     *
-     * @param actions
-     *   the list of [[MovementAction]] to apply to the robot.
+     * @param dt
+     *   the time delta for which the robot is moving.
+     * @param action
+     *   the action to apply to the robot.
      * @return
      *   the robot with updated state after applying the actions.
      */
-    def applyMovementActions[F[_]: Monad](dt: FiniteDuration, action: Action[F])(using ra: RobotAction[F]): F[Robot] =
-//      actions.foldLeftM(robot)((r, a) => a.run(r).flatMap(_.move[F](dt)))
+    def applyMovementActions[F[_]: Monad](dt: FiniteDuration, action: Action[F, Robot])(using
+        a: ActionAlg[F, Robot],
+    ): F[Robot] =
       action.run(robot).flatMap(_.move(dt))
   end extension
 end DifferentialWheelMotor
