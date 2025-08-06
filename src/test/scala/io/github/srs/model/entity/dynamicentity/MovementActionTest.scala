@@ -6,7 +6,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.minSpeed
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.maxSpeed
-import io.github.srs.model.entity.dynamicentity.action.MovementActionDsl.customMove
+import io.github.srs.model.entity.dynamicentity.action.MovementActionFactory.customMove
 
 class MovementActionTest extends AnyFlatSpec with Matchers:
 
