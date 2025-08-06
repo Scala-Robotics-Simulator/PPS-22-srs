@@ -4,10 +4,12 @@ import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
 
 import cats.Id
 import io.github.srs.model.entity.*
-import io.github.srs.model.entity.dynamicentity.DifferentialWheelMotor.{ applyMovementActions, move }
-import io.github.srs.model.entity.dynamicentity.WheelMotorTestUtils.calculateMovement
 import io.github.srs.model.entity.dynamicentity.action.MovementActionFactory.*
+import io.github.srs.model.entity.dynamicentity.action.SequenceAction.thenDo
 import io.github.srs.model.entity.dynamicentity.action.{ Action, ActionAlg, NoAction }
+import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor.{ applyMovementActions, move }
+import io.github.srs.model.entity.dynamicentity.actuator.WheelMotorTestUtils.calculateMovement
+import io.github.srs.model.entity.dynamicentity.actuator.{ DifferentialWheelMotor, Wheel }
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, Sensor, SensorReading }
 import io.github.srs.model.environment.Environment
@@ -15,7 +17,6 @@ import org.scalatest.Inside.inside
 import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import io.github.srs.model.entity.dynamicentity.action.SequenceAction.thenDo
 
 class RobotTest extends AnyFlatSpec with Matchers:
 
@@ -32,7 +33,7 @@ class RobotTest extends AnyFlatSpec with Matchers:
 
   val defaultRobot: Robot = robot at initialPosition withShape shape withOrientation initialOrientation
 
-  val emptyActions: Action[Id, Robot] = NoAction[Id, Robot]()
+  val emptyActions: Action[Id] = NoAction[Id]()
 
   given CanEqual[Point2D, Point2D] = CanEqual.derived
 
@@ -111,32 +112,32 @@ class RobotTest extends AnyFlatSpec with Matchers:
   it should "update its position based on a sequence of actions" in:
     inside((defaultRobot containing wheelMotor).validate):
       case Right(robot) =>
-        val moved1 = robot.applyMovementActions[Id](deltaTime, moveForward[Id, Robot])
-        val moved2 = moved1.applyMovementActions[Id](deltaTime, turnLeft[Id, Robot])
-        val moved3 = moved2.applyMovementActions[Id](deltaTime, stop[Id, Robot])
+        val moved1 = robot.applyMovementActions[Id](deltaTime, moveForward[Id])
+        val moved2 = moved1.applyMovementActions[Id](deltaTime, turnLeft[Id])
+        val moved3 = moved2.applyMovementActions[Id](deltaTime, stop[Id])
 
         val expectedPosition = moved3.position
-        val movements: Action[Id, Robot] = moveForward[Id, Robot] thenDo turnLeft[Id, Robot] thenDo stop[Id, Robot]
+        val movements: Action[Id] = moveForward[Id] thenDo turnLeft[Id] thenDo stop[Id]
         val movedRobot: Id[Robot] = robot.applyMovementActions[Id](deltaTime, movements)
         movedRobot.position should be(expectedPosition)
 
   it should "update its orientation based on a sequence of actions" in:
     inside((defaultRobot containing wheelMotor).validate):
       case Right(robot) =>
-        val moved1 = robot.applyMovementActions[Id](deltaTime, moveForward[Id, Robot])
-        val moved2 = moved1.applyMovementActions[Id](deltaTime, turnLeft[Id, Robot])
-        val moved3 = moved2.applyMovementActions[Id](deltaTime, stop[Id, Robot])
+        val moved1 = robot.applyMovementActions[Id](deltaTime, moveForward[Id])
+        val moved2 = moved1.applyMovementActions[Id](deltaTime, turnLeft[Id])
+        val moved3 = moved2.applyMovementActions[Id](deltaTime, stop[Id])
 
         val expectedOrientation = moved3.orientation
-        val movements: Action[Id, Robot] = moveForward[Id, Robot] thenDo turnLeft[Id, Robot] thenDo stop[Id, Robot]
+        val movements: Action[Id] = moveForward[Id] thenDo turnLeft[Id] thenDo stop[Id]
         val movedRobot: Id[Robot] = robot.applyMovementActions[Id](deltaTime, movements)
         movedRobot.orientation.degrees should be(expectedOrientation.degrees)
 
   it should "move correctly with custom actions" in:
     inside((defaultRobot containing wheelMotor).validate):
       case Right(robot) =>
-        val move1: Action[Id, Robot] = customMove[Id, Robot](0.5, 0.5).toOption.value
-        val move2: Action[Id, Robot] = customMove[Id, Robot](0.5, 0.5).toOption.value
+        val move1: Action[Id] = customMove[Id](0.5, 0.5).toOption.value
+        val move2: Action[Id] = customMove[Id](0.5, 0.5).toOption.value
         val movedRobot = robot.applyMovementActions[Id](deltaTime, move1 thenDo move2)
         val expectedMovement: (Point2D, Orientation) = calculateMovement(deltaTime, robot)
         movedRobot.position should be(expectedMovement._1)

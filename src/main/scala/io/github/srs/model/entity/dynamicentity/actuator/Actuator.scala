@@ -1,6 +1,7 @@
 package io.github.srs.model.entity.dynamicentity
 
 import scala.concurrent.duration.FiniteDuration
+
 import cats.Monad
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
 
