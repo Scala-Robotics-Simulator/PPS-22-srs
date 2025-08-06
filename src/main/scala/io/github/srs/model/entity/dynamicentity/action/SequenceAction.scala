@@ -2,8 +2,8 @@ package io.github.srs.model.entity.dynamicentity.action
 
 import cats.Monad
 import cats.syntax.foldable.toFoldableOps
-import io.github.srs.model.entity.dynamicentity.Robot
-import io.github.srs.model.entity.dynamicentity.action.RobotAction
+import io.github.srs.model.entity.dynamicentity.DynamicEntity
+import io.github.srs.model.entity.dynamicentity.action.ActionAlg
 
 /**
  * SequenceAction represents a composite action that executes a sequence of actions in order.
@@ -14,39 +14,34 @@ import io.github.srs.model.entity.dynamicentity.action.RobotAction
  *   the implicit Monad instance for the effect type F.
  * @tparam F
  *   the effect type of the action.
+ * @tparam E
+ *   the type of dynamic entity on which the action will be executed, extending DynamicEntity.
  */
-private final case class SequenceAction[F[_]: Monad](actions: List[Action[F]]) extends Action[F]:
+private final case class SequenceAction[F[_]: Monad, E <: DynamicEntity](actions: List[Action[F, E]])
+    extends Action[F, E]:
 
   /**
-   * Runs the sequence of actions on the given robot.
-   * @param robot
-   *   the robot on which the actions will be executed.
-   * @param ra
-   *   the RobotAction to use for executing the action.
+   * Runs the sequence of actions on the given dynamic entity.
+   *
+   * @param dynamicEntity
+   *   the dynamic entity on which the actions will be executed.
+   * @param a
+   *   the [[ActionAlg]] to use for executing the actions.
    * @return
-   *   a new instance of Robot after executing the action.
+   *   an effectful computation that results in the dynamic entity after all actions has been executed.
    */
-  override def run(robot: Robot)(using ra: RobotAction[F]): F[Robot] =
-    actions.foldLeftM(robot)((r, act) => act.run(r))
+  override def run(dynamicEntity: E)(using a: ActionAlg[F, E]): F[E] =
+    actions.foldLeftM(dynamicEntity)((e, act) => act.run(e))
 
-/**
- * NoAction represents an action that does nothing.
- *
- * @param monad$F$0
- *   the implicit Monad instance for the effect type F.
- * @tparam F
- *   the effect type of the action.
- */
-final case class NoAction[F[_]: Monad]() extends Action[F]:
+object SequenceAction:
 
-  /**
-   * Runs the no-action on the given robot.
-   * @param robot
-   *   the robot on which the action will be executed.
-   * @param ra
-   *   the RobotAction to use for executing the action.
-   * @return
-   *   a new instance of Robot after executing the action (which is a no-op).
-   */
-  override def run(robot: Robot)(using ra: RobotAction[F]): F[Robot] =
-    Monad[F].pure(robot)
+  extension [F[_]: Monad, E <: DynamicEntity, A <: Action[F, E]](a: A)
+    /**
+     * Chains the current action with the next action in a sequence.
+     *
+     * @param next
+     *   the next action to be executed after the current action.
+     * @return
+     *   the combined action as a [[SequenceAction]].
+     */
+    infix def thenDo(next: A): Action[F, E] = SequenceAction(List(a, next))

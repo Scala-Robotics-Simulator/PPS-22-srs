@@ -44,8 +44,10 @@ object SimulationDefaults:
   end StaticEntity
 
   object DynamicEntity:
+    val zeroSpeed: Double = 0.0
     val minSpeed: Double = -1.0
     val maxSpeed: Double = 1.0
+    val halfSpeed: Double = 0.5
 
     object Robot:
       val defaultPosition: Point2D = (0.0, 0.0)

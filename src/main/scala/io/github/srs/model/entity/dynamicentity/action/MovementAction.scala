@@ -1,25 +1,29 @@
 package io.github.srs.model.entity.dynamicentity.action
 
-import io.github.srs.model.entity.dynamicentity.Robot
+import io.github.srs.model.entity.dynamicentity.DynamicEntity
 
 /**
- * MovementAction represents a robot movement action characterized by the speeds applied to the left and right wheels.
+ * MovementAction represents a dynamic-entity movement action characterized by the speeds applied to the left and right
+ * wheels.
  * @param leftSpeed
  *   the speed to apply to the left wheel.
  * @param rightSpeed
  *   the speed to apply to the right wheel.
  * @tparam F
  *   the effect type of the action.
+ * @tparam E
+ *   the type of dynamic entity on which the action is performed, extending DynamicEntity.
  */
-final case class MovementAction[F[_]](leftSpeed: Double, rightSpeed: Double) extends Action[F]:
+private[action] final case class MovementAction[F[_], E <: DynamicEntity](leftSpeed: Double, rightSpeed: Double)
+    extends Action[F, E]:
 
   /**
    * Runs the movement action using the provided RobotAction.
    *
-   * @param ra
-   *   the RobotAction to use for executing the movement action.
+   * @param a
+   *   the [[ActionAlg]] to use for executing the movement action.
    * @return
-   *   a new instance of Robot after executing the movement action.
+   *   an effectful computation that results in the dynamic entity after the wheels have been moved.
    */
-  def run(r: Robot)(using ra: RobotAction[F]): F[Robot] =
-    ra.moveWheels(r, leftSpeed, rightSpeed)
+  override def run(dynamicEntity: E)(using a: ActionAlg[F, E]): F[E] =
+    a.moveWheels(dynamicEntity, leftSpeed, rightSpeed)
