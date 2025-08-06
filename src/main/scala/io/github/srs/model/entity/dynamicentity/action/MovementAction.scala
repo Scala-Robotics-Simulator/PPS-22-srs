@@ -18,7 +18,7 @@ private[action] final case class MovementAction[F[_], E <: DynamicEntity](leftSp
     extends Action[F, E]:
 
   /**
-   * Runs the movement action using the provided RobotAction.
+   * Runs the movement action using the provided [[ActionAlg]].
    *
    * @param a
    *   the [[ActionAlg]] to use for executing the movement action.
