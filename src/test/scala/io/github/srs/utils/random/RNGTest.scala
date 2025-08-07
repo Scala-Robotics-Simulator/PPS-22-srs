@@ -1,9 +1,10 @@
-package io.github.srs.utils
+package io.github.srs.utils.random
 
+import io.github.srs.utils.random.SimpleRNG
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class RandomTest extends AnyFlatSpec with Matchers:
+class RNGTest extends AnyFlatSpec with Matchers:
 
   val seed: Long = 42L
   val rng: SimpleRNG = SimpleRNG(seed)
@@ -45,4 +46,4 @@ class RandomTest extends AnyFlatSpec with Matchers:
     val length = 10
     val (stringValue, _) = rng.nextString(length)
     stringValue.length should be(length)
-end RandomTest
+end RNGTest
