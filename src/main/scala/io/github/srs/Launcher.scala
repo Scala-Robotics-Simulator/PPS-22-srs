@@ -1,6 +1,6 @@
 package io.github.srs
 
-import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
+//import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
 
 import io.github.srs.controller.ControllerModule
 import io.github.srs.controller.ControllerModule.Controller
@@ -10,7 +10,7 @@ import io.github.srs.model.logic.IncreaseLogic.given
 import io.github.srs.model.logic.StatusLogic.given
 import io.github.srs.model.logic.TimeLogic.given
 import io.github.srs.model.{ ModelModule, SimulationState }
-import io.github.srs.utils.SimpleRNG
+import io.github.srs.utils.random.SimpleRNG
 import io.github.srs.view.ViewModule
 import io.github.srs.view.ViewModule.View
 import monix.execution.Scheduler.Implicits.global
@@ -31,11 +31,11 @@ object Launcher
     controller
       .start(
         SimulationState(
-          0,
-          FiniteDuration(10000, MILLISECONDS),
-          SimulationSpeed.NORMAL,
-          SimpleRNG(42L),
-          SimulationStatus.RUNNING,
+          i = 0,
+          simulationTime = None, // Some(FiniteDuration(10_000, MILLISECONDS)),
+          simulationSpeed = SimulationSpeed.NORMAL,
+          simulationRNG = SimpleRNG(42L),
+          simulationStatus = SimulationStatus.RUNNING,
         ),
       )
       .runAsyncAndForget

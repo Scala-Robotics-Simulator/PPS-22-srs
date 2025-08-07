@@ -1,6 +1,6 @@
 package io.github.srs.model.logic
 
-import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
+import scala.concurrent.duration.FiniteDuration
 
 import io.github.srs.model.SimulationConfig.SimulationSpeed
 import io.github.srs.model.{ ModelModule, SimulationState }
@@ -15,9 +15,8 @@ object TimeLogic:
   given TickLogic[SimulationState] with
 
     def tick(s: SimulationState, delta: FiniteDuration): Task[SimulationState] =
-      val remainingMillis = s.simulationTime.toMillis - delta.toMillis
-      val clamped = if remainingMillis < 0 then 0 else remainingMillis
-      Task.pure(s.copy(simulationTime = FiniteDuration(clamped, MILLISECONDS)))
+      val updatedElapsed = s.elapsedTime + delta
+      Task.pure(s.copy(elapsedTime = updatedElapsed))
 
     def tickSpeed(s: SimulationState, speed: SimulationSpeed): Task[SimulationState] =
       Task.pure(s.copy(simulationSpeed = speed))

@@ -3,7 +3,7 @@ package io.github.srs.model
 import scala.concurrent.duration.FiniteDuration
 
 import io.github.srs.model.SimulationConfig.{ SimulationSpeed, SimulationStatus }
-import io.github.srs.utils.SimpleRNG
+import io.github.srs.utils.random.SimpleRNG
 import monix.eval.Task
 
 /**
@@ -19,7 +19,12 @@ object ModelModule:
     /**
      * The total simulation time for the simulation.
      */
-    def simulationTime: FiniteDuration
+    def simulationTime: Option[FiniteDuration]
+
+    /**
+     * The elapsed time since the start of the simulation.
+     */
+    def elapsedTime: FiniteDuration
 
     /**
      * The current simulation speed.
