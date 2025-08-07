@@ -1,4 +1,4 @@
-package io.github.srs.model.entity.dynamicentity
+package io.github.srs.model.entity.dynamicentity.actuator
 
 import scala.concurrent.duration.FiniteDuration
 
@@ -6,6 +6,7 @@ import cats.Monad
 import cats.syntax.flatMap.toFlatMapOps
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.Point2D.*
+import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.action.{ Action, ActionAlg }
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 
@@ -113,7 +114,7 @@ object DifferentialWheelMotor:
      * @return
      *   the robot with updated state after applying the actions.
      */
-    def applyMovementActions[F[_]: Monad](dt: FiniteDuration, action: Action[F, Robot])(using
+    def applyMovementActions[F[_]: Monad](dt: FiniteDuration, action: Action[F])(using
         a: ActionAlg[F, Robot],
     ): F[Robot] =
       action.run(robot).flatMap(_.move(dt))
