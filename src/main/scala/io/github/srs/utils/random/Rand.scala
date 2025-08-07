@@ -133,3 +133,4 @@ extension [A](ra: Rand[A])
    *   a new [[Rand]] that generates a value of type `B`.
    */
   def flatMap[B](f: A => Rand[B]): Rand[B] = Rand.flatMap(ra)(f)
+end extension
