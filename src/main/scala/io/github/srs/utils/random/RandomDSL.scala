@@ -31,6 +31,7 @@ object RandomDSL:
   /**
    * Generates a double value within the range [0.0, 1.0) using the provided [[RNG]].
    * @return
+   *   a [[Rand]] that generates a random double in the range [0.0, 1.0).
    */
   infix def randomDouble: Rand[Double] = (rng: RNG) => rng.nextDouble
 

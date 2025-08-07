@@ -150,7 +150,9 @@ final case class SimpleRNG(seed: Long) extends RNG:
    * @inheritdoc
    */
   override def nextUUID: (java.util.UUID, RNG) =
-    val uuid = java.util.UUID.randomUUID()
+    val mostSigBits = random.nextLong()
+    val leastSigBits = random.nextLong()
+    val uuid = new java.util.UUID(mostSigBits, leastSigBits)
     (uuid, nextRNG)
 
   /**

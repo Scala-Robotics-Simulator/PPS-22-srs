@@ -3,7 +3,7 @@ package io.github.srs.model.entity.dynamicentity.action
 import scala.concurrent.duration.FiniteDuration
 
 import cats.{ Id, Monad }
-import io.github.srs.model.entity.dynamicentity.action.MovementActionFactory.moveForward
+import io.github.srs.model.entity.dynamicentity.action.MovementActionFactory.{ moveForward, turnRight }
 import io.github.srs.model.entity.dynamicentity.actuator.Actuator
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
@@ -51,7 +51,8 @@ class SequenceActionTest extends AnyFlatSpec with Matchers:
   "SequenceAction" should "execute multiple actions in sequence" in:
     val action1: Action[Id] = NoAction[Id]()
     val action2: Action[Id] = moveForward[Id]
-    val sequenceAction: SequenceAction[Id] = SequenceAction(List(action1, action2))
+    val action3: Action[Id] = turnRight[Id]
+    val sequenceAction: SequenceAction[Id] = SequenceAction(List(action1, action2, action3))
     val updatedEntity: Dummy = sequenceAction.run(dynamicEntity)
     dynamicEntity should be(updatedEntity)
 
