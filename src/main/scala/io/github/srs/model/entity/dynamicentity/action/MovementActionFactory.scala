@@ -19,8 +19,6 @@ object MovementActionFactory:
    *   the speed to apply to the right wheel.
    * @tparam F
    *   the effect type of the action.
-   * @tparam E
-   *   the type of the dynamic entity.
    * @return
    *   a [[Validation]] containing the [[MovementAction]] if the speeds are within the defined bounds, or an error if
    *   they are not.
@@ -35,8 +33,6 @@ object MovementActionFactory:
    * Moves the robot forward by applying a positive speed to both wheels.
    * @tparam F
    *   the effect type of the action.
-   * @tparam E
-   *   the type of the dynamic entity.
    * @return
    *   the [[MovementAction]] representing the forward movement.
    */
@@ -46,8 +42,6 @@ object MovementActionFactory:
    * Moves the robot backward by applying a negative speed to both wheels.
    * @tparam F
    *   the effect type of the action.
-   * @tparam E
-   *   the type of the dynamic entity.
    * @return
    *   the [[MovementAction]] representing the backward movement.
    */
@@ -75,8 +69,6 @@ object MovementActionFactory:
    * Stops the robot by applying zero speed to both wheels.
    * @tparam F
    *   the effect type of the action.
-   * @tparam E
-   *   the type of the dynamic entity.
    * @return
    *   the [[MovementAction]] representing the stop action.
    */

@@ -40,7 +40,7 @@ class SequenceActionTest extends AnyFlatSpec with Matchers:
   ) extends DynamicEntity:
     def act[F[_]: Monad](): F[Dummy] = Monad[F].pure(this)
 
-  val dynamicEntity = new Dummy(
+  val dynamicEntity: Dummy = Dummy(
     position = Point2D(0, 0),
     shape = ShapeType.Circle(1.0),
     orientation = Orientation(0),
