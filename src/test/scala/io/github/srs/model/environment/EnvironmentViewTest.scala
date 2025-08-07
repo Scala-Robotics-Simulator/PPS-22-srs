@@ -8,7 +8,8 @@ import io.github.srs.model.entity.staticentity.StaticEntity
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.entity.staticentity.StaticEntity.{ Light, Obstacle }
 import io.github.srs.model.entity.Point2D.*
-import io.github.srs.model.entity.dynamicentity.{ DifferentialWheelMotor, Robot }
+import io.github.srs.model.entity.dynamicentity.Robot
+import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor
 import io.github.srs.model.environment.dsl.CreationDSL.*
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor

@@ -3,6 +3,7 @@ package io.github.srs.model.entity.dynamicentity
 import scala.concurrent.duration.FiniteDuration
 
 import cats.Monad
+import io.github.srs.model.entity.dynamicentity.actuator.Actuator
 import io.github.srs.model.entity.dynamicentity.sensor.*
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.environment.Environment

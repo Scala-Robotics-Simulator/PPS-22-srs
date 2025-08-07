@@ -3,6 +3,7 @@ package io.github.srs.model.entity.dynamicentity.actuator
 import scala.concurrent.duration.FiniteDuration
 
 import io.github.srs.model.entity.Orientation
+import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor
 
 /**
  * DifferentialKinematics provides methods to compute the kinematics of a differential drive robot.
