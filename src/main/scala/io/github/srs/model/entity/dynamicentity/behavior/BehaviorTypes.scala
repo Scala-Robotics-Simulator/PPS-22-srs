@@ -14,9 +14,12 @@ private[behavior] object BehaviorTypes:
   /**
    * **Behaviour** – a pure function in any effect [[F]].
    *
-   * @param F effect type (e.g. [[Id]], [[IO]])
-   * @param I input.
-   * @param A output.
+   * @param F
+   *   effect type (e.g. [[Id]], [[IO]])
+   * @param I
+   *   input.
+   * @param A
+   *   output.
    */
   type Behavior[F[_], I, A] = Kleisli[F, I, A]
 
@@ -25,21 +28,25 @@ private[behavior] object BehaviorTypes:
    *
    * A rule that operates without any effect, using the [[Id]] type.
    *
-   * @param I The input type.
-   * @param A The output type.
+   * @param I
+   *   The input type.
+   * @param A
+   *   The output type.
    */
   type BehaviorId[I, A] = Behavior[Id, I, A]
 
   /**
    * **Rule** – “may decide”.
    *
-   * Represents a rule that takes an input [[I]] and may produce an output [[A]]
-   * wrapped in an [[Option]]. If the rule produces [[Some(action)]], it has fired;
-   * otherwise, it defers to the next rule.
+   * Represents a rule that takes an input [[I]] and may produce an output [[A]] wrapped in an [[Option]]. If the rule
+   * produces [[Some(action)]], it has fired; otherwise, it defers to the next rule.
    *
-   * @param F The effect type (e.g., [[Id]], [[IO]]).
-   * @param I The input type.
-   * @param A The output type.
+   * @param F
+   *   The effect type (e.g., [[Id]], [[IO]]).
+   * @param I
+   *   The input type.
+   * @param A
+   *   The output type.
    */
   type Rule[F[_], I, A] = Kleisli[F, I, Option[A]]
 
@@ -48,8 +55,10 @@ private[behavior] object BehaviorTypes:
    *
    * A rule that operates without any effect, using the [[Id]] type.
    *
-   * @param I The input type.
-   * @param A The output type.
+   * @param I
+   *   The input type.
+   * @param A
+   *   The output type.
    */
   type RuleId[I, A] = Rule[Id, I, A]
 
@@ -58,7 +67,8 @@ private[behavior] object BehaviorTypes:
    *
    * Represents a condition that evaluates to `true` or `false` based on the input [[I]].
    *
-   * @param I The input type.
+   * @param I
+   *   The input type.
    */
   type Condition[I] = I => Boolean
 
@@ -66,3 +76,4 @@ private[behavior] object BehaviorTypes:
    * Constant predicate that is always `true`.
    */
   val always: Condition[Any] = _ => true
+end BehaviorTypes
