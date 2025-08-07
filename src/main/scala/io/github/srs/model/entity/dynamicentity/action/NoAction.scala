@@ -12,7 +12,7 @@ import io.github.srs.model.entity.dynamicentity.DynamicEntity
  * @tparam E
  *   the type of the dynamic entity on which the action will be executed.
  */
-final case class NoAction[F[_]: Monad, E <: DynamicEntity]() extends Action[F, E]:
+final case class NoAction[F[_]: Monad]() extends Action[F]:
 
   /**
    * Runs the no-action on the given dynamic entity.
@@ -23,5 +23,5 @@ final case class NoAction[F[_]: Monad, E <: DynamicEntity]() extends Action[F, E
    * @return
    *   a new instance of [[DynamicEntity]] after executing the action (which is the same as the input entity).
    */
-  override def run(dynamicEntity: E)(using a: ActionAlg[F, E]): F[E] =
+  override def run[E <: DynamicEntity](dynamicEntity: E)(using a: ActionAlg[F, E]): F[E] =
     Monad[F].pure(dynamicEntity)

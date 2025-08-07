@@ -3,7 +3,8 @@ package io.github.srs.model.entity.dynamicentity.action
 import scala.concurrent.duration.FiniteDuration
 
 import cats.{ Id, Monad }
-import io.github.srs.model.entity.dynamicentity.{ Actuator, DynamicEntity }
+import io.github.srs.model.entity.dynamicentity.actuator.Actuator
+import io.github.srs.model.entity.dynamicentity.DynamicEntity
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor
 import io.github.srs.model.environment.Environment
@@ -46,7 +47,7 @@ class NoActionTest extends AnyFlatSpec with Matchers:
       actuators = Seq(DummyActuator()),
       sensors = Vector.empty[Sensor[Dummy, Environment]],
     )
-    val noAction: NoAction[Id, Dummy] = NoAction[Id, Dummy]()
+    val noAction: NoAction[Id] = NoAction[Id]()
     val updateEntity: Dummy = noAction.run(dynamicEntity)(using actionAlg)
     dynamicEntity should be(updateEntity)
 end NoActionTest

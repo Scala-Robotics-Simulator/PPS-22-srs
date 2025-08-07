@@ -1,6 +1,9 @@
 package io.github.srs.view
 
+import io.github.srs.controller.Event
 import io.github.srs.model.ModelModule
+import monix.catnap.ConcurrentQueue
+import monix.eval.Task
 
 /**
  * Module that defines the view logic for the Scala Robotics Simulator.
@@ -14,18 +17,24 @@ object ViewModule:
    *   the type of the state, which must extend [[ModelModule.State]].
    */
   trait View[S <: ModelModule.State]:
+
     /**
-     * Initializes the view.
+     * Initializes the view with a queue for handling events.
+     * @param queue
+     *   the queue that will be used to handle events in the view.
+     * @return
+     *   the initialization task, which is a [[monix.eval.Task]] that completes when the initialization is done.
      */
-    def init(): Unit
+    def init(queue: ConcurrentQueue[Task, Event]): Task[Unit]
 
     /**
      * Renders the view based on the current state.
-     *
      * @param state
-     *   the current state of the simulation.
+     *   the current state of the simulation, which must extend [[ModelModule.State]].
+     * @return
+     *   the rendering task, which is a [[monix.eval.Task]] that completes when the rendering is done.
      */
-    def render(state: S): Unit
+    def render(state: S): Task[Unit]
 
   /**
    * Provider trait that defines the interface for providing a view.
@@ -66,17 +75,14 @@ object ViewModule:
         private val gui = new SimpleView[S]
 
         /**
-         * Initializes the GUI.
+         * @inheritdoc
          */
-        override def init(): Unit = gui.init()
+        override def init(queue: ConcurrentQueue[Task, Event]): Task[Unit] = gui.init(queue)
 
         /**
-         * Renders the GUI based on the current state.
-         *
-         * @param state
-         *   the current state of the simulation.
+         * @inheritdoc
          */
-        override def render(state: S): Unit = gui.render(state)
+        override def render(state: S): Task[Unit] = gui.render(state)
 
     end View
 

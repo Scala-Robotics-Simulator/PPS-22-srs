@@ -1,13 +1,15 @@
-package io.github.srs.model.entity.dynamicentity
+package io.github.srs.model.entity.dynamicentity.actuator
 
 import scala.concurrent.duration.FiniteDuration
 
 import io.github.srs.model.entity.*
-import io.github.srs.model.entity.dynamicentity.DifferentialKinematics.{
+import io.github.srs.model.entity.dynamicentity.Robot
+import io.github.srs.model.entity.dynamicentity.actuator.DifferentialKinematics.{
   computePositionAndOrientation,
   computeVelocities,
   computeWheelVelocities,
 }
+import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.{ at, withOrientation }
 
 object WheelMotorTestUtils:

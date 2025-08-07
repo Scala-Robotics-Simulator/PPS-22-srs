@@ -6,17 +6,17 @@ import io.github.srs.model.entity.dynamicentity.DynamicEntity
  * Action trait represents an action that can be performed on a dynamic entity.
  * @tparam F
  *   the effect type of the action.
- * @tparam E
- *   the type of dynamic entity on which the action is performed, extending DynamicEntity.
  */
-trait Action[F[_], E <: DynamicEntity]:
+trait Action[F[_]]:
   /**
    * Runs the action using the provided [[ActionAlg]].
    * @param e
    *   the dynamic entity on which the action will be executed.
    * @param a
    *   the [[ActionAlg]] to use for executing the action.
+   * @tparam E
+   *   the type of the dynamic entity on which the action will be executed.
    * @return
    *   an effectful computation that results in the dynamic entity after the action is executed.
    */
-  def run(e: E)(using a: ActionAlg[F, E]): F[E]
+  def run[E <: DynamicEntity](e: E)(using a: ActionAlg[F, E]): F[E]

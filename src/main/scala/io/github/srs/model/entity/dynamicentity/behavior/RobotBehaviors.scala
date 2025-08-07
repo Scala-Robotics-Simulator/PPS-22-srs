@@ -10,7 +10,7 @@ import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings
  *   - `I` is [[SensorReadings]], representing the data from the robot’s sensors
  *   - `A` is [[Action]], representing the actions the robot can take.
  */
-type RobotBehavior[F[_], E <: DynamicEntity] = Behavior[SensorReadings, Action[F, E]]
+type RobotBehavior[F[_], E <: DynamicEntity] = Behavior[SensorReadings, Action[F]]
 
 /**
  * Collection of predefined behaviors for robots.
