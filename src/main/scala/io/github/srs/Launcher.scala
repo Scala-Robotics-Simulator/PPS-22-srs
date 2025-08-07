@@ -1,6 +1,6 @@
 package io.github.srs
 
-//import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
+import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
 
 import io.github.srs.controller.ControllerModule
 import io.github.srs.controller.ControllerModule.Controller
@@ -32,7 +32,7 @@ object Launcher
       .start(
         SimulationState(
           i = 0,
-          simulationTime = None, // Some(FiniteDuration(10_000, MILLISECONDS)),
+          simulationTime = Some(FiniteDuration(10_000, MILLISECONDS)),
           simulationSpeed = SimulationSpeed.NORMAL,
           simulationRNG = SimpleRNG(42L),
           simulationStatus = SimulationStatus.RUNNING,

@@ -8,6 +8,7 @@ import io.github.srs.model.*
 import io.github.srs.model.SimulationConfig.SimulationStatus
 import io.github.srs.model.UpdateLogic.*
 import io.github.srs.model.logic.*
+import io.github.srs.utils.SimulationDefaults.SimulationConfig.maxCount
 import monix.catnap.ConcurrentQueue
 import monix.eval.Task
 
@@ -88,19 +89,13 @@ object ControllerModule:
       private class ControllerImpl extends Controller[S]:
 
         override def start(initialState: S): Task[Unit] =
-          val MAX_COUNT = 10_000
-          val randInt: Int = initialState.simulationRNG.nextIntBetween(0, MAX_COUNT)._1
+          val randInt: Int = initialState.simulationRNG.nextIntBetween(0, maxCount)._1
           val list = List.fill(randInt)(Event.Increment)
           for
             queueSim <- ConcurrentQueue.unbounded[Task, Event]()
             _ <- context.view.init(queueSim)
-            //            queueLog <- ConcurrentQueue.unbounded[Task, Event]()
             _ <- produceEvents(queueSim, list)
             _ <- simulationLoop(initialState, queueSim)
-          //            _ <- Task.parMap2(
-          //              simulationLoop(initialState, queueSim),
-          //              consumeStream(queueLog)(event => Task(println(s"Received: $event")))
-          //            )((_, _) => ())
           yield ()
 
         override def simulationLoop(s: S, queue: ConcurrentQueue[Task, Event]): Task[Unit] =
@@ -117,14 +112,7 @@ object ControllerModule:
                 newState.simulationTime.exists(max => newState.elapsedTime >= max)
               _ <- if stop then Task.unit else loop(nextState)
             yield ()
-
           loop(s)
-
-        //        private def consumeStream[A](queue: ConcurrentQueue[Task, A])(consume: A => Task[Unit]): Task[Unit] =
-        //          Observable
-        //            .repeatEvalF(queue.poll)
-        //            .mapEval(consume)
-        //            .completedL
 
         private def produceEvents[A](queue: ConcurrentQueue[Task, A], events: List[A]): Task[Unit] =
           events.traverse_(queue.offer)

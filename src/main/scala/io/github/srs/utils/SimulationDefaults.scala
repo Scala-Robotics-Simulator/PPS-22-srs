@@ -8,6 +8,9 @@ import io.github.srs.model.environment.Environment
 
 object SimulationDefaults:
 
+  object SimulationConfig:
+    val maxCount = 10_000
+
   object Environment:
     val defaultWidth: Int = 10
     val minWidth: Int = 1
