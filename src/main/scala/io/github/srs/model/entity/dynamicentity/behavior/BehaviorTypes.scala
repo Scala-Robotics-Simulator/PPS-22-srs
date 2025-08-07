@@ -12,7 +12,7 @@ import io.github.srs.model.entity.dynamicentity.*
 private[behavior] object BehaviorTypes:
 
   /**
-   * **Behaviour** – a pure function in any effect [[F]].
+   * **Behavior** – a pure function in any effect [[F]].
    *
    * @param F
    *   effect type (e.g. [[Id]], [[IO]])

@@ -8,7 +8,7 @@ import org.scalatest.matchers.should.Matchers.*
 import io.github.srs.model.entity.dynamicentity.behavior.dsl.dsl.*
 
 /**
- * Unit tests for the Behaviour DSL builders (`==>`, `|`, `default`).
+ * Unit tests for the Behavior DSL builders (`==>`, `|`, `default`).
  *
  * Each single assertion lives in its own `it` block to avoid the “unused value of type Assertion” compiler warning.
  */
