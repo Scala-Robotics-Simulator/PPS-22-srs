@@ -1,7 +1,7 @@
 package io.github.srs.controller
 
 import scala.compiletime.deferred
-import scala.concurrent.duration.{ Duration, FiniteDuration }
+import scala.concurrent.duration.FiniteDuration
 
 import cats.syntax.foldable.toFoldableOps
 import io.github.srs.model.*
@@ -112,9 +112,8 @@ object ControllerModule:
                 if newState.simulationStatus == SimulationStatus.RUNNING then
                   tickEvents(newState.simulationSpeed.tickSpeed, newState)
                 else Task.pure(newState)
-              stop = newState.simulationStatus == SimulationStatus.STOPPED || newState.simulationTime.equals(
-                Duration.Zero,
-              )
+              stop = newState.simulationStatus == SimulationStatus.STOPPED ||
+                newState.simulationTime.exists(max => newState.elapsedTime >= max)
               _ <- if stop then Task.unit else loop(nextState)
             yield ()
 

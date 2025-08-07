@@ -1,18 +1,20 @@
 package io.github.srs.view
 
-import javax.swing.*
 import java.awt.*
+import javax.swing.*
 
+import io.github.srs.controller.Event
 import io.github.srs.model.ModelModule
+import io.github.srs.model.SimulationConfig.SimulationSpeed
+import io.github.srs.utils.time.TimeUtils.formatTime
 import monix.catnap.ConcurrentQueue
 import monix.eval.Task
-import io.github.srs.controller.Event
-import io.github.srs.model.SimulationConfig.SimulationSpeed
 import monix.execution.Scheduler.Implicits.global
 
 class SimpleView[S <: ModelModule.State]:
   private val frame = new JFrame("Scala Robotics Simulator")
   private val lblText = new JLabel("Hello World!", SwingConstants.CENTER)
+  private val lblTimeElapsed = new JLabel("Elapsed Time: 00:00", SwingConstants.CENTER)
   private val rbtnSlow = new JRadioButton("Slow")
   private val rbtnNormal = new JRadioButton("Normal", true)
   private val rbtnFast = new JRadioButton("Fast")
@@ -21,13 +23,17 @@ class SimpleView[S <: ModelModule.State]:
   private val btnResume = new JButton("Resume")
   private val btnStop = new JButton("Stop")
 
-  private def setLabelText(text: String): Unit =
-    lblText.setText(text)
-
   def init(queue: ConcurrentQueue[Task, Event]): Task[Unit] = Task:
     frame.setMinimumSize(new Dimension(800, 600))
     frame.setLayout(new BorderLayout())
-    frame.getContentPane.add(lblText, BorderLayout.CENTER)
+
+    val contentPanel = new JPanel(new FlowLayout(FlowLayout.CENTER))
+    contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS))
+    lblText.setAlignmentX(Component.CENTER_ALIGNMENT)
+    lblTimeElapsed.setAlignmentX(Component.CENTER_ALIGNMENT)
+    contentPanel.add(lblText, BorderLayout.CENTER)
+    contentPanel.add(lblTimeElapsed, BorderLayout.CENTER)
+    frame.getContentPane.add(contentPanel, BorderLayout.CENTER)
 
     val buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER))
     buttonPanel.add(btnIncrement)
@@ -77,9 +83,18 @@ class SimpleView[S <: ModelModule.State]:
       queue.offer(Event.Stop).runAsyncAndForget
     }
 
-  def render(state: S): Task[Unit] =
-    Task:
-      SwingUtilities.invokeLater(() => setLabelText(s"$state"))
+  def render(state: S): Task[Unit] = Task:
+    val text = state.simulationTime match
+      case Some(max) =>
+        val remaining = max - state.elapsedTime
+        s"Remaining time: ${formatTime(remaining)}"
+      case None =>
+        s"Elapsed time: ${formatTime(state.elapsedTime)}"
+
+    SwingUtilities.invokeLater(() =>
+      lblText.setText(s"$state")
+      lblTimeElapsed.setText(text),
+    )
 
   def close(): Unit =
     frame.dispose()
