@@ -57,8 +57,6 @@ object MovementActionFactory:
    * Turns the robot left by applying a negative speed to the left wheel and a positive speed to the right wheel.
    * @tparam F
    *   the effect type of the action.
-   * @tparam E
-   *   the type of the dynamic entity.
    * @return
    *   the [[MovementAction]] representing the left turn.
    */
@@ -68,12 +66,10 @@ object MovementActionFactory:
    * Turns the robot right by applying a positive speed to the left wheel and a negative speed to the right wheel.
    * @tparam F
    *   the effect type of the action.
-   * @tparam E
-   *   the type of the dynamic entity.
    * @return
    *   the [[MovementAction]] representing the right turn.
    */
-  infix def turnRight[F[_], E <: DynamicEntity]: MovementAction[F] = MovementAction(halfSpeed, -halfSpeed)
+  infix def turnRight[F[_]]: MovementAction[F] = MovementAction(halfSpeed, -halfSpeed)
 
   /**
    * Stops the robot by applying zero speed to both wheels.
