@@ -9,6 +9,7 @@ import io.github.srs.model.entity.Point2D.*
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.action.{ Action, ActionAlg }
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.Actuator.DifferentialWheelMotor.defaultWheel
 
 /**
  * WheelMotor is an actuator that controls the movement of a robot.
@@ -44,7 +45,7 @@ object DifferentialWheelMotor:
    * @return
    *   a new instance of [[DifferentialWheelMotor]].
    */
-  def apply(left: Wheel, right: Wheel): DifferentialWheelMotor =
+  def apply(left: Wheel = defaultWheel, right: Wheel = defaultWheel): DifferentialWheelMotor =
     DifferentialWheelMotorImpl(left, right)
 
   /**

@@ -2,7 +2,7 @@ package io.github.srs.utils
 
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.Robot
-import io.github.srs.model.entity.dynamicentity.actuator.Actuator
+import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, Wheel as ActWheel }
 import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, Sensor }
 import io.github.srs.model.environment.Environment
 
@@ -55,6 +55,15 @@ object SimulationDefaults:
     val minSpeed: Double = -1.0
     val maxSpeed: Double = 1.0
     val halfSpeed: Double = 0.5
+
+    object Actuator:
+
+      object DifferentialWheelMotor:
+        val defaultWheel: ActWheel = ActWheel()
+
+        object Wheel:
+          val defaultSpeed: Double = 1.0
+          val defaultShape: ShapeType.Circle = ShapeType.Circle(0.1)
 
     object Robot:
       import SimulationDefaults.DynamicEntity.Robot.defaultShape.radius

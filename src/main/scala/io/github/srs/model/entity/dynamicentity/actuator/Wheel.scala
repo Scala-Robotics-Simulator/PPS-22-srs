@@ -1,6 +1,7 @@
 package io.github.srs.model.entity.dynamicentity.actuator
 
 import io.github.srs.model.entity.ShapeType
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.Actuator.DifferentialWheelMotor.Wheel.*
 
 /**
  * Represents a wheel with linear speed and circular shape.
@@ -10,7 +11,7 @@ import io.github.srs.model.entity.ShapeType
  * @param shape
  *   the physical shape of the wheel, assumed to be a circle.
  */
-final case class Wheel(speed: Double, shape: ShapeType.Circle):
+final case class Wheel(speed: Double = defaultSpeed, shape: ShapeType.Circle = defaultShape):
   /**
    * Returns a new instance of this wheel with an updated linear speed.
    *
