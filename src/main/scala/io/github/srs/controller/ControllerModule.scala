@@ -99,7 +99,6 @@ object ControllerModule:
           val list = List.fill(randInt)(Event.Increment)
           for
             queueSim <- Queue.unbounded[IO, Event]
-            //            queueSim <- Queue.unbounded[IO, Event]()
             _ <- context.view.init(queueSim)
             _ <- produceEvents(queueSim, list)
             _ <- simulationLoop(initialState, queueSim)
