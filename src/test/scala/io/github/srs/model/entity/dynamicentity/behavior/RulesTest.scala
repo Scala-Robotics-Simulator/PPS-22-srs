@@ -29,7 +29,7 @@ final class RulesTest extends AnyFlatSpec:
   // ---------- tests -------------------------------------------------------
   "avoidObstacle" should "fire when closer than threshold" in:
     val rule = Rules.avoidObstacle[Id](front, safeDist = 0.30)
-    rule.run(readings(0.05)) shouldBe Some(turnRight[Id, Robot])
+    rule.run(readings(0.05)) shouldBe Some(turnRight[Id])
 
   it should "defer otherwise" in:
     val rule = Rules.avoidObstacle[Id](front, 0.30)
@@ -37,5 +37,5 @@ final class RulesTest extends AnyFlatSpec:
 
   "alwaysForward" should "always decide moveForward" in:
     val rule = Rules.alwaysForward[Id]
-    rule.run(readings(0.99)) shouldBe Some(moveForward[Id, Robot])
+    rule.run(readings(0.99)) shouldBe Some(moveForward[Id])
 end RulesTest
