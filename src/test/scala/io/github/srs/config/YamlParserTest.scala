@@ -97,4 +97,40 @@ class YamlParserTest extends AnyFlatSpec with Matchers:
           case _ => fail("Expected a Robot entity")
     end match
 
+  it should "create a robot with a custom actuator" in:
+    val yamlContent =
+      """
+        |environment:
+        |  entities:
+        |    - robot:
+        |        position: [5.0, 5.0]
+        |        actuators:
+        |          - differentialWheelMotor:
+        |              leftSpeed: 3.0
+        |              rightSpeed: 2.0
+        |""".stripMargin
+
+    val res = YamlParser.parse[IO](yamlContent).unsafeRunSync()
+    res match
+      case Left(errors) => fail(s"Parsing failed with errors: ${errors.mkString(", ")}")
+      case Right(config) =>
+        val _ = config.environment.entities.size shouldBe 1
+        config.environment.entities.headOption match
+          case Some(entity) =>
+            entity match
+              case robot: Robot =>
+                val _ = robot.position shouldBe Point2D(5.0, 5.0)
+                val _ = robot.actuators.size shouldBe 1
+                robot.actuators.headOption match
+                  case Some(actuator) =>
+                    actuator match
+                      case d: DifferentialWheelMotor =>
+                        val _ = d.left.speed should be(3.0)
+                        val _ = d.right.speed should be(2.0)
+                      case _ => fail("Expected a DifferentialWheelMotor actuator")
+                  case None => fail("Expected at least one actuator")
+              case _ => fail("Expected a Robot entity")
+          case _ => fail("Expected a Robot entity")
+    end match
+
 end YamlParserTest

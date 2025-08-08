@@ -34,5 +34,27 @@ object DifferentialWheelMotorDsl:
       val leftWheel = motor.left.copy(speed = speed)
       val rightWheel = motor.right.copy(speed = speed)
       DifferentialWheelMotor(leftWheel, rightWheel)
+
+    /**
+     * Sets the speed of the left wheel of the differential motor.
+     * @param speed
+     *   the speed to set for the left wheel.
+     * @return
+     *   a new [[DifferentialWheelMotor]] instance with the updated left wheel speed.
+     */
+    infix def withLeftSpeed(speed: Double): DifferentialWheelMotor =
+      val leftWheel = motor.left.copy(speed = speed)
+      DifferentialWheelMotor(leftWheel, motor.right)
+
+    /**
+     * Sets the speed of the right wheel of the differential motor.
+     * @param speed
+     *   the speed to set for the right wheel.
+     * @return
+     *   a new [[DifferentialWheelMotor]] instance with the updated right wheel speed.
+     */
+    infix def withRightSpeed(speed: Double): DifferentialWheelMotor =
+      val rightWheel = motor.right.copy(speed = speed)
+      DifferentialWheelMotor(motor.left, rightWheel)
   end extension
 end DifferentialWheelMotorDsl
