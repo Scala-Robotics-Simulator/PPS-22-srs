@@ -16,7 +16,8 @@ class YamlParserTest extends AnyFlatSpec with Matchers:
   given CanEqual[Environment, Environment] = CanEqual.derived
 
   "YamlParser" should "parse a valid YAML configuration" in:
-    val yamlPath = Path(getClass.getResource("/configuration.yml").getPath)
+    val uri = getClass.getResource("/configuration.yml").toURI
+    val yamlPath = Path.fromNioPath(java.nio.file.Paths.get(uri))
     val yamlContent = Files[IO].readAll(yamlPath).through(text.utf8.decode).compile.string.unsafeRunSync()
     val res = YamlParser.parse[IO](yamlContent).unsafeRunSync()
     res match
@@ -57,7 +58,7 @@ class YamlParserTest extends AnyFlatSpec with Matchers:
       case Left(errors) => fail(s"Parsing failed with errors: ${errors.mkString(", ")}")
       case Right(config) =>
         val _ = config.simulation.duration shouldBe Some(60)
-        val _ = config.simulation.seed shouldBe None
+        val _ = config.simulation.seed should be(None)
         config.environment shouldBe Environment()
 
   it should "create the correct robot sensors" in:
