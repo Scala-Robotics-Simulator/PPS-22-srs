@@ -16,7 +16,7 @@ object Dependencies {
   val scalaTestJUnit5 = "org.scalatestplus" %% "junit-5-10" % "3.2.19.1" % "test"
   val squidLib = "com.squidpony" % "squidlib-util" % squidLibVersion
   val catsCore = "org.typelevel" %% "cats-core" % "2.13.0"
-  val catsEffect = "org.typelevel" %% "cats-effect" % "3.6.3"
+  val catsEffect = "org.typelevel" %% "cats-effect" % "3.7-4972921"
 
   /*
    * Bundles
