@@ -3,13 +3,13 @@ package io.github.srs.view
 import java.awt.*
 import javax.swing.*
 
+import cats.effect.IO
+import cats.effect.std.Queue
+import cats.effect.unsafe.implicits.global
 import io.github.srs.controller.Event
 import io.github.srs.model.ModelModule
 import io.github.srs.model.SimulationConfig.SimulationSpeed
 import io.github.srs.utils.time.TimeUtils.formatTime
-import monix.catnap.ConcurrentQueue
-import monix.eval.Task
-import monix.execution.Scheduler.Implicits.global
 
 class SimpleView[S <: ModelModule.State]:
   private val frame = new JFrame("Scala Robotics Simulator")
@@ -23,7 +23,7 @@ class SimpleView[S <: ModelModule.State]:
   private val btnResume = new JButton("Resume")
   private val btnStop = new JButton("Stop")
 
-  def init(queue: ConcurrentQueue[Task, Event]): Task[Unit] = Task:
+  def init(queue: Queue[IO, Event]): IO[Unit] = IO:
     frame.setMinimumSize(new Dimension(800, 600))
     frame.setLayout(new BorderLayout())
 
@@ -58,32 +58,32 @@ class SimpleView[S <: ModelModule.State]:
     frame.setVisible(true)
 
     rbtnSlow.addActionListener { _ =>
-      queue.offer(Event.TickSpeed(SimulationSpeed.SLOW)).runAsyncAndForget
+      queue.offer(Event.TickSpeed(SimulationSpeed.SLOW)).unsafeRunAndForget()
     }
     rbtnNormal.addActionListener { _ =>
-      queue.offer(Event.TickSpeed(SimulationSpeed.NORMAL)).runAsyncAndForget
+      queue.offer(Event.TickSpeed(SimulationSpeed.NORMAL)).unsafeRunAndForget()
     }
     rbtnFast.addActionListener { _ =>
-      queue.offer(Event.TickSpeed(SimulationSpeed.FAST)).runAsyncAndForget
+      queue.offer(Event.TickSpeed(SimulationSpeed.FAST)).unsafeRunAndForget()
     }
 
     btnIncrement.addActionListener { _ =>
-      queue.offer(Event.Increment).runAsyncAndForget
+      queue.offer(Event.Increment).unsafeRunAndForget()
     }
 
     btnPause.addActionListener { _ =>
-      queue.offer(Event.Pause).runAsyncAndForget
+      queue.offer(Event.Pause).unsafeRunAndForget()
     }
 
     btnResume.addActionListener { _ =>
-      queue.offer(Event.Resume).runAsyncAndForget
+      queue.offer(Event.Resume).unsafeRunAndForget()
     }
 
     btnStop.addActionListener { _ =>
-      queue.offer(Event.Stop).runAsyncAndForget
+      queue.offer(Event.Stop).unsafeRunAndForget()
     }
 
-  def render(state: S): Task[Unit] = Task:
+  def render(state: S): IO[Unit] = IO:
     val text = state.simulationTime match
       case Some(max) =>
         val remaining = max - state.elapsedTime
