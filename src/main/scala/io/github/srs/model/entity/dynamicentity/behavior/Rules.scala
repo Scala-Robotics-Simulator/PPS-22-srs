@@ -10,7 +10,7 @@ import io.github.srs.model.entity.dynamicentity.sensor.*
 import io.github.srs.model.environment.Environment
 
 /**
- * Catalogue of **stateless** behaviour rules.
+ * Catalogue of **stateless** behavior rules.
  *
  * This object contains a collection of pure rules that define specific behaviors for dynamic entities. Each rule is
  * stateless and depends only on its input parameters.

@@ -5,7 +5,7 @@ import cats.data.Kleisli
 import io.github.srs.model.entity.dynamicentity.*
 
 /**
- * Types used by the Behaviour DSL and policy.
+ * Types used by the Behavior DSL and policy.
  *
  * All aliases are kept package-internal so they do **not** be part of the public namespace
  */
