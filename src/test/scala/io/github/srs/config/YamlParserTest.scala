@@ -7,6 +7,7 @@ import fs2.text
 import io.github.srs.config.ConfigError.MissingField
 import io.github.srs.model.entity.Point2D
 import io.github.srs.model.entity.dynamicentity.Robot
+import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor
 import io.github.srs.model.environment.Environment
 import io.github.srs.utils.SimulationDefaults
 import org.scalatest.flatspec.AnyFlatSpec
@@ -68,6 +69,7 @@ class YamlParserTest extends AnyFlatSpec with Matchers:
         |  entities:
         |    - robot:
         |        position: [5.0, 5.0]
+        |        speed: 1.0
         |        withProximitySensors: true
         |""".stripMargin
 
@@ -81,8 +83,18 @@ class YamlParserTest extends AnyFlatSpec with Matchers:
             entity match
               case robot: Robot =>
                 val _ = robot.position shouldBe Point2D(5.0, 5.0)
+                val _ = robot.actuators.size shouldBe 1
+                robot.actuators.headOption match
+                  case Some(actuator) =>
+                    actuator match
+                      case d: DifferentialWheelMotor =>
+                        val _ = d.left.speed should be(1.0)
+                        val _ = d.right.speed should be(1.0)
+                      case _ => fail("Expected a DifferentialWheelMotor actuator")
+                  case None => fail("Expected at least one actuator")
                 robot.sensors should be(SimulationDefaults.DynamicEntity.Robot.stdProximitySensors)
               case _ => fail("Expected a Robot entity")
           case _ => fail("Expected a Robot entity")
+    end match
 
 end YamlParserTest

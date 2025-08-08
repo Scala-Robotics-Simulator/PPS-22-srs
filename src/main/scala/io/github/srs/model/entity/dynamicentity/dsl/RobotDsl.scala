@@ -1,9 +1,7 @@
 package io.github.srs.model.entity.dynamicentity.dsl
 
-import scala.annotation.unused
-
 import io.github.srs.model.entity.dynamicentity.Robot
-import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, DifferentialWheelMotor }
+import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, DifferentialWheelMotor, Wheel }
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.environment.Environment
@@ -121,8 +119,9 @@ object RobotDsl:
     infix def and(sensor: Sensor[Robot, Environment]): Robot =
       containing(sensor)
 
-    infix def withSpeed(@unused speed: Double): Robot =
-      robot // TODO: Implement speed setting logic
+    infix def withSpeed(speed: Double): Robot =
+      val dwm = DifferentialWheelMotor(Wheel(speed, ShapeType.Circle(0.1)), Wheel(speed, ShapeType.Circle(0.1)))
+      robot containing dwm
 
     def withProximitySensors: Robot =
       robot withSensors stdProximitySensors
