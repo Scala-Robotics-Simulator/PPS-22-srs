@@ -1,9 +1,12 @@
 package io.github.srs.config
 
 import io.github.srs.config.ConfigResult
+import io.github.srs.config.collection.CustomMap.*
 import io.github.srs.model.Simulation
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.Robot
+import io.github.srs.model.entity.dynamicentity.actuator.Actuator
+import io.github.srs.model.entity.dynamicentity.actuator.dsl.DifferentialWheelMotorDsl.*
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 import io.github.srs.model.entity.staticentity.dsl.LightDsl.*
 import io.github.srs.model.entity.staticentity.dsl.ObstacleDsl.*
@@ -40,51 +43,12 @@ object YamlSimulationConfigParser:
         case Left(err) => Left[Seq[ConfigError], Map[String, Any]](Seq(ConfigError.ParsingError(err.getMessage)))
         case Right(map) => Right[Seq[ConfigError], Map[String, Any]](map)
 
-      simMap <- getOptionalSubMap("simulation", root)
-      envMap <- getOptionalSubMap("environment", root)
+      simMap <- root.getOptionalSubMap("simulation")
+      envMap <- root.getOptionalSubMap("environment")
 
       sim <- parseSimulation(simMap)
       env <- parseEnvironment(envMap)
     yield SimulationConfig(sim, env)
-
-  /**
-   * Retrieves an optional sub-map from the given map by key.
-   * @param key
-   *   the key to look for in the map
-   * @param map
-   *   the map from which to retrieve the sub-map
-   * @return
-   *   a `ConfigResult` containing an `Option[Map[String, Any]]`. If the key is present it returns
-   *   `Right(Some(subMap))`, if the key is missing it returns `Right(None)`, and if there's an error it returns
-   *   `Left(errors)`.
-   */
-  private def getOptionalSubMap(key: String, map: Map[String, Any]): ConfigResult[Option[Map[String, Any]]] =
-    getSubMap(key, map) match
-      case Right(subMap) => Right[Seq[ConfigError], Option[Map[String, Any]]](Some(subMap))
-      case Left(errors) if errors.exists {
-            case ConfigError.MissingField(_) => true
-            case _ => false
-          } =>
-        Right[Seq[ConfigError], Option[Map[String, Any]]](None) // If the key is missing, return None
-      case Left(errors) =>
-        Left[Seq[ConfigError], Option[Map[String, Any]]](errors) // If there's another error, propagate it
-
-  /**
-   * Retrieves a sub-map from the given map by key.
-   * @param key
-   *   the key to look for in the map
-   * @param map
-   *   the map from which to retrieve the sub-map
-   * @return
-   *   a `ConfigResult` containing the sub-map. If the key is present and the value is a map, it returns
-   *   `Right(subMap)`, if the key is missing it returns `Left(errors)` with a `ConfigError.MissingField`, and if the
-   *   value is not a map it returns `Left(errors)` with a `ConfigError.InvalidType`
-   */
-  private def getSubMap(key: String, map: Map[String, Any]): ConfigResult[Map[String, Any]] =
-    map.get(key) match
-      case Some(m: Map[?, ?]) => Right[Seq[ConfigError], Map[String, Any]](m.asInstanceOf[Map[String, Any]])
-      case Some(_) => Left[Seq[ConfigError], Map[String, Any]](Seq(ConfigError.InvalidType(key, "Map[String, Any]")))
-      case None => Left[Seq[ConfigError], Map[String, Any]](Seq(ConfigError.MissingField(key)))
 
   /**
    * Parses the simulation portion of the configuration.
@@ -118,27 +82,13 @@ object YamlSimulationConfigParser:
         for
           width <- getOptional[Int]("width", m)
           height <- getOptional[Int]("height", m)
-          entities <- m.get("entities") match
-            case Some(list: List[?]) =>
-              val parsed = list.zipWithIndex.map { case (e, i) =>
-                e match
-                  case em: Map[?, ?] =>
-                    parseEntity(em.asInstanceOf[Map[String, Any]])
-                  case _ =>
-                    Left[Seq[ConfigError], Entity](Seq(ConfigError.InvalidType(s"entities[$i]", "Map[String, Any]")))
-              }
-              sequence(parsed).map(_.toSet)
-            case None => Right[Seq[ConfigError], Set[Entity]](Set.empty)
-            case _ =>
-              Left[Seq[ConfigError], Set[Entity]](Seq(ConfigError.InvalidType("entities", "List[Map[String, Any]]")))
+          entities <- m.parseSequence("entities", parseEntity)
         yield Environment()
           |> (env => width.fold(env)(env.withWidth))
           |> (env => height.fold(env)(env.withHeight))
-          |> (_.containing(entities))
+          |> (_.containing(entities.toSet))
         end for
     end match
-
-  end parseEnvironment
 
   /**
    * Parses an entity from the given map.
@@ -166,7 +116,7 @@ object YamlSimulationConfigParser:
    *   a `ConfigResult` containing the parsed `Robot` or the errors encountered during parsing.
    */
   private def parseRobot(map: Map[String, Any]): ConfigResult[Entity] =
-    // TODO: Add support for robot behavior and wheel actuators
+    // TODO: Add support for robot behavior
     for
       pos <- get[List[Int]]("position", map)
       orient <- getOptional[Double]("orientation", map)
@@ -174,12 +124,14 @@ object YamlSimulationConfigParser:
       speed <- getOptional[Double]("speed", map)
       prox <- getOptional[Boolean]("withProximitySensors", map)
       light <- getOptional[Boolean]("withLightSensors", map)
+      actuators <- map.parseSequence("actuators", parseActuator)
     yield Robot().at(Point2D(pos.head, pos(1)))
       |> (r => orient.fold(r)(o => r.withOrientation(Orientation(o))))
       |> (r => radius.fold(r)(radius => r.withShape(ShapeType.Circle(radius))))
       |> (r => speed.fold(r)(s => r.withSpeed(s)))
       |> (r => if prox.getOrElse(false) then r.withProximitySensors else r)
       |> (r => if light.getOrElse(false) then r.withLightSensors else r)
+      |> (r => if actuators.nonEmpty then r.withActuators(actuators) else r)
 
   /**
    * Parses an obstacle entity from the given map.
@@ -217,20 +169,33 @@ object YamlSimulationConfigParser:
       |> (l => attenuation.fold(l)(a => l.withAttenuation(a)))
 
   /**
-   * Utility method to sequence a collection of `ConfigResult`s into a single `ConfigResult` containing a sequence of
-   * results.
-   * @param results
-   *   the sequence of `ConfigResult`s to be sequenced
-   * @tparam A
-   *   the type of the results contained in the `ConfigResult`
+   * Parses an actuator from the given map.
+   * @param map
+   *   the map containing actuator parameters
    * @return
-   *   a `ConfigResult` containing a sequence of results if all are successful, or a sequence of errors if any fail.
+   *   a `ConfigResult` containing the parsed `Actuator[Robot]` or the errors encountered during parsing.
    */
-  private def sequence[A](results: Seq[ConfigResult[A]]): ConfigResult[Seq[A]] =
-    results.foldRight(Right[Seq[ConfigError], Seq[A]](Nil): ConfigResult[Seq[A]]):
-      case (Right(a), Right(as)) => Right[Seq[ConfigError], Seq[A]](a +: as)
-      case (Left(e1), Right(_)) => Left[Seq[ConfigError], Seq[A]](e1)
-      case (Right(_), Left(e2)) => Left[Seq[ConfigError], Seq[A]](e2)
-      case (Left(e1), Left(e2)) => Left[Seq[ConfigError], Seq[A]](e1 ++ e2)
+  private def parseActuator(map: Map[String, Any]): ConfigResult[Actuator[Robot]] =
+    map.headOption match
+      case Some(("differentialWheelMotor", v: Map[?, ?])) =>
+        parseDifferentialWheelMotor(v.asInstanceOf[Map[String, Any]])
+      case Some((key, _)) =>
+        Left[Seq[ConfigError], Actuator[Robot]](Seq(ConfigError.ParsingError(s"Unknown actuator type: $key")))
+      case None => Left[Seq[ConfigError], Actuator[Robot]](Seq(ConfigError.ParsingError("Empty actuator map")))
+
+  /**
+   * Parses a [[io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor]] from the given map.
+   * @param map
+   *   the map containing differential wheel motor parameters
+   * @return
+   *   a `ConfigResult` containing the parsed `Actuator[Robot]` or the errors encountered during parsing.
+   */
+  private def parseDifferentialWheelMotor(map: Map[String, Any]): ConfigResult[Actuator[Robot]] =
+    for
+      leftSpeed <- getOptional[Double]("leftSpeed", map)
+      rightSpeed <- getOptional[Double]("rightSpeed", map)
+    yield differentialWheelMotor
+      |> (motor => leftSpeed.fold(motor)(motor.withLeftSpeed))
+      |> (motor => rightSpeed.fold(motor)(motor.withRightSpeed))
 
 end YamlSimulationConfigParser
