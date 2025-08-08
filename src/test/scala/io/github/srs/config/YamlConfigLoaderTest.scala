@@ -15,7 +15,8 @@ class YamlConfigLoaderTest extends AnyFlatSpec with Matchers:
   given CanEqual[Sensor[?, ?], Sensor[?, ?]] = CanEqual.derived
 
   "YamlConfigLoader" should "load the correct configuration" in:
-    val path = Path(getClass.getResource("/configuration.yml").getPath)
+    val uri = getClass.getResource("/configuration.yml").toURI
+    val path = Path.fromNioPath(java.nio.file.Paths.get(uri))
     val loader = YamlConfigLoader[IO](path)
     val result = loader.load.unsafeRunSync()
     val _ = result shouldBe a[Right[?, SimulationConfig]]
