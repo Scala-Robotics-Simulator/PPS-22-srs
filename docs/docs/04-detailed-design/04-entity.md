@@ -68,7 +68,7 @@ Comprende:
 
 Questa struttura è pensata per simulare comportamenti robotici, in cui percezione e azione sono fortemente integrati.
 
-<!-- TODO: behaviour -->
+<!-- TODO: behavior -->
 
 ### StaticEntity
 

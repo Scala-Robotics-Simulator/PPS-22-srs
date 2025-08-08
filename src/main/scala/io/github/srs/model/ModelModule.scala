@@ -2,9 +2,9 @@ package io.github.srs.model
 
 import scala.concurrent.duration.FiniteDuration
 
+import cats.effect.IO
 import io.github.srs.model.SimulationConfig.{ SimulationSpeed, SimulationStatus }
 import io.github.srs.utils.random.SimpleRNG
-import monix.eval.Task
 
 /**
  * Module that defines the model logic for the Scala Robotics Simulator.
@@ -53,17 +53,19 @@ object ModelModule:
 
     /**
      * Updates the state of the simulation using the provided function.
+     *
      * @param s
      *   the current state of the simulation.
      * @param f
-     *   the function that takes the current state and returns a new state wrapped in a [[Task]].
+     *   the function that takes the current state and returns a new state wrapped in a [[IO]].
      * @return
-     *   the updated state wrapped in a [[Task]].
+     *   the updated state wrapped in a [[IO]].
      */
-    def update(s: S)(using f: S => Task[S]): Task[S]
+    def update(s: S)(using f: S => IO[S]): IO[S]
 
   /**
    * Provider trait that defines the interface for providing a model.
+   *
    * @tparam S
    *   the type of the state, which must extend [[State]].
    */
@@ -95,11 +97,12 @@ object ModelModule:
         /**
          * @inheritdoc
          */
-        override def update(s: S)(using updateLogic: S => Task[S]): Task[S] = updateLogic(s)
+        override def update(s: S)(using updateLogic: S => IO[S]): IO[S] = updateLogic(s)
   end Component
 
   /**
    * Interface trait that combines the provider and component traits.
+   *
    * @tparam S
    *   the type of the state, which must extend [[State]].
    */

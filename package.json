@@ -13,6 +13,7 @@
     "node": "22.18"
   },
   "scripts": {
-    "lint-format": "sbt \"scalafixAll ; scalafmtAll\""
+    "lint-format": "sbt \"scalafixAll ; scalafmtAll\"",
+    "clean": "sbt \"clean ; reload ; clean\""
   }
 }
