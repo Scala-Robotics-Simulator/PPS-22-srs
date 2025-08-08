@@ -16,11 +16,12 @@ object Dependencies {
   val scalaTestJUnit5 = "org.scalatestplus" %% "junit-5-10" % "3.2.19.1" % "test"
   val squidLib = "com.squidpony" % "squidlib-util" % squidLibVersion
   val catsCore = "org.typelevel" %% "cats-core" % "2.13.0"
-  val monix = "io.monix" %% "monix" % "3.4.1"
+  val catsEffect = "org.typelevel" %% "cats-effect" % "3.6.3"
 
   /*
    * Bundles
    */
   val scalaTestBundle: Seq[ModuleID] = Seq(scalaTest, scalactic)
+  val catsBundle: Seq[ModuleID] = Seq(catsCore, catsEffect)
 }
 
