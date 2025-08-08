@@ -35,7 +35,7 @@ object Rules:
   def avoidObstacle[F[_]: Monad](
       front: ProximitySensor[Robot, Environment],
       safeDist: Double,
-  ): Rule[F, SensorReadings, Action[F, Robot]] =
+  ): Rule[F, SensorReadings, Action[F]] =
     (front < safeDist) ==> turnRight
 
   /**
@@ -49,6 +49,6 @@ object Rules:
    * @return
    *   A [[Rule]] that always triggers a move forward action.
    */
-  def alwaysForward[F[_]: Applicative]: Rule[F, SensorReadings, Action[F, Robot]] =
+  def alwaysForward[F[_]: Applicative]: Rule[F, SensorReadings, Action[F]] =
     always ==> moveForward
 end Rules

@@ -22,7 +22,7 @@ final class PolicyTest extends AnyFlatSpec:
     ProximitySensor[Robot, Environment](Orientation(0), 0.1, 1.0)
   private def r(d: Double) = Vector(SensorReading(front, d))
 
-  given CanEqual[Action[Id, Robot], Action[Id, Robot]] = CanEqual.derived
+  given CanEqual[Action[Id], Action[Id]] = CanEqual.derived
 
   "simple policy" should "choose avoidObstacle over forward" in:
     Policy.simple[Id](front).run(r(0.05)) shouldBe turnRight[Id, Robot]
