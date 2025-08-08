@@ -1,7 +1,8 @@
 package io.github.srs.model.entity.dynamicentity.dsl
 
 import io.github.srs.model.entity.dynamicentity.Robot
-import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, DifferentialWheelMotor, Wheel }
+import io.github.srs.model.entity.dynamicentity.actuator.dsl.DifferentialWheelMotorDsl.{ differentialWheelMotor, ws }
+import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, DifferentialWheelMotor }
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.environment.Environment
@@ -86,8 +87,18 @@ object RobotDsl:
      * @return
      *   a new [[Robot]] instance with the actuator added.
      */
-    infix def containing(actuator: Actuator[Robot]): Robot =
+    infix def withActuator(actuator: Actuator[Robot]): Robot =
       robot.copy(actuators = robot.actuators :+ actuator)
+
+    /**
+     * Adds an actuator to the robot.
+     * @param actuator
+     *   the actuator to add.
+     * @return
+     *   a new [[Robot]] instance with the actuator added.
+     */
+    infix def containing(actuator: Actuator[Robot]): Robot =
+      withActuator(actuator)
 
     /**
      * Another way to add an actuator to the robot.
@@ -106,8 +117,18 @@ object RobotDsl:
      * @return
      *   a new [[Robot]] instance with the sensor added.
      */
-    infix def containing(sensor: Sensor[Robot, Environment]): Robot =
+    infix def withSensor(sensor: Sensor[Robot, Environment]): Robot =
       robot.copy(sensors = robot.sensors :+ sensor)
+
+    /**
+     * Adds a sensor to the robot.
+     * @param sensor
+     *   the sensor to add.
+     * @return
+     *   a new [[Robot]] instance with the sensor added.
+     */
+    infix def containing(sensor: Sensor[Robot, Environment]): Robot =
+      withSensor(sensor)
 
     /**
      * Adds a sensor to the robot.
@@ -120,11 +141,14 @@ object RobotDsl:
       containing(sensor)
 
     infix def withSpeed(speed: Double): Robot =
-      val dwm = DifferentialWheelMotor(Wheel(speed, ShapeType.Circle(0.1)), Wheel(speed, ShapeType.Circle(0.1)))
-      robot containing dwm
+      val dfw =
+        robot.actuators.collectFirst { case dfw: DifferentialWheelMotor => dfw }.getOrElse(differentialWheelMotor)
+      val updatedDfw = dfw.ws(speed)
+      val updatedActuators = robot.actuators.filterNot(_.equals(dfw)) :+ updatedDfw
+      robot.withActuators(updatedActuators)
 
     def withProximitySensors: Robot =
-      robot withSensors stdProximitySensors
+      robot.withSensors(stdProximitySensors)
 
     def withLightSensors: Robot =
       robot // TODO: Implement light sensors when available
