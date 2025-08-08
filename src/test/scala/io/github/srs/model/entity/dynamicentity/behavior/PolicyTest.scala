@@ -25,7 +25,7 @@ final class PolicyTest extends AnyFlatSpec:
   given CanEqual[Action[Id], Action[Id]] = CanEqual.derived
 
   "simple policy" should "choose avoidObstacle over forward" in:
-    Policy.simple[Id](front).run(r(0.05)) shouldBe turnRight[Id, Robot]
+    Policy.simple[Id](front).run(r(0.05)) shouldBe turnRight[Id]
 
   it should "fall back to moveForward when obstacle away" in:
-    Policy.simple[Id](front).run(r(0.80)) shouldBe moveForward[Id, Robot]
+    Policy.simple[Id](front).run(r(0.80)) shouldBe moveForward[Id]
