@@ -23,8 +23,8 @@ final class RulesTest extends AnyFlatSpec:
   private def readings(d: Double): SensorReadings =
     Vector(SensorReading(front, d))
 
-  given CanEqual[Action[Id, Robot], Action[Id, Robot]] = CanEqual.derived
-  given CanEqual[Option[Action[Id, Robot]], Option[Action[Id, Robot]]] = CanEqual.derived
+  given CanEqual[Action[Id], Action[Id]] = CanEqual.derived
+  given CanEqual[Option[Action[Id]], Option[Action[Id]]] = CanEqual.derived
 
   // ---------- tests -------------------------------------------------------
   "avoidObstacle" should "fire when closer than threshold" in:

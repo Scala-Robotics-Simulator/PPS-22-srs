@@ -33,7 +33,7 @@ object Policy:
    */
   def simple[F[_]: Monad](
       frontSensor: ProximitySensor[Robot, Environment],
-  ): Behavior[F, SensorReadings, Action[F, Robot]] =
+  ): Behavior[F, SensorReadings, Action[F]] =
 
     (
       Rules.avoidObstacle(front = frontSensor, safeDist = 0.3) |
