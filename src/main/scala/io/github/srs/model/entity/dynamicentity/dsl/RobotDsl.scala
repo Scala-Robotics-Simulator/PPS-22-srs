@@ -1,15 +1,15 @@
 package io.github.srs.model.entity.dynamicentity.dsl
 
+import scala.annotation.unused
+
 import io.github.srs.model.entity.dynamicentity.Robot
-import io.github.srs.model.entity.dynamicentity.actuator.{Actuator, DifferentialWheelMotor}
+import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, DifferentialWheelMotor }
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor
-import io.github.srs.model.entity.{Orientation, Point2D, ShapeType}
+import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.validation.Validation
-import io.github.srs.model.validation.Validation.{notInfinite, notNaN, validateCountOfType}
+import io.github.srs.model.validation.Validation.{ notInfinite, notNaN, validateCountOfType }
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.*
-
-import scala.annotation.unused
 
 /**
  * The DSL for creating and configuring a Robot entity.
