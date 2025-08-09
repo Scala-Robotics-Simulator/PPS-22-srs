@@ -1,13 +1,13 @@
 package io.github.srs.model.lighting.grid
 
-import io.github.srs.model.lighting.grid.{CellAggregation, GridConfig}
+import io.github.srs.model.lighting.grid.{ CellAggregation, GridConfig }
 import io.github.srs.model.validation.DomainError
 import org.scalatest.Inside.inside
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 /**
- * Unit tests for the [[GridConfig]] class.
+ * Unit tests for the [[GridConfig]] class, which represents the configuration for a grid-based lighting system.
  */
 final class GridConfigTest extends AnyFlatSpec with Matchers:
 
@@ -19,14 +19,14 @@ final class GridConfigTest extends AnyFlatSpec with Matchers:
     val opHiBad = 1.01
     val eps = 1e-12
 
-  import C._
+  import C.*
 
   "GridConfig" should "create a valid instance" in:
     val res = GridConfig.make(
       subdivisionsPerCell = subsOk,
       aggregation = CellAggregation.Max,
       robotsBlockLight = true,
-      defaultCellOpacity = opOk
+      defaultCellOpacity = opOk,
     )
     inside(res):
       case Right(cfg) =>
@@ -34,7 +34,7 @@ final class GridConfigTest extends AnyFlatSpec with Matchers:
           cfg.subdivisionsPerCell == subsOk,
           cfg.aggregation == CellAggregation.Max,
           cfg.robotsBlockLight,
-          math.abs(cfg.defaultCellOpacity - opOk) < eps
+          math.abs(cfg.defaultCellOpacity - opOk) < eps,
         ).forall(identity) shouldBe true
 
   it should "reject subdivisionsPerCell < 1" in:
