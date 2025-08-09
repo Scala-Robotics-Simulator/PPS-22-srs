@@ -1,11 +1,19 @@
 package io.github.srs.config.yaml.serializer.encoders
 
+import io.circe.syntax.*
 import io.circe.{ Encoder, Json }
 import io.github.srs.model.Simulation
-import io.circe.syntax.*
 
+/**
+ * Encoders for Simulation types.
+ */
 object Simulation:
 
+  /**
+   * Encoder for Simulation.
+   * @return
+   *   An Encoder that serializes Simulation instances to JSON.
+   */
   given Encoder[Simulation] = (simulation: Simulation) =>
     Json
       .obj()
