@@ -197,4 +197,22 @@ class YamlManagerTest extends AnyFlatSpec with Matchers:
     val _ = yamlContent should be(expectedYaml)
     loadedConfig shouldBe config
 
+  it should "convert a default SimulationConfig to YAML" in:
+    val config = SimulationConfig(
+      simulation = Simulation(),
+      environment = Environment(),
+    )
+
+    val expectedYaml =
+      """environment:
+        |  width: 10
+        |  height: 10
+        |""".stripMargin
+
+    val yamlContent = YamlManager.toYaml[IO](config).unsafeRunSync()
+    println(yamlContent)
+    val loadedConfig = YamlManager.parse[IO](yamlContent).unsafeRunSync().toOption.value
+    val _ = yamlContent should be(expectedYaml)
+    loadedConfig shouldBe config
+
 end YamlManagerTest
