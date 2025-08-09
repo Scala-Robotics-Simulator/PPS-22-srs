@@ -1,4 +1,6 @@
-package io.github.srs.config
+package io.github.srs.config.yaml.decoder
+
+import io.github.srs.config.{ ConfigError, ConfigResult }
 
 /**
  * A trait for decoding configuration values from a map. It provides methods to decode various types of values, such as
