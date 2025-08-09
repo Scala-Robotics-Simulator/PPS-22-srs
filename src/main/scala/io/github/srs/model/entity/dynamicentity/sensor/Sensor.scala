@@ -8,6 +8,7 @@ import io.github.srs.model.entity.{ Orientation, Point2D }
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.validation.Validation
 import io.github.srs.utils.Ray.intersectRay
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.Sensor.ProximitySensor as ProximitySensorDefaults
 
 /**
  * Represents the range of a sensor.
@@ -106,9 +107,9 @@ type SensorReadings = Vector[SensorReading[? <: Sensor[?, ?], ?]]
  *   the type of environment in which the sensor operates.
  */
 final case class ProximitySensor[Entity <: DynamicEntity, Env <: Environment](
-    offset: Orientation,
-    distance: Distance,
-    range: Range,
+    offset: Orientation = Orientation(ProximitySensorDefaults.defaultOffset),
+    distance: Distance = ProximitySensorDefaults.defaultDistance,
+    range: Range = ProximitySensorDefaults.defaultRange,
 ) extends Sensor[Entity, Env]:
 
   override type Data = Double

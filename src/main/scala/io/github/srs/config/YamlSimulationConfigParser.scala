@@ -8,6 +8,8 @@ import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.actuator.Actuator
 import io.github.srs.model.entity.dynamicentity.actuator.dsl.DifferentialWheelMotorDsl.*
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
+import io.github.srs.model.entity.dynamicentity.sensor.Sensor
+import io.github.srs.model.entity.dynamicentity.sensor.dsl.ProximitySensorDsl.*
 import io.github.srs.model.entity.staticentity.dsl.LightDsl.*
 import io.github.srs.model.entity.staticentity.dsl.ObstacleDsl.*
 import io.github.srs.model.environment.Environment
@@ -125,6 +127,7 @@ object YamlSimulationConfigParser:
       prox <- getOptional[Boolean]("withProximitySensors", map)
       light <- getOptional[Boolean]("withLightSensors", map)
       actuators <- map.parseSequence("actuators", parseActuator)
+      sensors <- map.parseSequence("sensors", parseSensor)
     yield Robot().at(Point2D(pos.head, pos(1)))
       |> (r => orient.fold(r)(o => r.withOrientation(Orientation(o))))
       |> (r => radius.fold(r)(radius => r.withShape(ShapeType.Circle(radius))))
@@ -132,6 +135,7 @@ object YamlSimulationConfigParser:
       |> (r => if prox.getOrElse(false) then r.withProximitySensors else r)
       |> (r => if light.getOrElse(false) then r.withLightSensors else r)
       |> (r => if actuators.nonEmpty then r.withActuators(actuators) else r)
+      |> (r => if sensors.nonEmpty then r.withSensors(sensors) else r)
 
   /**
    * Parses an obstacle entity from the given map.
@@ -192,10 +196,37 @@ object YamlSimulationConfigParser:
    */
   private def parseDifferentialWheelMotor(map: Map[String, Any]): ConfigResult[Actuator[Robot]] =
     for
-      leftSpeed <- getOptional[Double]("leftSpeed", map)
-      rightSpeed <- getOptional[Double]("rightSpeed", map)
-    yield differentialWheelMotor
-      |> (motor => leftSpeed.fold(motor)(motor.withLeftSpeed))
-      |> (motor => rightSpeed.fold(motor)(motor.withRightSpeed))
+      leftSpeed <- get[Double]("leftSpeed", map)
+      rightSpeed <- get[Double]("rightSpeed", map)
+    yield differentialWheelMotor withLeftSpeed leftSpeed withRightSpeed rightSpeed
+
+  /**
+   * Parses a [[Sensor]] from the given map.
+   * @param map
+   *   the map containing sensor parameters
+   * @return
+   *   a `ConfigResult` containing the parsed `Sensor[Robot, Environment]` or the errors encountered during parsing.
+   */
+  private def parseSensor(map: Map[String, Any]): ConfigResult[Sensor[Robot, Environment]] =
+    map.headOption match
+      case Some(("proximitySensor", v: Map[?, ?])) =>
+        parseProximitySensor(v.asInstanceOf[Map[String, Any]])
+      case Some((key, _)) =>
+        Left[Seq[ConfigError], Sensor[Robot, Environment]](Seq(ConfigError.ParsingError(s"Unknown sensor type: $key")))
+      case None => Left[Seq[ConfigError], Sensor[Robot, Environment]](Seq(ConfigError.ParsingError("Empty sensor map")))
+
+  /**
+   * Parses a [[io.github.srs.model.entity.dynamicentity.sensor.ProximitySensor]] from the given map.
+   * @param map
+   *   the map containing proximity sensor parameters
+   * @return
+   *   a `ConfigResult` containing the parsed `Sensor[Robot, Environment]` or the errors encountered during parsing.
+   */
+  private def parseProximitySensor(map: Map[String, Any]): ConfigResult[Sensor[Robot, Environment]] =
+    for
+      offset <- get[Double]("offset", map)
+      distance <- get[Double]("distance", map)
+      range <- get[Double]("range", map)
+    yield proximitySensor withOffset Orientation(offset) withDistance distance withRange range
 
 end YamlSimulationConfigParser

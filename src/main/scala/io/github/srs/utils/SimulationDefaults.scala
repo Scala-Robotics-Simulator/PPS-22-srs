@@ -65,6 +65,13 @@ object SimulationDefaults:
           val defaultSpeed: Double = 1.0
           val defaultShape: ShapeType.Circle = ShapeType.Circle(0.1)
 
+    object Sensor:
+
+      object ProximitySensor:
+        val defaultOffset: Double = 0.0
+        val defaultDistance: Double = 0.5
+        val defaultRange: Double = 5.0
+
     object Robot:
       import SimulationDefaults.DynamicEntity.Robot.defaultShape.radius
 
