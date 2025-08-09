@@ -8,6 +8,7 @@ import io.github.srs.config.ConfigError.MissingField
 import io.github.srs.model.entity.Point2D
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor
+import io.github.srs.model.entity.dynamicentity.sensor.ProximitySensor
 import io.github.srs.model.environment.Environment
 import io.github.srs.utils.SimulationDefaults
 import org.scalatest.flatspec.AnyFlatSpec
@@ -129,6 +130,46 @@ class YamlParserTest extends AnyFlatSpec with Matchers:
                         val _ = d.right.speed should be(2.0)
                       case _ => fail("Expected a DifferentialWheelMotor actuator")
                   case None => fail("Expected at least one actuator")
+              case _ => fail("Expected a Robot entity")
+          case _ => fail("Expected a Robot entity")
+    end match
+
+  it should "parse a robot with custom sensors" in:
+    val yamlContent =
+      """
+        |environment:
+        |  entities:
+        |    - robot:
+        |        position: [5.0, 5.0]
+        |        sensors:
+        |          - proximitySensor:
+        |              distance: 0.5
+        |              offset: 0.0
+        |              range: 2.3
+        |""".stripMargin
+
+    val res = YamlParser.parse[IO](yamlContent).unsafeRunSync()
+    res match
+      case Left(errors) => fail(s"Parsing failed with errors: ${errors.mkString(", ")}")
+      case Right(config) =>
+        val _ = config.environment.entities.size shouldBe 1
+        config.environment.entities.headOption match
+          case Some(entity) =>
+            entity match
+              case robot: Robot =>
+                val _ = robot.position shouldBe Point2D(5.0, 5.0)
+                val _ = robot.sensors.size should be(1)
+                robot.sensors.headOption match
+                  case Some(sensor) =>
+                    sensor match
+                      case ProximitySensor(offset, distance, range) =>
+                        val _ = offset.degrees should be(0.0)
+                        val _ = distance should be(0.5)
+                        val _ = range should be > 2.29
+                        val _ =
+                          range should be < 2.31 // Allowing a small margin of error due to floating point precision
+                      case _ => fail("Expected a ProximitySensor")
+                  case None => fail("Expected at least one sensor")
               case _ => fail("Expected a Robot entity")
           case _ => fail("Expected a Robot entity")
     end match
