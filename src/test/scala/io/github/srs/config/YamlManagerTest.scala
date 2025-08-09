@@ -5,31 +5,34 @@ import cats.effect.unsafe.implicits.global
 import fs2.io.file.{ Files, Path }
 import fs2.text
 import io.github.srs.config.ConfigError.MissingField
-import io.github.srs.config.yaml.decoder.YamlParser
+import io.github.srs.config.yaml.YamlManager
+import io.github.srs.model.Simulation
 import io.github.srs.model.entity.Point2D
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor
 import io.github.srs.model.entity.dynamicentity.sensor.ProximitySensor
 import io.github.srs.model.environment.Environment
 import io.github.srs.utils.SimulationDefaults
+import org.scalatest.OptionValues.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class YamlParserTest extends AnyFlatSpec with Matchers:
+class YamlManagerTest extends AnyFlatSpec with Matchers:
   given CanEqual[Environment, Environment] = CanEqual.derived
+  given CanEqual[SimulationConfig, SimulationConfig] = CanEqual.derived
 
   "YamlParser" should "parse a valid YAML configuration" in:
     val uri = getClass.getResource("/configuration.yml").toURI
     val yamlPath = Path.fromNioPath(java.nio.file.Paths.get(uri))
     val yamlContent = Files[IO].readAll(yamlPath).through(text.utf8.decode).compile.string.unsafeRunSync()
-    val res = YamlParser.parse[IO](yamlContent).unsafeRunSync()
+    val res = YamlManager.parse[IO](yamlContent).unsafeRunSync()
     res match
       case Left(errors) => fail(s"Parsing failed with errors: ${errors.mkString(", ")}")
       case Right(_) => succeed
 
   it should "fail with an empty YAML configuration" in:
     val emptyYamlContent = ""
-    val res = YamlParser.parse[IO](emptyYamlContent).unsafeRunSync()
+    val res = YamlManager.parse[IO](emptyYamlContent).unsafeRunSync()
     res match
       case Left(_) => succeed
       case Right(_) => fail("Parsing should not succeed with empty content")
@@ -44,7 +47,7 @@ class YamlParserTest extends AnyFlatSpec with Matchers:
         |        height: 1.0
         |""".stripMargin
 
-    val res = YamlParser.parse[IO](invalidYamlContent).unsafeRunSync()
+    val res = YamlManager.parse[IO](invalidYamlContent).unsafeRunSync()
     res match
       case Left(errors) if errors.contains(MissingField("position")) => succeed
       case Left(errors) => fail(s"Parsing failed with unexpected errors: ${errors.mkString(", ")}")
@@ -56,7 +59,7 @@ class YamlParserTest extends AnyFlatSpec with Matchers:
         |simulation:
             duration: 60
         |""".stripMargin
-    val res = YamlParser.parse[IO](yamlContent).unsafeRunSync()
+    val res = YamlManager.parse[IO](yamlContent).unsafeRunSync()
     res match
       case Left(errors) => fail(s"Parsing failed with errors: ${errors.mkString(", ")}")
       case Right(config) =>
@@ -75,7 +78,7 @@ class YamlParserTest extends AnyFlatSpec with Matchers:
         |        withProximitySensors: true
         |""".stripMargin
 
-    val res = YamlParser.parse[IO](yamlContent).unsafeRunSync()
+    val res = YamlManager.parse[IO](yamlContent).unsafeRunSync()
     res match
       case Left(errors) => fail(s"Parsing failed with errors: ${errors.mkString(", ")}")
       case Right(config) =>
@@ -112,7 +115,7 @@ class YamlParserTest extends AnyFlatSpec with Matchers:
         |              rightSpeed: 2.0
         |""".stripMargin
 
-    val res = YamlParser.parse[IO](yamlContent).unsafeRunSync()
+    val res = YamlManager.parse[IO](yamlContent).unsafeRunSync()
     res match
       case Left(errors) => fail(s"Parsing failed with errors: ${errors.mkString(", ")}")
       case Right(config) =>
@@ -149,7 +152,7 @@ class YamlParserTest extends AnyFlatSpec with Matchers:
         |              range: 2.3
         |""".stripMargin
 
-    val res = YamlParser.parse[IO](yamlContent).unsafeRunSync()
+    val res = YamlManager.parse[IO](yamlContent).unsafeRunSync()
     res match
       case Left(errors) => fail(s"Parsing failed with errors: ${errors.mkString(", ")}")
       case Right(config) =>
@@ -175,4 +178,23 @@ class YamlParserTest extends AnyFlatSpec with Matchers:
           case _ => fail("Expected a Robot entity")
     end match
 
-end YamlParserTest
+  it should "convert a SimulationConfig to YAML" in:
+    val config = SimulationConfig(
+      simulation = Simulation(duration = Some(60)),
+      environment = Environment(),
+    )
+
+    val expectedYaml =
+      """simulation:
+        |  duration: 60
+        |environment:
+        |  width: 10
+        |  height: 10
+        |""".stripMargin
+
+    val yamlContent = YamlManager.toYaml[IO](config).unsafeRunSync()
+    val loadedConfig = YamlManager.parse[IO](yamlContent).unsafeRunSync().toOption.value
+    val _ = yamlContent should be(expectedYaml)
+    loadedConfig shouldBe config
+
+end YamlManagerTest

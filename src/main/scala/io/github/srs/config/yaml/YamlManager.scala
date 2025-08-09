@@ -1,12 +1,14 @@
-package io.github.srs.config.yaml.decoder
+package io.github.srs.config.yaml
 
 import cats.effect.Sync
+import io.github.srs.config.yaml.parser.YamlSimulationConfigParser
+import io.github.srs.config.yaml.serializer.YamlSimulationConfigSerializer
 import io.github.srs.config.{ ConfigResult, SimulationConfig }
 
 /**
  * A parser for YAML configuration files.
  */
-object YamlParser:
+object YamlManager:
   /**
    * Parses a YAML configuration string into a `SimulationConfig`.
    * @param content
@@ -46,4 +48,16 @@ object YamlParser:
 
   def parse[F[_]: Sync](content: String): F[ConfigResult[SimulationConfig]] =
     Sync[F].pure(YamlSimulationConfigParser.parseSimulationConfig(content))
-end YamlParser
+
+  /**
+   * Converts a `SimulationConfig` to a YAML string.
+   * @param config
+   *   the `SimulationConfig` to convert
+   * @tparam F
+   *   the effect type
+   * @return
+   *   a `F[String]` containing the YAML representation of the configuration
+   */
+  def toYaml[F[_]: Sync](config: SimulationConfig): F[String] =
+    Sync[F].pure(YamlSimulationConfigSerializer.serializeSimulationConfig(config))
+end YamlManager
