@@ -1,6 +1,7 @@
-package io.github.srs.config
+package io.github.srs.config.yaml.decoder
 
 import cats.effect.Sync
+import io.github.srs.config.{ ConfigResult, SimulationConfig }
 
 /**
  * A parser for YAML configuration files.

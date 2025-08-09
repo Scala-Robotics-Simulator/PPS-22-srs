@@ -1,4 +1,4 @@
-package io.github.srs.config.collection
+package io.github.srs.config.yaml.decoder.collection
 
 import io.github.srs.config.{ ConfigError, ConfigResult }
 

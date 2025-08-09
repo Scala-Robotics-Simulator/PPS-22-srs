@@ -1,7 +1,7 @@
-package io.github.srs.config
+package io.github.srs.config.yaml.decoder
 
-import io.github.srs.config.ConfigResult
-import io.github.srs.config.collection.CustomMap.*
+import io.github.srs.config.yaml.decoder.collection.CustomMap.*
+import io.github.srs.config.{ ConfigError, ConfigResult, SimulationConfig }
 import io.github.srs.model.Simulation
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.Robot

@@ -5,6 +5,7 @@ import cats.effect.unsafe.implicits.global
 import fs2.io.file.{ Files, Path }
 import fs2.text
 import io.github.srs.config.ConfigError.MissingField
+import io.github.srs.config.yaml.decoder.YamlParser
 import io.github.srs.model.entity.Point2D
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor

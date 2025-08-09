@@ -1,7 +1,8 @@
-package io.github.srs.config.collection
+package io.github.srs.config.yaml.decoder.collection
 
-import io.github.srs.config.collection.CustomSeq.sequence
 import io.github.srs.config.{ ConfigError, ConfigResult }
+
+import CustomSeq.sequence
 
 @SuppressWarnings(
   Array(

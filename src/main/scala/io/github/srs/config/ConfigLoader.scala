@@ -4,6 +4,7 @@ import cats.effect.Sync
 import cats.syntax.all.*
 import fs2.io.file.{ Files, Path }
 import fs2.text
+import io.github.srs.config.yaml.decoder.YamlParser
 
 /**
  * A trait for loading simulation configurations.
