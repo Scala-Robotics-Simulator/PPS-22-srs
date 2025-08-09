@@ -1,4 +1,4 @@
-package io.github.srs.config.yaml.decoder
+package io.github.srs.config.yaml.parser
 
 import io.github.srs.config.{ ConfigError, ConfigResult }
 

@@ -18,11 +18,14 @@ object Dependencies {
   val catsCore = "org.typelevel" %% "cats-core" % "2.13.0"
   val catsEffect = "org.typelevel" %% "cats-effect" % "3.7-4972921"
   val scalaYaml = "org.virtuslab" %% "scala-yaml" % "0.3.0"
+  val circeYaml = "io.circe" %% "circe-yaml" % "1.15.0"
+  val circeGeneric = "io.circe" %% "circe-generic" % "0.14.14"
   val fs2Io = "co.fs2" %% "fs2-io" % "3.12.0"
   /*
    * Bundles
    */
   val scalaTestBundle: Seq[ModuleID] = Seq(scalaTest, scalactic)
   val catsBundle: Seq[ModuleID] = Seq(catsCore, catsEffect)
+  val yamlBundle: Seq[ModuleID] = Seq(scalaYaml, circeYaml, circeGeneric)
 }
 
