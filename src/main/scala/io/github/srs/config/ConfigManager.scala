@@ -33,13 +33,14 @@ trait ConfigManager[F[_]]:
   def save(config: SimulationConfig): F[Unit]
 
 /**
- * A configuration loader that reads a YAML file from the specified path.
+ * A configuration manager that reads a YAML file from the specified path and provides methods to save a yaml
+ * configuration.
  * @param path
  *   the path to the YAML configuration file
  * @tparam F
  *   the effect type
  */
-final case class YamlConfigLoader[F[_]: {Files, Sync}](path: Path) extends ConfigManager[F]:
+final case class YamlConfigManager[F[_]: {Files, Sync}](path: Path) extends ConfigManager[F]:
 
   /**
    * Loads the simulation configuration from the YAML file.
@@ -66,4 +67,4 @@ final case class YamlConfigLoader[F[_]: {Files, Sync}](path: Path) extends Confi
     yield
       val _ = JNIOFiles.writeString(nioPath, yamlContent, StandardCharsets.UTF_8)
       ()
-end YamlConfigLoader
+end YamlConfigManager

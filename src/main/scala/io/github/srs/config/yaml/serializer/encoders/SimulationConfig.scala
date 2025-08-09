@@ -2,12 +2,20 @@ package io.github.srs.config.yaml.serializer.encoders
 
 import io.circe
 import io.circe.syntax.*
-import io.circe.{Encoder, Json}
+import io.circe.{ Encoder, Json }
 import io.github.srs.config.SimulationConfig
 import io.github.srs.config.yaml.serializer.encoders.given
 
+/**
+ * Encoders for SimulationConfig types.
+ */
 object SimulationConfig:
 
+  /**
+   * Encoder for SimulationConfig.
+   * @return
+   *   An Encoder that serializes SimulationConfig instances to JSON.
+   */
   given Encoder[SimulationConfig] = (config: SimulationConfig) =>
     val baseFields = List(
       "environment" -> config.environment.asJson,
