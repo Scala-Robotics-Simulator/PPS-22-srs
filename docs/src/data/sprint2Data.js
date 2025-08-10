@@ -1,5 +1,23 @@
 export const sprint2Data = [
     {
+        backlogItem: "Come utente, voglio modificare la dimensione dell'ambiente e aggiungere/rimuovere le entità al suo interno",
+        id: "6.3",
+        task: "Validazione collisioni tra le entità",
+        volontario: "Ceredi",
+        stima: 4,
+        effettivo: 3,
+        days: [0, 2, 1],
+    },
+    {
+        backlogItem: "Come utente, voglio modificare la dimensione dell'ambiente e aggiungere/rimuovere le entità al suo interno",
+        id: "6.4",
+        task: "Gestione dei confini dell'ambiente",
+        volontario: "Ceredi",
+        stima: 2,
+        effettivo: 2,
+        days: [0, 0, 0, 2],
+    },
+    {
         backlogItem: "Come utente, voglio gestire gli attuatori di spostamento del robot, come le ruote motorizzate, così da poterli aggiungere, rimuovere o modificare la loro velocità per personalizzare la mobilità del robot",
         id: "9.3",
         task: "Modellazione del movimento in azioni",
@@ -72,8 +90,35 @@ export const sprint2Data = [
         days: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0]
     },
     {
+        backlogItem: "Come un utente, voglio poter caricare e salvare un file di configurazione personalizzato della simulazione, così che possa verificare nuovamente comportamenti eseguiti precedentemente",
+        id: "19.1",
+        task: "Implementazione dei dsl per la configurazione di tutti gli elementi della simulazione salvabili",
+        volontario: "Ceredi",
+        stima: 5,
+        effettivo: 5,
+        days: [0, 0, 0, 0, 0, 0, 0, 3, 2]
+    },
+    {
+        backlogItem: "Come un utente, voglio poter caricare e salvare un file di configurazione personalizzato della simulazione, così che possa verificare nuovamente comportamenti eseguiti precedentemente",
+        id: "19.2",
+        task: "Implementazione della logica di caricamento del file di configurazione",
+        volontario: "Ceredi",
+        stima: 4,
+        effettivo: 3,
+        days: [0, 0, 0, 0, 0, 0, 0, 1, 2]
+    },
+    {
+        backlogItem: "Come un utente, voglio poter caricare e salvare un file di configurazione personalizzato della simulazione, così che possa verificare nuovamente comportamenti eseguiti precedentemente",
+        id: "19.3",
+        task: "Implementazione della logica di salvataggio della configurazione",
+        volontario: "Ceredi",
+        stima: 1,
+        effettivo: 4,
+        days: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4]
+    },
+    {
         backlogItem: "Deliverable sprint-2 (GUI con visualizzazione dello stato, gestione del tempo e della riproducibilità)",
-        id: "21.1",
+        id: "20.1",
         task: "Implementazione della GUI per la gestione della simulazione",
         volontario: "Nardicchia",
         stima: 1,

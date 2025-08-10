@@ -36,10 +36,10 @@ export const backlogData = [
   },
   {
     id: 6,
-    item: "Come utente, voglio modificare la dimensione dell'ambiente",
-    stima: 2,
-    effettivo: 1,
-    sprints: [0, 1, 0, 0, 0]
+    item: "Come utente, voglio modificare la dimensione dell'ambiente e aggiungere/rimuovere le entità al suo interno",
+    stima: 5,
+    effettivo: 6,
+    sprints: [0, 1, 5, 0, 0]
   },
   {
     id: 7,
@@ -127,20 +127,13 @@ export const backlogData = [
   },
   {
     id: 19,
-    item: "Come un utente, voglio poter caricare un file di configurazione personalizzato della simulazione, così che possa verificare nuovamente comportamenti eseguiti precedentemente",
-    stima: 5,
-    effettivo: 0,
+    item: "Come un utente, voglio poter caricare e salvare un file di configurazione personalizzato della simulazione, così che possa verificare nuovamente comportamenti eseguiti precedentemente",
+    stima: 9,
+    effettivo: 12,
     sprints: [0, 0, 0, 0, 0]
   },
   {
     id: 20,
-    item: "Come un utente, voglio poter salvare la configurazione in un file, così da poterla riutilizzare nelle simulazioni successive",
-    stima: 1,
-    effettivo: 0,
-    sprints: [0, 0, 0, 0, 0]
-  },
-  {
-    id: 21,
     item: "Deliverable sprint-2 (GUI con visualizzazione dello stato, gestione del tempo e della riproducibilità)",
     stima: 1,
     effettivo: 1,

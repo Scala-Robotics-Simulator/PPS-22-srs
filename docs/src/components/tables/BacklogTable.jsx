@@ -120,7 +120,7 @@ export function BacklogTable({ data, sprintData, showValidation = false }) {
           <th>Stima (h)</th>
           <th>Effettivo (h)</th>
           {Array.from({ length: maxSprints }, (_, i) => (
-            <th key={i}>S{i + 1}</th>
+            <th key={i}>S{i}</th>
           ))}
         </tr>
       </thead>
