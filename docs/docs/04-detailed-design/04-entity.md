@@ -10,7 +10,7 @@ In questa sezione, viene descritta la struttura e le funzionalità delle entità
 
 ![Entity](../../static/img/04-detailed-design/entity.png)
 
-Il *trait* `Entity` descrive un’entità spaziale dotata di una posizione bidimensionale (`position: Point2D`), una forma
+Il _trait_ `Entity` descrive un’entità spaziale dotata di una posizione bidimensionale (`position: Point2D`), una forma
 geometrica (`shape: ShapeType`), rappresentata dal tipo enumerato `ShapeType`, e un orientamento (
 `orientation: Orientation`) espresso in gradi.  
 Questo trait costituisce l’interfaccia di base per ogni oggetto collocato nello spazio simulato, fornendo una struttura
@@ -32,7 +32,7 @@ Questa classe costituisce la base per il calcolo di spostamenti, direzioni e int
 
 ### Forma
 
-La forma geometrica delle entità è definita dal tipo *enum* `ShapeType`, che può assumere due varianti:
+La forma geometrica delle entità è definita dal tipo _enum_ `ShapeType`, che può assumere due varianti:
 
 - `Circle(radius: Double)`: rappresenta un cerchio con raggio specificato.
 - `Rectangle(width: Double, height: Double)`: rappresenta un rettangolo con larghezza e altezza definite.
@@ -42,7 +42,7 @@ simulato.
 
 ### Orientamento
 
-Il *trait* `Orientation` descrive l’angolo di rotazione di un’entità rispetto a un sistema di riferimento fisso.
+Il _trait_ `Orientation` descrive l’angolo di rotazione di un’entità rispetto a un sistema di riferimento fisso.
 Contiene:
 
 - `degrees: Double`: l’orientamento espresso in gradi.
@@ -55,11 +55,11 @@ movimento direzionale e la rotazione.
 
 ![Entities](../../static/img/04-detailed-design/entities.png)
 
-`DynamicEntity` e `StaticEntity` sono due *trait* che estendono `Entity`.
+`DynamicEntity` e `StaticEntity` sono due _trait_ che estendono `Entity`.
 
 ### DynamicEntity
 
-Il *trait* `DynamicEntity` rappresenta un'entità in grado di muoversi e interagire con l’ambiente circostante.
+Il _trait_ `DynamicEntity` rappresenta un'entità in grado di muoversi e interagire con l’ambiente circostante.
 Comprende:
 
 - `sensors: SensorSuite`: un insieme di sensori che percepiscono l’ambiente
@@ -72,7 +72,7 @@ Questa struttura è pensata per simulare comportamenti robotici, in cui percezio
 
 ### StaticEntity
 
-Il *trait* `StaticEntity` rappresenta un’entità fissa nello spazio, che non può muoversi né agire attivamente
+Il _trait_ `StaticEntity` rappresenta un’entità fissa nello spazio, che non può muoversi né agire attivamente
 sull’ambiente, come:
 
 - `Obstacle`: ostacoli fissi che impediscono il movimento di entità dinamiche
@@ -93,12 +93,12 @@ comportamento.
 
 ![Robot](../../static/img/04-detailed-design/robot.png)
 
-Il *trait* `Robot` estende `DynamicEntity` e rappresenta un'entità mobile autonoma nello spazio bidimensionale, in grado
+Il _trait_ `Robot` estende `DynamicEntity` e rappresenta un'entità mobile autonoma nello spazio bidimensionale, in grado
 di interagire con l’ambiente circostante tramite sensori e attuatori. Ogni robot ha una forma circolare
-(`ShapeType.Circle`) e possiede un insieme di attuatori (`Seq[Actuator[Robot]]`) e una *suite* di sensori (
+(`ShapeType.Circle`) e possiede un insieme di attuatori (`Seq[Actuator[Robot]]`) e una _suite_ di sensori (
 `SensorSuite`).
 
-Il *companion object* fornisce un metodo `apply` per la creazione sicura di istanze tramite un sistema di validazione (
+Il _companion object_ fornisce un metodo `apply` per la creazione sicura di istanze tramite un sistema di validazione (
 `Validation`), assicurandosi che i parametri forniti siano coerenti e privi di valori non validi (ad esempio NaN o
 infiniti).
 
@@ -106,7 +106,7 @@ infiniti).
 
 ![Actuator](../../static/img/04-detailed-design/actuator.png)
 
-Un Actuator è un componente in grado di modificare lo stato di un'entità dinamica (`DynamicEntity`). Il *trait*
+Un Actuator è un componente in grado di modificare lo stato di un'entità dinamica (`DynamicEntity`). Il _trait_
 `Actuator[E]`
 definisce un’interfaccia generica per tutti gli attuatori, attraverso il metodo `act(entity: E): Validation[E]`, che
 applica un cambiamento all'entità specificata, restituendo una nuova istanza validata.
@@ -154,13 +154,38 @@ movimento vero e proprio del robot nello spazio simulato.
 
 ![Sensor](../../static/img/04-detailed-design/sensor.png)
 
-Il trait `DynamicEntity` include un campo `sensors: SensorSuite`, che rappresenta un insieme di sensori associati all'entità.
-`SensorSuite` è un trait che definisce un insieme di sensori, per facilità di utilizzo, ogni tipologia di sensore è specificata all'interno di un campo dedicato.
-Il trait `SensorSuite` contiene un metodo `sense(entity)(environment): SensorReadings`, che permette di ottenere una lettura dei sensori per l'entità specificata nell'ambiente di simulazione.
-`SensorReading` contiene il riferimento al sensore che ha effettuato la lettura, oltre al valore della lettura stessa.
-I `Sensor` sono definiti come un trait che implementa il metodo `sense(entity)(environment): SensorReading`, permettendo di ottenere letture specifiche per ogni tipo di sensore, entity ed environment sono generici e sottotipi rispettivamente dei trait `DynamicEntity` e `Environment`.
+I sensori sono componenti che permettono a un'entità dinamica di percepire l'ambiente circostante. Il _trait_ `Sensor[Entity, Environment]` definisce un'interfaccia generica per i sensori.
+I sensori sono parametrizzati su due tipi:
 
-### Sensore di Prossimità
+- `Entity`: il tipo di entità che il sensore può percepire, sottotipo di `DynamicEntity` (ad esempio, `Robot`).
+- `Environment`: il tipo di ambiente in cui il sensore opera, sottotipo di `Environment` (ad esempio, `Environment` stesso).
+- `Data`: il tipo di dato restituito dal sensore.
 
-Il sensore di prossimità è un tipo di sensore che rileva la presenza di altre entità vicine. Si tratta del trait `ProximitySensor`, che estende il trait `Sensor`.
-Il metodo `sense(entity)(environment): Double` restituisce la distanza tra il sensore e l'entità più vicina nell'ambiente di simulazione. Questa distanza viene calcolata tramite `rayCasting`, che verifica se, entro il `range` del sensore, è presente un'altra entità. Il valore restituito è normalizzato tra 0 e 1, dove 0 indica che l'entità è molto vicina e 1 indica che non ci sono entità nel raggio di azione del sensore.
+Inoltre, i sensori contengono alcune informazioni di base, quali:
+
+- `offset`: l'offset del sensore rispetto all'entità che lo possiede.
+- `distance`: la distanza del sensore dal centro dell'entità.
+- `range`: il raggio di azione del sensore.
+
+Infine un metodo `sense[F[_]](entity: Entity, env: Environment): F[Data]` che permette di ottenere i dati di rilevamento dal sensore.
+Il tipo `F[_]` è un tipo di effetto generico (come `IO`, `Task`, etc.) che permette:
+
+- Astrazione rispetto al tipo di effetto utilizzato per l'esecuzione.
+- Composizione funzionale con altre operazioni monadiche.
+- Testabilità tramite interpreti fittizi, mock o utilizzando `Id` per esecuzioni sincrone e deterministiche.
+
+Il tipo `SensorReading` è un tipo di utilità che aiuta a rappresentare i dati letti da un sensore.
+Si tratta di un _case class_ che contiene:
+
+- `sensor: Sensor[?, ?]`: il sensore che ha effettuato la lettura.
+- `value: A`: il valore letto dal sensore, parametrizzato su un tipo `A`.
+
+Questo tipo consente di incapsulare le letture dei sensori in un formato coerente, facilitando la gestione e l'elaborazione dei dati raccolti.
+
+`SensorReadings` è un tipo di utilità che rappresenta una raccolta di letture dei sensori.
+
+### Sensori di prossimità
+
+La _case class_ `ProximitySensor` estende `Sensor[Robot, Environment]` e rappresenta un sensore di prossimità che rileva la presenza di altre entità nell'ambiente.
+I valori ritornati da questo sensore sono di tipo `Double`, che rappresenta la distanza alla quale si trova l'entità più vicina, normalizzata tra 0 e 1, dove 0 indica che l'entità è molto vicina e 1 che è molto lontana.
+Il metodo `sense` implementa la logica di rilevamento, tramite _Ray Casting_, che calcola la distanza tra il sensore e le entità nell'ambiente, restituendo il valore normalizzato.
