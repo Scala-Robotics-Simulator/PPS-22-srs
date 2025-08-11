@@ -161,7 +161,7 @@ jobs:
         run: |
             sbt assembly
             mkdir -p target/fatjar
-            mv target/scala-${{ needs.dry-website-build.outputs.scala_version }}/root-assembly-*.jar target/fatjar/${{ github.event.repository.name }}.jar
+            mv target/scala-${{ needs.dry-website-build.outputs.scala_version }}/PPS-22-srs-assembly-*.jar target/fatjar/${{ github.event.repository.name }}.jar
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
