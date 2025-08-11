@@ -78,16 +78,48 @@ sull’ambiente, come:
 - `Obstacle`: ostacoli fissi che impediscono il movimento di entità dinamiche
 - `Light`: fonti di luce che influenzano l’ambiente ma non interagiscono attivamente.
 
-Queste entità possono essere percepite dai sensori delle entità dinamiche, influenzando indirettamente il loro
-comportamento.
+Ogni `StaticEntity` ha una forma geometrica (`shape: ShapeType`) e una posizione (`position: Point2D`) e
+un orientamento (`orientation: Orientation`) coerente:
+
+* `Obstacle`/`Boundary` sono rappresentati da un rettangolo, che può essere orientato;
+* `Light` è rappresentato da un cerchio, che non ha orientamento.
+
+> i `boundary` vengono creati da `CreationDSL.validate(insertBoundaries = true)`. Sono rettangoli sottili posizionati
+> sui bordi e partecipano a collisioni/resistenza come gli ostacoli.
 
 ## Ostacoli
 
-<!-- TODO: ostacoli -->
+Gli **ostacoli** (`StaticEntity.Obstacle`) sono i “muri” dell’ambiente di simulazione:
+blocchi **rettangolari** che occupano spazio, fermano i robot e interrompono il passaggio della luce. Servono a
+costruire scenari realistici — dal corridoio stretto al piccolo labirinto — in cui i robot devono pianificare il
+movimento ed evitare collisioni.
+
+Ogni ostacolo ha:
+
+* una **posizione** (`position`) e un’**orientazione** (`orientation`) nello spazio;
+* due **dimensioni** (`width`, `height`);
+* una **forma** coerente, esposta come `ShapeType.Rectangle(width, height)`.
+
+In fase di **validazione** verifichiamo che le dimensioni siano **> 0**, che l’ostacolo stia **dentro i limiti**
+dell’ambiente e che **non si sovrapponga** ad altre entità.
 
 ## Luce
 
-<!-- TODO: luce -->
+Le **luci** (`StaticEntity.Light`) sono sorgenti **radiali**: da un punto emettono illuminazione che **decresce con la
+distanza** e viene **bloccata** dagli ostacoli e robot. Sono l’ingrediente che rende
+l’ambiente leggibile per futuri foto-sensori e utile per esperimenti di percezione.
+
+Ogni luce definisce:
+
+* un **raggio fisico** (`radius`) usato per la sua forma (`ShapeType.Circle(radius)`);
+* un **raggio di illuminazione** (`illuminationRadius`) che ne delimita la portata;
+* **intensità** (`intensity`) e **attenuazione** (`attenuation`) per controllare quanto e come “decade” la luce;
+* un’**orientazione** presente per uniformità del modello, ma l’emissione è **isotropica** (non direzionale).
+
+In fase di **validazione** verifichiamo che raggio, intensità e attenuazione siano **> 0** e che la luce sia
+posizionata **all'interno** dell'ambiente.
+
+## Boundary
 
 ## Robot
 
@@ -154,11 +186,13 @@ movimento vero e proprio del robot nello spazio simulato.
 
 ![Sensor](../../static/img/04-detailed-design/sensor.png)
 
-I sensori sono componenti che permettono a un'entità dinamica di percepire l'ambiente circostante. Il _trait_ `Sensor[Entity, Environment]` definisce un'interfaccia generica per i sensori.
+I sensori sono componenti che permettono a un'entità dinamica di percepire l'ambiente circostante. Il _trait_
+`Sensor[Entity, Environment]` definisce un'interfaccia generica per i sensori.
 I sensori sono parametrizzati su due tipi:
 
 - `Entity`: il tipo di entità che il sensore può percepire, sottotipo di `DynamicEntity` (ad esempio, `Robot`).
-- `Environment`: il tipo di ambiente in cui il sensore opera, sottotipo di `Environment` (ad esempio, `Environment` stesso).
+- `Environment`: il tipo di ambiente in cui il sensore opera, sottotipo di `Environment` (ad esempio, `Environment`
+  stesso).
 - `Data`: il tipo di dato restituito dal sensore.
 
 Inoltre, i sensori contengono alcune informazioni di base, quali:
@@ -167,7 +201,8 @@ Inoltre, i sensori contengono alcune informazioni di base, quali:
 - `distance`: la distanza del sensore dal centro dell'entità.
 - `range`: il raggio di azione del sensore.
 
-Infine un metodo `sense[F[_]](entity: Entity, env: Environment): F[Data]` che permette di ottenere i dati di rilevamento dal sensore.
+Infine un metodo `sense[F[_]](entity: Entity, env: Environment): F[Data]` che permette di ottenere i dati di rilevamento
+dal sensore.
 Il tipo `F[_]` è un tipo di effetto generico (come `IO`, `Task`, etc.) che permette:
 
 - Astrazione rispetto al tipo di effetto utilizzato per l'esecuzione.
@@ -180,12 +215,16 @@ Si tratta di un _case class_ che contiene:
 - `sensor: Sensor[?, ?]`: il sensore che ha effettuato la lettura.
 - `value: A`: il valore letto dal sensore, parametrizzato su un tipo `A`.
 
-Questo tipo consente di incapsulare le letture dei sensori in un formato coerente, facilitando la gestione e l'elaborazione dei dati raccolti.
+Questo tipo consente di incapsulare le letture dei sensori in un formato coerente, facilitando la gestione e
+l'elaborazione dei dati raccolti.
 
 `SensorReadings` è un tipo di utilità che rappresenta una raccolta di letture dei sensori.
 
 ### Sensori di prossimità
 
-La _case class_ `ProximitySensor` estende `Sensor[Robot, Environment]` e rappresenta un sensore di prossimità che rileva la presenza di altre entità nell'ambiente.
-I valori ritornati da questo sensore sono di tipo `Double`, che rappresenta la distanza alla quale si trova l'entità più vicina, normalizzata tra 0 e 1, dove 0 indica che l'entità è molto vicina e 1 che è molto lontana.
-Il metodo `sense` implementa la logica di rilevamento, tramite _Ray Casting_, che calcola la distanza tra il sensore e le entità nell'ambiente, restituendo il valore normalizzato.
+La _case class_ `ProximitySensor` estende `Sensor[Robot, Environment]` e rappresenta un sensore di prossimità che rileva
+la presenza di altre entità nell'ambiente.
+I valori ritornati da questo sensore sono di tipo `Double`, che rappresenta la distanza alla quale si trova l'entità più
+vicina, normalizzata tra 0 e 1, dove 0 indica che l'entità è molto vicina e 1 che è molto lontana.
+Il metodo `sense` implementa la logica di rilevamento, tramite _Ray Casting_, che calcola la distanza tra il sensore e
+le entità nell'ambiente, restituendo il valore normalizzato.
