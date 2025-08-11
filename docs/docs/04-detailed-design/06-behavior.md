@@ -31,7 +31,6 @@ grazie al fallback.
 
 ![Behavior: Rule, Behavior, Policy](../../static/img/04-detailed-design/behavior-package.svg)
 
-
 Tutto vive in `io.github.srs.model.entity.dynamicentity.behavior`.
 
 * **BehaviorTypes**: alias di tipo (`Behavior`, `Rule`, `Condition`, e l’utility `always`).
@@ -58,12 +57,13 @@ Tutto vive in `io.github.srs.model.entity.dynamicentity.behavior`.
 
 ## Esempio (DSL)
 
-Una policy minima che evita l’ostacolo davanti, prova a girare se serve e altrimenti avanza; chiudiamo con un fallback sicuro:
+Una policy minima che evita l’ostacolo davanti, prova a girare se serve e altrimenti avanza; chiudiamo con un fallback
+sicuro:
 
 ```scala
 ((front < 0.30) ==> turnRight[F]) |
-((left  < 0.25) ==> turnRight[F]) |
-((right < 0.25) ==> turnLeft[F])  |
-Rules.alwaysForward[F]
-  .default(stop[F])
+  ((left < 0.25) ==> turnRight[F]) |
+  ((right < 0.25) ==> turnLeft[F]) |
+  Rules.alwaysForward[F]
+    .default(stop[F])
 ```
