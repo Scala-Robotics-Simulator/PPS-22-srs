@@ -9,7 +9,7 @@ import io.github.srs.model.entity.dynamicentity.*
  *
  * All aliases are kept package-internal so they do **not** be part of the public namespace
  */
-private[behavior] object BehaviorTypes:
+object BehaviorTypes:
 
   /**
    * **Behavior** – a pure function in any effect [[F]].
