@@ -73,8 +73,8 @@ export const backlogData = [
     id: 11,
     item: "Come utente, voglio gestire le luci, così da configurare il numero, la posizione e l'intensità di essi",
     stima: 8,
-    effettivo: 10,
-    sprints: [0, 10, 0, 0, 0]
+    effettivo: 12,
+    sprints: [0, 10, 2, 0, 0]
   },
   {
     id: 12,

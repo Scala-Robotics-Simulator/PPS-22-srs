@@ -27,6 +27,15 @@ export const sprint2Data = [
         days: [0, 0, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0]
     },
     {
+        backlogItem: "Come utente, voglio gestire le luci, così da configurare il numero, la posizione e l'intensità di essi",
+        id: "11.4",
+        task: "Seconda modellazione e gestione della griglia",
+        volontario: "Cohen",
+        stima: 2,
+        effettivo: 2,
+        days: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0]
+    },
+    {
         backlogItem: "Come un utente, durante la simulazione voglio: poter mettere in pausa la simulazione; poter riprendere la simulazione, se in pausa; poter fermare la simulazione; così che possa gestire il controllo della simulazione",
         id: "16.1",
         task: "Modellazione del motore di simulazione",
@@ -151,15 +160,6 @@ export const sprint2Data = [
         stima: 1,
         effettivo: 4,
         days: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4]
-    },
-    {
-        backlogItem: "Come utente, voglio gestire le luci, così da configurare il numero, la posizione e l'intensità di essi",
-        id: "21.1",
-        task: "Seconda modellazione e gestione della griglia",
-        volontario: "Cohen",
-        stima: 2,
-        effettivo: 2,
-        days: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0]
     },
     {
         backlogItem: "Deliverable sprint-2 (GUI con visualizzazione dello stato, gestione del tempo e della riproducibilità)",
