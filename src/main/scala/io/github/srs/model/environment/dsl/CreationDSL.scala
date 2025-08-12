@@ -94,6 +94,6 @@ object CreationDSL:
         _ <- bounded("entities", env.entities.size, 0, maxEntities, includeMax = true)
         entities <- withinBounds("entities", env.entities, width, height)
         entities <- noCollisions("entities", entities ++ boundaries)
-      yield ValidEnvironment(width, height, entities)
+      yield ValidEnvironment.from(Environment(width, height, entities))
   end extension
 end CreationDSL

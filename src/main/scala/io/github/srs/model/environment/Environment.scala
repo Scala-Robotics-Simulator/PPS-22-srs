@@ -49,8 +49,14 @@ extension (env: Environment)
   /** Derives the static view of the environment. */
   def view: EnvironmentView = EnvironmentView.static(env)
 
-final case class ValidEnvironment private[environment] (
-    override val width: Int,
-    override val height: Int,
-    override val entities: Set[Entity],
-) extends EnvironmentParameters
+
+object ValidEnvironment:
+  opaque type ValidEnvironment = Environment
+
+  private[environment] def from(env: Environment): ValidEnvironment =
+    env
+
+  given Conversion[ValidEnvironment, Environment] = identity
+
+
+export ValidEnvironment.ValidEnvironment
