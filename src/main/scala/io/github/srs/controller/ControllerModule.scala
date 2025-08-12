@@ -1,16 +1,22 @@
 package io.github.srs.controller
 
-import scala.compiletime.deferred
-import scala.concurrent.duration.FiniteDuration
-
+import cats.Id
 import cats.effect.IO
 import cats.effect.std.Queue
 import cats.syntax.all.*
 import io.github.srs.model.*
 import io.github.srs.model.SimulationConfig.SimulationStatus
 import io.github.srs.model.UpdateLogic.*
+import io.github.srs.model.entity.dynamicentity.action.Action
+import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Rule
+import io.github.srs.model.entity.dynamicentity.behavior.Rules
+import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings
 import io.github.srs.model.logic.*
 import io.github.srs.utils.SimulationDefaults.SimulationConfig.maxCount
+
+import scala.annotation.unused
+import scala.compiletime.deferred
+import scala.concurrent.duration.{FiniteDuration, MILLISECONDS}
 
 /**
  * Module that defines the controller logic for the Scala Robotics Simulator.
@@ -94,6 +100,8 @@ object ControllerModule:
        */
       private class ControllerImpl extends Controller[S]:
 
+        @unused private val behavior: Rule[Id, SensorReadings, Action[Id]] = Rules.alwaysForward[Id]
+
         override def start(initialState: S): IO[Unit] =
           val randInt: Int = initialState.simulationRNG.nextIntBetween(0, maxCount)._1
           val list = List.fill(randInt)(Event.Increment)
@@ -107,27 +115,37 @@ object ControllerModule:
         override def simulationLoop(s: S, queue: Queue[IO, Event]): IO[Unit] =
           def loop(state: S): IO[Unit] =
             for
+              startTime <- IO.pure(System.currentTimeMillis())
               events <- queue.tryTakeN(Some(50))
               newState <- handleEvents(events, state)
               _ <- context.view.render(newState)
               nextState <-
                 if newState.simulationStatus == SimulationStatus.RUNNING then
-                  tickEvents(newState.simulationSpeed.tickSpeed, newState)
+                  tickEvents(startTime, newState.simulationSpeed.tickSpeed, newState)
                 else IO.pure(newState)
               stop = newState.simulationStatus == SimulationStatus.STOPPED ||
                 newState.simulationTime.exists(max => newState.elapsedTime >= max)
+              endTime <- IO.pure(System.currentTimeMillis())
+              _ <-
+                println(s"Simulation loop took ${endTime - startTime} ms")
+                IO.unit
               _ <- if stop then IO.unit else loop(nextState)
             yield ()
 
           loop(s)
 
+        end simulationLoop
+
         private def produceEvents[A](queue: Queue[IO, A], events: List[A]): IO[Unit] =
           events.traverse_(queue.offer)
 
-        private def tickEvents(tickSpeed: FiniteDuration, state: S): IO[S] =
+        private def tickEvents(start: Long, tickSpeed: FiniteDuration, state: S): IO[S] =
+          val timeToNextTick = tickSpeed.toMillis - (System.currentTimeMillis() - start)
+          val adjustedTickSpeed: Long = if timeToNextTick > 0 then timeToNextTick else 0L
+          val sleepTime = FiniteDuration(adjustedTickSpeed, MILLISECONDS)
           for
             _ <- IO.sleep(tickSpeed)
-            tick <- handleEvent(Event.Tick(tickSpeed), state)
+            tick <- handleEvent(Event.Tick(sleepTime), state)
           yield tick
 
         private def handleEvents(events: Seq[Event], state: S): IO[S] =

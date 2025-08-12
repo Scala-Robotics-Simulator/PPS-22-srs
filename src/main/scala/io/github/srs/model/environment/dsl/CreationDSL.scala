@@ -2,9 +2,9 @@ package io.github.srs.model.environment.dsl
 
 import io.github.srs.model.entity.Entity
 import io.github.srs.model.entity.staticentity.StaticEntity.Boundary
-import io.github.srs.model.environment.Environment
+import io.github.srs.model.environment.{Environment, ValidEnvironment}
 import io.github.srs.model.validation.Validation
-import io.github.srs.model.validation.Validation.{ bounded, noCollisions, withinBounds }
+import io.github.srs.model.validation.Validation.{bounded, noCollisions, withinBounds}
 
 /**
  * The DSL for creating an environment in the simulation.
@@ -75,7 +75,7 @@ object CreationDSL:
      * @return
      *   A [[Validation]] that contains the validated environment or an error message if validation fails.
      */
-    infix def validate: Validation[Environment] =
+    infix def validate: Validation[ValidEnvironment] =
       validate(insertBoundaries = true)
 
     /**
@@ -85,7 +85,7 @@ object CreationDSL:
      * @return
      *   A [[Validation]] that contains the validated environment or an error message if validation fails.
      */
-    infix def validate(insertBoundaries: Boolean): Validation[Environment] =
+    infix def validate(insertBoundaries: Boolean): Validation[ValidEnvironment] =
       import io.github.srs.utils.SimulationDefaults.Environment.*
       val boundaries = if insertBoundaries then Boundary.createBoundaries(env.width, env.height) else Set.empty[Entity]
       for
@@ -94,6 +94,6 @@ object CreationDSL:
         _ <- bounded("entities", env.entities.size, 0, maxEntities, includeMax = true)
         entities <- withinBounds("entities", env.entities, width, height)
         entities <- noCollisions("entities", entities ++ boundaries)
-      yield Environment(width, height, entities)
+      yield ValidEnvironment(width, height, entities)
   end extension
 end CreationDSL
