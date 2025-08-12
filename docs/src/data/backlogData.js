@@ -130,7 +130,7 @@ export const backlogData = [
     item: "Come un utente, voglio poter caricare e salvare un file di configurazione personalizzato della simulazione, così che possa verificare nuovamente comportamenti eseguiti precedentemente",
     stima: 9,
     effettivo: 12,
-    sprints: [0, 0, 0, 0, 0]
+    sprints: [0, 0, 12, 0, 0]
   },
   {
     id: 20,
