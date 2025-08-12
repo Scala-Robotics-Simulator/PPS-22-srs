@@ -2,8 +2,8 @@
 sidebar_label: Sprint 2
 ---
 
-import {SprintTable} from '@site/src/components/tables/SprintTable'
-import {sprint2Data} from '@site/src/data/sprint2Data'
+import { SprintTable } from '@site/src/components/tables/SprintTable'
+import { sprint2Data } from '@site/src/data/sprint2Data'
 
 # Sprint 2 [28/07/2025 - 10/08/2025]
 
@@ -13,17 +13,26 @@ import {sprint2Data} from '@site/src/data/sprint2Data'
 
 Gli obiettivi dello Sprint 2 sono stati:
 - Completamento della modellazione del dominio;
-- Prima implementazione GUI di configurazione;
+- Prima implementazione GUI di simulazione;
+- Prima implementazione del motore di simulazione;
 - Salvataggio e caricamento del file di configurazione;
-- Implementazione del comportamento;
-- Prima implementazione del motore di simulazione.
+- Implementazione del comportamento del robot.
 
 ## Sprint Deadline
 
-
+Lo sprint 2 è iniziato il 28 Luglio 2025 e si è concluso il 10 Agosto 2025.
 
 ## Sprint Review
 
-
+Durante la Sprint Review sono stati presentati i seguenti risultati:
+- Una prima implementazione della GUI di simulazione è stata realizzata;
+- Il motore di simulazione è stato implementato;
+- Il salvataggio e caricamento del file di configurazione è stato implementato, resta da gestire il caricamento dinamico del comportamento del robot;
+- Il comportamento del robot è stato implementato.
+- La modellazione del dominio non è stata completata in quanto mancano i sensori di luce;
 
 ## Sprint Retrospective
+
+- La gestione del salvataggio e caricamento del file di configurazione ha richiesto più tempo del previsto, a causa della necessità di gestire la serializzazione e deserializzazione degli oggetti complessi in maniera personalizzata.
+- Un errore nella modellazione del dominio, relativo alle azioni che il robot può svolgere, ha reso necessaria una seconda revisione della modellazione delle azioni stesse oltre al comportamento dei robot, causando ritardi rispetto alla pianificazione iniziale.
+- Il ritardi descritti sopra hanno impattato negativamente sulla pianificazione dello sprint, rendendo necessario il rinvio dell'implementazione dei sensori di luce al prossimo sprint.

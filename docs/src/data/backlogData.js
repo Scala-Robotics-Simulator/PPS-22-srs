@@ -36,10 +36,10 @@ export const backlogData = [
   },
   {
     id: 6,
-    item: "Come utente, voglio modificare la dimensione dell'ambiente",
-    stima: 2,
-    effettivo: 1,
-    sprints: [0, 1, 0, 0, 0]
+    item: "Come utente, voglio modificare la dimensione dell'ambiente e aggiungere/rimuovere le entità al suo interno",
+    stima: 5,
+    effettivo: 6,
+    sprints: [0, 1, 5, 0, 0]
   },
   {
     id: 7,
@@ -59,8 +59,8 @@ export const backlogData = [
     id: 9,
     item: "Come utente, voglio gestire gli attuatori di spostamento del robot, come le ruote motorizzate, così da poterli aggiungere, rimuovere o modificare la loro velocità per personalizzare la mobilità del robot",
     stima: 6,
-    effettivo: 7,
-    sprints: [0, 7, 0, 0, 0]
+    effettivo: 10,
+    sprints: [0, 7, 3, 0, 0]
   },
   {
     id: 10,
@@ -73,8 +73,8 @@ export const backlogData = [
     id: 11,
     item: "Come utente, voglio gestire le luci, così da configurare il numero, la posizione e l'intensità di essi",
     stima: 8,
-    effettivo: 10,
-    sprints: [0, 10, 0, 0, 0]
+    effettivo: 12,
+    sprints: [0, 10, 2, 0, 0]
   },
   {
     id: 12,
@@ -106,30 +106,37 @@ export const backlogData = [
   },
   {
     id: 16,
-    item: "Come un utente, voglio poter scegliere il seed, così da poter riprodurre la stessa simulazione",
-    stima: 8,
-    effettivo: 0,
-    sprints: [0, 0, 0, 0, 0]
+    item: "Come un utente, durante la simulazione voglio: poter mettere in pausa la simulazione; poter riprendere la simulazione, se in pausa; poter fermare la simulazione; così che possa gestire il controllo della simulazione",
+    stima: 12,
+    effettivo: 11,
+    sprints: [0, 0, 11, 0, 0]
   },
   {
     id: 17,
-    item: "Come un utente, voglio poter caricare un file di configurazione personalizzato della simulazione, così che possa verificare nuovamente comportamenti eseguiti precedentemente",
-    stima: 5,
-    effettivo: 0,
-    sprints: [0, 0, 0, 0, 0]
+    item: "Come un utente, voglio modificare la durata della simulazione, così da avere simulazioni di durata differente",
+    stima: 4,
+    effettivo: 3,
+    sprints: [0, 0, 3, 0, 0]
   },
   {
     id: 18,
-    item: "Come un utente, voglio poter salvare la configurazione in un file, così da poterla riutilizzare nelle simulazioni successive",
+    item: "Come un utente, voglio poter scegliere il seed, così da poter riprodurre la stessa simulazione",
     stima: 1,
-    effettivo: 0,
-    sprints: [0, 0, 0, 0, 0]
+    effettivo: 1,
+    sprints: [0, 0, 1, 0, 0]
   },
   {
     id: 19,
-    item: "Deliverable sprint-2",
+    item: "Come un utente, voglio poter caricare e salvare un file di configurazione personalizzato della simulazione, così che possa verificare nuovamente comportamenti eseguiti precedentemente",
+    stima: 9,
+    effettivo: 12,
+    sprints: [0, 0, 12, 0, 0]
+  },
+  {
+    id: 20,
+    item: "Deliverable sprint-2 (GUI con visualizzazione dello stato, gestione del tempo e della riproducibilità)",
     stima: 1,
-    effettivo: 0,
-    sprints: [0, 0, 0, 0, 0]
+    effettivo: 1,
+    sprints: [0, 0, 1, 0, 0]
   }
 ];

@@ -1,6 +1,6 @@
 export const sprint1Data = [
   {
-    backlogItem: "Come utente, voglio modificare la dimensione dell'ambiente",
+    backlogItem: "Come utente, voglio modificare la dimensione dell'ambiente e aggiungere/rimuovere le entità al suo interno",
     id: "6.1",
     task: "Modellazione ambiente",
     volontario: "Ceredi",
@@ -9,7 +9,7 @@ export const sprint1Data = [
     days: [0, 0, 0, 0, 0.5, 0, 0, 0, 0, 0, 0, 0, 0, 0]
   },
   {
-    backlogItem: "Come utente, voglio modificare la dimensione dell'ambiente",
+    backlogItem: "Come utente, voglio modificare la dimensione dell'ambiente e aggiungere/rimuovere le entità al suo interno",
     id: "6.2",
     task: "Validazione parametri ambiente",
     volontario: "Ceredi",
