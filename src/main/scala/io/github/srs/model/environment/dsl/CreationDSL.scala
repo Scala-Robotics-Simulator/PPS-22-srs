@@ -2,9 +2,9 @@ package io.github.srs.model.environment.dsl
 
 import io.github.srs.model.entity.Entity
 import io.github.srs.model.entity.staticentity.StaticEntity.Boundary
-import io.github.srs.model.environment.{Environment, ValidEnvironment}
+import io.github.srs.model.environment.{ Environment, ValidEnvironment }
 import io.github.srs.model.validation.Validation
-import io.github.srs.model.validation.Validation.{bounded, noCollisions, withinBounds}
+import io.github.srs.model.validation.Validation.{ bounded, noCollisions, withinBounds }
 
 /**
  * The DSL for creating an environment in the simulation.

@@ -1,17 +1,17 @@
 package io.github.srs.model
 
-import io.github.srs.model.SimulationConfig.{SimulationSpeed, SimulationStatus}
+import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
+
+import io.github.srs.model.SimulationConfig.{ SimulationSpeed, SimulationStatus }
 import io.github.srs.model.environment.ValidEnvironment
 import io.github.srs.utils.random.SimpleRNG
 
-import scala.concurrent.duration.{FiniteDuration, MILLISECONDS}
-
 final case class SimulationState(
     i: Int,
-    simulationTime: Option[FiniteDuration],
-    elapsedTime: FiniteDuration = FiniteDuration(0, MILLISECONDS),
-    simulationSpeed: SimulationSpeed,
-    simulationRNG: SimpleRNG,
-    simulationStatus: SimulationStatus,
-    environment: ValidEnvironment,
+    override val simulationTime: Option[FiniteDuration],
+    override val elapsedTime: FiniteDuration = FiniteDuration(0, MILLISECONDS),
+    override val simulationSpeed: SimulationSpeed,
+    override val simulationRNG: SimpleRNG,
+    override val simulationStatus: SimulationStatus,
+    override val environment: ValidEnvironment,
 ) extends ModelModule.State
