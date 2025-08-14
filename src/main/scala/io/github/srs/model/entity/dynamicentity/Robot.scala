@@ -1,5 +1,7 @@
 package io.github.srs.model.entity.dynamicentity
 
+import java.util.UUID
+
 import cats.Id
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.action.Action
@@ -18,10 +20,20 @@ import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.*
  *   the sequence of actuators that control the robot.
  */
 final case class Robot(
+    id: UUID = UUID.randomUUID(),
     override val position: Point2D = defaultPosition,
     override val shape: ShapeType.Circle = defaultShape,
     override val orientation: Orientation = defaultOrientation,
     override val actuators: Seq[Actuator[Robot]] = defaultActuators,
     override val sensors: Vector[Sensor[Robot, Environment]] = defaultSensors,
     override val behavior: Rule[Id, SensorReadings, Action[Id]] = defaultBehavior,
-) extends DynamicEntity
+) extends DynamicEntity:
+
+  override def equals(obj: Any): Boolean =
+    obj match
+      case that: Robot =>
+        this.shape.radius == that.shape.radius &&
+        this.position == that.position &&
+        this.orientation.degrees == that.orientation.degrees
+      case _ => false
+      // TODO: find a way to check equality of actuators, sensors, and behavior
