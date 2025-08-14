@@ -51,13 +51,6 @@ trait RNG:
   def nextDoubleBetween(min: Double, max: Double, isMaxExcluded: Boolean = true): (Double, RNG)
 
   /**
-   * Generates a random UUID along with the next RNG state.
-   * @return
-   *   a tuple containing a random UUID and the next RNG state.
-   */
-  def nextUUID: (java.util.UUID, RNG)
-
-  /**
    * Generates a random long value along with the next RNG state.
    * @return
    *   a tuple containing a random long and the next RNG state.
@@ -145,15 +138,6 @@ final case class SimpleRNG(seed: Long) extends RNG:
       if !isMaxExcluded && nextDouble > 0.999999999999999 then max
       else min + (max - min) * nextDouble
     (value, nextRNG)
-
-  /**
-   * @inheritdoc
-   */
-  override def nextUUID: (java.util.UUID, RNG) =
-    val mostSigBits = random.nextLong()
-    val leastSigBits = random.nextLong()
-    val uuid = new java.util.UUID(mostSigBits, leastSigBits)
-    (uuid, nextRNG)
 
   /**
    * @inheritdoc

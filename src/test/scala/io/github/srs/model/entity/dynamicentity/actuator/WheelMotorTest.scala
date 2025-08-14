@@ -23,27 +23,37 @@ class WheelMotorTest extends AnyFlatSpec with Matchers:
 
   "WheelMotor" should "update its position based on the wheel speeds" in:
     val leftSpeed: Double = 1.0
-    val rightSpeed: Double = 2.0
+    val rightSpeed: Double = 1.0
     val wheelMotor: DifferentialWheelMotor = DifferentialWheelMotor(
       Wheel(leftSpeed, ShapeType.Circle(wheelRadius)),
       Wheel(rightSpeed, ShapeType.Circle(wheelRadius)),
     )
     val robot: Robot =
-      Robot(initialPosition, shape, initialOrientation, Seq(wheelMotor)).validate.toOption.value
+      Robot(
+        position = initialPosition,
+        shape = shape,
+        orientation = initialOrientation,
+        actuators = Seq(wheelMotor),
+      ).validate.toOption.value
     val movedRobot: Robot = robot.move[Id](deltaTime)
 
     val expectedMovement: (Point2D, Orientation) = calculateMovement(deltaTime, robot)
     movedRobot.position shouldBe expectedMovement._1
 
   it should "update its orientation based on the wheel speeds" in:
-    val leftSpeed: Double = 1.0
-    val rightSpeed: Double = 2.0
+    val leftSpeed: Double = -0.5
+    val rightSpeed: Double = 1.0
     val wheelMotor: DifferentialWheelMotor = DifferentialWheelMotor(
       Wheel(leftSpeed, ShapeType.Circle(wheelRadius)),
       Wheel(rightSpeed, ShapeType.Circle(wheelRadius)),
     )
     val robot: Robot =
-      Robot(initialPosition, shape, initialOrientation, Seq(wheelMotor)).validate.toOption.value
+      Robot(
+        position = initialPosition,
+        shape = shape,
+        orientation = initialOrientation,
+        actuators = Seq(wheelMotor),
+      ).validate.toOption.value
     val movedRobot: Robot = robot.move[Id](deltaTime)
 
     val expectedMovement: (Point2D, Orientation) = calculateMovement(deltaTime, robot)

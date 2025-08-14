@@ -1,7 +1,5 @@
 package io.github.srs.utils.random
 
-import java.util.UUID
-
 /**
  * A domain-specific language (DSL) for generating random values using a [[Rand]] type.
  */
@@ -41,13 +39,6 @@ object RandomDSL:
    *   a [[Rand]] that generates a random long.
    */
   infix def randomLong: Rand[Long] = (rng: RNG) => rng.nextLong
-
-  /**
-   * Generates a random UUID using the provided [[RNG]].
-   * @return
-   *   a [[Rand]] that generates a random UUID.
-   */
-  infix def randomUUID: Rand[UUID] = (rng: RNG) => rng.nextUUID
 
   extension (rng: RNG)
     /**

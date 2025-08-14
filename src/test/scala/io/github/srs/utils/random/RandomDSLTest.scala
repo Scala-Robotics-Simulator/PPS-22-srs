@@ -1,7 +1,5 @@
 package io.github.srs.utils.random
 
-import java.util.UUID
-
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import io.github.srs.utils.random.*
@@ -47,10 +45,6 @@ class RandomDSLTest extends AnyFlatSpec with Matchers:
     val randList: Rand[List[Int]] = 5 times randomInt
     val (list, _) = rng generate randList
     list should have size 5
-
-  it should "generate a random UUID" in:
-    val (uuid, _) = rng generate randomUUID
-    uuid shouldBe a[java.util.UUID]
 
   it should "generate a positive random integer" in:
     val (posInt, _) = rng generate positive
