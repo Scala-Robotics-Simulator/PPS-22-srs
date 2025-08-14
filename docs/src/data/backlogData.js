@@ -99,10 +99,10 @@ export const backlogData = [
   },
   {
     id: 15,
-    item: "Come utente, voglio modificare il comportamento dei robot, indicandone il Behavior",
-    stima: 12,
-    effettivo: 0,
-    sprints: [0, 0, 0, 0, 0]
+    item: "Come utente, voglio modificare il comportamento dei robot, così da poter personalizzare le loro azioni",
+    stima: 10,
+    effettivo: 11,
+    sprints: [0, 0, 11, 0, 0]
   },
   {
     id: 16,
