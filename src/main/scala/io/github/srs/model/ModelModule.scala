@@ -4,6 +4,7 @@ import scala.concurrent.duration.FiniteDuration
 
 import cats.effect.IO
 import io.github.srs.model.SimulationConfig.{ SimulationSpeed, SimulationStatus }
+import io.github.srs.model.environment.ValidEnvironment.ValidEnvironment
 import io.github.srs.utils.random.SimpleRNG
 
 /**
@@ -41,6 +42,7 @@ object ModelModule:
      */
     def simulationStatus: SimulationStatus
 
+    def environment: ValidEnvironment
   end State
 
   /**

@@ -48,3 +48,13 @@ final case class Environment(
 extension (env: Environment)
   /** Derives the static view of the environment. */
   def view: EnvironmentView = EnvironmentView.static(env)
+
+object ValidEnvironment:
+  opaque type ValidEnvironment = Environment
+
+  private[environment] def from(env: Environment): ValidEnvironment =
+    env
+
+  given Conversion[ValidEnvironment, Environment] = identity
+
+export ValidEnvironment.ValidEnvironment

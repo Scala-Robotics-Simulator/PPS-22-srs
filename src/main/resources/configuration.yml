@@ -1,5 +1,4 @@
 simulation:
-  duration: 1000
   seed: 42
 
 environment:
@@ -23,4 +22,3 @@ environment:
         speed: 1.0
         withProximitySensors: true
         withLightSensors: false
-        behavior: "randomWalk"

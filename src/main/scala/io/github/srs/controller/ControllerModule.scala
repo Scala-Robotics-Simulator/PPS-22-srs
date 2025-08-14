@@ -1,14 +1,17 @@
 package io.github.srs.controller
 
 import scala.compiletime.deferred
-import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
 
+import cats.Id
 import cats.effect.IO
 import cats.effect.std.Queue
 import cats.syntax.all.*
 import io.github.srs.model.*
 import io.github.srs.model.SimulationConfig.SimulationStatus
 import io.github.srs.model.UpdateLogic.*
+import io.github.srs.model.entity.dynamicentity.Robot
+import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.logic.*
 import io.github.srs.utils.SimulationDefaults.SimulationConfig.maxCount
 
@@ -80,6 +83,8 @@ object ControllerModule:
 
     given stop: StopLogic[S] = deferred
 
+//    given robotAction: RobotActionLogic[S] = deferred
+
     object Controller:
       /**
        * Creates a controller instance.
@@ -107,26 +112,47 @@ object ControllerModule:
         override def simulationLoop(s: S, queue: Queue[IO, Event]): IO[Unit] =
           def loop(state: S): IO[Unit] =
             for
+              startTime <- IO.pure(System.currentTimeMillis())
+              _ <- IO.pure(runBehaviors(state, queue))
               events <- queue.tryTakeN(Some(50))
               newState <- handleEvents(events, state)
               _ <- context.view.render(newState)
               nextState <-
                 if newState.simulationStatus == SimulationStatus.RUNNING then
-                  tickEvents(newState.simulationSpeed.tickSpeed, newState)
+                  tickEvents(startTime, newState.simulationSpeed.tickSpeed, newState)
                 else IO.pure(newState)
               stop = newState.simulationStatus == SimulationStatus.STOPPED ||
                 newState.simulationTime.exists(max => newState.elapsedTime >= max)
+              endTime <- IO.pure(System.currentTimeMillis())
+              _ <- IO.pure(println(s"Simulation loop took ${endTime - startTime} ms"))
               _ <- if stop then IO.unit else loop(nextState)
             yield ()
 
           loop(s)
 
+        end simulationLoop
+
         private def produceEvents[A](queue: Queue[IO, A], events: List[A]): IO[Unit] =
           events.traverse_(queue.offer)
 
-        private def tickEvents(tickSpeed: FiniteDuration, state: S): IO[S] =
+        private def runBehaviors(state: S, queue: Queue[IO, Event]): Unit =
+          import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
+          state.environment.entities.collect { case robot: Robot =>
+            robot
+          }.foreach { robot =>
+            val sensorReadings = robot.senseAll[Id](state.environment)
+            val action: Id[Option[Action[Id]]] = robot.behavior.run(sensorReadings)
+            action.foreach { a =>
+              queue.offer(Event.RobotAction(robot, a))
+            }
+          }
+
+        private def tickEvents(start: Long, tickSpeed: FiniteDuration, state: S): IO[S] =
+          val timeToNextTick = tickSpeed.toMillis - (System.currentTimeMillis() - start)
+          val adjustedTickSpeed: Long = if timeToNextTick > 0 then timeToNextTick else 0L
+          val sleepTime = FiniteDuration(adjustedTickSpeed, MILLISECONDS)
           for
-            _ <- IO.sleep(tickSpeed)
+            _ <- IO.sleep(sleepTime)
             tick <- handleEvent(Event.Tick(tickSpeed), state)
           yield tick
 
@@ -150,6 +176,8 @@ object ControllerModule:
             case Event.Stop => context.model.stop(state)
             case Event.TickSpeed(speed) => context.model.tickSpeed(state, speed)
             case _ => IO.pure(state)
+//            case Event.RobotAction(robot, action) =>
+//              context.model.handleRobotAction(state, robot, action)
 
       end ControllerImpl
 

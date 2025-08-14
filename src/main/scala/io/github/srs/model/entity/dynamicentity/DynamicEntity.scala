@@ -1,8 +1,11 @@
 package io.github.srs.model.entity.dynamicentity
 
+import cats.Id
 import io.github.srs.model.entity.Entity
+import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.actuator.Actuator
-import io.github.srs.model.entity.dynamicentity.sensor.Sensor
+import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Rule
+import io.github.srs.model.entity.dynamicentity.sensor.{ Sensor, SensorReadings }
 import io.github.srs.model.environment.Environment
 
 /**
@@ -22,3 +25,5 @@ trait DynamicEntity extends Entity:
    *   the sequence of sensors.
    */
   def sensors: Vector[Sensor[? <: DynamicEntity, ? <: Environment]]
+
+  def behavior: Rule[Id, SensorReadings, Action[Id]]
