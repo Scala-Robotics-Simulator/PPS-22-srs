@@ -14,7 +14,7 @@ import io.github.srs.model.entity.dynamicentity.DynamicEntity
  * @tparam E
  *   the type of dynamic entity on which the action is performed, extending DynamicEntity.
  */
-private[action] final case class MovementAction[F[_]](leftSpeed: Double, rightSpeed: Double) extends Action[F]:
+final case class MovementAction[F[_]] private[action] (leftSpeed: Double, rightSpeed: Double) extends Action[F]:
 
   /**
    * Runs the movement action using the provided [[ActionAlg]].

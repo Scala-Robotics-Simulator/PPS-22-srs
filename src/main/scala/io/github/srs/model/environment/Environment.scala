@@ -49,7 +49,6 @@ extension (env: Environment)
   /** Derives the static view of the environment. */
   def view: EnvironmentView = EnvironmentView.static(env)
 
-
 object ValidEnvironment:
   opaque type ValidEnvironment = Environment
 
@@ -57,6 +56,5 @@ object ValidEnvironment:
     env
 
   given Conversion[ValidEnvironment, Environment] = identity
-
 
 export ValidEnvironment.ValidEnvironment
