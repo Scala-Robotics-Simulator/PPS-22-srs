@@ -12,9 +12,6 @@ import io.github.srs.model.SimulationConfig.SimulationStatus
 import io.github.srs.model.UpdateLogic.*
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.action.Action
-import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Rule
-import io.github.srs.model.entity.dynamicentity.behavior.Rules
-import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings
 import io.github.srs.model.logic.*
 import io.github.srs.utils.SimulationDefaults.SimulationConfig.maxCount
 
@@ -102,8 +99,6 @@ object ControllerModule:
        */
       private class ControllerImpl extends Controller[S]:
 
-        private val behavior: Rule[Id, SensorReadings, Action[Id]] = Rules.alwaysForward[Id]
-
         override def start(initialState: S): IO[Unit] =
           val randInt: Int = initialState.simulationRNG.nextIntBetween(0, maxCount)._1
           val list = List.fill(randInt)(Event.Increment)
@@ -146,7 +141,7 @@ object ControllerModule:
             robot
           }.foreach { robot =>
             val sensorReadings = robot.senseAll[Id](state.environment)
-            val action: Id[Option[Action[Id]]] = behavior.run(sensorReadings)
+            val action: Id[Option[Action[Id]]] = robot.behavior.run(sensorReadings)
             action.foreach { a =>
               queue.offer(Event.RobotAction(robot, a))
             }
