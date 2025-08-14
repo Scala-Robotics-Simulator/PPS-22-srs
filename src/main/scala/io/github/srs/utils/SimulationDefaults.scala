@@ -1,9 +1,13 @@
 package io.github.srs.utils
 
+import cats.Id
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.Robot
+import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, Wheel as ActWheel }
-import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, Sensor }
+import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Rule
+import io.github.srs.model.entity.dynamicentity.behavior.Rules
+import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, Sensor, SensorReadings }
 import io.github.srs.model.environment.Environment
 
 object SimulationDefaults:
@@ -94,6 +98,8 @@ object SimulationDefaults:
 
       // TODO: Add light sensors when implemented
       val stdLightSensors: Vector[Sensor[Robot, Environment]] = Vector.empty
+
+      val defaultBehavior: Rule[Id, SensorReadings, Action[Id]] = Rules.alwaysForward[Id]
     end Robot
   end DynamicEntity
 end SimulationDefaults

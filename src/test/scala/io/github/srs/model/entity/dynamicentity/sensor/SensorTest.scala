@@ -2,7 +2,10 @@ package io.github.srs.model.entity.dynamicentity.sensor
 
 import cats.{ Id, Monad }
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
+import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.actuator.Actuator
+import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Rule
+import io.github.srs.model.entity.dynamicentity.behavior.Rules
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.environment.dsl.CreationDSL.*
@@ -22,11 +25,12 @@ class SensorTest extends AnyFlatSpec with should.Matchers:
   val range: Range = 10.0
 
   class Dummy(
-      val position: Point2D,
-      val shape: ShapeType,
-      val orientation: Orientation,
-      val actuators: Seq[Actuator[Dummy]],
-      val sensors: Vector[Sensor[Dummy, Environment]],
+      override val position: Point2D,
+      override val shape: ShapeType,
+      override val orientation: Orientation,
+      override val actuators: Seq[Actuator[Dummy]],
+      override val sensors: Vector[Sensor[Dummy, Environment]],
+      override val behavior: Rule[Id, SensorReadings, Action[Id]] = Rules.alwaysForward,
   ) extends DynamicEntity:
     def act[F[_]: Monad](): F[Dummy] = Monad[F].pure(this)
 

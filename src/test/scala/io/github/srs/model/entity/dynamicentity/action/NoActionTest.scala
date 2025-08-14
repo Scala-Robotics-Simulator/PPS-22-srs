@@ -5,8 +5,10 @@ import scala.concurrent.duration.FiniteDuration
 import cats.{ Id, Monad }
 import io.github.srs.model.entity.dynamicentity.actuator.Actuator
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
+import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Rule
+import io.github.srs.model.entity.dynamicentity.behavior.Rules
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
-import io.github.srs.model.entity.dynamicentity.sensor.Sensor
+import io.github.srs.model.entity.dynamicentity.sensor.{ Sensor, SensorReadings }
 import io.github.srs.model.environment.Environment
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -22,6 +24,7 @@ class NoActionTest extends AnyFlatSpec with Matchers:
       override val orientation: Orientation,
       override val actuators: Seq[DummyActuator],
       override val sensors: Vector[Sensor[Dummy, Environment]],
+      override val behavior: Rule[Id, SensorReadings, Action[Id]] = Rules.alwaysForward,
   ) extends DynamicEntity:
     def act[F[_]: Monad](): F[Dummy] = Monad[F].pure(this)
 
