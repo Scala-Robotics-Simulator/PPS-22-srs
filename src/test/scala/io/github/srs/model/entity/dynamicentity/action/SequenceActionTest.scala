@@ -3,10 +3,12 @@ package io.github.srs.model.entity.dynamicentity.action
 import scala.concurrent.duration.FiniteDuration
 
 import cats.{ Id, Monad }
+import io.github.srs.model.entity.dynamicentity.DynamicEntity
 import io.github.srs.model.entity.dynamicentity.action.MovementActionFactory.{ moveForward, turnRight }
 import io.github.srs.model.entity.dynamicentity.actuator.Actuator
-import io.github.srs.model.entity.dynamicentity.sensor.Sensor
-import io.github.srs.model.entity.dynamicentity.DynamicEntity
+import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Rule
+import io.github.srs.model.entity.dynamicentity.behavior.Rules
+import io.github.srs.model.entity.dynamicentity.sensor.{ Sensor, SensorReadings }
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.environment.Environment
 import org.scalatest.flatspec.AnyFlatSpec
@@ -37,6 +39,7 @@ class SequenceActionTest extends AnyFlatSpec with Matchers:
       override val orientation: Orientation,
       override val actuators: Seq[DummyActuator],
       override val sensors: Vector[Sensor[Dummy, Environment]],
+      override val behavior: Rule[Id, SensorReadings, Action[Id]] = Rules.alwaysForward,
   ) extends DynamicEntity:
     def act[F[_]: Monad](): F[Dummy] = Monad[F].pure(this)
 
@@ -54,7 +57,11 @@ class SequenceActionTest extends AnyFlatSpec with Matchers:
     val action3: Action[Id] = turnRight[Id]
     val sequenceAction: SequenceAction[Id] = SequenceAction(List(action1, action2, action3))
     val updatedEntity: Dummy = sequenceAction.run(dynamicEntity)
-    dynamicEntity should be(updatedEntity)
+    val _ = dynamicEntity.position should be(updatedEntity.position)
+    val _ = dynamicEntity.shape should be(updatedEntity.shape)
+    val _ = dynamicEntity.orientation should be(updatedEntity.orientation)
+    val _ = dynamicEntity.actuators should be(updatedEntity.actuators)
+    dynamicEntity.sensors should be(updatedEntity.sensors)
 
   it should "handle an empty sequence of actions" in:
     val emptySequenceAction: SequenceAction[Id] = SequenceAction(List.empty)
