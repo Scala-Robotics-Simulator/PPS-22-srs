@@ -1,9 +1,7 @@
 package io.github.srs.controller
 
-import scala.compiletime.deferred
 import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
 
-import cats.Id
 import cats.effect.IO
 import cats.effect.std.Queue
 import cats.syntax.all.*
@@ -11,9 +9,8 @@ import io.github.srs.model.*
 import io.github.srs.model.SimulationConfig.SimulationStatus
 import io.github.srs.model.UpdateLogic.*
 import io.github.srs.model.entity.dynamicentity.Robot
-import io.github.srs.model.entity.dynamicentity.action.Action
+import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
 import io.github.srs.model.logic.*
-import io.github.srs.utils.SimulationDefaults.SimulationConfig.maxCount
 
 /**
  * Module that defines the controller logic for the Scala Robotics Simulator.
@@ -73,39 +70,44 @@ object ControllerModule:
    */
   trait Component[S <: ModelModule.State]:
     context: Requirements[S] =>
-    given inc: IncrementLogic[S] = deferred
-
-    given tick: TickLogic[S] = deferred
-
-    given pause: PauseLogic[S] = deferred
-
-    given resume: ResumeLogic[S] = deferred
-
-    given stop: StopLogic[S] = deferred
-
-//    given robotAction: RobotActionLogic[S] = deferred
 
     object Controller:
+
       /**
        * Creates a controller instance.
        *
        * @return
        *   a [[Controller]] instance.
        */
-      def apply(): Controller[S] = new ControllerImpl
+      def apply()(using
+          inc: IncrementLogic[S],
+          tick: TickLogic[S],
+          pause: PauseLogic[S],
+          resume: ResumeLogic[S],
+          stop: StopLogic[S],
+          robot: RobotActionLogic[S],
+      ): Controller[S] = new ControllerImpl
 
       /**
        * Private controller implementation that delegates the simulation loop to the provided model and view.
        */
-      private class ControllerImpl extends Controller[S]:
+      private class ControllerImpl(using
+          inc: IncrementLogic[S],
+          tick: TickLogic[S],
+          pause: PauseLogic[S],
+          resume: ResumeLogic[S],
+          stop: StopLogic[S],
+          robot: RobotActionLogic[S],
+      ) extends Controller[S]:
 
         override def start(initialState: S): IO[Unit] =
-          val randInt: Int = initialState.simulationRNG.nextIntBetween(0, maxCount)._1
-          val list = List.fill(randInt)(Event.Increment)
+          //          val randInt: Int = initialState.simulationRNG.nextIntBetween(0, maxCount)._1
+          //          val list = List.fill(randInt)(Event.Increment)
           for
             queueSim <- Queue.unbounded[IO, Event]
             _ <- context.view.init(queueSim)
-            _ <- produceEvents(queueSim, list)
+            //            _ <- produceEvents(queueSim, list)
+            _ <- runBehavior(queueSim, initialState)
             _ <- simulationLoop(initialState, queueSim)
           yield ()
 
@@ -113,8 +115,8 @@ object ControllerModule:
           def loop(state: S): IO[Unit] =
             for
               startTime <- IO.pure(System.currentTimeMillis())
-              _ <- IO.pure(runBehaviors(state, queue))
-              events <- queue.tryTakeN(Some(50))
+              _ <- runBehavior(queue, state)
+              events <- queue.tryTakeN(Some(20))
               newState <- handleEvents(events, state)
               _ <- context.view.render(newState)
               nextState <-
@@ -132,20 +134,19 @@ object ControllerModule:
 
         end simulationLoop
 
-        private def produceEvents[A](queue: Queue[IO, A], events: List[A]): IO[Unit] =
-          events.traverse_(queue.offer)
+        //        private def produceEvents[A](queue: Queue[IO, A], events: List[A]): IO[Unit] =
+        //          events.traverse_(queue.offer)
 
-        private def runBehaviors(state: S, queue: Queue[IO, Event]): Unit =
-          import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
+        private def runBehavior(queue: Queue[IO, Event], state: S): IO[Unit] =
           state.environment.entities.collect { case robot: Robot =>
-            robot
-          }.foreach { robot =>
-            val sensorReadings = robot.senseAll[Id](state.environment)
-            val action: Id[Option[Action[Id]]] = robot.behavior.run(sensorReadings)
-            action.foreach { a =>
-              queue.offer(Event.RobotAction(robot, a))
-            }
-          }
+            for
+              sensorReadings <- robot.senseAll[IO](state.environment)
+              maybeAction <- robot.behavior.run(sensorReadings)
+              _ <- maybeAction match
+                case Some(a) => queue.offer(Event.RobotAction(queue, robot, a))
+                case None => IO.unit
+            yield ()
+          }.toList.sequence.void
 
         private def tickEvents(start: Long, tickSpeed: FiniteDuration, state: S): IO[S] =
           val timeToNextTick = tickSpeed.toMillis - (System.currentTimeMillis() - start)
@@ -175,9 +176,9 @@ object ControllerModule:
             case Event.Resume => context.model.resume(state)
             case Event.Stop => context.model.stop(state)
             case Event.TickSpeed(speed) => context.model.tickSpeed(state, speed)
+            case Event.RobotAction(queue, robot, action) =>
+              context.model.handleRobotAction(state, queue, robot, action)
             case _ => IO.pure(state)
-//            case Event.RobotAction(robot, action) =>
-//              context.model.handleRobotAction(state, robot, action)
 
       end ControllerImpl
 
