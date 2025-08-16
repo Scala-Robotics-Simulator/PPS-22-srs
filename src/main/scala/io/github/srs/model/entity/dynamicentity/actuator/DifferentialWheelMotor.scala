@@ -4,6 +4,7 @@ import scala.concurrent.duration.FiniteDuration
 
 import cats.Monad
 import cats.syntax.flatMap.toFlatMapOps
+import cats.syntax.functor.toFunctorOps
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.Point2D.*
 import io.github.srs.model.entity.dynamicentity.Robot
@@ -90,9 +91,6 @@ object DifferentialWheelMotor:
 
   end DifferentialWheelMotorImpl
 
-  /**
-   * Extension method to move the robot using its wheel motors.
-   */
   extension (robot: Robot)
 
     /**
@@ -115,9 +113,13 @@ object DifferentialWheelMotor:
      * @return
      *   the robot with updated state after applying the actions.
      */
-    def applyMovementActions[F[_]: Monad](dt: FiniteDuration, action: Action[F])(using
-        a: ActionAlg[F, Robot],
-    ): F[Robot] =
-      action.run(robot).flatMap(_.move(dt))
+    def applyMovementActions[F[_]: Monad](
+        dt: FiniteDuration,
+        action: Action[F],
+    )(using a: ActionAlg[F, Robot]): F[Robot] =
+      for
+        robotWithNewSpeeds <- action.run(robot)
+        movedRobot <- robotWithNewSpeeds.move(dt)
+      yield movedRobot
   end extension
 end DifferentialWheelMotor
