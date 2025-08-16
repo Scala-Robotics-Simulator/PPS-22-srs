@@ -22,3 +22,10 @@ environment:
         speed: 1.0
         withProximitySensors: true
         withLightSensors: false
+    - robot:
+        position: [7,7]
+        orientation: 0.0
+        radius: 0.5
+        speed: 1.0
+        withProximitySensors: true
+        withLightSensors: false

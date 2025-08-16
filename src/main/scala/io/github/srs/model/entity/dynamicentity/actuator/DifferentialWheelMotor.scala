@@ -86,6 +86,7 @@ object DifferentialWheelMotor:
           andThen computePositionAndOrientation(theta, dt)
           andThen { case (dx, dy, newOrientation) =>
             val newPos = Point2D(robot.position.x + dx, robot.position.y + dy)
+            println(s"Moving robot from ${robot.position} to $newPos with orientation $newOrientation")
             (robot at newPos withOrientation newOrientation).validate
           }
       )(this)

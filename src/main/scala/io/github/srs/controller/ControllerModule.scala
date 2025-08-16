@@ -116,7 +116,7 @@ object ControllerModule:
             for
               startTime <- IO.pure(System.currentTimeMillis())
               _ <- runBehavior(queue, state)
-              events <- queue.tryTakeN(Some(20))
+              events <- queue.tryTakeN(Some(Int.MaxValue))
               newState <- handleEvents(events, state)
               _ <- context.view.render(newState)
               nextState <-
