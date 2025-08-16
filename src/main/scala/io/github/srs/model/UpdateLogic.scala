@@ -11,6 +11,7 @@ import io.github.srs.model.SimulationConfig.SimulationSpeed
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.logic.*
+import io.github.srs.utils.random.RNG
 
 object UpdateLogic:
 
@@ -29,6 +30,9 @@ object UpdateLogic:
 
     def tickSpeed(s: S, speed: SimulationSpeed)(using logic: TickLogic[S]): IO[S] =
       logic.tickSpeed(s, speed)
+
+    def random(s: S, rng: RNG)(using logic: RandomLogic[S]): IO[S] =
+      logic.random(s, rng)
 
     def pause(s: S)(using logic: PauseLogic[S]): IO[S] =
       logic.pause(s)

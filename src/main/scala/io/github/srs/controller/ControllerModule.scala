@@ -1,9 +1,11 @@
 package io.github.srs.controller
 
 import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
+import scala.language.postfixOps
 
 import cats.effect.IO
 import cats.effect.std.Queue
+import cats.effect.unsafe.implicits.global
 import cats.syntax.all.*
 import io.github.srs.model.*
 import io.github.srs.model.SimulationConfig.SimulationStatus
@@ -11,6 +13,8 @@ import io.github.srs.model.UpdateLogic.*
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
 import io.github.srs.model.logic.*
+import io.github.srs.utils.random.RNG
+import io.github.srs.utils.random.RandomDSL.{ generate, shuffle }
 
 /**
  * Module that defines the controller logic for the Scala Robotics Simulator.
@@ -82,6 +86,7 @@ object ControllerModule:
       def apply()(using
           inc: IncrementLogic[S],
           tick: TickLogic[S],
+          random: RandomLogic[S],
           pause: PauseLogic[S],
           resume: ResumeLogic[S],
           stop: StopLogic[S],
@@ -94,6 +99,7 @@ object ControllerModule:
       private class ControllerImpl(using
           inc: IncrementLogic[S],
           tick: TickLogic[S],
+          random: RandomLogic[S],
           pause: PauseLogic[S],
           resume: ResumeLogic[S],
           stop: StopLogic[S],
@@ -117,7 +123,7 @@ object ControllerModule:
               startTime <- IO.pure(System.currentTimeMillis())
               _ <- runBehavior(queue, state)
               events <- queue.tryTakeN(Some(Int.MaxValue))
-              newState <- handleEvents(events, state)
+              newState <- handleEvents(state, shuffleEvents(queue, state, events))
               _ <- context.view.render(newState)
               nextState <-
                 if newState.simulationStatus == SimulationStatus.RUNNING then
@@ -146,7 +152,7 @@ object ControllerModule:
                 case Some(a) => queue.offer(Event.RobotAction(queue, robot, a))
                 case None => IO.unit
             yield ()
-          }.toList.sequence.void
+          }.toList.sequence.void // TODO: parSequence
 
         private def tickEvents(start: Long, tickSpeed: FiniteDuration, state: S): IO[S] =
           val timeToNextTick = tickSpeed.toMillis - (System.currentTimeMillis() - start)
@@ -154,19 +160,28 @@ object ControllerModule:
           val sleepTime = FiniteDuration(adjustedTickSpeed, MILLISECONDS)
           for
             _ <- IO.sleep(sleepTime)
-            tick <- handleEvent(Event.Tick(tickSpeed), state)
+            tick <- handleEvent(state, Event.Tick(tickSpeed))
           yield tick
 
-        private def handleEvents(events: Seq[Event], state: S): IO[S] =
-          for finalState <- events.foldLeft(IO.pure(state)) { (taskState, event) =>
+        private def shuffleEvents(queue: Queue[IO, Event], state: S, events: Seq[Event]): Seq[Event] =
+          val filteredEvents = events.filter:
+            case _: Event.RobotAction => true
+            case _: Event.CollisionDetected => true
+            case _ => false
+          val (shuffledEvents, nextRNG: RNG) = state.simulationRNG generate (filteredEvents shuffle)
+          queue.offer(Event.Random(nextRNG)).unsafeRunAndForget()
+          shuffledEvents
+
+        private def handleEvents(state: S, shuffledEvents: Seq[Event]): IO[S] =
+          for finalState <- shuffledEvents.foldLeft(IO.pure(state)) { (taskState, event) =>
               for
                 currentState <- taskState
-                newState <- handleEvent(event, currentState)
+                newState <- handleEvent(currentState, event)
               yield newState
             }
           yield finalState
 
-        private def handleEvent(event: Event, state: S): IO[S] =
+        private def handleEvent(state: S, event: Event): IO[S] =
           event match
             case Event.Increment if state.simulationStatus == SimulationStatus.RUNNING =>
               context.model.increment(state)
@@ -176,8 +191,8 @@ object ControllerModule:
             case Event.Resume => context.model.resume(state)
             case Event.Stop => context.model.stop(state)
             case Event.TickSpeed(speed) => context.model.tickSpeed(state, speed)
-            case Event.RobotAction(queue, robot, action) =>
-              context.model.handleRobotAction(state, queue, robot, action)
+            case Event.Random(rng) => context.model.random(state, rng)
+            case Event.RobotAction(queue, robot, action) => context.model.handleRobotAction(state, queue, robot, action)
             case _ => IO.pure(state)
 
       end ControllerImpl

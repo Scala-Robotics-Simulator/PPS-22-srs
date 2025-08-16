@@ -66,6 +66,15 @@ trait RNG:
    */
   def nextString(length: Int): (String, RNG)
 
+  /**
+   * Shuffles a sequence of elements randomly.
+   * @param seq
+   *   the sequence to shuffle.
+   * @return
+   *   a tuple containing the shuffled sequence and the next RNG state.
+   */
+  def shuffle[A](seq: Seq[A]): (Seq[A], RNG)
+
 end RNG
 
 /**
@@ -152,4 +161,12 @@ final case class SimpleRNG(seed: Long) extends RNG:
   override def nextString(length: Int): (String, RNG) =
     val nextString = random.nextString(length)
     (nextString, nextRNG)
+
+  /**
+   * @inheritdoc
+   */
+  override def shuffle[A](seq: Seq[A]): (Seq[A], RNG) =
+    val shuffled = random.shuffle(seq)
+    (shuffled, nextRNG)
+
 end SimpleRNG

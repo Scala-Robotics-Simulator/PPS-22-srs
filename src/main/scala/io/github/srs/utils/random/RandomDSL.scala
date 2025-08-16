@@ -99,4 +99,13 @@ object RandomDSL:
      *   a [[Rand]] that generates a random double value, excluding the maximum value.
      */
     infix def excludeMax: Rand[Double] = f(true)
+
+  extension [A](seq: Seq[A])
+    /**
+     * Generates a shuffled version of the list using the provided [[RNG]].
+     *
+     * @return
+     *   a [[Rand]] that produces a tuple: the shuffled list and the next RNG state.
+     */
+    infix def shuffle: Rand[Seq[A]] = rng => rng.shuffle(seq)
 end RandomDSL

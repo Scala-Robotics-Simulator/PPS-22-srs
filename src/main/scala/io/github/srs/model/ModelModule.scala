@@ -5,7 +5,7 @@ import scala.concurrent.duration.FiniteDuration
 import cats.effect.IO
 import io.github.srs.model.SimulationConfig.{ SimulationSpeed, SimulationStatus }
 import io.github.srs.model.environment.ValidEnvironment.ValidEnvironment
-import io.github.srs.utils.random.SimpleRNG
+import io.github.srs.utils.random.RNG
 
 /**
  * Module that defines the model logic for the Scala Robotics Simulator.
@@ -40,7 +40,7 @@ object ModelModule:
     /**
      * The random number generator used for the simulation.
      */
-    def simulationRNG: SimpleRNG
+    def simulationRNG: RNG
 
     /**
      * The current simulation status.
