@@ -35,6 +35,14 @@ object Launcher
       _ <- IO.never
     yield ()
 
+/**
+ * Creates the initial state of the simulation based on the provided configuration.
+ *
+ * @param cfg
+ *   the simulation configuration to use for initializing the state
+ * @return
+ *   the initial state of the simulation
+ */
 def mkInitialState(cfg: SimulationConfig): SimulationState =
   SimulationState(
     i = 0,
