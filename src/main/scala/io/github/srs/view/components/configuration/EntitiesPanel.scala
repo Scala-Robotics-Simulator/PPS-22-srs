@@ -5,6 +5,12 @@ import java.awt.*
 
 import io.github.srs.view.components.FieldSpec
 
+/**
+ * EntitiesPanel is a JPanel that allows users to add and remove the simulation entities.
+ *
+ * @param fieldSpecsByType
+ *   a map where keys are entity types and values are sequences of FieldSpec defining the fields for each entity type
+ */
 @SuppressWarnings(
   Array(
     "org.wartremover.warts.AsInstanceOf",
@@ -55,6 +61,12 @@ class EntitiesPanel(fieldSpecsByType: Map[String, Seq[FieldSpec]]) extends JPane
     entityListPanel.revalidate()
     entityListPanel.repaint()
 
+    /**
+     * Retrieves the list of entities currently in the panel.
+     *
+     * @return
+     *   a sequence of tuples where each tuple contains the entity type and a map of its values
+     */
   def getEntities: Seq[(String, Map[String, Any])] =
     entityListPanel.getComponents.collect { case r: EntityRow =>
       r.getEntityType -> r.getEntityValues
