@@ -3,18 +3,19 @@ package io.github.srs
 import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
 
 import cats.effect.IO
-import cats.effect.unsafe.implicits.global
 import io.github.srs.controller.ControllerModule
 import io.github.srs.controller.ControllerModule.Controller
 import io.github.srs.model.ModelModule.Model
-import io.github.srs.model.SimulationConfig.{ SimulationSpeed, SimulationStatus }
 import io.github.srs.model.logic.IncreaseLogic.given
 import io.github.srs.model.logic.StatusLogic.given
 import io.github.srs.model.logic.TimeLogic.given
 import io.github.srs.model.{ ModelModule, SimulationState }
-import io.github.srs.utils.random.SimpleRNG
 import io.github.srs.view.ViewModule
 import io.github.srs.view.ViewModule.View
+import io.github.srs.model.SimulationConfig.SimulationStatus
+import io.github.srs.utils.random.SimpleRNG
+import io.github.srs.config.SimulationConfig
+import io.github.srs.model.SimulationConfig.SimulationSpeed
 
 /**
  * Launcher object that initializes the simulation.
@@ -28,21 +29,17 @@ object Launcher
   val view: View[SimulationState] = View()
   val controller: Controller[SimulationState] = Controller()
 
-  def run(): IO[Unit] =
+  def runMVC(cfg: SimulationState): IO[Unit] =
     for
-      _ <- controller
-        .start(
-          SimulationState(
-            i = 0,
-            simulationTime = Some(FiniteDuration(10_000, MILLISECONDS)),
-            simulationSpeed = SimulationSpeed.NORMAL,
-            simulationRNG = SimpleRNG(42L),
-            simulationStatus = SimulationStatus.RUNNING,
-          ),
-        )
+      _ <- controller.start(cfg)
       _ <- IO.never
     yield ()
-end Launcher
 
-@main def run(): Unit =
-  Launcher.run().unsafeRunSync()
+def mkInitialState(cfg: SimulationConfig): SimulationState =
+  SimulationState(
+    i = 0,
+    simulationTime = cfg.simulation.duration.map(FiniteDuration(_, MILLISECONDS)),
+    simulationSpeed = SimulationSpeed.NORMAL,
+    simulationRNG = SimpleRNG(42L),
+    simulationStatus = SimulationStatus.RUNNING,
+  )
