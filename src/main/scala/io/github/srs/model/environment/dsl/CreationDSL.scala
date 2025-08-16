@@ -87,12 +87,18 @@ object CreationDSL:
      */
     infix def validate(insertBoundaries: Boolean): Validation[ValidEnvironment] =
       import io.github.srs.utils.SimulationDefaults.Environment.*
-      val boundaries = if insertBoundaries then Boundary.createBoundaries(env.width, env.height) else Set.empty[Entity]
+      val entities = env.entities.filterNot:
+        case _: Boundary => true
+        case _ => false
+      val boundaries =
+        if insertBoundaries || entities.sizeIs != env.entities.size then
+          Boundary.createBoundaries(env.width, env.height)
+        else Set.empty[Entity]
       for
         width <- bounded("width", env.width, minWidth, maxWidth, includeMax = true)
         height <- bounded("height", env.height, minHeight, maxHeight, includeMax = true)
         _ <- bounded("entities", env.entities.size, 0, maxEntities, includeMax = true)
-        entities <- withinBounds("entities", env.entities, width, height)
+        entities <- withinBounds("entities", entities, width, height)
         entities <- noCollisions("entities", entities ++ boundaries)
       yield ValidEnvironment.from(Environment(width, height, entities))
   end extension
