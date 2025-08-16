@@ -20,7 +20,7 @@ import org.scalatest.matchers.should.Matchers
 
 class RobotTest extends AnyFlatSpec with Matchers:
 
-  val initialPosition: Point2D = Point2D(0.0, 0.0)
+  val initialPosition: Point2D = Point2D(3.0, 1.0)
   val initialOrientation: Orientation = Orientation(0.0)
   val deltaTime: FiniteDuration = FiniteDuration(100, MILLISECONDS)
   val shape: ShapeType.Circle = ShapeType.Circle(0.5)
@@ -83,11 +83,11 @@ class RobotTest extends AnyFlatSpec with Matchers:
         val movedRobot: Robot = robot.move[Id](deltaTime)
         movedRobot.orientation should be(initialOrientation)
 
-  it should "stay at the same position if it has no actions" in:
+  it should "keep moving with the same velocity if it has no actions" in:
     inside((defaultRobot containing wheelMotor).validate):
       case Right(robot) =>
         val movedRobot: Robot = robot.applyMovementActions[Id](deltaTime, emptyActions)
-        movedRobot.position should be(initialPosition)
+        movedRobot.position._1 should be > initialPosition._1
 
   it should "return the same orientation if it has no actions" in:
     inside((defaultRobot containing wheelMotor).validate):
