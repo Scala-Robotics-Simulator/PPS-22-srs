@@ -22,6 +22,11 @@ object UpdateLogic:
     ): IO[S] =
       logic.handleRobotAction(s, queue, robot, action)
 
+    def handleCollision(s: S, queue: Queue[IO, Event], robot: Robot, updatedRobot: Robot)(using
+        logic: CollisionLogic[S],
+    ): IO[S] =
+      logic.handleCollision(s, queue, robot, updatedRobot)
+
     def increment(s: S)(using logic: IncrementLogic[S]): IO[S] =
       logic.increment(s)
 
