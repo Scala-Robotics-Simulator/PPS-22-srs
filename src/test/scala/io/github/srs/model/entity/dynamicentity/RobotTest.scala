@@ -8,7 +8,7 @@ import io.github.srs.model.entity.dynamicentity.action.MovementActionFactory.*
 import io.github.srs.model.entity.dynamicentity.action.SequenceAction.thenDo
 import io.github.srs.model.entity.dynamicentity.action.{ Action, ActionAlg, NoAction }
 import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor.{ applyMovementActions, move }
-import io.github.srs.model.entity.dynamicentity.actuator.WheelMotorTestUtils.calculateMovement
+import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotorTestUtils.calculateMovement
 import io.github.srs.model.entity.dynamicentity.actuator.{ DifferentialWheelMotor, Wheel }
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, Sensor, SensorReading }
