@@ -38,7 +38,7 @@ object RobotActionLogic:
           case Right(validEnv) =>
             IO.pure(s.copy(environment = validEnv))
           case Left(_) =>
-            queue.offer(Event.CollisionDetected(s, robot, updatedRobot)) *> IO.pure(s)
+            queue.offer(Event.CollisionDetected(queue, robot, updatedRobot)) *> IO.pure(s)
       yield newState
   end given
 end RobotActionLogic

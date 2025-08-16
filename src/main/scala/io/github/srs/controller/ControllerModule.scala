@@ -91,6 +91,7 @@ object ControllerModule:
           resume: ResumeLogic[S],
           stop: StopLogic[S],
           robot: RobotActionLogic[S],
+          collision: CollisionLogic[S],
       ): Controller[S] = new ControllerImpl
 
       /**
@@ -104,6 +105,7 @@ object ControllerModule:
           resume: ResumeLogic[S],
           stop: StopLogic[S],
           robot: RobotActionLogic[S],
+          collision: CollisionLogic[S],
       ) extends Controller[S]:
 
         override def start(initialState: S): IO[Unit] =
@@ -123,7 +125,8 @@ object ControllerModule:
               startTime <- IO.pure(System.currentTimeMillis())
               _ <- runBehavior(queue, state)
               events <- queue.tryTakeN(Some(Int.MaxValue))
-              newState <- handleEvents(state, shuffleEvents(queue, state, events))
+              shuffledEvents = shuffleEvents(queue, state, events)
+              newState <- handleEvents(state, shuffledEvents)
               _ <- context.view.render(newState)
               nextState <-
                 if newState.simulationStatus == SimulationStatus.RUNNING then
@@ -166,7 +169,6 @@ object ControllerModule:
         private def shuffleEvents(queue: Queue[IO, Event], state: S, events: Seq[Event]): Seq[Event] =
           val filteredEvents = events.filter:
             case _: Event.RobotAction => true
-            case _: Event.CollisionDetected => true
             case _ => false
           val (shuffledEvents, nextRNG: RNG) = state.simulationRNG generate (filteredEvents shuffle)
           queue.offer(Event.Random(nextRNG)).unsafeRunAndForget()
@@ -187,12 +189,14 @@ object ControllerModule:
               context.model.increment(state)
             case Event.Tick(deltaTime) if state.simulationStatus == SimulationStatus.RUNNING =>
               context.model.tick(state, deltaTime)
+            case Event.TickSpeed(speed) => context.model.tickSpeed(state, speed)
+            case Event.Random(rng) => context.model.random(state, rng)
             case Event.Pause => context.model.pause(state)
             case Event.Resume => context.model.resume(state)
             case Event.Stop => context.model.stop(state)
-            case Event.TickSpeed(speed) => context.model.tickSpeed(state, speed)
-            case Event.Random(rng) => context.model.random(state, rng)
             case Event.RobotAction(queue, robot, action) => context.model.handleRobotAction(state, queue, robot, action)
+            case Event.CollisionDetected(queue, robot, updatedRobot) =>
+              context.model.handleCollision(state, queue, robot, updatedRobot)
             case _ => IO.pure(state)
 
       end ControllerImpl
