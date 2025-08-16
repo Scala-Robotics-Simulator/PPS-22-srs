@@ -5,6 +5,9 @@ import scala.concurrent.duration.FiniteDuration
 import io.github.srs.model.entity.Orientation
 import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor
 
+given DurationToDouble: Conversion[FiniteDuration, Double] with
+  def apply(d: FiniteDuration): Double = d.toMillis / 1000.0
+
 /**
  * DifferentialKinematics provides methods to compute the kinematics of a differential drive robot.
  *
@@ -83,7 +86,7 @@ object DifferentialKinematics:
       dt: FiniteDuration,
   ): ((Double, Double)) => (Double, Double, Orientation) =
     (v, omega) =>
-      val dtSeconds = dt.toSeconds
+      val dtSeconds: Double = dt
       val dx = v * math.cos(theta) * dtSeconds
       val dy = v * math.sin(theta) * dtSeconds
       val newTheta = theta + omega * dtSeconds

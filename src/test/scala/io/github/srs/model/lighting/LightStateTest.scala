@@ -4,6 +4,7 @@ import scala.collection.immutable.ArraySeq
 
 import io.github.srs.model.Cell
 import io.github.srs.model.entity.dynamicentity.Robot
+import io.github.srs.model.entity.dynamicentity.actuator.Actuator
 import io.github.srs.model.entity.staticentity.StaticEntity.{ Light, Obstacle }
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.environment.dsl.CreationDSL.*
@@ -35,10 +36,10 @@ class LightStateTest extends AnyFlatSpec:
   )
 
   private val robot = Robot(
-    robotPos,
-    ShapeType.Circle(0.4),
-    Orientation(0),
-    Seq.empty,
+    position = robotPos,
+    shape = ShapeType.Circle(0.4),
+    orientation = Orientation(0),
+    actuators = Seq.empty: Seq[Actuator[Robot]],
   ).validate.toOption.value
 
   private val env: Environment = Environment(

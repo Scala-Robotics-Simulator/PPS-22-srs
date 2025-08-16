@@ -51,13 +51,6 @@ trait RNG:
   def nextDoubleBetween(min: Double, max: Double, isMaxExcluded: Boolean = true): (Double, RNG)
 
   /**
-   * Generates a random UUID along with the next RNG state.
-   * @return
-   *   a tuple containing a random UUID and the next RNG state.
-   */
-  def nextUUID: (java.util.UUID, RNG)
-
-  /**
    * Generates a random long value along with the next RNG state.
    * @return
    *   a tuple containing a random long and the next RNG state.
@@ -72,6 +65,15 @@ trait RNG:
    *   a tuple containing a random string and the next RNG state.
    */
   def nextString(length: Int): (String, RNG)
+
+  /**
+   * Shuffles a sequence of elements randomly.
+   * @param seq
+   *   the sequence to shuffle.
+   * @return
+   *   a tuple containing the shuffled sequence and the next RNG state.
+   */
+  def shuffle[A](seq: Seq[A]): (Seq[A], RNG)
 
 end RNG
 
@@ -149,15 +151,6 @@ final case class SimpleRNG(seed: Long) extends RNG:
   /**
    * @inheritdoc
    */
-  override def nextUUID: (java.util.UUID, RNG) =
-    val mostSigBits = random.nextLong()
-    val leastSigBits = random.nextLong()
-    val uuid = new java.util.UUID(mostSigBits, leastSigBits)
-    (uuid, nextRNG)
-
-  /**
-   * @inheritdoc
-   */
   override def nextLong: (Long, RNG) =
     val nextLong = random.nextLong()
     (nextLong, nextRNG)
@@ -168,4 +161,12 @@ final case class SimpleRNG(seed: Long) extends RNG:
   override def nextString(length: Int): (String, RNG) =
     val nextString = random.nextString(length)
     (nextString, nextRNG)
+
+  /**
+   * @inheritdoc
+   */
+  override def shuffle[A](seq: Seq[A]): (Seq[A], RNG) =
+    val shuffled = random.shuffle(seq)
+    (shuffled, nextRNG)
+
 end SimpleRNG

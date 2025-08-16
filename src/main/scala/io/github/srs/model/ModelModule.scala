@@ -4,7 +4,8 @@ import scala.concurrent.duration.FiniteDuration
 
 import cats.effect.IO
 import io.github.srs.model.SimulationConfig.{ SimulationSpeed, SimulationStatus }
-import io.github.srs.utils.random.SimpleRNG
+import io.github.srs.model.environment.ValidEnvironment.ValidEnvironment
+import io.github.srs.utils.random.RNG
 
 /**
  * Module that defines the model logic for the Scala Robotics Simulator.
@@ -27,6 +28,11 @@ object ModelModule:
     def elapsedTime: FiniteDuration
 
     /**
+     * The delta time for the simulation, which is the time step used in the simulation.
+     */
+    def dt: FiniteDuration
+
+    /**
      * The current simulation speed.
      */
     def simulationSpeed: SimulationSpeed
@@ -34,13 +40,14 @@ object ModelModule:
     /**
      * The random number generator used for the simulation.
      */
-    def simulationRNG: SimpleRNG
+    def simulationRNG: RNG
 
     /**
      * The current simulation status.
      */
     def simulationStatus: SimulationStatus
 
+    def environment: ValidEnvironment
   end State
 
   /**
@@ -50,7 +57,6 @@ object ModelModule:
    *   the type of the simulation state, which must extend [[State]].
    */
   trait Model[S <: State]:
-
     /**
      * Updates the state of the simulation using the provided function.
      *

@@ -4,12 +4,15 @@ import scala.concurrent.duration.FiniteDuration
 
 import cats.Monad
 import cats.syntax.flatMap.toFlatMapOps
+import cats.syntax.functor.toFunctorOps
+import cats.syntax.foldable.toFoldableOps
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.Point2D.*
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.action.{ Action, ActionAlg }
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Actuator.DifferentialWheelMotor.defaultWheel
+import io.github.srs.model.entity.dynamicentity.action.SequenceAction
 
 /**
  * WheelMotor is an actuator that controls the movement of a robot.
@@ -83,6 +86,7 @@ object DifferentialWheelMotor:
           andThen computePositionAndOrientation(theta, dt)
           andThen { case (dx, dy, newOrientation) =>
             val newPos = Point2D(robot.position.x + dx, robot.position.y + dy)
+            println(s"Moving robot from ${robot.position} to $newPos with orientation $newOrientation")
             (robot at newPos withOrientation newOrientation).validate
           }
       )(this)
@@ -90,9 +94,6 @@ object DifferentialWheelMotor:
 
   end DifferentialWheelMotorImpl
 
-  /**
-   * Extension method to move the robot using its wheel motors.
-   */
   extension (robot: Robot)
 
     /**
@@ -115,9 +116,19 @@ object DifferentialWheelMotor:
      * @return
      *   the robot with updated state after applying the actions.
      */
-    def applyMovementActions[F[_]: Monad](dt: FiniteDuration, action: Action[F])(using
-        a: ActionAlg[F, Robot],
-    ): F[Robot] =
-      action.run(robot).flatMap(_.move(dt))
+    def applyMovementActions[F[_]: Monad](
+        dt: FiniteDuration,
+        action: Action[F],
+    )(using a: ActionAlg[F, Robot]): F[Robot] =
+      action match
+        case seq: SequenceAction[F] =>
+          seq.actions.foldLeftM(robot) { (r, act) =>
+            r.applyMovementActions(dt, act)
+          }
+        case single =>
+          for
+            robotWithNewSpeeds <- single.run(robot)
+            movedRobot <- robotWithNewSpeeds.move(dt)
+          yield movedRobot
   end extension
 end DifferentialWheelMotor
