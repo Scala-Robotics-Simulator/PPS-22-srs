@@ -6,6 +6,17 @@ import java.awt.*
 import io.github.srs.view.components.FieldSpec
 import io.github.srs.view.components.FormPanel
 
+/**
+ * EntityRow is a JPanel that represents a single entity in the configuration view. It allows users to select the type
+ * of entity and fill in its properties.
+ *
+ * @param initialType
+ *   the initial type of the entity
+ * @param fieldSpecsByType
+ *   a map where keys are entity types and values are sequences of FieldSpec defining the fields for each entity type
+ * @param removeRow
+ *   a function to call when the user wants to remove this row from the configuration
+ */
 @SuppressWarnings(
   Array(
     "org.wartremover.warts.AsInstanceOf",
@@ -56,6 +67,19 @@ class EntityRow(
 
   btnRemove.addActionListener(_ => removeRow(this))
 
+  /**
+   * Retrieves the type and values of the entity represented by this row.
+   *
+   * @return
+   *   a tuple containing the entity type and a map of its properties
+   */
   def getEntityType: String = typeCombo.getSelectedItem.asInstanceOf[String]
+
+  /**
+   * Retrieves the values of the properties for the entity represented by this row.
+   *
+   * @return
+   *   a map where keys are property names and values are the corresponding input values
+   */
   def getEntityValues: Map[String, Any] = propertiesPanel.getValues
 end EntityRow

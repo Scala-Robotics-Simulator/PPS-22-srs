@@ -13,13 +13,38 @@ import io.github.srs.model.Simulation
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.environment.dsl.CreationDSL.*
 
+/**
+ * Defines how the configuration view should behave.
+ */
 trait ConfigurationView:
 
+  /**
+   * Initializes the configuration view and displays it to the user.
+   *
+   * @return
+   *   an IO effect that, when run, will return the simulation configuration chosen by the user.
+   */
   def init(): IO[SimulationConfig]
 
+  /**
+   * Closes the configuration view.
+   *
+   * @return
+   *   an IO effect that, when run, will close the view.
+   */
   def close(): IO[Unit]
 
+  /**
+   * Companion object for ConfigurationView that provides a factory method to create an instance of ConfigurationView.
+   */
 object ConfigurationView:
+
+  /**
+   * Factory method to create an instance of ConfigurationView.
+   *
+   * @return
+   *   a new instance of ConfigurationView.
+   */
   def apply(): ConfigurationView = new ConfigurationViewImpl()
 
   private class ConfigurationViewImpl extends ConfigurationView:
