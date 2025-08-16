@@ -5,12 +5,14 @@ import scala.concurrent.duration.FiniteDuration
 import cats.Monad
 import cats.syntax.flatMap.toFlatMapOps
 import cats.syntax.functor.toFunctorOps
+import cats.syntax.foldable.toFoldableOps
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.Point2D.*
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.action.{ Action, ActionAlg }
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Actuator.DifferentialWheelMotor.defaultWheel
+import io.github.srs.model.entity.dynamicentity.action.SequenceAction
 
 /**
  * WheelMotor is an actuator that controls the movement of a robot.
@@ -117,9 +119,15 @@ object DifferentialWheelMotor:
         dt: FiniteDuration,
         action: Action[F],
     )(using a: ActionAlg[F, Robot]): F[Robot] =
-      for
-        robotWithNewSpeeds <- action.run(robot)
-        movedRobot <- robotWithNewSpeeds.move(dt)
-      yield movedRobot
+      action match
+        case seq: SequenceAction[F] =>
+          seq.actions.foldLeftM(robot) { (r, act) =>
+            r.applyMovementActions(dt, act)
+          }
+        case single =>
+          for
+            robotWithNewSpeeds <- single.run(robot)
+            movedRobot <- robotWithNewSpeeds.move(dt)
+          yield movedRobot
   end extension
 end DifferentialWheelMotor

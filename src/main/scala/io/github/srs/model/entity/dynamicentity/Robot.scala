@@ -7,13 +7,11 @@ import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.action.{ Action, ActionAlg }
 import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, DifferentialWheelMotor }
 import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Rule
+import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.withActuators
 import io.github.srs.model.entity.dynamicentity.sensor.{ Sensor, SensorReadings }
 import io.github.srs.model.environment.Environment
+import io.github.srs.utils.EqualityGivenInstances.given
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.*
-import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.withActuators
-
-given CanEqual[Robot, Robot] = CanEqual.derived
-given CanEqual[UUID, UUID] = CanEqual.derived
 
 /**
  * Represents a robot entity in the simulation.
@@ -33,9 +31,22 @@ final case class Robot(
     override val behavior: Rule[IO, SensorReadings, Action[IO]] = defaultBehavior,
 ) extends DynamicEntity:
 
+  // TODO: serialize the id
+  //  override def equals(obj: Any): Boolean = obj match
+  //    case that: Robot => this.id == that.id
+  //    case _ => false
+
   override def equals(obj: Any): Boolean = obj match
-    case that: Robot => this.id == that.id
+    case that: Robot =>
+      this.position == that.position &&
+      this.shape == that.shape &&
+      this.orientation == that.orientation &&
+      this.actuators == that.actuators &&
+      this.sensors == that.sensors &&
+      this.behavior == that.behavior
     case _ => false
+
+end Robot
 
 object Robot:
 
