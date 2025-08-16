@@ -28,6 +28,11 @@ object ModelModule:
     def elapsedTime: FiniteDuration
 
     /**
+     * The delta time for the simulation, which is the time step used in the simulation.
+     */
+    def dt: FiniteDuration
+
+    /**
      * The current simulation speed.
      */
     def simulationSpeed: SimulationSpeed
@@ -52,7 +57,6 @@ object ModelModule:
    *   the type of the simulation state, which must extend [[State]].
    */
   trait Model[S <: State]:
-
     /**
      * Updates the state of the simulation using the provided function.
      *
