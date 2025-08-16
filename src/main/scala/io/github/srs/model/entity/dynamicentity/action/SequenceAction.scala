@@ -16,7 +16,7 @@ import io.github.srs.model.entity.dynamicentity.DynamicEntity
  * @tparam E
  *   the type of dynamic entity on which the action will be executed, extending DynamicEntity.
  */
-private final case class SequenceAction[F[_]: Monad](actions: List[Action[F]]) extends Action[F]:
+final case class SequenceAction[F[_]: Monad](actions: List[Action[F]]) extends Action[F]:
 
   /**
    * Runs the sequence of actions on the given dynamic entity.
