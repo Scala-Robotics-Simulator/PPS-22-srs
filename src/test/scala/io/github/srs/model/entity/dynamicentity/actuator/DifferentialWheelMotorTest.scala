@@ -5,7 +5,7 @@ import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
 import cats.Id
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor.move
-import io.github.srs.model.entity.dynamicentity.actuator.WheelMotorTestUtils.calculateMovement
+import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotorTestUtils.calculateMovement
 import io.github.srs.model.entity.dynamicentity.actuator.Wheel
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import org.scalatest.OptionValues.convertOptionToValuable
@@ -13,12 +13,12 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 
-class WheelMotorTest extends AnyFlatSpec with Matchers:
+class DifferentialWheelMotorTest extends AnyFlatSpec with Matchers:
 
   val deltaTime: FiniteDuration = FiniteDuration(100, MILLISECONDS)
   val wheelRadius: Double = 0.5
   val shape: ShapeType.Circle = ShapeType.Circle(1.0)
-  val initialPosition: Point2D = Point2D(0.0, 0.0)
+  val initialPosition: Point2D = Point2D(3.0, 1.0)
   val initialOrientation: Orientation = Orientation(0.0)
 
   "WheelMotor" should "update its position based on the wheel speeds" in:
@@ -58,4 +58,4 @@ class WheelMotorTest extends AnyFlatSpec with Matchers:
 
     val expectedMovement: (Point2D, Orientation) = calculateMovement(deltaTime, robot)
     movedRobot.orientation.degrees shouldBe expectedMovement._2.degrees
-end WheelMotorTest
+end DifferentialWheelMotorTest

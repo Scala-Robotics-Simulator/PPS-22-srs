@@ -12,7 +12,7 @@ import io.github.srs.model.entity.dynamicentity.actuator.DifferentialKinematics.
 import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.{ at, withOrientation }
 
-object WheelMotorTestUtils:
+object DifferentialWheelMotorTestUtils:
 
   def calculateMovement(dt: FiniteDuration, robot: Robot): (Point2D, Orientation) =
     robot.actuators.collectFirst { case wm: DifferentialWheelMotor => wm } match
@@ -32,4 +32,4 @@ object WheelMotorTestUtils:
         )(wm)
         (expectedRobot.position, expectedRobot.orientation)
       case None => (robot.position, robot.orientation)
-end WheelMotorTestUtils
+end DifferentialWheelMotorTestUtils
