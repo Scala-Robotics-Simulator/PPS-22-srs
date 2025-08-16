@@ -1,6 +1,6 @@
 package io.github.srs.utils
 
-import cats.Id
+import cats.effect.IO
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.action.Action
@@ -99,7 +99,7 @@ object SimulationDefaults:
       // TODO: Add light sensors when implemented
       val stdLightSensors: Vector[Sensor[Robot, Environment]] = Vector.empty
 
-      val defaultBehavior: Rule[Id, SensorReadings, Action[Id]] = Rules.alwaysForward[Id]
+      val defaultBehavior: Rule[IO, SensorReadings, Action[IO]] = Rules.alwaysForward[IO]
     end Robot
   end DynamicEntity
 end SimulationDefaults
