@@ -1,6 +1,7 @@
 package io.github.srs.model.entity.dynamicentity.sensor
 
 import cats.{ Id, Monad }
+import cats.effect.IO
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
 import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.actuator.Actuator
@@ -30,7 +31,7 @@ class SensorTest extends AnyFlatSpec with should.Matchers:
       override val orientation: Orientation,
       override val actuators: Seq[Actuator[Dummy]],
       override val sensors: Vector[Sensor[Dummy, Environment]],
-      override val behavior: Rule[Id, SensorReadings, Action[Id]] = Rules.alwaysForward,
+      override val behavior: Rule[IO, SensorReadings, Action[IO]] = Rules.alwaysForward,
   ) extends DynamicEntity:
     def act[F[_]: Monad](): F[Dummy] = Monad[F].pure(this)
 

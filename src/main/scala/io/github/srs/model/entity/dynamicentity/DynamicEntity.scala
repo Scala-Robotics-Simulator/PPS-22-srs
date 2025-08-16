@@ -1,6 +1,6 @@
 package io.github.srs.model.entity.dynamicentity
 
-import cats.Id
+import cats.effect.IO
 import io.github.srs.model.entity.Entity
 import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.actuator.Actuator
@@ -26,4 +26,4 @@ trait DynamicEntity extends Entity:
    */
   def sensors: Vector[Sensor[? <: DynamicEntity, ? <: Environment]]
 
-  def behavior: Rule[Id, SensorReadings, Action[Id]]
+  def behavior: Rule[IO, SensorReadings, Action[IO]]
