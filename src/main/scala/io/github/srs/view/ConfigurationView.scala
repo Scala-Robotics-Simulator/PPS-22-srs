@@ -4,6 +4,8 @@ import java.awt.{ BorderLayout, Dimension, FlowLayout }
 import javax.swing.*
 
 import cats.effect.IO
+import cats.effect.unsafe.implicits.global
+import fs2.text
 import io.github.srs.config.yaml.parser.Decoder
 import io.github.srs.config.{ ConfigResult, SimulationConfig }
 import io.github.srs.model.Simulation
@@ -14,6 +16,10 @@ import io.github.srs.model.validation.DomainError
 import io.github.srs.utils.chaining.Pipe.given
 import io.github.srs.view.components.*
 import io.github.srs.view.components.configuration.EntitiesPanel
+import javax.swing.filechooser.FileNameExtensionFilter
+import fs2.io.file.Files
+import io.github.srs.config.yaml.YamlManager
+import fs2.io.file.Path
 
 /**
  * Defines how the configuration view should behave.
@@ -53,38 +59,38 @@ object ConfigurationView:
     private val frame = new JFrame("Scala Robotics Simulator - Configuration")
 
     private val simulationFields = Seq(
-      FieldSpec("duration", "Duration (duration)", TextField(10)),
-      FieldSpec("seed", "Seed (seed)", TextField(10)),
+      FieldSpec("duration", "Duration", TextField(10)),
+      FieldSpec("seed", "Seed", TextField(10)),
     )
 
     private val environmentFields = Seq(
-      FieldSpec("width", "Width (width)", TextField(5)),
-      FieldSpec("height", "Height (height)", TextField(5)),
+      FieldSpec("width", "Width", TextField(5)),
+      FieldSpec("height", "Height", TextField(5)),
     )
 
     private val baseFieldSpec = Seq(
-      FieldSpec("x", "X position (x)", TextField(3)),
-      FieldSpec("y", "Y position (y)", TextField(3)),
+      FieldSpec("x", "X position", TextField(3)),
+      FieldSpec("y", "Y position", TextField(3)),
     )
 
     private val baseAndOrient =
-      baseFieldSpec :+ FieldSpec("orientation", "Orientation (degrees) (orientation)", TextField(3))
+      baseFieldSpec :+ FieldSpec("orientation", "Orientation (degrees)", TextField(3))
 
     private val entityFieldSpecs: Map[String, Seq[FieldSpec]] = Map(
       "Robot" -> (baseAndOrient ++ Seq(
-        FieldSpec("radius", "Radius (meters) (radius)", TextField(2)),
-        FieldSpec("speed", "Speed (speed)", TextField(3)),
-        FieldSpec("proxSens", "With proximity sensors (proxSens)", CheckBox(true)),
-        FieldSpec("lightSens", "With light sensors (lightSens)", CheckBox(true)),
+        FieldSpec("radius", "Radius (meters)", TextField(2)),
+        FieldSpec("speed", "Speed", TextField(3)),
+        FieldSpec("proxSens", "With proximity sensors", CheckBox(true)),
+        FieldSpec("lightSens", "With light sensors", CheckBox(true)),
       )),
       "Obstacle" -> (baseAndOrient ++ Seq(
-        FieldSpec("width", "Width (width)", TextField(8)),
-        FieldSpec("height", "Height (height)", TextField(5)),
+        FieldSpec("width", "Width", TextField(8)),
+        FieldSpec("height", "Height", TextField(5)),
       )),
       "Light" -> (baseFieldSpec ++ Seq(
-        FieldSpec("illumination", "Illumination radius (illumination)", TextField(3)),
-        FieldSpec("intensity", "Intensity (intensity)", TextField(3)),
-        FieldSpec("attenuation", "Attenuation (attenuation)", TextField(3)),
+        FieldSpec("illumination", "Illumination radius", TextField(3)),
+        FieldSpec("intensity", "Intensity", TextField(3)),
+        FieldSpec("attenuation", "Attenuation", TextField(3)),
       )),
     )
 
@@ -95,6 +101,20 @@ object ConfigurationView:
     private val loadButton = new JButton("Load")
     private val saveButton = new JButton("Save")
     private val startButton = new JButton("Start")
+
+    loadButton.addActionListener(_ =>
+      val chooser = new JFileChooser()
+      chooser.setFileFilter(new FileNameExtensionFilter("YAML files", "yml", "yaml"))
+      val result = chooser.showOpenDialog(frame)
+      if result == JFileChooser.APPROVE_OPTION then
+        val path = Path.fromNioPath(java.nio.file.Paths.get(chooser.getSelectedFile.toURI))
+        val yamlContent = Files[IO].readAll(path).through(text.utf8.decode).compile.string.unsafeRunSync()
+        val res = YamlManager.parse[IO](yamlContent).unsafeRunSync()
+        res match
+          case Left(errors) =>
+            JOptionPane.showMessageDialog(frame, s"Parsing failed with errors: ${errors.mkString(", ")}")
+          case Right(config) => storeConfig(config),
+    )
 
     def init(): IO[SimulationConfig] =
       frame.setMinimumSize(new Dimension(700, 500))
@@ -127,16 +147,33 @@ object ConfigurationView:
       frame.setVisible(true)
 
       IO.async_[SimulationConfig] { cb =>
-        // set up GUI and event listener
         startButton.addActionListener { _ =>
           loadSimulation() match
-            case Left(errors) => JOptionPane.showMessageDialog(frame, errors.fold("")((acc, err) => s"$acc$err \n"))
+            case Left(errors) =>
+              JOptionPane.showMessageDialog(
+                frame,
+                errors.mkString("\n"),
+                "Invalid simulation value(s)",
+                JOptionPane.ERROR_MESSAGE,
+              )
             case Right(sim) =>
               loadEnvironment() match
-                case Left(errors) => JOptionPane.showMessageDialog(frame, errors.fold("")((acc, err) => s"$acc$err \n"))
+                case Left(errors) =>
+                  JOptionPane.showMessageDialog(
+                    frame,
+                    errors.mkString("\n"),
+                    "Invalid environment value(s)",
+                    JOptionPane.ERROR_MESSAGE,
+                  )
                 case Right(env) =>
                   loadConfig(sim, env) match
-                    case Left(error) => JOptionPane.showMessageDialog(frame, error.errorMessage);
+                    case Left(error) =>
+                      JOptionPane.showMessageDialog(
+                        frame,
+                        error.errorMessage,
+                        "Invalid configuration",
+                        JOptionPane.ERROR_MESSAGE,
+                      )
                     case Right(cfg) => cb(Right[Throwable, SimulationConfig](cfg))
         }
       }
@@ -148,7 +185,6 @@ object ConfigurationView:
         simulation: Simulation,
         environment: Environment,
     ): Either[DomainError, SimulationConfig] =
-      // TODO: update creating the correct simulation config
       for env <- environment.validate
       yield SimulationConfig(simulation, env)
 
@@ -171,5 +207,18 @@ object ConfigurationView:
         entities <- entitiesPanel.getEntities
       yield environment withWidth width withHeight height containing entities.toSet
 
+    private def storeConfig(config: SimulationConfig): Unit =
+      println(s"Config loaded: $config")
+      val simulationMap = Map(
+        "duration" -> config.simulation.duration.map(_.toString()).getOrElse(""),
+        "seed" -> config.simulation.seed.map(_.toString()).getOrElse(""),
+      )
+      simulationPanel.setValues(simulationMap)
+      val environmentMap = Map(
+        "width" -> config.environment.width.toString,
+        "height" -> config.environment.height.toString,
+      )
+      environmentPanel.setValues(environmentMap)
   end ConfigurationViewImpl
+
 end ConfigurationView
