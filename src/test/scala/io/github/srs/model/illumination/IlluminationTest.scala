@@ -1,5 +1,7 @@
 package io.github.srs.model.illumination
 
+import java.util.concurrent.atomic.AtomicReference
+
 import scala.collection.immutable.ArraySeq
 
 import io.github.srs.model.entity.*
@@ -10,13 +12,12 @@ import io.github.srs.model.environment.Environment
 import io.github.srs.model.environment.dsl.CreationDSL.*
 import io.github.srs.model.illumination.engine.{ FovEngine, SquidLibFovEngine }
 import io.github.srs.model.illumination.model.{ GridDims, ScaleFactor }
+import io.github.srs.model.illumination.utils.StaticSignature
 import org.scalatest.OptionValues.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-/**
- * Tests for [[Illumination]], which provides methods for preparing static lighting data,
- */
+/** Tests for [[Illumination]]: statics prep, reuse, and FoV wiring. */
 final class IlluminationTest extends AnyFlatSpec with Matchers:
 
   /** Raw data structure to capture FOV computation parameters */
@@ -29,7 +30,7 @@ final class IlluminationTest extends AnyFlatSpec with Matchers:
 
   /** Tapping FOV engine that captures the parameters used in the FOV computation */
   private final class TappingFov(delegate: FovEngine) extends FovEngine:
-    private val ref = new java.util.concurrent.atomic.AtomicReference[Option[Capture]](None)
+    private val ref = new AtomicReference[Option[Capture]](None)
     def captured: Option[Capture] = ref.get()
 
     /** Compute method that captures the parameters used in the FOV computation */
@@ -37,9 +38,6 @@ final class IlluminationTest extends AnyFlatSpec with Matchers:
       ref.set(Some(Capture(grid, sx, sy, r)))
       delegate.compute(grid)(sx, sy, r)
 
-  /**
-   * Test constants and environment setup
-   */
   private object C:
     val SF: ScaleFactor = ScaleFactor.validate(1).toOption.value // 1 cell == 1 m
     val EnvW = 3
@@ -78,7 +76,7 @@ final class IlluminationTest extends AnyFlatSpec with Matchers:
 
   private given ScaleFactor = C.SF
 
-  "Lighting" should "compute dims, static matrix, and stable signature" in:
+  "Illumination" should "compute dims, static matrix, and a stable signature" in:
     val env = C.env3x3()
     val prepared = Illumination.prepareStatics(env, summon[ScaleFactor])
     val again = Illumination.prepareStatics(env, summon[ScaleFactor])
@@ -87,7 +85,8 @@ final class IlluminationTest extends AnyFlatSpec with Matchers:
       prepared.dims == GridDims(C.EnvW, C.EnvH) &&
         prepared.staticRes.length == prepared.dims.widthCells &&
         prepared.staticRes.head.length == prepared.dims.heightCells &&
-        prepared.staticSig == again.staticSig
+        prepared.staticSig == again.staticSig &&
+        prepared.staticSig == StaticSignature.of(env, summon[ScaleFactor], prepared.dims)
 
     ok shouldBe true
 
@@ -138,10 +137,11 @@ final class IlluminationTest extends AnyFlatSpec with Matchers:
 
     val field = Illumination.field(env, prepared, fov, includeDynamic = true)
     val cap = fov.captured.value
-    val ones = for
-      x <- cap.grid.indices
-      y <- cap.grid.head.indices
-    yield cap.grid(x)(y)
+    val ones =
+      for
+        x <- cap.grid.indices
+        y <- cap.grid.head.indices
+      yield cap.grid(x)(y)
 
     val ok =
       (field.width, field.height) == (prepared.dims.widthCells, prepared.dims.heightCells) &&

@@ -1,7 +1,6 @@
 package io.github.srs.model.illumination
 
 import scala.collection.immutable.ArraySeq
-import scala.util.hashing.MurmurHash3
 
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.staticentity.StaticEntity
@@ -9,6 +8,7 @@ import io.github.srs.model.environment.Environment
 import io.github.srs.model.illumination.engine.FovEngine
 import io.github.srs.model.illumination.model.*
 import io.github.srs.model.illumination.raster.OcclusionRaster
+import io.github.srs.model.illumination.utils.StaticSignature
 
 /**
  * The [[Illumination]] object provides methods to compute light fields in a grid-based environment. It prepares static
@@ -21,7 +21,7 @@ object Illumination:
    * Immutable bundle of precomputed, static data for light-field computation.
    *
    * @param scale
-   *   envirnoment→grid scale factor (cells per meter)
+   *   environment→grid scale factor (cells per meter)
    * @param dims
    *   grid dimensions (in cells) derived from the current environment and scale
    * @param staticRes
@@ -50,7 +50,7 @@ object Illumination:
     given ScaleFactor = scale
     val dims = GridDims.from(env)(scale)
     val staticRes = OcclusionRaster.staticMatrix(env)
-    val sig = staticSignature(env, scale, dims)
+    val sig = StaticSignature.of(env, scale, dims)
     Prepared(scale, dims, staticRes, sig)
 
   /**
@@ -66,15 +66,13 @@ object Illumination:
    *   a [[Prepared]] instance, either reused or rebuilt
    */
   def reuseOrRebuild(prev: Prepared, env: Environment): Prepared =
-    val now = staticSignature(env, prev.scale, prev.dims)
+    val now = StaticSignature.of(env, prev.scale, prev.dims)
     if now == prev.staticSig then prev else prepareStatics(env, prev.scale)
 
   /**
    * Compute the light field for the environment using the supplied FoV engine.
    *
-   * Static occlusions are taken from the [[Prepared]] cache.
-   *
-   * dynamic occlusions are optionally overlaid.
+   * Static occlusions are taken from the [[Prepared]] cache, dynamic occlusions are optionally overlaid.
    *
    * @param env
    *   the environment containing entities and obstacles
@@ -98,7 +96,7 @@ object Illumination:
     val dims = prepared.dims
 
     // Combine static and dynamic occlusion grids if dynamic entities are included
-    val resistanceGrid =
+    val OcclusionGridGrid =
       Option
         .when(includeDynamic)(OcclusionRaster.dynamicMatrix(env))
         .fold(prepared.staticRes)(dyn => OcclusionRaster.overlay(prepared.staticRes, dyn))
@@ -112,7 +110,7 @@ object Illumination:
       lights.map { l =>
         val (sx, sy) = Cell.toCellFloor(l.position)
         val radius = Cell.radiusCells(l.illuminationRadius).toDouble
-        val base = fov.compute(resistanceGrid)(sx, sy, radius)
+        val base = fov.compute(OcclusionGridGrid)(sx, sy, radius)
         val k = clamp01(l.intensity)
         if k == 1.0 then base
         else if k == 0.0 then zeroField(dims)
@@ -173,25 +171,4 @@ object Illumination:
   private def combineSaturating(dims: GridDims)(fields: Vector[ArraySeq[Double]]): ArraySeq[Double] =
     fields.reduceOption((a, b) => a.lazyZip(b).map(satAdd)).getOrElse(zeroField(dims))
 
-  /**
-   * Compute a hash signature for the static environment to decide caching and reuse.
-   *
-   * @param env
-   *   the environment containing static entities
-   * @param scale
-   *   the scale factor for the grid
-   * @param dims
-   *   the grid dimensions
-   * @return
-   *   a hash signature for the static environment
-   */
-  private def staticSignature(env: Environment, scale: ScaleFactor, dims: GridDims): Int =
-    val items =
-      env.entities.collect {
-        case o: StaticEntity.Obstacle =>
-          ("O", o.position._1, o.position._2, o.orientation.degrees, o.width, o.height)
-        case b: StaticEntity.Boundary =>
-          ("B", b.position._1, b.position._2, b.orientation.degrees, b.width, b.height)
-      }.toIndexedSeq.sorted
-    MurmurHash3.productHash((scale, dims.widthCells, dims.heightCells, MurmurHash3.seqHash(items)))
 end Illumination
