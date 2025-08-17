@@ -13,7 +13,7 @@ import io.github.srs.model.illumination.model.GridDims
  * @param data
  *   The light intensity values stored in a row-major order (x fast) flattened array.
  */
-final case class LightField(dims: GridDims, data: ArraySeq[Double]):
+final case class LightField(dims: GridDims, data: ArraySeq[Double]) derives CanEqual:
 
   /**
    * Gets the width of the grid in cells.
