@@ -59,6 +59,32 @@ class FormPanel(title: String, fields: Seq[FieldSpec]) extends JPanel(new GridBa
       case (key, cb: JComboBox[?]) => key -> cb.getSelectedItem
       case (key, chk: JCheckBox) => key -> chk.isSelected
       case (key, comp: JComponent) =>
-        println(s"got for key $key component ${comp.toString()}, unable to get the value, exiting...")
-        sys.exit(1)
+        sys.error(s"Unsupported component type for key $key: ${comp.getClass}")
+
+  def setValue(key: String, value: String | Boolean): Unit =
+    inputs
+      .get(key)
+      .foreach:
+        case tf: JTextField =>
+          value match
+            case _: Boolean =>
+              JOptionPane.showMessageDialog(
+                this,
+                s"Cannot set a Boolean value to a text field for key '$key'.",
+                "Invalid Value",
+                JOptionPane.ERROR_MESSAGE,
+              )
+            case s: String => tf.setText(s)
+        case cb: JComboBox[?] => cb.setSelectedItem(value)
+        case chk: JCheckBox =>
+          val b = value match
+            case bool: Boolean => bool
+            case s: String => s.toBooleanOption.getOrElse(false)
+          chk.setSelected(b)
+        case comp =>
+          sys.error(s"Unsupported component type for key $key: ${comp.getClass}")
+
+  /** Bulk set multiple fields */
+  def setValues(values: Map[String, String | Boolean]): Unit =
+    values.foreachEntry { case (k, v) => setValue(k, v) }
 end FormPanel
