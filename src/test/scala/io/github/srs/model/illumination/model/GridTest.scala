@@ -1,9 +1,9 @@
 package io.github.srs.model.illumination.model
 
+import scala.collection.immutable.ArraySeq
+
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-
-import scala.collection.immutable.ArraySeq
 
 /** Tests for the Grid model, which provides utility methods for creating and manipulating grids of values. */
 final class GridTest extends AnyFlatSpec with Matchers:
@@ -19,7 +19,7 @@ final class GridTest extends AnyFlatSpec with Matchers:
     private val OverH = 1
     // Base grid values
     val B00 = 0.2
-    val B10 = 0.3
+    private val B10 = 0.3
     val B21 = 0.7
     val O10 = 0.9
     // Overlay grid values
