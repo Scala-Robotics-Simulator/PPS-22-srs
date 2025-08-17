@@ -23,8 +23,6 @@ object LightMap:
   /**
    * Create a stateless [[LightMap]] facade that computes from the current environment
    *
-   * The cache is invalidated when static entities geometry changes.
-   *
    * @param fov
    *   The Field of View (FoV) engine used for light propagation.
    * @param scale
@@ -35,7 +33,7 @@ object LightMap:
    *   A new [[LightMap]] instance wrapped in the effect type `F`.
    */
   def create[F[_]](fov: FovEngine, scale: ScaleFactor)(using F: Sync[F]): F[LightMap[F]] =
-    F.pure((env: Environment, includeDynamic: Boolean) =>
+    F.pure[LightMap[F]]((env: Environment, includeDynamic: Boolean) =>
       F.delay {
         val prepared = Illumination.prepareStatics(env, scale)
         Illumination.field(env, prepared, fov, includeDynamic)
