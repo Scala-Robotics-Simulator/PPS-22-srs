@@ -6,8 +6,9 @@ import io.circe.syntax.*
 import io.circe.{ Encoder, Json }
 import io.github.srs.config.yaml.serializer.encoders.given
 import io.github.srs.model.entity.dynamicentity.Robot
-import io.github.srs.model.entity.dynamicentity.actuator.Actuator
-import io.github.srs.model.entity.dynamicentity.sensor.Sensor
+import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.stdProximitySensors
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.stdLightSensors
 
 /**
  * Encoders for DynamicEntity types.
@@ -20,33 +21,36 @@ object DynamicEntity:
    *   An Encoder that serializes DynamicEntity instances to JSON.
    */
   given Encoder[Robot] = (robot: Robot) =>
-    val baseFields = List(
-      "id" -> robot.id.asJson,
-      "position" -> robot.position.asJson,
-      "radius" -> robot.shape.radius.asJson,
-      "orientation" -> robot.orientation.degrees.asJson,
-    )
+    val dwt = robot.actuators.collectFirst { case dwt: DifferentialWheelMotor =>
+      dwt
+    }
+    val speeds = dwt.map(d => (d.left.speed, d.right.speed))
+    speeds match
+      case Some(value) if value._1 != value._2 =>
+        println(
+          s"WARNING: encoding DifferentialWheelMotor with speeds (${value._1}, ${value._2}) the serializer only isn't able to correctly serialize them and will only use the left speed",
+        )
+      case _ => ()
 
-    val sensorsFields = robot.sensors.toList.map(Encoder[Sensor[?, ?]].apply(_)).asJson
+    val withProximitySensors = stdProximitySensors.forall(robot.sensors.contains)
+    val withLightSensors = stdLightSensors.forall(robot.sensors.contains)
 
-    val actuatorsFields = robot.actuators.toList.map(Encoder[Actuator[?]].apply(_)).asJson
-
-    if robot.sensors.isEmpty && robot.actuators.isEmpty
-    then Json.obj(baseFields*)
-    else if robot.sensors.isEmpty then
-      Json.obj(
-        baseFields ++ List("actuators" -> actuatorsFields)*,
+    if robot.sensors.diff(stdProximitySensors ++ stdLightSensors).sizeIs > 0 then
+      println(
+        "WARNING: encoding robot with custom sensors, those will be lost during the serialization",
       )
-    else if robot.actuators.isEmpty then
-      Json.obj(
-        baseFields ++ List("sensors" -> sensorsFields)*,
+
+    Json
+      .obj(
+        "id" -> robot.id.asJson,
+        "position" -> robot.position.asJson,
+        "radius" -> robot.shape.radius.asJson,
+        "orientation" -> robot.orientation.degrees.asJson,
+        "withProximitySensors" -> withProximitySensors.asJson,
+        "withLightSensors" -> withLightSensors.asJson,
       )
-    else
-      Json.obj(
-        baseFields ++ List(
-          "sensors" -> sensorsFields,
-          "actuators" -> actuatorsFields,
-        )*,
+      .deepMerge(
+        speeds.map("speed" -> _._1.asJson).toList.toMap.asJson,
       )
 
 end DynamicEntity

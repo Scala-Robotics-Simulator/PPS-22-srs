@@ -1,25 +1,23 @@
 package io.github.srs.config
 
 import java.nio.file.Files as JNIOFiles
-
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
-import fs2.io.file.{ Files, Path }
+import fs2.io.file.{Files, Path}
 import io.github.srs.model.Simulation
 import io.github.srs.model.entity.ShapeType.Circle
 import io.github.srs.model.entity.dynamicentity.Robot
-import io.github.srs.model.entity.dynamicentity.actuator.dsl.DifferentialWheelMotorDsl.*
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor
-import io.github.srs.model.entity.dynamicentity.sensor.dsl.ProximitySensorDsl.*
 import io.github.srs.model.entity.staticentity.dsl.LightDsl.*
 import io.github.srs.model.entity.staticentity.dsl.ObstacleDsl.*
-import io.github.srs.model.entity.{ Orientation, Point2D }
+import io.github.srs.model.entity.{Orientation, Point2D}
 import io.github.srs.model.environment.dsl.CreationDSL.*
 import io.github.srs.utils.SimulationDefaults
 import org.scalatest.OptionValues.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.{stdLightSensors, stdProximitySensors}
 
 class YamlConfigManagerTest extends AnyFlatSpec with Matchers:
   given CanEqual[Sensor[?, ?], Sensor[?, ?]] = CanEqual.derived
@@ -41,26 +39,21 @@ class YamlConfigManagerTest extends AnyFlatSpec with Matchers:
     val _ = config.environment.entities.exists(_.position == Point2D(2, 2)) should be(true)
     val _ = config.environment.entities.exists(e =>
       e.position == Point2D(3, 1) && (e match
-        case Robot(_, _, _, _, _, sensors, _) =>
-          sensors == SimulationDefaults.DynamicEntity.Robot.stdProximitySensors ++ SimulationDefaults.DynamicEntity.Robot.stdLightSensors),
+        case Robot(_, _, _, _,_,  sensors, _) =>
+          sensors == stdProximitySensors ++ stdLightSensors),
     ) should be(true)
 
   "YamlConfigManager" should "save the configuration correctly" in:
     val obstacleId = SimulationDefaults.StaticEntity.Obstacle.defaultId
     val lightId = SimulationDefaults.StaticEntity.Light.defaultId
     val robotId = SimulationDefaults.DynamicEntity.Robot.defaultId
-    val dwm = differentialWheelMotor withLeftSpeed 2.0 withRightSpeed 3.0
-    val ps = proximitySensor withOffset Orientation(90.0) withRange 1.5
     val orientation = Orientation(0.0)
     val l =
-      light withId lightId at (
-        1.0,
-        1.0,
-      ) withIntensity 0.5 withAttenuation 1.0 withIlluminationRadius 8.0 withOrientation orientation
+      light withId lightId at (1.0, 1.0) withIntensity 0.5 withAttenuation 1.0 withIlluminationRadius 8.0 withOrientation orientation
     val o = obstacle withId obstacleId at (2.0, 2.0) withWidth 1.0 withHeight 1.0 withOrientation orientation
-    val r =
-      robot withId robotId at (4.0, 4.0) withOrientation orientation withSpeed 1.0 withShape Circle(0.5) containing
-        dwm and ps
+    val r = robot withId robotId at (4.0, 4.0) withOrientation orientation withSpeed 1.0 withShape Circle(
+      0.5,
+    ) withSpeed 2.0 withSensors (stdProximitySensors ++ stdLightSensors)
 
     val env = environment containing l and o and r
 
@@ -90,20 +83,12 @@ class YamlConfigManagerTest extends AnyFlatSpec with Matchers:
         |      orientation: 0.0
         |  - robot:
         |      id: 00000000-0000-0000-0000-000000000002
-        |      sensors:
-        |      - proximitySensor:
-        |          offset: 90.0
-        |          range: 1.5
-        |      actuators:
-        |      - differentialWheelMotor:
-        |          leftSpeed: 1.0
-        |          rightSpeed: 1.0
-        |      - differentialWheelMotor:
-        |          leftSpeed: 2.0
-        |          rightSpeed: 3.0
         |      orientation: 0.0
         |      radius: 0.5
         |      position: [4.0, 4.0]
+        |      speed: 2.0
+        |      withProximitySensors: true
+        |      withLightSensors: true
         |""".stripMargin
 
     val path = Path.fromNioPath(JNIOFiles.createTempFile("test", ".yml"))
