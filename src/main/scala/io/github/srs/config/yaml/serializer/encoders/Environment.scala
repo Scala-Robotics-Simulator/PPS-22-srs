@@ -25,7 +25,7 @@ object Environment:
       "height" -> environment.height.asJson,
     )
     val entitiesFields = environment.entities.filterNot {
-      case Boundary(_, _, _, _) =>
+      case Boundary(_, _, _, _, _) =>
         true // Boundary entities are not serialized
       case _ => false
     }.toList.map(_.asJson).asJson

@@ -1,5 +1,7 @@
 package io.github.srs.model.entity.dynamicentity.dsl
 
+import java.util.UUID
+
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.actuator.dsl.DifferentialWheelMotorDsl.{ differentialWheelMotor, ws }
 import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, DifferentialWheelMotor }
@@ -29,6 +31,9 @@ object RobotDsl:
 
   /** Extension methods for Robot to allow DSL-like configuration. */
   extension (robot: Robot)
+
+    infix def withId(id: UUID): Robot =
+      robot.copy(id = id)
 
     /**
      * Sets the position of the robot.

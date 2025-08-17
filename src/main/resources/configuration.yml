@@ -6,16 +6,19 @@ environment:
   height: 10
   entities:
     - obstacle:
+        id: 00000000-0000-0000-0000-000000000000
         position: [5, 5]
         orientation: 0.0
         width: 1.0
         height: 1.0
     - light:
+        id: 00000000-0000-0000-0000-000000000001
         position: [2, 2]
         illuminationRadius: 5.0
         intensity: 1.0
         attenuation: 1.0
     - robot:
+        id: 00000000-0000-0000-0000-000000000002
         position: [3, 1]
         orientation: 90.0
         radius: 0.5
@@ -23,6 +26,7 @@ environment:
         withProximitySensors: true
         withLightSensors: false
     - robot:
+        id: 00000000-0000-0000-0000-000000000003
         position: [7,7]
         orientation: 0.0
         radius: 0.5

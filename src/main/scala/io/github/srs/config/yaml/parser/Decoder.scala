@@ -1,5 +1,7 @@
 package io.github.srs.config.yaml.parser
 
+import java.util.UUID
+
 import io.github.srs.config.{ ConfigError, ConfigResult }
 
 /**
@@ -62,6 +64,13 @@ object Decoder:
     def decode(field: String, value: Any): ConfigResult[String] = value match
       case s: String => Right[Seq[ConfigError], String](s)
       case _ => Left[Seq[ConfigError], String](Seq(ConfigError.InvalidType(field, "String")))
+
+  given Decoder[UUID] with
+
+    def decode(field: String, value: Any): ConfigResult[UUID] =
+      value match
+        case s: String => Right[Seq[ConfigError], UUID](UUID.fromString(s))
+        case _ => Left[Seq[ConfigError], UUID](Seq(ConfigError.InvalidType(field, "UUID")))
 
   given [A](using decoder: Decoder[A]): Decoder[List[A]] with
 

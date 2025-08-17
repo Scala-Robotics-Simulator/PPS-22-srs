@@ -21,6 +21,7 @@ object DynamicEntity:
    */
   given Encoder[Robot] = (robot: Robot) =>
     val baseFields = List(
+      "id" -> robot.id.asJson,
       "position" -> robot.position.asJson,
       "radius" -> robot.shape.radius.asJson,
       "orientation" -> robot.orientation.degrees.asJson,

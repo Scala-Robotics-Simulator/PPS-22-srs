@@ -1,5 +1,7 @@
 package io.github.srs.model.entity.staticentity.dsl
 
+import java.util.UUID
+
 import io.github.srs.model.entity.staticentity.StaticEntity.Obstacle
 import io.github.srs.model.entity.{ Orientation, Point2D }
 import io.github.srs.model.validation.Validation
@@ -18,6 +20,18 @@ object ObstacleDsl:
   def obstacle: Obstacle = Obstacle()
 
   extension (obstacle: Obstacle)
+
+    /**
+     * Sets the unique identifier for the obstacle.
+     *
+     * @param id
+     *   the unique identifier for the obstacle.
+     * @return
+     *   the updated obstacle with the specified identifier.
+     */
+    infix def withId(id: UUID): Obstacle =
+      obstacle.copy(id = id)
+
     /**
      * Sets the position of the obstacle.
      * @param pos

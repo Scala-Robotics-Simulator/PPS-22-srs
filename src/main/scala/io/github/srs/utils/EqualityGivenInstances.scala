@@ -10,8 +10,15 @@ import io.github.srs.model.entity.dynamicentity.action.*
 import io.github.srs.model.entity.dynamicentity.actuator.Actuator
 import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Rule
 import io.github.srs.model.entity.dynamicentity.sensor.*
+import io.github.srs.model.entity.staticentity.StaticEntity
+import io.github.srs.model.entity.staticentity.StaticEntity.{ Light, Obstacle }
 
 object EqualityGivenInstances:
+  given CanEqual[StaticEntity, StaticEntity] = CanEqual.derived
+  given CanEqual[DynamicEntity, DynamicEntity] = CanEqual.derived
+  given CanEqual[Entity, Entity] = CanEqual.derived
+  given CanEqual[Obstacle, Obstacle] = CanEqual.derived
+  given CanEqual[Light, Light] = CanEqual.derived
   given CanEqual[Robot, Robot] = CanEqual.derived
   given CanEqual[UUID, UUID] = CanEqual.derived
   given CanEqual[ShapeType, ShapeType] = CanEqual.derived

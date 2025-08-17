@@ -1,5 +1,7 @@
 package io.github.srs.model.entity.staticentity.dsl
 
+import java.util.UUID
+
 import io.github.srs.model.entity.staticentity.StaticEntity.Light
 import io.github.srs.model.entity.{ Orientation, Point2D }
 import io.github.srs.model.validation.Validation
@@ -21,6 +23,18 @@ object LightDsl:
    * Provides an extension method for the Light class to allow for a more fluent DSL.
    */
   extension (light: Light)
+
+    /**
+     * Sets the unique identifier for the light.
+     *
+     * @param id
+     *   the unique identifier for the light.
+     * @return
+     *   the updated light with the specified identifier.
+     */
+    infix def withId(id: UUID): Light =
+      light.copy(id = id)
+
     /**
      * Sets the position of the light.
      * @param pos

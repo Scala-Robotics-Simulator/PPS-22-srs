@@ -1,5 +1,7 @@
 package io.github.srs.model.entity.dynamicentity
 
+import java.util.UUID
+
 import scala.concurrent.duration.FiniteDuration
 
 import cats.Monad
@@ -31,6 +33,7 @@ class DynamicEntityTest extends AnyFlatSpec with Matchers:
   )
 
   class Dummy(
+      override val id: UUID = UUID.randomUUID(),
       override val position: Point2D,
       override val shape: ShapeType,
       override val orientation: Orientation,
@@ -44,21 +47,45 @@ class DynamicEntityTest extends AnyFlatSpec with Matchers:
     override def act[F[_]: Monad](dt: FiniteDuration, entity: Dummy): F[Dummy] = Monad[F].pure(entity)
 
   "DynamicEntity" should "support having no actuators" in:
-    val entity = new Dummy(initialPosition, shape, initialOrientation, Seq.empty, Vector.empty)
+    val entity = new Dummy(
+      position = initialPosition,
+      shape = shape,
+      orientation = initialOrientation,
+      actuators = Seq.empty[Actuator[Dummy]],
+      sensors = Vector.empty[Sensor[Dummy, Environment]],
+    )
     entity.actuators should be(Seq.empty)
 
   it should "support having some actuators" in:
     val actuator = new DummyActuator()
-    val entity = new Dummy(initialPosition, shape, initialOrientation, Seq(actuator), Vector.empty)
+    val entity = new Dummy(
+      position = initialPosition,
+      shape = shape,
+      orientation = initialOrientation,
+      actuators = Seq(actuator),
+      sensors = Vector.empty[Sensor[Dummy, Environment]],
+    )
     entity.actuators should be(Seq(actuator))
 
   it should "support having no sensors" in:
-    val entity = new Dummy(initialPosition, shape, initialOrientation, Seq.empty, Vector.empty)
+    val entity = new Dummy(
+      position = initialPosition,
+      shape = shape,
+      orientation = initialOrientation,
+      actuators = Seq.empty[Actuator[Dummy]],
+      sensors = Vector.empty[Sensor[Dummy, Environment]],
+    )
     entity.sensors should be(Vector.empty)
 
   it should "support having some sensors" in:
     val entityWithSensors =
-      new Dummy(initialPosition, shape, initialOrientation, Seq.empty, Vector(sensor))
+      new Dummy(
+        position = initialPosition,
+        shape = shape,
+        orientation = initialOrientation,
+        actuators = Seq.empty[Actuator[Dummy]],
+        sensors = Vector(sensor),
+      )
     entityWithSensors.sensors should be(Vector(sensor))
 
 end DynamicEntityTest

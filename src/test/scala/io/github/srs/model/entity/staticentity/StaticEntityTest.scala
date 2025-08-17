@@ -1,6 +1,9 @@
 package io.github.srs.model.entity.staticentity
 
+import scala.language.postfixOps
+
 import io.github.srs.model.entity.staticentity.StaticEntity
+import io.github.srs.model.entity.staticentity.StaticEntity.{ Boundary, Light, Obstacle }
 import io.github.srs.model.entity.staticentity.dsl.LightDsl.*
 import io.github.srs.model.entity.staticentity.dsl.ObstacleDsl.*
 import io.github.srs.model.entity.staticentity.dsl.BoundaryDsl.*
@@ -13,22 +16,20 @@ import org.scalatest.matchers.should.Matchers.*
 
 class StaticEntityTest extends AnyFlatSpec:
 
-  given CanEqual[StaticEntity, StaticEntity] = CanEqual.derived
-
   val origin: (Double, Double) = Point2D(0, 0)
   val orientation: Orientation = Orientation(0)
 
   // Obstacle
   val width = 2
   val height = 3
-  val expectedObstacle: StaticEntity = StaticEntity.Obstacle(origin, orientation, width, height)
+  val expectedObstacle: Obstacle = Obstacle(pos = origin, orient = orientation, width = width, height = height)
 
   // Light
   val radius = 1.0
   val intensity = 1.0
   val attenuation = 1.0
 
-  val expectedLight: StaticEntity = StaticEntity.Light(
+  val expectedLight: Light = Light(
     pos = origin,
     orient = orientation,
     illuminationRadius = radius,
@@ -39,7 +40,11 @@ class StaticEntityTest extends AnyFlatSpec:
   "obstacle" should "create a valid entity" in:
     val res = obstacle at origin withOrientation orientation withWidth width withHeight height
     inside(res.validate):
-      case Right(entity) => entity shouldBe expectedObstacle
+      case Right(entity: Obstacle) =>
+        val _ = entity.position should be(expectedObstacle.position)
+        val _ = entity.orientation should be(expectedObstacle.orientation)
+        val _ = entity.width should be(expectedObstacle.width)
+        entity.height should be(expectedObstacle.height)
 
   it should "fail when width is not positive" in:
     val res = obstacle at origin withOrientation orientation withWidth 0 withHeight height
@@ -55,7 +60,13 @@ class StaticEntityTest extends AnyFlatSpec:
     inside(
       res.validate,
     ):
-      case Right(entity) => entity shouldBe expectedLight
+      case Right(entity) =>
+        val _ = entity.position should be(expectedLight.position)
+        val _ = entity.orientation should be(expectedLight.orientation)
+        val _ = entity.radius should be(expectedLight.radius)
+        val _ = entity.illuminationRadius should be(expectedLight.illuminationRadius)
+        val _ = entity.intensity should be(expectedLight.intensity)
+        entity.attenuation should be(expectedLight.attenuation)
 
   it should "fail when radius is not positive" in:
     val res =
@@ -73,10 +84,14 @@ class StaticEntityTest extends AnyFlatSpec:
     inside(res.validate.left.value) { case DomainError.NegativeOrZero("attenuation", _) => succeed }
 
   "boundary" should "create a valid entity" in:
-    val expectedBoundary: StaticEntity = StaticEntity.Boundary(origin, orientation, width, height)
+    val expectedBoundary: Boundary = Boundary(pos = origin, orient = orientation, width = width, height = height)
     val res = boundary at origin withOrientation orientation withWidth width withHeight height
     inside(res.validate):
-      case Right(entity) => entity shouldBe expectedBoundary
+      case Right(entity) =>
+        val _ = entity.position should be(expectedBoundary.position)
+        val _ = entity.orientation should be(expectedBoundary.orientation)
+        val _ = entity.width should be(expectedBoundary.width)
+        entity.height should be(expectedBoundary.height)
 
   it should "fail when width is negative" in:
     val res = boundary at origin withOrientation orientation withWidth -1 withHeight height
@@ -87,8 +102,13 @@ class StaticEntityTest extends AnyFlatSpec:
     inside(res.validate.left.value) { case DomainError.Negative("height", _) => succeed }
 
   it should "succeed when width and height are zero" in:
+    val expectedBoundary: Boundary = Boundary(pos = origin, orient = orientation, width = 0, height = 0)
     val res = boundary at origin withOrientation orientation withWidth 0 withHeight 0
     inside(res.validate):
-      case Right(entity) => entity shouldBe StaticEntity.Boundary(origin, orientation, 0, 0)
+      case Right(entity) =>
+        val _ = entity.position should be(expectedBoundary.position)
+        val _ = entity.orientation should be(expectedBoundary.orientation)
+        val _ = entity.width should be(expectedBoundary.width)
+        entity.height should be(expectedBoundary.height)
 
 end StaticEntityTest

@@ -1,5 +1,7 @@
 package io.github.srs.model.entity.staticentity
 
+import java.util.UUID
+
 import io.github.srs.model.entity.*
 import io.github.srs.utils.SimulationDefaults
 import io.github.srs.utils.SimulationDefaults.StaticEntity as Defaults
@@ -24,6 +26,7 @@ enum StaticEntity(val position: Point2D, val orientation: Orientation) extends E
    *   height of the obstacle
    */
   case Obstacle(
+      id: UUID = UUID.randomUUID(),
       pos: Point2D = Defaults.Obstacle.defaultPosition,
       orient: Orientation = Defaults.Obstacle.defaultOrientation,
       width: Double = Defaults.Obstacle.defaultWidth,
@@ -47,6 +50,7 @@ enum StaticEntity(val position: Point2D, val orientation: Orientation) extends E
    *   attenuation factor of the light
    */
   case Light(
+      id: UUID = UUID.randomUUID(),
       pos: Point2D = Defaults.Light.defaultPosition,
       orient: Orientation = Defaults.Light.defaultOrientation,
       radius: Double = SimulationDefaults.StaticEntity.Light.defaultRadius,
@@ -67,6 +71,7 @@ enum StaticEntity(val position: Point2D, val orientation: Orientation) extends E
    *   height of the boundary
    */
   case Boundary(
+      id: UUID = UUID.randomUUID(),
       pos: Point2D = Defaults.Boundary.defaultPosition,
       orient: Orientation = Defaults.Boundary.defaultOrientation,
       width: Double = Defaults.Boundary.defaultWidth,
@@ -80,9 +85,9 @@ enum StaticEntity(val position: Point2D, val orientation: Orientation) extends E
    *   the [[ShapeType]] that defines the geometric shape of this static entity.
    */
   override def shape: ShapeType = this match
-    case Obstacle(_, _, w, h) => ShapeType.Rectangle(w, h)
-    case Light(_, _, r, _, _, _) => ShapeType.Circle(r)
-    case Boundary(_, _, w, h) => ShapeType.Rectangle(w, h)
+    case Obstacle(_, _, _, w, h) => ShapeType.Rectangle(w, h)
+    case Light(_, _, _, r, _, _, _) => ShapeType.Circle(r)
+    case Boundary(_, _, _, w, h) => ShapeType.Rectangle(w, h)
 
 end StaticEntity
 

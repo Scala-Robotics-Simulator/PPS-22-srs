@@ -21,6 +21,18 @@ object BoundaryDsl:
    * Provides an extension method for the Boundary class to allow for a more fluent DSL.
    */
   extension (boundary: Boundary)
+
+    /**
+     * Sets the unique identifier for the boundary.
+     *
+     * @param id
+     *   the unique identifier for the boundary.
+     * @return
+     *   the updated boundary with the specified identifier.
+     */
+    infix def withId(id: java.util.UUID): Boundary =
+      boundary.copy(id = id)
+
     /**
      * Sets the position of the boundary.
      * @param pos
