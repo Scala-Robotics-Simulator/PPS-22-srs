@@ -1,7 +1,8 @@
 package io.github.srs.controller
 
-import scala.concurrent.duration.{ DurationInt, FiniteDuration, MILLISECONDS }
+import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
 import scala.language.postfixOps
+import scala.concurrent.duration.DurationInt
 
 import cats.effect.std.Queue
 import cats.effect.unsafe.implicits.global
