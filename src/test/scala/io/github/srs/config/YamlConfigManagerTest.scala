@@ -1,6 +1,7 @@
 package io.github.srs.config
 
 import java.nio.file.Files as JNIOFiles
+
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import fs2.io.file.{ Files, Path }
