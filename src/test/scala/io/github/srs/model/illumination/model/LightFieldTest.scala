@@ -41,7 +41,7 @@ final class LightFieldTest extends AnyFlatSpec with Matchers:
     val Fill = 0.7
   end C
 
-  "FovField.sampleAtWorld" should "bilinearly interpolate inside bounds (SF=1)" in:
+  "FovField" should "bilinearly interpolate inside bounds (SF=1)" in:
     val field = C.mk(GridDims(C.W1, C.H1), C.Data1)
     given ScaleFactor = C.SF1
     val out = field.sampleAtWorld(C.P1)
