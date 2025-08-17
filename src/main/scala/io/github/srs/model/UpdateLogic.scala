@@ -10,7 +10,7 @@ import io.github.srs.model.ModelModule.Model
 import io.github.srs.model.SimulationConfig.SimulationSpeed
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.action.Action
-import io.github.srs.model.logic.*
+import io.github.srs.model.logic.LogicsBundle
 import io.github.srs.utils.random.RNG
 
 object UpdateLogic:
@@ -18,34 +18,34 @@ object UpdateLogic:
   extension [S <: ModelModule.State](m: Model[S])
 
     def handleRobotAction(s: S, queue: Queue[IO, Event], robot: Robot, action: Action[IO])(using
-        logic: RobotActionLogic[S],
+        bundle: LogicsBundle[S],
     ): IO[S] =
-      logic.handleRobotAction(s, queue, robot, action)
+      bundle.robotAction.handleRobotAction(s, queue, robot, action)
 
     def handleCollision(s: S, queue: Queue[IO, Event], robot: Robot, updatedRobot: Robot)(using
-        logic: CollisionLogic[S],
+        bundle: LogicsBundle[S],
     ): IO[S] =
-      logic.handleCollision(s, queue, robot, updatedRobot)
+      bundle.collision.handleCollision(s, queue, robot, updatedRobot)
 
-    def increment(s: S)(using logic: IncrementLogic[S]): IO[S] =
-      logic.increment(s)
+    def increment(s: S)(using bundle: LogicsBundle[S]): IO[S] =
+      bundle.increment.increment(s)
 
-    def tick(s: S, delta: FiniteDuration)(using logic: TickLogic[S]): IO[S] =
-      logic.tick(s, delta)
+    def tick(s: S, delta: FiniteDuration)(using bundle: LogicsBundle[S]): IO[S] =
+      bundle.tick.tick(s, delta)
 
-    def tickSpeed(s: S, speed: SimulationSpeed)(using logic: TickLogic[S]): IO[S] =
-      logic.tickSpeed(s, speed)
+    def tickSpeed(s: S, speed: SimulationSpeed)(using bundle: LogicsBundle[S]): IO[S] =
+      bundle.tick.tickSpeed(s, speed)
 
-    def random(s: S, rng: RNG)(using logic: RandomLogic[S]): IO[S] =
-      logic.random(s, rng)
+    def random(s: S, rng: RNG)(using bundle: LogicsBundle[S]): IO[S] =
+      bundle.random.random(s, rng)
 
-    def pause(s: S)(using logic: PauseLogic[S]): IO[S] =
-      logic.pause(s)
+    def pause(s: S)(using bundle: LogicsBundle[S]): IO[S] =
+      bundle.pause.pause(s)
 
-    def resume(s: S)(using logic: ResumeLogic[S]): IO[S] =
-      logic.resume(s)
+    def resume(s: S)(using bundle: LogicsBundle[S]): IO[S] =
+      bundle.resume.resume(s)
 
-    def stop(s: S)(using logic: StopLogic[S]): IO[S] =
-      logic.stop(s)
+    def stop(s: S)(using bundle: LogicsBundle[S]): IO[S] =
+      bundle.stop.stop(s)
   end extension
 end UpdateLogic
