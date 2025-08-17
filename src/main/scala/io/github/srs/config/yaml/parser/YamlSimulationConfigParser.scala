@@ -1,5 +1,7 @@
 package io.github.srs.config.yaml.parser
 
+import java.util.UUID
+
 import io.github.srs.config.yaml.parser.collection.CustomMap.*
 import io.github.srs.config.{ ConfigError, ConfigResult, SimulationConfig }
 import io.github.srs.model.Simulation
@@ -120,6 +122,7 @@ object YamlSimulationConfigParser:
   private def parseRobot(map: Map[String, Any]): ConfigResult[Entity] =
     // TODO: Add support for robot behavior
     for
+      id <- get[UUID]("id", map)
       pos <- get[List[Int]]("position", map)
       orient <- getOptional[Double]("orientation", map)
       radius <- getOptional[Double]("radius", map)
@@ -128,7 +131,7 @@ object YamlSimulationConfigParser:
       light <- getOptional[Boolean]("withLightSensors", map)
       actuators <- map.parseSequence("actuators", parseActuator)
       sensors <- map.parseSequence("sensors", parseSensor)
-    yield Robot().at(Point2D(pos.head, pos(1)))
+    yield Robot().withId(id).at(Point2D(pos.head, pos(1)))
       |> (r => orient.fold(r)(o => r.withOrientation(Orientation(o))))
       |> (r => radius.fold(r)(radius => r.withShape(ShapeType.Circle(radius))))
       |> (r => speed.fold(r)(s => r.withSpeed(s)))
@@ -146,11 +149,12 @@ object YamlSimulationConfigParser:
    */
   private def parseObstacle(map: Map[String, Any]): ConfigResult[Entity] =
     for
+      id <- get[UUID]("id", map)
       pos <- get[List[Int]]("position", map)
       orientation <- getOptional[Double]("orientation", map)
       width <- getOptional[Double]("width", map)
       height <- getOptional[Double]("height", map)
-    yield obstacle.at(Point2D(pos.head, pos(1)))
+    yield obstacle.withId(id).at(Point2D(pos.head, pos(1)))
       |> (obs => orientation.fold(obs)(o => obs.withOrientation(Orientation(o))))
       |> (obs => width.fold(obs)(w => obs.withWidth(w)))
       |> (obs => height.fold(obs)(h => obs.withHeight(h)))
@@ -164,11 +168,12 @@ object YamlSimulationConfigParser:
    */
   private def parseLight(map: Map[String, Any]): ConfigResult[Entity] =
     for
+      id <- get[UUID]("id", map)
       pos <- get[List[Int]]("position", map)
       radius <- get[Double]("illuminationRadius", map)
       intensity <- getOptional[Double]("intensity", map)
       attenuation <- getOptional[Double]("attenuation", map)
-    yield light.at(Point2D(pos.head, pos(1))).withIlluminationRadius(radius)
+    yield light.withId(id).at(Point2D(pos.head, pos(1))).withIlluminationRadius(radius)
       |> (l => intensity.fold(l)(i => l.withIntensity(i)))
       |> (l => attenuation.fold(l)(a => l.withAttenuation(a)))
 

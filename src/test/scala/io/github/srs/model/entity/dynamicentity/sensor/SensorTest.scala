@@ -1,5 +1,7 @@
 package io.github.srs.model.entity.dynamicentity.sensor
 
+import java.util.UUID
+
 import cats.{ Id, Monad }
 import cats.effect.IO
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
@@ -26,6 +28,7 @@ class SensorTest extends AnyFlatSpec with should.Matchers:
   val range: Range = 10.0
 
   class Dummy(
+      override val id: UUID = UUID.randomUUID(),
       override val position: Point2D,
       override val shape: ShapeType,
       override val orientation: Orientation,
@@ -48,7 +51,13 @@ class SensorTest extends AnyFlatSpec with should.Matchers:
 
   it should "sense the environment and return data" in:
     val sensor = new DummySensor(offset, distance, range)
-    val entity = new Dummy(initialPosition, shape, initialOrientation, Seq.empty, Vector(sensor))
+    val entity = new Dummy(
+      position = initialPosition,
+      shape = shape,
+      orientation = initialOrientation,
+      actuators = Seq.empty[Actuator[Dummy]],
+      sensors = Vector(sensor),
+    )
     val environment = Environment(10, 10).validate.toOption.value
     val data = sensor.sense[Id](entity, environment)
     data should be(42.0)

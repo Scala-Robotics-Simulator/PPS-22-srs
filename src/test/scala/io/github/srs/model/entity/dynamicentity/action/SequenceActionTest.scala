@@ -1,5 +1,7 @@
 package io.github.srs.model.entity.dynamicentity.action
 
+import java.util.UUID
+
 import scala.concurrent.duration.FiniteDuration
 
 import cats.{ Id, Monad }
@@ -35,6 +37,7 @@ class SequenceActionTest extends AnyFlatSpec with Matchers:
     override def act[F[_]: Monad](dt: FiniteDuration, entity: Dummy): F[Dummy] = Monad[F].pure(entity)
 
   case class Dummy(
+      override val id: UUID = UUID.randomUUID(),
       override val position: Point2D,
       override val shape: ShapeType,
       override val orientation: Orientation,

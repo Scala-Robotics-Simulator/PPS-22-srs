@@ -49,6 +49,7 @@ class YamlManagerTest extends AnyFlatSpec with Matchers:
         |environment:
         |  entities:
         |    - obstacle:
+        |        id: 00000000-0000-0000-0000-000000000000
         |        orientation: 0.0
         |        width: 1.0
         |        height: 1.0
@@ -80,6 +81,7 @@ class YamlManagerTest extends AnyFlatSpec with Matchers:
         |environment:
         |  entities:
         |    - robot:
+        |        id: 00000000-0000-0000-0000-000000000002
         |        position: [5.0, 5.0]
         |        speed: 1.0
         |        withProximitySensors: true
@@ -115,6 +117,7 @@ class YamlManagerTest extends AnyFlatSpec with Matchers:
         |environment:
         |  entities:
         |    - robot:
+        |        id: 00000000-0000-0000-0000-000000000002
         |        position: [5.0, 5.0]
         |        actuators:
         |          - differentialWheelMotor:
@@ -151,6 +154,7 @@ class YamlManagerTest extends AnyFlatSpec with Matchers:
         |environment:
         |  entities:
         |    - robot:
+        |        id: 00000000-0000-0000-0000-000000000002
         |        position: [5.0, 5.0]
         |        sensors:
         |          - proximitySensor:
@@ -222,14 +226,21 @@ class YamlManagerTest extends AnyFlatSpec with Matchers:
     loadedConfig shouldBe config
 
   it should "convert a SimulationConfig with custom environment to YAML" in:
+    val obstacleId = SimulationDefaults.StaticEntity.Obstacle.defaultId
+    val lightId = SimulationDefaults.StaticEntity.Light.defaultId
+    val robotId = SimulationDefaults.DynamicEntity.Robot.defaultId
     val dwm = differentialWheelMotor withLeftSpeed 2.0 withRightSpeed 3.0
     val ps = proximitySensor withDistance 0.5 withOffset Orientation(90.0) withRange 1.5
     val orientation = Orientation(0.0)
     val l =
-      light at (1.0, 1.0) withIntensity 0.5 withAttenuation 1.0 withIlluminationRadius 8.0 withOrientation orientation
-    val o = obstacle at (2.0, 2.0) withWidth 1.0 withHeight 1.0 withOrientation orientation
-    val r = robot at (4.0, 4.0) withOrientation orientation withSpeed 1.0 withShape (Circle(0.5)) containing
-      dwm and ps
+      light withId lightId at (
+        1.0,
+        1.0,
+      ) withIntensity 0.5 withAttenuation 1.0 withIlluminationRadius 8.0 withOrientation orientation
+    val o = obstacle withId obstacleId at (2.0, 2.0) withWidth 1.0 withHeight 1.0 withOrientation orientation
+    val r =
+      robot withId robotId at (4.0, 4.0) withOrientation orientation withSpeed 1.0 withShape (Circle(0.5)) containing
+        dwm and ps
 
     val env = environment containing l and o and r
 
@@ -245,19 +256,22 @@ class YamlManagerTest extends AnyFlatSpec with Matchers:
         |  width: 10
         |  height: 10
         |  entities:
+        |  - obstacle:
+        |      id: 00000000-0000-0000-0000-000000000000
+        |      position: [2.0, 2.0]
+        |      orientation: 0.0
+        |      width: 1.0
+        |      height: 1.0
         |  - light:
+        |      id: 00000000-0000-0000-0000-000000000001
         |      radius: 0.05
         |      attenuation: 1.0
         |      illuminationRadius: 8.0
         |      position: [1.0, 1.0]
         |      intensity: 0.5
         |      orientation: 0.0
-        |  - obstacle:
-        |      position: [2.0, 2.0]
-        |      orientation: 0.0
-        |      width: 1.0
-        |      height: 1.0
         |  - robot:
+        |      id: 00000000-0000-0000-0000-000000000002
         |      sensors:
         |      - proximitySensor:
         |          offset: 90.0

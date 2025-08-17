@@ -12,6 +12,15 @@ import io.github.srs.utils.collision.Collision.isColliding
  * An entity is characterized by its position, shape, and orientation.
  */
 trait Entity:
+
+  /**
+   * The unique identifier for the entity.
+   *
+   * @return
+   *   a unique identifier UUID.
+   */
+  def id: java.util.UUID
+
   /**
    * The position of the entity in 2D space.
    *

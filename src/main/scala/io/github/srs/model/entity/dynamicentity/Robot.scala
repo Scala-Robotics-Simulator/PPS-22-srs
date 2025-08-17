@@ -22,7 +22,7 @@ import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.*
  *   the sequence of actuators that control the robot.
  */
 final case class Robot(
-    id: UUID = UUID.randomUUID(),
+    override val id: UUID = UUID.randomUUID(),
     override val position: Point2D = defaultPosition,
     override val shape: ShapeType.Circle = defaultShape,
     override val orientation: Orientation = defaultOrientation,
@@ -38,6 +38,7 @@ final case class Robot(
 
   override def equals(obj: Any): Boolean = obj match
     case that: Robot =>
+      this.id == that.id &&
       this.position == that.position &&
       this.shape == that.shape &&
       this.orientation == that.orientation &&

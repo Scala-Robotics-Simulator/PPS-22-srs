@@ -1,5 +1,7 @@
 package io.github.srs.utils
 
+import java.util.UUID
+
 import cats.effect.IO
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.Robot
@@ -33,12 +35,14 @@ object SimulationDefaults:
   object StaticEntity:
 
     object Obstacle:
+      val defaultId: UUID = UUID.fromString("00000000-0000-0000-0000-00000000000")
       val defaultPosition: Point2D = (0.0, 0.0)
       val defaultOrientation: Orientation = Orientation(0.0)
       val defaultWidth: Double = 1.0
       val defaultHeight: Double = 1.0
 
     object Light:
+      val defaultId: UUID = UUID.fromString("00000000-0000-0000-0000-00000000001")
       val defaultPosition: Point2D = (0.0, 0.0)
       val defaultOrientation: Orientation = Orientation(0.0)
       val defaultRadius: Double = 0.05
@@ -79,6 +83,7 @@ object SimulationDefaults:
     object Robot:
       import SimulationDefaults.DynamicEntity.Robot.defaultShape.radius
 
+      val defaultId: UUID = UUID.fromString("00000000-0000-0000-0000-00000000002")
       val defaultPosition: Point2D = (0.0, 0.0)
       val defaultShape: ShapeType.Circle = ShapeType.Circle(0.5)
       val defaultOrientation: Orientation = Orientation(0.0)

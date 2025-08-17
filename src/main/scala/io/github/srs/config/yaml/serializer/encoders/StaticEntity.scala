@@ -16,6 +16,7 @@ object StaticEntity:
    */
   given Encoder[Obstacle] = (obs: Obstacle) =>
     Json.obj(
+      "id" -> obs.id.asJson,
       "position" -> obs.position.asJson,
       "orientation" -> obs.orientation.degrees.asJson,
       "width" -> obs.width.asJson,
@@ -29,6 +30,7 @@ object StaticEntity:
    */
   given Encoder[Light] = (light: Light) =>
     Json.obj(
+      "id" -> light.id.asJson,
       "position" -> light.position.asJson,
       "orientation" -> light.orientation.degrees.asJson,
       "radius" -> light.radius.asJson,
