@@ -57,7 +57,7 @@ final class OcclusionRasterTest extends AnyFlatSpec with Matchers:
 
   // ------------------------------- Core matrices -----------------------------
 
-  "Resistance" should "classify static occlusion" in:
+  "OcclusionGrid" should "classify static occlusion" in:
     val env = C.env3x1NoCollision()
     val stat = OcclusionRaster.staticMatrix(env)
     val res: Seq[Double] = Seq(C.cell(stat)(0, 0), C.cell(stat)(1, 0), C.cell(stat)(2, 0))
@@ -77,7 +77,7 @@ final class OcclusionRasterTest extends AnyFlatSpec with Matchers:
 
   // ------------------------------ Dynamic (Circle) ---------------------------
 
-  "Resistance (Circle)" should "block when radius fully covers the cell and be free otherwise" in:
+  "OcclusionGrid (Circle)" should "block when radius fully covers the cell and be free otherwise" in:
     val tie = math.sqrt(0.5)
     val eps = 1e-6
     val botBelow = Robot((0.5, 0.5), ShapeType.Circle(tie - eps), Orientation(0), Vector.empty)
@@ -93,7 +93,7 @@ final class OcclusionRasterTest extends AnyFlatSpec with Matchers:
 
   // ------------------------------ Static rectangles --------------------------
 
-  "Resistance (Rectangle)" should "be opaque at the 1x1 tie and free only when strictly smaller" in:
+  "OcclusionGrid (Rectangle)" should "be opaque at the 1x1 tie and free only when strictly smaller" in:
     val obsTie = StaticEntity.Obstacle(Point2D(0.5, 0.5), Orientation(0), width = 1.0, height = 1.0)
     val envTie = C.validated(environment withWidth 1 withHeight 1 containing obsTie)
     val statTie = OcclusionRaster.staticMatrix(envTie)
@@ -105,7 +105,7 @@ final class OcclusionRasterTest extends AnyFlatSpec with Matchers:
     val res: Seq[Double] = Seq(C.cell(statTie)(0, 0), C.cell(statIn)(0, 0))
     res shouldBe Seq(1.0, 1.0)
 
-  "Resistance (Rectangle rotation)" should "block when fully covering the cell and be free otherwise" in:
+  "OcclusionGrid (Rectangle rotation)" should "block when fully covering the cell and be free otherwise" in:
     val big = StaticEntity.Obstacle(Point2D(0.5, 0.5), Orientation(45.0), width = 1.5, height = 1.5)
     val envBig = C.validated(environment withWidth 1 withHeight 1 containing big)
     val statBig = OcclusionRaster.staticMatrix(envBig)
@@ -117,7 +117,7 @@ final class OcclusionRasterTest extends AnyFlatSpec with Matchers:
     val res: Seq[Double] = Seq(C.cell(statBig)(0, 0), C.cell(statSmall)(0, 0))
     res shouldBe Seq(1.0, 0.0)
 
-  "Resistance (thin Rectangle)" should "not occlude when not covering all four corners" in:
+  "OcclusionGrid (thin Rectangle)" should "not occlude when not covering all four corners" in:
     val thin = StaticEntity.Obstacle(Point2D(0.5, 0.5), Orientation(0.0), width = 1.0, height = 0.3)
     val env = C.validated(environment withWidth 1 withHeight 1 containing thin)
     val stat = OcclusionRaster.staticMatrix(env)
@@ -126,7 +126,7 @@ final class OcclusionRasterTest extends AnyFlatSpec with Matchers:
 
   // --------------------------------- Boundary --------------------------------
 
-  "Resistance (Boundary)" should "behave like a static obstacle" in:
+  "OcclusionGrid (Boundary)" should "behave like a static obstacle" in:
     val boundary = StaticEntity.Boundary(Point2D(0.5, 0.5), Orientation(0), width = 1.2, height = 1.2)
     val envB = C.validated(environment withWidth 1 withHeight 1 containing boundary)
     val statB = OcclusionRaster.staticMatrix(envB)
@@ -135,7 +135,7 @@ final class OcclusionRasterTest extends AnyFlatSpec with Matchers:
 
   // ----------------------------- AABB & clamping -----------------------------
 
-  "Resistance (AABB clamping)" should "stay within bounds and fill correctly" in:
+  "OcclusionGrid (AABB clamping)" should "stay within bounds and fill correctly" in:
     val huge = StaticEntity.Obstacle(Point2D(1.5, 0.5), Orientation(0), width = 5.0, height = 3.0)
     val env = C.validated(environment withWidth 2 withHeight 1 containing huge)
     val stat = OcclusionRaster.staticMatrix(env)
@@ -150,7 +150,7 @@ final class OcclusionRasterTest extends AnyFlatSpec with Matchers:
 
   // --------------------------------- Overlay ---------------------------------
 
-  "Resistance.overlay" should "union in the overlapping area and preserve base elsewhere" in:
+  "OcclusionGrid" should "union in the overlapping area and preserve base elsewhere" in:
     val base = Array.fill(3, 2)(0.0)
     base(2)(1) = 0.7
     val over = Array.fill(2, 1)(0.0)
@@ -167,7 +167,7 @@ final class OcclusionRasterTest extends AnyFlatSpec with Matchers:
 
   // -------------------------------- Edge cases -------------------------------
 
-  "Resistance (Rectangle 1x1 non-orthogonal)" should "be transparent because it does not fully cover the cell" in:
+  "OcclusionGrid (Rectangle 1x1 non-orthogonal)" should "be transparent because it does not fully cover the cell" in:
     val allTransparent: Boolean = C.AnglesSome.forall { ang =>
       val obs = StaticEntity.Obstacle(Point2D(0.0, 0.0), Orientation(ang), width = 1.0, height = 1.0)
       val env = C.validated(environment withWidth 1 withHeight 1 containing obs)
@@ -195,7 +195,7 @@ final class OcclusionRasterTest extends AnyFlatSpec with Matchers:
     }
     allTransparent shouldBe true
 
-  "Resistance (Rectangle 1x1 centered) — tie case" should "block when the 4 corners lie on the cell border" in:
+  "OcclusionGrid (Rectangle 1x1 centered) — tie case" should "block when the 4 corners lie on the cell border" in:
     val obsTie = StaticEntity.Obstacle(Point2D(0.5, 0.5), Orientation(0), width = 1.0, height = 1.0)
     val envTie = C.validated(environment withWidth 1 withHeight 1 containing obsTie)
     val statTie = OcclusionRaster.staticMatrix(envTie)
