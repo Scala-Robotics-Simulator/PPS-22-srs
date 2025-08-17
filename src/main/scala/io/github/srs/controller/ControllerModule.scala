@@ -1,11 +1,11 @@
 package io.github.srs.controller
 
-import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
+import scala.concurrent.duration.{ DurationInt, FiniteDuration, MILLISECONDS }
 import scala.language.postfixOps
 
-import cats.effect.IO
 import cats.effect.std.Queue
 import cats.effect.unsafe.implicits.global
+import cats.effect.{ Clock, IO }
 import cats.syntax.all.*
 import io.github.srs.model.*
 import io.github.srs.model.SimulationConfig.SimulationStatus
@@ -122,26 +122,40 @@ object ControllerModule:
         override def simulationLoop(s: S, queue: Queue[IO, Event]): IO[Unit] =
           def loop(state: S): IO[Unit] =
             for
-              startTime <- IO.pure(System.currentTimeMillis())
-              _ <- runBehavior(queue, state)
-              events <- queue.tryTakeN(Some(Int.MaxValue))
+              startTime <- Clock[IO].realTime.map(_.toMillis)
+              _ <- runBehavior(queue, state).whenA(state.simulationStatus == SimulationStatus.RUNNING)
+
+              events <- queue.tryTakeN(Some(50))
               shuffledEvents = shuffleEvents(queue, state, events)
               newState <- handleEvents(state, shuffledEvents)
+
               _ <- context.view.render(newState)
-              nextState <-
-                if newState.simulationStatus == SimulationStatus.RUNNING then
-                  tickEvents(startTime, newState.simulationSpeed.tickSpeed, newState)
-                else IO.pure(newState)
+
+              nextState <- nextStep(newState, startTime)
+
               stop = newState.simulationStatus == SimulationStatus.STOPPED ||
                 newState.simulationTime.exists(max => newState.elapsedTime >= max)
-              endTime <- IO.pure(System.currentTimeMillis())
-              _ <- IO.pure(println(s"Simulation loop took ${endTime - startTime} ms"))
+
+              endTime <- Clock[IO].realTime.map(_.toMillis)
+              _ <- IO.println(s"Simulation loop took ${endTime - startTime} ms")
+
               _ <- if stop then IO.unit else loop(nextState)
             yield ()
 
           loop(s)
 
         end simulationLoop
+
+        private def nextStep(state: S, startTime: Long): IO[S] =
+          state.simulationStatus match
+            case SimulationStatus.RUNNING =>
+              tickEvents(startTime, state.simulationSpeed.tickSpeed, state)
+
+            case SimulationStatus.PAUSED =>
+              IO.sleep(50.millis).as(state)
+
+            case SimulationStatus.STOPPED =>
+              IO.pure(state)
 
         //        private def produceEvents[A](queue: Queue[IO, A], events: List[A]): IO[Unit] =
         //          events.traverse_(queue.offer)
@@ -158,21 +172,22 @@ object ControllerModule:
           }.toList.sequence.void // TODO: parSequence
 
         private def tickEvents(start: Long, tickSpeed: FiniteDuration, state: S): IO[S] =
-          val timeToNextTick = tickSpeed.toMillis - (System.currentTimeMillis() - start)
-          val adjustedTickSpeed: Long = if timeToNextTick > 0 then timeToNextTick else 0L
-          val sleepTime = FiniteDuration(adjustedTickSpeed, MILLISECONDS)
           for
+            now <- Clock[IO].realTime.map(_.toMillis)
+            timeToNextTick = tickSpeed.toMillis - (now - start)
+            adjustedTickSpeed = if timeToNextTick > 0 then timeToNextTick else 0L
+            sleepTime = FiniteDuration(adjustedTickSpeed, MILLISECONDS)
             _ <- IO.sleep(sleepTime)
             tick <- handleEvent(state, Event.Tick(tickSpeed))
           yield tick
 
         private def shuffleEvents(queue: Queue[IO, Event], state: S, events: Seq[Event]): Seq[Event] =
-          val filteredEvents = events.filter:
-            case _: Event.RobotAction => true
-            case _ => false
-          val (shuffledEvents, nextRNG: RNG) = state.simulationRNG generate (filteredEvents shuffle)
+          val (controllerEvents, otherEvents) = events.partition:
+            case _: Event.RobotAction => false
+            case _ => true
+          val (shuffledEvents, nextRNG: RNG) = state.simulationRNG generate (otherEvents shuffle)
           queue.offer(Event.Random(nextRNG)).unsafeRunAndForget()
-          shuffledEvents
+          controllerEvents ++ shuffledEvents
 
         private def handleEvents(state: S, shuffledEvents: Seq[Event]): IO[S] =
           for finalState <- shuffledEvents.foldLeft(IO.pure(state)) { (taskState, event) =>
