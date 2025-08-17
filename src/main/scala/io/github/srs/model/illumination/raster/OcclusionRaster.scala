@@ -18,7 +18,7 @@ import io.github.srs.model.illumination.model.{ Grid, GridDims, ScaleFactor }
 object OcclusionRaster:
 
   /**
-   * Rasterize static occluders (obstacles + boundaries) to a resistance grid.
+   * Rasterize static occluders (obstacles + boundaries) to a occlusion grid.
    *
    * @param env
    *   The environment containing static entities.
@@ -31,7 +31,7 @@ object OcclusionRaster:
     toMatrix(staticBitset(env, dims), dims)
 
   /**
-   * Rasterize dynamic occluders (all dynamic entities) to a resistance grid.
+   * Rasterize dynamic occluders (all dynamic entities) to a occlusion grid.
    *
    * @param env
    *   The environment containing dynamic entities.
@@ -300,10 +300,10 @@ object OcclusionRaster:
     val y1 = (cellY + 1) / k
     List((x0, y0), (x1, y0), (x1, y1), (x0, y1))
 
-  // ---------- Projection: BitSet → resistance matrix -------------------------
+  // ---------- Projection: BitSet → occlusion matrix -------------------------
 
   /**
-   * Convert a set of occluded cell indices into a resistance matrix in [0,1]
+   * Convert a set of occluded cell indices into a occlusion matrix in [0,1]
    *
    * @param occluded
    *   The BitSet representing occluded cells.

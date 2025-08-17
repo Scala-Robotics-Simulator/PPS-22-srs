@@ -17,13 +17,13 @@ object SquidLibFovEngine extends FovEngine:
   /**
    * SquidLib-based FoV implementation.
    *
-   * Delegates to `FOV.reuseFOV` using the provided resistance grid, writing into a reusable buffer, and finally
-   * flattens the matrix in row-major order.
+   * Delegates to `FOV.reuseFOV` using the provided occlusion grid, writing into a reusable buffer, and finally flattens
+   * the matrix in row-major order.
    *
-   * @param resistanceGrid
+   * @param occlusionGrid
    *   A grid of occlusion coefficients in the range [0,1], where:
-   *   - 0 represents an empty cell (no resistance to light).
-   *   - 1 represents a fully blocking cell (complete resistance to light).
+   *   - 0 represents an empty cell (no occlusion to light).
+   *   - 1 represents a fully blocking cell (complete resistance/occlusion to light).
    * @param startX
    *   The x-coordinate of the light source in cell space.
    * @param startY
@@ -35,14 +35,14 @@ object SquidLibFovEngine extends FovEngine:
    *   cell. The size equals width × height of the grid.
    */
   override def compute(
-      resistanceGrid: Grid[Double],
+      occlusionGrid: Grid[Double],
   )(startX: Int, startY: Int, radius: Double): ArraySeq[Double] =
 
-    val w = resistanceGrid.width
-    val h = resistanceGrid.height
+    val w = occlusionGrid.width
+    val h = occlusionGrid.height
     if w == 0 || h == 0 then ArraySeq.empty
     else
       val buffer = Array.ofDim[Double](w, h)
-      FOV.reuseFOV(resistanceGrid, buffer, startX, startY, radius)
+      FOV.reuseFOV(occlusionGrid, buffer, startX, startY, radius)
       buffer.flattenRowMajor
 end SquidLibFovEngine
