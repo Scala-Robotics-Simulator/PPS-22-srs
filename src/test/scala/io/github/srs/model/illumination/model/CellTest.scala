@@ -25,7 +25,7 @@ final class CellTest extends AnyFlatSpec with Matchers:
     given ScaleFactor = C.S4
     Cell.toCellFloor(C.PNeg) shouldBe (-1, -4)
 
-  "Cell" should "ceil radius meters to cells" in:
+  it should "ceil radius meters to cells" in:
     given ScaleFactor = C.S4
     val res = Seq(
       Cell.radiusCells(1.00),
