@@ -102,6 +102,15 @@ class EntityRow(
       case "obstacle" => parseObstacle()
       case "light" => parseLight()
 
+  /**
+   * Sets the values of the properties panel.
+   *
+   * @param values
+   *   a map where keys are property names and values are the corresponding values (either String or Boolean)
+   */
+  def setValues(values: Map[String, String | Boolean]): Unit =
+    propertiesPanel.setValues(values)
+
   private def parseRobot(): ConfigResult[Robot] =
     import Decoder.{ get, given }
     val map = propertiesPanel.getValues

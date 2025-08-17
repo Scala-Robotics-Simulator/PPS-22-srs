@@ -1,12 +1,19 @@
 package io.github.srs.view.components.configuration
 
 import javax.swing.*
-import java.awt.*
+import java.awt.BorderLayout
+import java.awt.FlowLayout
 
 import io.github.srs.view.components.FieldSpec
 import io.github.srs.model.entity.Entity
 import io.github.srs.config.ConfigResult
 import io.github.srs.config.yaml.parser.collection.CustomSeq.sequence
+import io.github.srs.model.entity.staticentity.StaticEntity
+import io.github.srs.model.entity.dynamicentity.Robot
+import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.stdProximitySensors
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.stdLightSensors
+import io.github.srs.model.entity.ShapeType
 
 /**
  * EntitiesPanel is a JPanel that allows users to add and remove the simulation entities.
@@ -74,4 +81,64 @@ class EntitiesPanel(fieldSpecsByType: Map[String, Seq[FieldSpec]]) extends JPane
     entityListPanel.getComponents.collect { case r: EntityRow =>
       r.getEntity
     }.sequence
+
+  /**
+   * Sets the entities in the panel
+   *
+   * @param entities
+   *   a set of entities to be displayed in the panel
+   */
+  def setEntities(entities: Set[Entity]): Unit =
+    import io.github.srs.model.entity.Point2D.*
+    entityListPanel.removeAll()
+    entities.foreach(e =>
+      e match
+        case robot: Robot =>
+          val row = new EntityRow("Robot", fieldSpecsByType, removeEntityRow)
+          entityListPanel.add(row)
+          val robotMap = Map(
+            "x" -> robot.position.x.toString(),
+            "y" -> robot.position.y.toString(),
+            "orientation" -> robot.orientation.degrees.toString(),
+            "radius" -> robot.shape.radius.toString(),
+            "speed" -> robot.actuators.collectFirst { case dwt: DifferentialWheelMotor =>
+              dwt.left.speed.toString()
+            }.getOrElse(""),
+            "proxSens" -> stdProximitySensors.forall(robot.sensors.contains),
+            "lightSens" -> stdLightSensors.forall(robot.sensors.contains),
+          )
+          row.setValues(robotMap)
+        case obs: StaticEntity.Obstacle =>
+          val row = new EntityRow("Obstacle", fieldSpecsByType, removeEntityRow)
+          entityListPanel.add(row)
+          val shapeMap: Map[String, String | Boolean] = obs.shape match
+            case ShapeType.Circle(_) => Map.empty[String, String | Boolean]
+            case ShapeType.Rectangle(width, height) =>
+              Map(
+                "width" -> width.toString(),
+                "height" -> height.toString(),
+              )
+          val obstacleMap = Map(
+            "x" -> obs.position.x.toString(),
+            "y" -> obs.position.y.toString(),
+            "orientation" -> obs.orientation.degrees.toString(),
+          ) ++ shapeMap
+          row.setValues(obstacleMap)
+        case light: StaticEntity.Light =>
+          val row = new EntityRow("Light", fieldSpecsByType, removeEntityRow)
+          entityListPanel.add(row)
+          val lightMap = Map(
+            "x" -> light.position.x.toString(),
+            "y" -> light.position.y.toString(),
+            "illumination" -> light.illuminationRadius.toString(),
+            "intensity" -> light.intensity.toString(),
+            "attenuation" -> light.attenuation.toString(),
+          )
+          row.setValues(lightMap)
+      end match
+      entityListPanel.revalidate()
+      entityListPanel.repaint(),
+    )
+  end setEntities
+
 end EntitiesPanel

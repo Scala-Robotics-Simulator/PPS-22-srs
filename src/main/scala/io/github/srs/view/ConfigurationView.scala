@@ -2,6 +2,7 @@ package io.github.srs.view
 
 import java.awt.{ BorderLayout, Dimension, FlowLayout }
 import javax.swing.*
+import javax.swing.filechooser.FileNameExtensionFilter
 
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
@@ -16,7 +17,6 @@ import io.github.srs.model.validation.DomainError
 import io.github.srs.utils.chaining.Pipe.given
 import io.github.srs.view.components.*
 import io.github.srs.view.components.configuration.EntitiesPanel
-import javax.swing.filechooser.FileNameExtensionFilter
 import fs2.io.file.Files
 import io.github.srs.config.yaml.YamlManager
 import fs2.io.file.Path
@@ -208,7 +208,6 @@ object ConfigurationView:
       yield environment withWidth width withHeight height containing entities.toSet
 
     private def storeConfig(config: SimulationConfig): Unit =
-      println(s"Config loaded: $config")
       val simulationMap = Map(
         "duration" -> config.simulation.duration.map(_.toString()).getOrElse(""),
         "seed" -> config.simulation.seed.map(_.toString()).getOrElse(""),
@@ -219,6 +218,7 @@ object ConfigurationView:
         "height" -> config.environment.height.toString,
       )
       environmentPanel.setValues(environmentMap)
+      entitiesPanel.setEntities(config.environment.entities)
   end ConfigurationViewImpl
 
 end ConfigurationView
