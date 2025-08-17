@@ -11,9 +11,7 @@ import io.github.srs.controller.ControllerModule
 import io.github.srs.controller.ControllerModule.Controller
 import io.github.srs.model.ModelModule.Model
 import io.github.srs.model.SimulationConfig.{ SimulationSpeed, SimulationStatus }
-import io.github.srs.model.logic.IncreaseLogic.given
-import io.github.srs.model.logic.StatusLogic.given
-import io.github.srs.model.logic.TimeLogic.given
+import io.github.srs.model.logic.simulationStateLogicsBundle
 import io.github.srs.model.{ ModelModule, SimulationState }
 import io.github.srs.utils.random.SimpleRNG
 import io.github.srs.view.ViewModule

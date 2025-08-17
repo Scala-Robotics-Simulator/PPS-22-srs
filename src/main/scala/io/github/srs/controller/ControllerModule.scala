@@ -17,6 +17,23 @@ import io.github.srs.model.logic.*
 import io.github.srs.utils.random.RNG
 import io.github.srs.utils.random.RandomDSL.{ generate, shuffle }
 
+trait ControllerLogic[S <: ModelModule.State]:
+  def inc: IncrementLogic[S]
+
+  def tick: TickLogic[S]
+
+  def random: RandomLogic[S]
+
+  def pause: PauseLogic[S]
+
+  def resume: ResumeLogic[S]
+
+  def stop: StopLogic[S]
+
+  def robot: RobotActionLogic[S]
+
+  def collision: CollisionLogic[S]
+
 /**
  * Module that defines the controller logic for the Scala Robotics Simulator.
  */
@@ -84,38 +101,17 @@ object ControllerModule:
        * @return
        *   a [[Controller]] instance.
        */
-      def apply()(using
-          inc: IncrementLogic[S],
-          tick: TickLogic[S],
-          random: RandomLogic[S],
-          pause: PauseLogic[S],
-          resume: ResumeLogic[S],
-          stop: StopLogic[S],
-          robot: RobotActionLogic[S],
-          collision: CollisionLogic[S],
-      ): Controller[S] = new ControllerImpl
+      def apply()(using bundle: LogicsBundle[S]): Controller[S] = new ControllerImpl
 
       /**
        * Private controller implementation that delegates the simulation loop to the provided model and view.
        */
-      private class ControllerImpl(using
-          inc: IncrementLogic[S],
-          tick: TickLogic[S],
-          random: RandomLogic[S],
-          pause: PauseLogic[S],
-          resume: ResumeLogic[S],
-          stop: StopLogic[S],
-          robot: RobotActionLogic[S],
-          collision: CollisionLogic[S],
-      ) extends Controller[S]:
+      private class ControllerImpl(using bundle: LogicsBundle[S]) extends Controller[S]:
 
         override def start(initialState: S): IO[Unit] =
-          //          val randInt: Int = initialState.simulationRNG.nextIntBetween(0, maxCount)._1
-          //          val list = List.fill(randInt)(Event.Increment)
           for
             queueSim <- Queue.unbounded[IO, Event]
             _ <- context.view.init(queueSim)
-            //            _ <- produceEvents(queueSim, list)
             _ <- runBehavior(queueSim, initialState)
             _ <- simulationLoop(initialState, queueSim)
           yield ()
@@ -158,9 +154,6 @@ object ControllerModule:
             case SimulationStatus.STOPPED =>
               IO.pure(state)
 
-        //        private def produceEvents[A](queue: Queue[IO, A], events: List[A]): IO[Unit] =
-        //          events.traverse_(queue.offer)
-
         private def runBehavior(queue: Queue[IO, Event], state: S): IO[Unit] =
           state.environment.entities.collect { case robot: Robot =>
             for
@@ -170,7 +163,7 @@ object ControllerModule:
                 case Some(a) => queue.offer(Event.RobotAction(queue, robot, a))
                 case None => IO.unit
             yield ()
-          }.toList.sequence.void // TODO: parSequence
+          }.toList.parSequence.void
 
         private def tickEvents(start: Long, tickSpeed: FiniteDuration, state: S): IO[S] =
           for
