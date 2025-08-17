@@ -5,7 +5,7 @@ import scala.collection.immutable.ArraySeq
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-/** Tests for the Grid model, which provides utility methods for creating and manipulating grids of values. */
+/** Tests for the [[Grid]], which provides utility methods for creating and manipulating grids of values. */
 final class GridTest extends AnyFlatSpec with Matchers:
 
   import Grid.*
