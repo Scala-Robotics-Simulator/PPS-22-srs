@@ -66,7 +66,7 @@ object YamlSimulationConfigParser:
       case None => Right[Seq[ConfigError], Simulation](Simulation.simulation)
       case Some(m) =>
         for
-          duration <- getOptional[Int]("duration", m)
+          duration <- getOptional[Long]("duration", m)
           seed <- getOptional[Long]("seed", m)
         yield Simulation.simulation
           |> (sim => duration.fold(sim)(sim.withDuration))

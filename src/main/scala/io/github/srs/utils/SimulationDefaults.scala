@@ -15,7 +15,7 @@ import io.github.srs.model.entity.dynamicentity.sensor.LightSensor
 
 object SimulationDefaults:
 
-  val duration: Option[Int] = None
+  val duration: Option[Long] = None
   val seed: Option[Long] = None
   val debugMode = true
 

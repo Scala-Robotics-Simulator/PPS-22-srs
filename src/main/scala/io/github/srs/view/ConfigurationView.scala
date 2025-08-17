@@ -1,17 +1,19 @@
 package io.github.srs.view
 
-import javax.swing.*
 import java.awt.{ BorderLayout, Dimension, FlowLayout }
+import javax.swing.*
 
 import cats.effect.IO
-import io.github.srs.view.components.configuration.EntitiesPanel
-import io.github.srs.view.components.*
-import io.github.srs.config.SimulationConfig
-import io.github.srs.model.validation.DomainError
-import io.github.srs.model.Simulation.simulation
+import io.github.srs.config.yaml.parser.Decoder
+import io.github.srs.config.{ ConfigResult, SimulationConfig }
 import io.github.srs.model.Simulation
+import io.github.srs.model.Simulation.*
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.environment.dsl.CreationDSL.*
+import io.github.srs.model.validation.DomainError
+import io.github.srs.utils.chaining.Pipe.given
+import io.github.srs.view.components.*
+import io.github.srs.view.components.configuration.EntitiesPanel
 
 /**
  * Defines how the configuration view should behave.
@@ -51,37 +53,38 @@ object ConfigurationView:
     private val frame = new JFrame("Scala Robotics Simulator - Configuration")
 
     private val simulationFields = Seq(
-      FieldSpec("duration", "Duration", TextField(10)),
-      FieldSpec("seed", "Seed", TextField(10)),
+      FieldSpec("duration", "Duration (duration)", TextField(10)),
+      FieldSpec("seed", "Seed (seed)", TextField(10)),
     )
 
     private val environmentFields = Seq(
-      FieldSpec("width", "Width", TextField(5)),
-      FieldSpec("height", "Height", TextField(5)),
+      FieldSpec("width", "Width (width)", TextField(5)),
+      FieldSpec("height", "Height (height)", TextField(5)),
     )
 
     private val baseFieldSpec = Seq(
-      FieldSpec("x position", "X", TextField(3)),
-      FieldSpec("y position", "Y", TextField(3)),
+      FieldSpec("x", "X position (x)", TextField(3)),
+      FieldSpec("y", "Y position (y)", TextField(3)),
     )
 
-    private val baseAndOrient = baseFieldSpec :+ FieldSpec("orientation degrees", "Orientation (degrees)", TextField(3))
+    private val baseAndOrient =
+      baseFieldSpec :+ FieldSpec("orientation", "Orientation (degrees) (orientation)", TextField(3))
 
     private val entityFieldSpecs: Map[String, Seq[FieldSpec]] = Map(
       "Robot" -> (baseAndOrient ++ Seq(
-        FieldSpec("radius meters", "Radius (meters)", TextField(2)),
-        FieldSpec("speed", "Speed", TextField(3)),
-        FieldSpec("containing proximity sensors", "With proximity sensors", CheckBox(true)),
-        FieldSpec("containing light sensors", "With light sensors", CheckBox(true)),
+        FieldSpec("radius", "Radius (meters) (radius)", TextField(2)),
+        FieldSpec("speed", "Speed (speed)", TextField(3)),
+        FieldSpec("proxSens", "With proximity sensors (proxSens)", CheckBox(true)),
+        FieldSpec("lightSens", "With light sensors (lightSens)", CheckBox(true)),
       )),
       "Obstacle" -> (baseAndOrient ++ Seq(
-        FieldSpec("width", "Width", TextField(8)),
-        FieldSpec("height", "Height", TextField(5)),
+        FieldSpec("width", "Width (width)", TextField(8)),
+        FieldSpec("height", "Height (height)", TextField(5)),
       )),
       "Light" -> (baseFieldSpec ++ Seq(
-        FieldSpec("illumination radius", "Illumination radius", TextField(3)),
-        FieldSpec("intensity", "Intensity", TextField(3)),
-        FieldSpec("attenuation", "Attenuation", TextField(3)),
+        FieldSpec("illumination", "Illumination radius (illumination)", TextField(3)),
+        FieldSpec("intensity", "Intensity (intensity)", TextField(3)),
+        FieldSpec("attenuation", "Attenuation (attenuation)", TextField(3)),
       )),
     )
 
@@ -126,30 +129,47 @@ object ConfigurationView:
       IO.async_[SimulationConfig] { cb =>
         // set up GUI and event listener
         startButton.addActionListener { _ =>
-          loadConfig() match
-            case Left(error) => JOptionPane.showMessageDialog(frame, error.errorMessage);
-            case Right(cfg) => cb(Right[Throwable, SimulationConfig](cfg))
+          loadSimulation() match
+            case Left(errors) => JOptionPane.showMessageDialog(frame, errors.fold("")((acc, err) => s"$acc$err \n"))
+            case Right(sim) =>
+              loadEnvironment() match
+                case Left(errors) => JOptionPane.showMessageDialog(frame, errors.fold("")((acc, err) => s"$acc$err \n"))
+                case Right(env) =>
+                  loadConfig(sim, env) match
+                    case Left(error) => JOptionPane.showMessageDialog(frame, error.errorMessage);
+                    case Right(cfg) => cb(Right[Throwable, SimulationConfig](cfg))
         }
       }
     end init
 
     override def close(): IO[Unit] = IO.pure(frame.dispose())
 
-    private def loadConfig(): Either[DomainError, SimulationConfig] =
+    private def loadConfig(
+        simulation: Simulation,
+        environment: Environment,
+    ): Either[DomainError, SimulationConfig] =
       // TODO: update creating the correct simulation config
-      val simulation = loadSimulation()
-      val environment = loadEnvironment()
       for env <- environment.validate
       yield SimulationConfig(simulation, env)
 
-    private def loadSimulation(): Simulation =
-      simulation
+    private def loadSimulation(): ConfigResult[Simulation] =
+      import Decoder.{ getOptional, given }
+      val map = simulationPanel.getValues
+      for
+        duration <- getOptional[Long]("duration", map)
+        seed <- getOptional[Long]("seed", map)
+      yield simulation
+        |> (s => duration.fold(s)(s.withDuration))
+        |> (s => seed.fold(s)(s.withSeed))
 
-    private def loadEnvironment(): Environment =
-      environment
+    private def loadEnvironment(): ConfigResult[Environment] =
+      import Decoder.{ get, given }
+      val map = environmentPanel.getValues
+      for
+        width <- get[Int]("width", map)
+        height <- get[Int]("height", map)
+        entities <- entitiesPanel.getEntities
+      yield environment withWidth width withHeight height containing entities.toSet
 
-    def getSimulationSettings: Map[String, Any] = simulationPanel.getValues
-    def getEnvironmentSettings: Map[String, Any] = environmentPanel.getValues
-    def getEntities: Seq[(String, Map[String, Any])] = entitiesPanel.getEntities
   end ConfigurationViewImpl
 end ConfigurationView

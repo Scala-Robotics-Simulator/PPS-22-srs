@@ -32,6 +32,11 @@ object Decoder:
         case n: Number =>
           if n.intValue() == n.longValue() then Right[Seq[ConfigError], Int](n.intValue())
           else Left[Seq[ConfigError], Int](Seq(ConfigError.InvalidType(field, "Int - value out of range")))
+        case s: String =>
+          try Right[Seq[ConfigError], Int](s.toInt)
+          catch
+            case _: NumberFormatException =>
+              Left[Seq[ConfigError], Int](Seq(ConfigError.InvalidType(field, "Int - invalid string format")))
         case _ => Left[Seq[ConfigError], Int](Seq(ConfigError.InvalidType(field, "Int")))
 
   given Decoder[Long] with
@@ -40,6 +45,11 @@ object Decoder:
       value match
         case l: Long => Right[Seq[ConfigError], Long](l)
         case n: Number => Right[Seq[ConfigError], Long](n.longValue())
+        case s: String =>
+          try Right[Seq[ConfigError], Long](s.toLong)
+          catch
+            case _: NumberFormatException =>
+              Left[Seq[ConfigError], Long](Seq(ConfigError.InvalidType(field, "Long - invalid string format")))
         case _ => Left[Seq[ConfigError], Long](Seq(ConfigError.InvalidType(field, "Long")))
 
   given Decoder[Double] with
@@ -50,6 +60,11 @@ object Decoder:
         case f: Float => Right[Seq[ConfigError], Double](f.toDouble)
         case i: Int => Right[Seq[ConfigError], Double](i.toDouble)
         case n: Number => Right[Seq[ConfigError], Double](n.doubleValue())
+        case s: String =>
+          try Right[Seq[ConfigError], Double](s.toDouble)
+          catch
+            case _: NumberFormatException =>
+              Left[Seq[ConfigError], Double](Seq(ConfigError.InvalidType(field, "Double - invalid string format")))
         case _ => Left[Seq[ConfigError], Double](Seq(ConfigError.InvalidType(field, "Double")))
 
   given Decoder[Boolean] with
@@ -125,6 +140,9 @@ object Decoder:
    */
   def getOptional[A](field: String, map: Map[String, Any])(using decoder: Decoder[A]): ConfigResult[Option[A]] =
     map.get(field) match
-      case Some(value) => decoder.decode(field, value).map(Some(_))
+      case Some(value) =>
+        value match
+          case s: String if s == "" => Right[Seq[ConfigError], Option[A]](None)
+          case _ => decoder.decode(field, value).map(Some(_))
       case None => Right[Seq[ConfigError], Option[A]](None)
 end Decoder

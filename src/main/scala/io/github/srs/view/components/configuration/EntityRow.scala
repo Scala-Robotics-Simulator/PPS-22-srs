@@ -1,10 +1,25 @@
 package io.github.srs.view.components.configuration
 
 import javax.swing.*
-import java.awt.*
+import java.awt.BorderLayout
+import java.awt.GridBagConstraints
+import java.awt.GridBagLayout
+import java.awt.Insets
+import java.util.Locale
 
+import io.github.srs.utils.chaining.Pipe.given
 import io.github.srs.view.components.FieldSpec
 import io.github.srs.view.components.FormPanel
+import io.github.srs.model.entity.Entity
+import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
+import io.github.srs.model.entity.dynamicentity.Robot
+import io.github.srs.model.entity.staticentity.StaticEntity
+import io.github.srs.model.entity.staticentity.dsl.ObstacleDsl.*
+import io.github.srs.model.entity.staticentity.dsl.LightDsl.*
+import io.github.srs.config.yaml.parser.Decoder
+import io.github.srs.config.ConfigResult
+import io.github.srs.model.entity.ShapeType
+import io.github.srs.model.entity.Orientation
 
 /**
  * EntityRow is a JPanel that represents a single entity in the configuration view. It allows users to select the type
@@ -73,13 +88,58 @@ class EntityRow(
    * @return
    *   a tuple containing the entity type and a map of its properties
    */
-  def getEntityType: String = typeCombo.getSelectedItem.asInstanceOf[String]
+  private def getEntityType: String = typeCombo.getSelectedItem.asInstanceOf[String]
 
   /**
-   * Retrieves the values of the properties for the entity represented by this row.
+   * Retrieves the entity represented by this row.
    *
    * @return
-   *   a map where keys are property names and values are the corresponding input values
+   *   a [[ConfigResult]] containing either the parsed entity or a sequence of configuration errors
    */
-  def getEntityValues: Map[String, Any] = propertiesPanel.getValues
+  def getEntity: ConfigResult[Entity] =
+    getEntityType.toLowerCase(Locale.ENGLISH) match
+      case "robot" => parseRobot()
+      case "obstacle" => parseObstacle()
+      case "light" => parseLight()
+
+  private def parseRobot(): ConfigResult[Robot] =
+    import Decoder.{ get, given }
+    val map = propertiesPanel.getValues
+    for
+      x <- get[Double]("x", map)
+      y <- get[Double]("y", map)
+      orientation <- get[Double]("orientation", map)
+      radius <- get[Double]("radius", map)
+      speed <- get[Double]("speed", map)
+      prox <- get[Boolean]("proxSens", map)
+      light <- get[Boolean]("lightSens", map)
+    yield robot
+      .at((x, y))
+      .withOrientation(Orientation(orientation))
+      .withShape(ShapeType.Circle(radius))
+      .withSpeed(speed)
+      |> (r => if prox then r.withProximitySensors else r)
+      |> (r => if light then r.withLightSensors else r)
+
+  private def parseObstacle(): ConfigResult[StaticEntity.Obstacle] =
+    import Decoder.{ get, given }
+    val map = propertiesPanel.getValues
+    for
+      x <- get[Double]("x", map)
+      y <- get[Double]("y", map)
+      orientation <- get[Double]("orientation", map)
+      width <- get[Double]("width", map)
+      height <- get[Double]("height", map)
+    yield obstacle at (x, y) withOrientation Orientation(orientation) withWidth width withHeight height
+
+  private def parseLight(): ConfigResult[StaticEntity.Light] =
+    import Decoder.{ get, given }
+    val map = propertiesPanel.getValues
+    for
+      x <- get[Double]("x", map)
+      y <- get[Double]("y", map)
+      illumintation <- get[Double]("illumination", map)
+      intensity <- get[Double]("intensity", map)
+      attenuation <- get[Double]("attenuation", map)
+    yield light at (x, y) withIlluminationRadius illumintation withIntensity intensity withAttenuation attenuation
 end EntityRow
