@@ -45,6 +45,6 @@ final case class Environment(
     override val entities: Set[Entity] = defaultEntities,
 ) extends EnvironmentParameters
 
-extension (env: Environment)
-  /** Derives the static view of the environment. */
-  def view: EnvironmentView = EnvironmentView.static(env)
+//extension (env: Environment)
+//  /** Derives the static view of the environment. */
+//  def view: EnvironmentView = EnvironmentView.static(env)
