@@ -24,21 +24,33 @@ object RobotActionLogic:
         case r: Robot if r == robot => updatedRobot
         case e => e
 
+    private def computeClosestSafePosition(currentRobot: Robot): Robot =
+      currentRobot
+
     def handleRobotAction(
         s: SimulationState,
         queue: Queue[IO, Event],
         robot: Robot,
         action: Action[IO],
     ): IO[SimulationState] =
+
+      def loop(currentState: SimulationState, currentRobot: Robot): IO[SimulationState] =
+        println(s"${currentRobot.position}")
+        val updatedEntities = updateEnvironment(currentState, robot, currentRobot)
+        val validated = currentState.environment.copy(entities = updatedEntities).validate(insertBoundaries = false)
+        validated match
+          case Right(validEnv) =>
+            IO.pure(currentState.copy(environment = validEnv))
+          case Left(_) =>
+            val safeRobot = computeClosestSafePosition(currentRobot)
+            queue.offer(Event.CollisionDetected(queue, robot, safeRobot)) *>
+              loop(currentState, safeRobot)
+
       for
         updatedRobot <- robot.applyMovementActions[IO](s.dt, action)
-        updatedEntities = updateEnvironment(s, robot, updatedRobot)
-        validated = s.environment.copy(entities = updatedEntities).validate(insertBoundaries = false)
-        newState <- validated match
-          case Right(validEnv) =>
-            IO.pure(s.copy(environment = validEnv))
-          case Left(_) =>
-            queue.offer(Event.CollisionDetected(queue, robot, updatedRobot)) *> IO.pure(s)
+        newState <- loop(s, updatedRobot)
       yield newState
+    end handleRobotAction
+
   end given
 end RobotActionLogic
