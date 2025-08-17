@@ -83,7 +83,7 @@ final class GridTest extends AnyFlatSpec with Matchers:
     val ok = g1.isEmpty && g2.isEmpty && g2.width == 1 && g2.height == 0
     ok shouldBe true
 
-  "Grid" should "flatten with x-fast order" in:
+  it should "flatten with x-fast order" in:
     val grid = Grid.tabulate(C.FlattenW, C.FlattenH)((x, y) => x + 10 * y)
     grid.flattenRowMajor shouldBe C.FlattenExpected
 end GridTest
