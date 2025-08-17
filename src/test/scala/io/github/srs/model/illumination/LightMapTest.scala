@@ -14,7 +14,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 /**
- * Tests for the [[LightMap]], which provides methods for creating and managing light maps.
+ * Tests for [[LightMap]], which provides methods for creating and managing light maps.
  */
 final class LightMapTest extends AnyFlatSpec with Matchers:
 

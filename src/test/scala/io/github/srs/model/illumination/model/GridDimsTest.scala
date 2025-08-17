@@ -10,7 +10,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 /**
- * Tests for the [[GridDims]], which provides utility methods for creating grid dimensions from an environment.
+ * Tests for [[GridDims]], which provides utility methods for creating grid dimensions from an environment.
  */
 final class GridDimsTest extends AnyFlatSpec with Matchers:
 

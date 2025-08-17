@@ -15,7 +15,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 /**
- * Tests for the [[Illumination]], which provides methods for preparing static lighting data,
+ * Tests for [[Illumination]], which provides methods for preparing static lighting data,
  */
 final class IlluminationTest extends AnyFlatSpec with Matchers:
 

@@ -8,7 +8,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 /**
- * Tests for the [[LightField]], which provides methods for sampling light fields at world coordinates.
+ * Tests for [[LightField]], which provides methods for sampling light fields at world coordinates.
  */
 final class LightFieldTest extends AnyFlatSpec with Matchers:
 
