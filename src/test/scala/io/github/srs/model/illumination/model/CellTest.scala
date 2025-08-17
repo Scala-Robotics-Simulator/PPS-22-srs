@@ -6,7 +6,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 /**
- * Tests for the [[Cell]], which provides utility methods for converting world coordinates to cell coordinates.
+ * Tests for [[Cell]], which provides utility methods for converting world coordinates to cell coordinates.
  */
 final class CellTest extends AnyFlatSpec with Matchers:
 
