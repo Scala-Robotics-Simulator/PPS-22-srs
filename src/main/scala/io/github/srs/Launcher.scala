@@ -49,7 +49,7 @@ def mkInitialState(cfg: SimulationConfig): SimulationState =
     i = 0,
     simulationTime = cfg.simulation.duration.map(FiniteDuration(_, MILLISECONDS)),
     simulationSpeed = SimulationSpeed.NORMAL,
-    simulationRNG = SimpleRNG(42L),
+    simulationRNG = SimpleRNG(cfg.simulation.seed.getOrElse(42)),
     simulationStatus = SimulationStatus.RUNNING,
     environment = environment,
   )

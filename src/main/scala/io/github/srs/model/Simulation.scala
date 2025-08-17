@@ -10,7 +10,7 @@ import io.github.srs.utils.SimulationDefaults
  *   The seed for the random number generator. If None, a random seed will be used.
  */
 final case class Simulation(
-    duration: Option[Int] = SimulationDefaults.duration,
+    duration: Option[Long] = SimulationDefaults.duration,
     seed: Option[Long] = SimulationDefaults.seed,
 )
 
@@ -34,7 +34,7 @@ object Simulation:
      * @return
      *   A new simulation instance with the specified duration.
      */
-    infix def withDuration(duration: Int): Simulation =
+    infix def withDuration(duration: Long): Simulation =
       simulation.copy(duration = Some(duration))
 
     /**
