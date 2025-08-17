@@ -43,7 +43,7 @@ object ScaleFactor:
      * Converts a point in world coordinates to the corresponding floored cell coordinates.
      *
      * @param p
-     *   The point in world coordinate¶.
+     *   The point in world coordinates.
      * @return
      *   A tuple (Int, Int) representing the cell coordinates.
      */
