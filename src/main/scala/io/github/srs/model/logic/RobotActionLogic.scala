@@ -11,6 +11,7 @@ import io.github.srs.model.environment.ValidEnvironment
 import io.github.srs.model.environment.dsl.CreationDSL.validate
 import io.github.srs.model.{ ModelModule, SimulationState }
 import io.github.srs.utils.EqualityGivenInstances.given_CanEqual_Robot_Robot
+import io.github.srs.utils.SimulationDefaults.debugMode
 
 trait RobotActionLogic[S <: ModelModule.State]:
   def handleRobotAction(s: S, queue: Queue[IO, Event], robot: Robot, action: Action[IO]): IO[S]
@@ -24,8 +25,8 @@ object RobotActionLogic:
         case r: Robot if r == robot => updatedRobot
         case e => e
 
-    private def computeClosestSafePosition(currentRobot: Robot): Robot =
-      currentRobot
+    private def computeClosestSafePosition(robot: Robot): Robot =
+      robot
 
     def handleRobotAction(
         s: SimulationState,
@@ -41,12 +42,13 @@ object RobotActionLogic:
           case Right(validEnv) =>
             IO.pure(currentState.copy(environment = validEnv))
           case Left(_) =>
-            val safeRobot = computeClosestSafePosition(currentRobot)
+            val safeRobot = computeClosestSafePosition(robot)
             queue.offer(Event.CollisionDetected(queue, robot, safeRobot)) *>
               loop(currentState, safeRobot)
 
       for
         updatedRobot <- robot.applyMovementActions[IO](s.dt, action)
+        _ <- if debugMode then IO.println(s"${updatedRobot.position}") else IO.unit
         newState <- loop(s, updatedRobot)
       yield newState
     end handleRobotAction

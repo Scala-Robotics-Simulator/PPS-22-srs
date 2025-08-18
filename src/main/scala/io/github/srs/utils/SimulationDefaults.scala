@@ -16,7 +16,7 @@ object SimulationDefaults:
 
   val duration: Option[Int] = None
   val seed: Option[Long] = None
-  val debugMode = false
+  val debugMode = true
 
   object SimulationConfig:
     val maxCount = 10_000
