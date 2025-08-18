@@ -5,7 +5,6 @@ import scala.language.postfixOps
 import scala.concurrent.duration.DurationInt
 
 import cats.effect.std.Queue
-import cats.effect.unsafe.implicits.global
 import cats.effect.{ Clock, IO }
 import cats.syntax.all.*
 import io.github.srs.model.*
@@ -14,25 +13,9 @@ import io.github.srs.model.UpdateLogic.*
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
 import io.github.srs.model.logic.*
+import io.github.srs.utils.SimulationDefaults.debugMode
 import io.github.srs.utils.random.RNG
 import io.github.srs.utils.random.RandomDSL.{ generate, shuffle }
-
-trait ControllerLogic[S <: ModelModule.State]:
-  def inc: IncrementLogic[S]
-
-  def tick: TickLogic[S]
-
-  def random: RandomLogic[S]
-
-  def pause: PauseLogic[S]
-
-  def resume: ResumeLogic[S]
-
-  def stop: StopLogic[S]
-
-  def robot: RobotActionLogic[S]
-
-  def collision: CollisionLogic[S]
 
 /**
  * Module that defines the controller logic for the Scala Robotics Simulator.
@@ -123,7 +106,7 @@ object ControllerModule:
               _ <- runBehavior(queue, state).whenA(state.simulationStatus == SimulationStatus.RUNNING)
 
               events <- queue.tryTakeN(Some(50))
-              shuffledEvents = shuffleEvents(queue, state, events)
+              shuffledEvents <- shuffleEvents(queue, state, events)
               newState <- handleEvents(state, shuffledEvents)
 
               _ <- context.view.render(newState)
@@ -134,7 +117,7 @@ object ControllerModule:
                 newState.simulationTime.exists(max => newState.elapsedTime >= max)
 
               endTime <- Clock[IO].realTime.map(_.toMillis)
-              _ <- IO.println(s"Simulation loop took ${endTime - startTime} ms")
+              _ <- if debugMode then IO.println(s"Simulation loop took ${endTime - startTime} ms") else IO.unit
 
               _ <- if stop then IO.unit else loop(nextState)
             yield ()
@@ -175,13 +158,12 @@ object ControllerModule:
             tick <- handleEvent(state, Event.Tick(tickSpeed))
           yield tick
 
-        private def shuffleEvents(queue: Queue[IO, Event], state: S, events: Seq[Event]): Seq[Event] =
+        private def shuffleEvents(queue: Queue[IO, Event], state: S, events: Seq[Event]): IO[Seq[Event]] =
           val (controllerEvents, otherEvents) = events.partition:
             case _: Event.RobotAction => false
             case _ => true
           val (shuffledEvents, nextRNG: RNG) = state.simulationRNG generate (otherEvents shuffle)
-          queue.offer(Event.Random(nextRNG)).unsafeRunAndForget()
-          controllerEvents ++ shuffledEvents
+          queue.offer(Event.Random(nextRNG)).as(controllerEvents ++ shuffledEvents)
 
         private def handleEvents(state: S, shuffledEvents: Seq[Event]): IO[S] =
           for finalState <- shuffledEvents.foldLeft(IO.pure(state)) { (taskState, event) =>
