@@ -39,7 +39,7 @@ class YamlConfigManagerTest extends AnyFlatSpec with Matchers:
     val _ = config.environment.entities.exists(_.position == Point2D(2, 2)) should be(true)
     val _ = config.environment.entities.exists(e =>
       e.position == Point2D(3, 1) && (e match
-        case Robot(_, _, _, _,_,  sensors, _) =>
+        case Robot(_, _, _, _, _, sensors, _) =>
           sensors == stdProximitySensors ++ stdLightSensors),
     ) should be(true)
 
@@ -49,7 +49,10 @@ class YamlConfigManagerTest extends AnyFlatSpec with Matchers:
     val robotId = SimulationDefaults.DynamicEntity.Robot.defaultId
     val orientation = Orientation(0.0)
     val l =
-      light withId lightId at (1.0, 1.0) withIntensity 0.5 withAttenuation 1.0 withIlluminationRadius 8.0 withOrientation orientation
+      light withId lightId at (
+        1.0,
+        1.0,
+      ) withIntensity 0.5 withAttenuation 1.0 withIlluminationRadius 8.0 withOrientation orientation
     val o = obstacle withId obstacleId at (2.0, 2.0) withWidth 1.0 withHeight 1.0 withOrientation orientation
     val r = robot withId robotId at (4.0, 4.0) withOrientation orientation withSpeed 1.0 withShape Circle(
       0.5,

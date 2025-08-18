@@ -1,19 +1,19 @@
 package io.github.srs
 
+import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
+
 import cats.effect.IO
 import io.github.srs.config.SimulationConfig
 import io.github.srs.controller.ControllerModule
 import io.github.srs.controller.ControllerModule.Controller
 import io.github.srs.model.ModelModule.Model
-import io.github.srs.model.SimulationConfig.{SimulationSpeed, SimulationStatus}
+import io.github.srs.model.SimulationConfig.{ SimulationSpeed, SimulationStatus }
 import io.github.srs.model.environment.dsl.CreationDSL.validate
 import io.github.srs.model.logic.simulationStateLogicsBundle
-import io.github.srs.model.{ModelModule, SimulationState}
+import io.github.srs.model.{ ModelModule, SimulationState }
 import io.github.srs.utils.random.SimpleRNG
 import io.github.srs.view.ViewModule
 import io.github.srs.view.ViewModule.View
-
-import scala.concurrent.duration.{FiniteDuration, MILLISECONDS}
 
 /**
  * Launcher object that initializes the simulation.
