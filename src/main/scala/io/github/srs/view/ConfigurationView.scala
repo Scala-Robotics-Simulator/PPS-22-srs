@@ -2,26 +2,14 @@ package io.github.srs.view
 
 import java.awt.{ BorderLayout, Dimension, FlowLayout }
 import javax.swing.*
-import javax.swing.filechooser.FileNameExtensionFilter
-
-import scala.util.{ Failure, Success }
-import scala.io.Source
 
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
-import fs2.io.file.{ Files, Path }
-import io.github.srs.config.yaml.parser.Decoder
-import io.github.srs.config.{ ConfigResult, SimulationConfig, YamlConfigManager }
-import io.github.srs.model.Simulation
-import io.github.srs.model.Simulation.*
-import io.github.srs.model.environment.Environment
+import io.github.srs.config.SimulationConfig
 import io.github.srs.model.environment.dsl.CreationDSL.*
 import io.github.srs.model.validation.DomainError
-import io.github.srs.utils.chaining.Pipe.given
-import io.github.srs.utils.loader.ResourceFileLister
 import io.github.srs.view.components.*
-import io.github.srs.view.components.configuration.EntitiesPanel
-import io.github.srs.config.yaml.YamlManager
+import io.github.srs.view.components.configuration.*
 
 /**
  * Defines how the configuration view should behave.
@@ -59,24 +47,16 @@ object ConfigurationView:
 
   @SuppressWarnings(
     Array(
-      "org.wartremover.warts.AsInstanceOf",
-      "scalafix:DisableSyntax.asInstanceOf",
+      "org.wartremover.warts.Var",
     ),
   )
   private class ConfigurationViewImpl extends ConfigurationView:
-    private val configsPath = "configurations/default"
     private val frame = new JFrame("Scala Robotics Simulator - Configuration")
 
-    private val simulationFields = Seq(
-      FieldSpec("duration", "Duration", TextField(10)),
-      FieldSpec("seed", "Seed", TextField(10)),
-    )
+    // State to hold the result promise
+    private var resultPromise: Option[cats.effect.Deferred[IO, SimulationConfig]] = None
 
-    private val environmentFields = Seq(
-      FieldSpec("width", "Width", TextField(5)),
-      FieldSpec("height", "Height", TextField(5)),
-    )
-
+    // Define entity field specifications
     private val baseFieldSpec = Seq(
       FieldSpec("x", "X position", TextField(3)),
       FieldSpec("y", "Y position", TextField(3)),
@@ -103,92 +83,71 @@ object ConfigurationView:
       )),
     )
 
-    private val simulationPanel = new FormPanel("Simulation Settings", simulationFields)
-    private val environmentPanel = new FormPanel("Environment Settings", environmentFields)
+    // Component panels with callbacks
+    private val simulationPanel = new SimulationSettingsPanel(
+      onValidationError = showValidationErrors,
+    )
+
+    private val environmentPanel = new EnvironmentSettingsPanel(
+      onValidationError = showValidationErrors,
+    )
+
     private val entitiesPanel = new EntitiesPanel(entityFieldSpecs)
 
-    private val loadButton = new JButton("Load")
-    private val saveButton = new JButton("Save")
-    private val startButton = new JButton("Start")
+    private val controlsPanel = new ConfigurationControlsPanel(
+      onConfigLoaded = loadConfiguration,
+      onConfigSave = getCurrentConfiguration,
+      onConfigChanged = _ => (), // Not needed as load handles this
+    )
 
-    loadButton.addActionListener: _ =>
-      val chooser = new JFileChooser()
-      chooser.setFileFilter(new FileNameExtensionFilter("YAML files", "yml", "yaml"))
-      val result = chooser.showOpenDialog(frame)
-      if result == JFileChooser.APPROVE_OPTION then
-        val path = Path.fromNioPath(java.nio.file.Paths.get(chooser.getSelectedFile.toURI))
-        val res = YamlConfigManager[IO](path).load.unsafeRunSync()
-        res match
-          case Left(errors) =>
-            JOptionPane.showMessageDialog(
-              frame,
-              s"Parsing failed with errors: ${errors.mkString(", ")}",
-              "Error loading config",
-              JOptionPane.ERROR_MESSAGE,
-            )
-          case Right(config) => storeConfig(config)
+    // Additional control for starting simulation
+    private val startButton = new JButton("Start Simulation")
 
-    saveButton.addActionListener: _ =>
+    private def showValidationErrors(errors: Seq[String]): Unit =
+      JOptionPane.showMessageDialog(
+        frame,
+        errors.mkString("\n"),
+        "Validation Errors",
+        JOptionPane.ERROR_MESSAGE,
+      )
+
+    private def loadConfiguration(config: SimulationConfig): Unit =
+      // Update all panels with the loaded configuration
+      simulationPanel.setSimulation(config.simulation)
+      environmentPanel.setEnvironment(config.environment)
+      entitiesPanel.setEntities(config.environment.entities)
+
+    private def getCurrentConfiguration(): Option[SimulationConfig] =
       extractConfig() match
-        case Some(cfg) =>
-          val chooser = new JFileChooser()
-          chooser.setFileFilter(new FileNameExtensionFilter("YAML files", "yml", "yaml"))
-          val result = chooser.showOpenDialog(frame)
-          if result == JFileChooser.APPROVE_OPTION then
-            val path = Path.fromNioPath(java.nio.file.Paths.get(chooser.getSelectedFile.toURI))
-            val saver = for
-              _ <- YamlConfigManager[IO](path).save(cfg)
-              _ <- IO.pure(
-                JOptionPane.showMessageDialog(
-                  frame,
-                  "File saved",
-                  "Save configuration",
-                  JOptionPane.INFORMATION_MESSAGE,
-                ),
-              )
-            yield ()
-            saver.unsafeRunAsync(_ => ())
+        case Some(config) =>
+          Some(config)
+        case None => None
 
-        case None => ()
+    private def startSimulation(): Unit =
+      extractConfig() match
+        case Some(config) =>
+          // Complete the promise to return the configuration
+          resultPromise.foreach(_.complete(config).unsafeRunSync())
+          frame.dispose()
+        case None =>
+          showValidationErrors(Seq("Please fix configuration errors before starting"))
 
-    def init(): IO[SimulationConfig] =
+    private def setupUI(): Unit =
       frame.setMinimumSize(new Dimension(700, 500))
       frame.setLayout(new BorderLayout())
 
-      // Top panel with buttons and settings
+      // Top panel with controls and settings
       val topPanel = new JPanel(new BorderLayout())
-
-      val defaultConfigs = loadDefaultConfigs()
-
-      // buttons + combo
-      val configsComboBox = new JComboBox(defaultConfigs.toArray)
-      val configsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER))
-      configsPanel.add(configsComboBox)
-      configsPanel.add(loadButton)
-      configsPanel.add(saveButton)
-
-      configsComboBox.addActionListener(_ =>
-        Option(configsComboBox.getSelectedItem) match
-          case Some(item) =>
-            val config = item.asInstanceOf[String]
-            loadResourceConfig(config).unsafeRunAsync(_ => ())
-          // Handle the selection
-          case None => (),
-          // Handle no selection
-      )
-
-      val controlsPanel = new JPanel(new BorderLayout())
-      controlsPanel.add(configsPanel, BorderLayout.CENTER)
+      topPanel.add(controlsPanel, BorderLayout.NORTH)
 
       val settingsPanel = new JPanel(new BorderLayout())
       settingsPanel.add(simulationPanel, BorderLayout.NORTH)
       settingsPanel.add(environmentPanel, BorderLayout.SOUTH)
-
-      topPanel.add(controlsPanel, BorderLayout.NORTH)
       topPanel.add(settingsPanel, BorderLayout.SOUTH)
 
       // Bottom panel with start button
       val bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT))
+      startButton.addActionListener(_ => startSimulation())
       bottomPanel.add(startButton)
 
       frame.add(topPanel, BorderLayout.NORTH)
@@ -198,113 +157,47 @@ object ConfigurationView:
       frame.pack()
       frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
 
-      defaultConfigs.headOption match
-        case Some(config) => loadResourceConfig(config).unsafeRunAsync(_ => ())
-        case None => ()
+    end setupUI
 
-      frame.setVisible(true)
-
-      IO.async_[SimulationConfig]: cb =>
-        startButton.addActionListener: _ =>
-          extractConfig() match
-            case Some(cfg) => cb(Right[Throwable, SimulationConfig](cfg))
-            case None => ()
-    end init
+    def init(): IO[SimulationConfig] =
+      for
+        promise <- cats.effect.Deferred[IO, SimulationConfig]
+        _ <- IO.delay:
+          resultPromise = Some(promise)
+          setupUI()
+          frame.setVisible(true)
+        config <- promise.get
+      yield config
 
     private def extractConfig(): Option[SimulationConfig] =
-      loadSimulation() match
-        case Left(errors) =>
-          JOptionPane.showMessageDialog(
-            frame,
-            errors.mkString("\n"),
-            "Invalid simulation value(s)",
-            JOptionPane.ERROR_MESSAGE,
-          )
-          None
-        case Right(sim) =>
-          loadEnvironment() match
-            case Left(errors) =>
-              JOptionPane.showMessageDialog(
-                frame,
-                errors.mkString("\n"),
-                "Invalid environment value(s)",
-                JOptionPane.ERROR_MESSAGE,
-              )
+      val simulationResult = simulationPanel.getSimulation
+      val environmentResult = environmentPanel.getEnvironmentBase
+      val entitiesResult = entitiesPanel.getEntities
+
+      (simulationResult, environmentResult, entitiesResult) match
+        case (Right(simulation), Right(environmentBase), Right(entities)) =>
+          val environment = environmentBase.copy(entities = entities.toSet)
+          environment.validate match
+            case Left(error) =>
+              showValidationErrors(Seq(s"Environment validation error: ${error.errorMessage}"))
               None
-            case Right(env) =>
-              loadConfig(sim, env) match
-                case Left(error) =>
-                  JOptionPane.showMessageDialog(
-                    frame,
-                    error.errorMessage,
-                    "Invalid configuration",
-                    JOptionPane.ERROR_MESSAGE,
-                  )
-                  None
-                case Right(cfg) => Some(cfg)
+            case Right(validatedEnv) =>
+              Some(SimulationConfig(simulation, validatedEnv))
+        case _ =>
+          val allErrors = Seq(simulationResult, environmentResult, entitiesResult).collect { case Left(errors) =>
+            errors
+          }.flatten
+            .map:
+              case io.github.srs.config.ConfigError.MissingField(field) => s"Missing field: $field"
+              case io.github.srs.config.ConfigError.ParsingError(message) => s"Parsing error: $message"
+              case io.github.srs.config.ConfigError.InvalidType(field, expected) =>
+                s"Invalid type for $field: expected $expected"
+          showValidationErrors(allErrors)
+          None
+      end match
+    end extractConfig
 
     override def close(): IO[Unit] = IO.pure(frame.dispose())
-
-    private def loadResourceConfig(config: String): IO[Unit] =
-      val pathString = s"/${configsPath}/${config}.yml"
-      val resource = getClass.getResourceAsStream(pathString)
-      val content = Source.fromInputStream(resource, "UTF-8").getLines().mkString("\n")
-      for res <- YamlManager.parse[IO](content)
-      yield res match
-        case Left(errors) =>
-          JOptionPane.showMessageDialog(
-            frame,
-            s"Parsing default configuration failed with errors: ${errors.mkString(", ")}",
-            "Error loading default config",
-            JOptionPane.ERROR_MESSAGE,
-          )
-        case Right(config) => storeConfig(config)
-
-    private def loadConfig(
-        simulation: Simulation,
-        environment: Environment,
-    ): Either[DomainError, SimulationConfig] =
-      for env <- environment.validate
-      yield SimulationConfig(simulation, env)
-
-    private def loadSimulation(): ConfigResult[Simulation] =
-      import Decoder.{ getOptional, given }
-      val map = simulationPanel.getValues
-      for
-        duration <- getOptional[Long]("duration", map)
-        seed <- getOptional[Long]("seed", map)
-      yield simulation
-        |> (s => duration.fold(s)(s.withDuration))
-        |> (s => seed.fold(s)(s.withSeed))
-
-    private def loadEnvironment(): ConfigResult[Environment] =
-      import Decoder.{ get, given }
-      val map = environmentPanel.getValues
-      for
-        width <- get[Int]("width", map)
-        height <- get[Int]("height", map)
-        entities <- entitiesPanel.getEntities
-      yield environment withWidth width withHeight height containing entities.toSet
-
-    private def storeConfig(config: SimulationConfig): Unit =
-      val simulationMap = Map(
-        "duration" -> config.simulation.duration.map(_.toString()).getOrElse(""),
-        "seed" -> config.simulation.seed.map(_.toString()).getOrElse(""),
-      )
-      simulationPanel.setValues(simulationMap)
-      val environmentMap = Map(
-        "width" -> config.environment.width.toString,
-        "height" -> config.environment.height.toString,
-      )
-      environmentPanel.setValues(environmentMap)
-      entitiesPanel.setEntities(config.environment.entities)
-
-    private def loadDefaultConfigs(): Seq[String] =
-      ResourceFileLister.listConfigurationFilesWithExtension(configsPath, "yml") match
-        case Failure(exception) =>
-          println(s"Unable to load configurations: ${exception.getMessage}")
-          Seq.empty[String]
-        case Success(files) => files.map(_.getFileName().toString()).map(_.replaceAll("\\.[^.]*$", ""))
 
   end ConfigurationViewImpl
 
