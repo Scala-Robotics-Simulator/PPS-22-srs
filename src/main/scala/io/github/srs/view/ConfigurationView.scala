@@ -4,21 +4,24 @@ import java.awt.{ BorderLayout, Dimension, FlowLayout }
 import javax.swing.*
 import javax.swing.filechooser.FileNameExtensionFilter
 
+import scala.util.{ Failure, Success }
+import scala.io.Source
+
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
+import fs2.io.file.{ Files, Path }
 import io.github.srs.config.yaml.parser.Decoder
-import io.github.srs.config.{ ConfigResult, SimulationConfig }
+import io.github.srs.config.{ ConfigResult, SimulationConfig, YamlConfigManager }
 import io.github.srs.model.Simulation
 import io.github.srs.model.Simulation.*
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.environment.dsl.CreationDSL.*
 import io.github.srs.model.validation.DomainError
 import io.github.srs.utils.chaining.Pipe.given
+import io.github.srs.utils.loader.ResourceFileLister
 import io.github.srs.view.components.*
 import io.github.srs.view.components.configuration.EntitiesPanel
-import fs2.io.file.Files
-import fs2.io.file.Path
-import io.github.srs.config.YamlConfigManager
+import io.github.srs.config.yaml.YamlManager
 
 /**
  * Defines how the configuration view should behave.
@@ -54,7 +57,14 @@ object ConfigurationView:
    */
   def apply(): ConfigurationView = new ConfigurationViewImpl()
 
+  @SuppressWarnings(
+    Array(
+      "org.wartremover.warts.AsInstanceOf",
+      "scalafix:DisableSyntax.asInstanceOf",
+    ),
+  )
   private class ConfigurationViewImpl extends ConfigurationView:
+    private val configsPath = "configurations/default"
     private val frame = new JFrame("Scala Robotics Simulator - Configuration")
 
     private val simulationFields = Seq(
@@ -110,7 +120,12 @@ object ConfigurationView:
         val res = YamlConfigManager[IO](path).load.unsafeRunSync()
         res match
           case Left(errors) =>
-            JOptionPane.showMessageDialog(frame, s"Parsing failed with errors: ${errors.mkString(", ")}")
+            JOptionPane.showMessageDialog(
+              frame,
+              s"Parsing failed with errors: ${errors.mkString(", ")}",
+              "Error loading config",
+              JOptionPane.ERROR_MESSAGE,
+            )
           case Right(config) => storeConfig(config)
 
     saveButton.addActionListener: _ =>
@@ -143,15 +158,33 @@ object ConfigurationView:
       // Top panel with buttons and settings
       val topPanel = new JPanel(new BorderLayout())
 
-      val buttonPanelTop = new JPanel(new FlowLayout(FlowLayout.LEFT))
-      buttonPanelTop.add(loadButton)
-      buttonPanelTop.add(saveButton)
+      val defaultConfigs = loadDefaultConfigs()
+
+      // buttons + combo
+      val configsComboBox = new JComboBox(defaultConfigs.toArray)
+      val configsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER))
+      configsPanel.add(configsComboBox)
+      configsPanel.add(loadButton)
+      configsPanel.add(saveButton)
+
+      configsComboBox.addActionListener(_ =>
+        Option(configsComboBox.getSelectedItem) match
+          case Some(item) =>
+            val config = item.asInstanceOf[String]
+            loadResourceConfig(config).unsafeRunAsync(_ => ())
+          // Handle the selection
+          case None => (),
+          // Handle no selection
+      )
+
+      val controlsPanel = new JPanel(new BorderLayout())
+      controlsPanel.add(configsPanel, BorderLayout.CENTER)
 
       val settingsPanel = new JPanel(new BorderLayout())
       settingsPanel.add(simulationPanel, BorderLayout.NORTH)
       settingsPanel.add(environmentPanel, BorderLayout.SOUTH)
 
-      topPanel.add(buttonPanelTop, BorderLayout.NORTH)
+      topPanel.add(controlsPanel, BorderLayout.NORTH)
       topPanel.add(settingsPanel, BorderLayout.SOUTH)
 
       // Bottom panel with start button
@@ -164,6 +197,11 @@ object ConfigurationView:
 
       frame.pack()
       frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
+
+      defaultConfigs.headOption match
+        case Some(config) => loadResourceConfig(config).unsafeRunAsync(_ => ())
+        case None => ()
+
       frame.setVisible(true)
 
       IO.async_[SimulationConfig]: cb =>
@@ -207,6 +245,21 @@ object ConfigurationView:
 
     override def close(): IO[Unit] = IO.pure(frame.dispose())
 
+    private def loadResourceConfig(config: String): IO[Unit] =
+      val pathString = s"/${configsPath}/${config}.yml"
+      val resource = getClass.getResourceAsStream(pathString)
+      val content = Source.fromInputStream(resource, "UTF-8").getLines().mkString("\n")
+      for res <- YamlManager.parse[IO](content)
+      yield res match
+        case Left(errors) =>
+          JOptionPane.showMessageDialog(
+            frame,
+            s"Parsing default configuration failed with errors: ${errors.mkString(", ")}",
+            "Error loading default config",
+            JOptionPane.ERROR_MESSAGE,
+          )
+        case Right(config) => storeConfig(config)
+
     private def loadConfig(
         simulation: Simulation,
         environment: Environment,
@@ -245,6 +298,14 @@ object ConfigurationView:
       )
       environmentPanel.setValues(environmentMap)
       entitiesPanel.setEntities(config.environment.entities)
+
+    private def loadDefaultConfigs(): Seq[String] =
+      ResourceFileLister.listConfigurationFilesWithExtension(configsPath, "yml") match
+        case Failure(exception) =>
+          println(s"Unable to load configurations: ${exception.getMessage}")
+          Seq.empty[String]
+        case Success(files) => files.map(_.getFileName().toString()).map(_.replaceAll("\\.[^.]*$", ""))
+
   end ConfigurationViewImpl
 
 end ConfigurationView
