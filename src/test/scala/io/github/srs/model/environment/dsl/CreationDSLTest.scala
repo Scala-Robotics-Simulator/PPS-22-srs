@@ -46,11 +46,6 @@ class CreationDSLTest extends AnyFlatSpec with Matchers:
     val validationResult = env.validate
     validationResult.isRight shouldBe true
 
-  it should "validate the environment without adding boundaries" in:
-    val env = environment
-    val validationResult = env.validate(insertBoundaries = false)
-    validationResult.isRight shouldBe true
-
   it should "not allow colliding entities" in:
     val entity1 = Obstacle(pos = (1.0, 1.0), orient = Orientation(0.0), width = 1.0, height = 1.0)
     val entity2 = Obstacle(pos = (1.5, 1.5), orient = Orientation(0.0), width = 1.0, height = 1.0)

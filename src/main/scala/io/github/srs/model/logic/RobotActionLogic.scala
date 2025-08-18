@@ -37,7 +37,7 @@ object RobotActionLogic:
       def loop(currentState: SimulationState, currentRobot: Robot): IO[SimulationState] =
         println(s"${currentRobot.position}")
         val updatedEntities = updateEnvironment(currentState, robot, currentRobot)
-        val validated = currentState.environment.copy(entities = updatedEntities).validate(insertBoundaries = false)
+        val validated = currentState.environment.copy(entities = updatedEntities).validate
         validated match
           case Right(validEnv) =>
             IO.pure(currentState.copy(environment = validEnv))

@@ -18,10 +18,7 @@ final class GridDimsTest extends AnyFlatSpec with Matchers:
 
     /** Creates an environment with specified width and height, inserting boundaries */
     def envWithBoundaries(w: Int, h: Int): Environment =
-      (environment withWidth w withHeight h)
-        .validate(insertBoundaries = true)
-        .toOption
-        .value
+      (environment withWidth w withHeight h).validate.toOption.value
 
     val S1: ScaleFactor = ScaleFactor.validate(1).toOption.value
     val S3: ScaleFactor = ScaleFactor.validate(3).toOption.value

@@ -71,29 +71,18 @@ object CreationDSL:
       env.copy(entities = env.entities + entity)
 
     /**
-     * Validates the environment.
-     * @return
-     *   A [[Validation]] that contains the validated environment or an error message if validation fails.
-     */
-    infix def validate: Validation[ValidEnvironment] =
-      validate(insertBoundaries = true)
-
-    /**
      * Validates the environment with an option to insert boundaries.
      * @param insertBoundaries
      *   whether to insert boundaries into the environment.
      * @return
      *   A [[Validation]] that contains the validated environment or an error message if validation fails.
      */
-    infix def validate(insertBoundaries: Boolean): Validation[ValidEnvironment] =
+    infix def validate: Validation[ValidEnvironment] =
       import io.github.srs.utils.SimulationDefaults.Environment.*
       val entities = env.entities.filterNot:
         case _: Boundary => true
         case _ => false
-      val boundaries =
-        if insertBoundaries || entities.sizeIs != env.entities.size then
-          Boundary.createBoundaries(env.width, env.height)
-        else Set.empty[Entity]
+      val boundaries = Boundary.createBoundaries(env.width, env.height)
       for
         width <- bounded("width", env.width, minWidth, maxWidth, includeMax = true)
         height <- bounded("height", env.height, minHeight, maxHeight, includeMax = true)
