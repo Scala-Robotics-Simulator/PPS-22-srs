@@ -1,0 +1,24 @@
+simulation:
+  seed: 42
+environment:
+  width: 10
+  height: 10
+  entities:
+  - obstacle:
+      position: [8.0, 4.0]
+      orientation: 90.0
+      width: 7.0
+      height: 0.2
+  - obstacle:
+      position: [5.0, 5.0]
+      orientation: 0.0
+      width: 3.0
+      height: 0.5
+  - robot:
+      speed: 1.0
+      withLightSensors: true
+      orientation: 90.0
+      position: [3.0, 1.0]
+      radius: 0.5
+      withProximitySensors: true
+      behavior: collision-avoidance

@@ -6,7 +6,6 @@ import javax.swing.filechooser.FileNameExtensionFilter
 
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
-import fs2.text
 import io.github.srs.config.yaml.parser.Decoder
 import io.github.srs.config.{ ConfigResult, SimulationConfig }
 import io.github.srs.model.Simulation
@@ -18,8 +17,8 @@ import io.github.srs.utils.chaining.Pipe.given
 import io.github.srs.view.components.*
 import io.github.srs.view.components.configuration.EntitiesPanel
 import fs2.io.file.Files
-import io.github.srs.config.yaml.YamlManager
 import fs2.io.file.Path
+import io.github.srs.config.YamlConfigManager
 
 /**
  * Defines how the configuration view should behave.
@@ -102,19 +101,40 @@ object ConfigurationView:
     private val saveButton = new JButton("Save")
     private val startButton = new JButton("Start")
 
-    loadButton.addActionListener(_ =>
+    loadButton.addActionListener: _ =>
       val chooser = new JFileChooser()
       chooser.setFileFilter(new FileNameExtensionFilter("YAML files", "yml", "yaml"))
       val result = chooser.showOpenDialog(frame)
       if result == JFileChooser.APPROVE_OPTION then
         val path = Path.fromNioPath(java.nio.file.Paths.get(chooser.getSelectedFile.toURI))
-        val yamlContent = Files[IO].readAll(path).through(text.utf8.decode).compile.string.unsafeRunSync()
-        val res = YamlManager.parse[IO](yamlContent).unsafeRunSync()
+        val res = YamlConfigManager[IO](path).load.unsafeRunSync()
         res match
           case Left(errors) =>
             JOptionPane.showMessageDialog(frame, s"Parsing failed with errors: ${errors.mkString(", ")}")
-          case Right(config) => storeConfig(config),
-    )
+          case Right(config) => storeConfig(config)
+
+    saveButton.addActionListener: _ =>
+      extractConfig() match
+        case Some(cfg) =>
+          val chooser = new JFileChooser()
+          chooser.setFileFilter(new FileNameExtensionFilter("YAML files", "yml", "yaml"))
+          val result = chooser.showOpenDialog(frame)
+          if result == JFileChooser.APPROVE_OPTION then
+            val path = Path.fromNioPath(java.nio.file.Paths.get(chooser.getSelectedFile.toURI))
+            val saver = for
+              _ <- YamlConfigManager[IO](path).save(cfg)
+              _ <- IO.pure(
+                JOptionPane.showMessageDialog(
+                  frame,
+                  "File saved",
+                  "Save configuration",
+                  JOptionPane.INFORMATION_MESSAGE,
+                ),
+              )
+            yield ()
+            saver.unsafeRunAsync(_ => ())
+
+        case None => ()
 
     def init(): IO[SimulationConfig] =
       frame.setMinimumSize(new Dimension(700, 500))
@@ -146,38 +166,44 @@ object ConfigurationView:
       frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
       frame.setVisible(true)
 
-      IO.async_[SimulationConfig] { cb =>
-        startButton.addActionListener { _ =>
-          loadSimulation() match
+      IO.async_[SimulationConfig]: cb =>
+        startButton.addActionListener: _ =>
+          extractConfig() match
+            case Some(cfg) => cb(Right[Throwable, SimulationConfig](cfg))
+            case None => ()
+    end init
+
+    private def extractConfig(): Option[SimulationConfig] =
+      loadSimulation() match
+        case Left(errors) =>
+          JOptionPane.showMessageDialog(
+            frame,
+            errors.mkString("\n"),
+            "Invalid simulation value(s)",
+            JOptionPane.ERROR_MESSAGE,
+          )
+          None
+        case Right(sim) =>
+          loadEnvironment() match
             case Left(errors) =>
               JOptionPane.showMessageDialog(
                 frame,
                 errors.mkString("\n"),
-                "Invalid simulation value(s)",
+                "Invalid environment value(s)",
                 JOptionPane.ERROR_MESSAGE,
               )
-            case Right(sim) =>
-              loadEnvironment() match
-                case Left(errors) =>
+              None
+            case Right(env) =>
+              loadConfig(sim, env) match
+                case Left(error) =>
                   JOptionPane.showMessageDialog(
                     frame,
-                    errors.mkString("\n"),
-                    "Invalid environment value(s)",
+                    error.errorMessage,
+                    "Invalid configuration",
                     JOptionPane.ERROR_MESSAGE,
                   )
-                case Right(env) =>
-                  loadConfig(sim, env) match
-                    case Left(error) =>
-                      JOptionPane.showMessageDialog(
-                        frame,
-                        error.errorMessage,
-                        "Invalid configuration",
-                        JOptionPane.ERROR_MESSAGE,
-                      )
-                    case Right(cfg) => cb(Right[Throwable, SimulationConfig](cfg))
-        }
-      }
-    end init
+                  None
+                case Right(cfg) => Some(cfg)
 
     override def close(): IO[Unit] = IO.pure(frame.dispose())
 

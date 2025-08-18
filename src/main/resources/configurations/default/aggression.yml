@@ -1,0 +1,33 @@
+simulation:
+  seed: 42
+
+environment:
+  width: 10
+  height: 10
+  entities:
+  - light:
+      position: [2, 2]
+      illuminationRadius: 5.0
+      intensity: 1.0
+      attenuation: 1.0
+  - light:
+      position: [8, 8]
+      illuminationRadius: 5.0
+      intensity: 1.0
+      attenuation: 1.0
+  - robot:
+      position: [3, 1]
+      orientation: 90.0
+      radius: 0.5
+      speed: 1.0
+      withProximitySensors: true
+      withLightSensors: true
+      behavior: aggression
+  - robot:
+      position: [1, 7]
+      orientation: 270.0
+      radius: 0.5
+      speed: 1.0
+      withProximitySensors: true
+      withLightSensors: true
+      behavior: aggression
