@@ -12,16 +12,12 @@ import io.github.srs.model.illumination.LightMap
 import io.github.srs.model.illumination.engine.SquidLibFovEngine
 import io.github.srs.model.illumination.model.ScaleFactor
 import cats.effect.kernel.Sync
+import io.github.srs.model.entity.ShapeType
 
 /**
  * Represents the range of a sensor.
  */
 type Range = Double
-
-/**
- * Represents the distance from the center of a dynamic entity to a sensor.
- */
-type Distance = Double
 
 /**
  * Represents a sensor that can sense the environment for a dynamic entity.
@@ -44,22 +40,6 @@ trait Sensor[-Entity <: DynamicEntity, -Env <: Environment]:
   def offset: Orientation
 
   /**
-   * The distance from the center of the entity to the sensor.
-   * @return
-   *   the distance of the sensor from the entity's center.
-   */
-  def distance: Distance
-
-  /**
-   * The range of the sensor, which defines how far it can sense.
-   * @note
-   *   The range is typically a positive value that indicates the maximum distance the sensor can detect.
-   * @return
-   *   the range of the sensor.
-   */
-  def range: Range
-
-  /**
    * Senses the environment for the given entity and returns the data collected by the sensor.
    * @param entity
    *   the dynamic entity that the sensor is attached to.
@@ -71,6 +51,18 @@ trait Sensor[-Entity <: DynamicEntity, -Env <: Environment]:
    *   a monadic effect containing the data sensed by the sensor.
    */
   def sense[F[_]: Sync](entity: Entity, env: Env): F[Data]
+
+  private[sensor] def direction(entity: Entity): Point2D =
+    val globalOrientation = entity.orientation.toRadians + offset.toRadians
+    (math.cos(globalOrientation), -math.sin(globalOrientation))
+
+  private[sensor] def origin(entity: Entity): Point2D =
+    import Point2D.*
+    val distance = entity.shape match
+      case ShapeType.Circle(radius) => radius
+      case ShapeType.Rectangle(width, height) => math.min(width, height)
+    val origin = entity.position + direction(entity) * distance
+    origin
 end Sensor
 
 /**
@@ -108,24 +100,24 @@ type SensorReadings = Vector[SensorReading[? <: Sensor[?, ?], ?]]
  *   the type of environment in which the sensor operates.
  */
 final case class ProximitySensor[Entity <: DynamicEntity, Env <: Environment](
-    offset: Orientation = Orientation(ProximitySensorDefaults.defaultOffset),
-    distance: Distance = ProximitySensorDefaults.defaultDistance,
-    range: Range = ProximitySensorDefaults.defaultRange,
+    override val offset: Orientation = Orientation(ProximitySensorDefaults.defaultOffset),
+    val range: Range = ProximitySensorDefaults.defaultRange,
 ) extends Sensor[Entity, Env]:
 
   override type Data = Double
 
+  private def rayEnd(entity: Entity): Point2D =
+    import Point2D.*
+    origin(entity) + direction(entity) * range
+
   override def sense[F[_]: Sync](entity: Entity, env: Env): F[Data] =
     Sync[F].pure:
-      import Point2D.*
-      val globalOrientation = entity.orientation.toRadians + offset.toRadians
-      val direction = Point2D(math.cos(globalOrientation), -math.sin(globalOrientation))
-      val origin = entity.position + direction * distance
-      val end = origin + direction * range
+      val o = origin(entity)
+      val end = rayEnd(entity)
 
       val distances = env.entities
         .filter(!_.equals(entity))
-        .flatMap(intersectRay(_, origin, end))
+        .flatMap(intersectRay(_, o, end))
         .filter(_ <= range)
 
       distances.minOption.map(_ / range).getOrElse(1.0)
@@ -147,8 +139,6 @@ end ProximitySensor
  */
 final case class LightSensor[Entity <: DynamicEntity, Env <: Environment](
     offset: Orientation = Orientation(ProximitySensorDefaults.defaultOffset),
-    distance: Distance = ProximitySensorDefaults.defaultDistance,
-    range: Range = ProximitySensorDefaults.defaultRange,
 ) extends Sensor[Entity, Env]:
 
   override type Data = Double
@@ -164,28 +154,23 @@ final case class LightSensor[Entity <: DynamicEntity, Env <: Environment](
    *   a monadic effect containing the light intensity sensed by the sensor.
    */
   override def sense[F[_]: Sync](entity: Entity, env: Env): F[Data] =
-    import Point2D.*
-    val globalOrientation = entity.orientation.toRadians + offset.toRadians
-    val direction = Point2D(math.cos(globalOrientation), -math.sin(globalOrientation))
-    val origin = entity.position + direction * distance
+    val o = origin(entity)
     for
       lightMap <- LightMap.cached[F](SquidLibFovEngine, ScaleFactor.default)
       field <- lightMap.computeField(env = env, includeDynamic = true)
-    yield field.sampleAtWorld(origin)(using ScaleFactor.default)
+    yield field.sampleAtWorld(o)(using ScaleFactor.default)
 
 end LightSensor
 
 object Sensor:
 
-  extension [E <: DynamicEntity, Env <: Environment](s: Sensor[E, Env])
+  extension [E <: DynamicEntity, Env <: Environment](s: ProximitySensor[E, Env])
 
     /**
      * Validates the properties of a sensor.
      */
-    def validate: Validation[Sensor[E, Env]] =
-      for
-        _ <- PositiveDouble(s.distance).validate
-        _ <- PositiveDouble(s.range).validate
+    def validate: Validation[ProximitySensor[E, Env]] =
+      for _ <- PositiveDouble(s.range).validate
       yield s
 
   extension (r: Robot)

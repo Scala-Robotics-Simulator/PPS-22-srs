@@ -31,7 +31,7 @@ class RobotTest extends AnyFlatSpec with Matchers:
     DifferentialWheelMotor(Wheel(1.0, ShapeType.Circle(0.5)), Wheel(1.0, ShapeType.Circle(0.5)))
 
   val proximitySensor: Sensor[Robot, Environment] =
-    ProximitySensor(Orientation(0.0), 0.5, 3.0)
+    ProximitySensor(Orientation(0.0), 3.0)
 
   val defaultRobot: Robot = robot at initialPosition withShape shape withOrientation initialOrientation
 

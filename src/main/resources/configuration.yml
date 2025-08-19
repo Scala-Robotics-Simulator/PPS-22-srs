@@ -32,4 +32,4 @@ environment:
         radius: 0.5
         speed: 1.0
         withProximitySensors: true
-        withLightSensors: false
+        withLightSensors: true

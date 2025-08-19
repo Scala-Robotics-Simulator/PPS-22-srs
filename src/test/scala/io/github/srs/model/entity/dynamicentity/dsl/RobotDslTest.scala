@@ -27,9 +27,9 @@ class RobotDslTest extends AnyFlatSpec with Matchers:
   val wheelMotor2: DifferentialWheelMotor =
     DifferentialWheelMotor(Wheel(3.0, ShapeType.Circle(wheelRadius)), Wheel(4.0, ShapeType.Circle(wheelRadius)))
 
-  val sensor: Sensor[Robot, Environment] = ProximitySensor(Orientation(0.0), 0.5, 3.0)
+  val sensor: Sensor[Robot, Environment] = ProximitySensor(Orientation(0.0), 3.0)
 
-  val sensor2: Sensor[Robot, Environment] = ProximitySensor(Orientation(90.0), 0.5, 3.0)
+  val sensor2: Sensor[Robot, Environment] = ProximitySensor(Orientation(90.0), 3.0)
 
   "Robot DSL" should "create a robot with default properties" in:
     import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.*

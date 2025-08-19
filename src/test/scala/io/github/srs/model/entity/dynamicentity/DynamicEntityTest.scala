@@ -23,12 +23,10 @@ class DynamicEntityTest extends AnyFlatSpec with Matchers:
   val shape: ShapeType.Circle = ShapeType.Circle(0.5)
 
   val sensorOffset: Orientation = Orientation(0.0)
-  val sensorDistance: Double = 0.5
   val sensorRange: Double = 1.0
 
   val sensor: ProximitySensor[DynamicEntity, Environment] = ProximitySensor(
     offset = sensorOffset,
-    distance = sensorDistance,
     range = sensorRange,
   )
 

@@ -50,7 +50,7 @@ class YamlConfigManagerTest extends AnyFlatSpec with Matchers:
     val lightId = SimulationDefaults.StaticEntity.Light.defaultId
     val robotId = SimulationDefaults.DynamicEntity.Robot.defaultId
     val dwm = differentialWheelMotor withLeftSpeed 2.0 withRightSpeed 3.0
-    val ps = proximitySensor withDistance 0.5 withOffset Orientation(90.0) withRange 1.5
+    val ps = proximitySensor withOffset Orientation(90.0) withRange 1.5
     val orientation = Orientation(0.0)
     val l =
       light withId lightId at (
@@ -59,7 +59,7 @@ class YamlConfigManagerTest extends AnyFlatSpec with Matchers:
       ) withIntensity 0.5 withAttenuation 1.0 withIlluminationRadius 8.0 withOrientation orientation
     val o = obstacle withId obstacleId at (2.0, 2.0) withWidth 1.0 withHeight 1.0 withOrientation orientation
     val r =
-      robot withId robotId at (4.0, 4.0) withOrientation orientation withSpeed 1.0 withShape (Circle(0.5)) containing
+      robot withId robotId at (4.0, 4.0) withOrientation orientation withSpeed 1.0 withShape Circle(0.5) containing
         dwm and ps
 
     val env = environment containing l and o and r
@@ -93,7 +93,6 @@ class YamlConfigManagerTest extends AnyFlatSpec with Matchers:
         |      sensors:
         |      - proximitySensor:
         |          offset: 90.0
-        |          distance: 0.5
         |          range: 1.5
         |      actuators:
         |      - differentialWheelMotor:
