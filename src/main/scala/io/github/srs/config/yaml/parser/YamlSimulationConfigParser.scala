@@ -230,8 +230,7 @@ object YamlSimulationConfigParser:
   private def parseProximitySensor(map: Map[String, Any]): ConfigResult[Sensor[Robot, Environment]] =
     for
       offset <- get[Double]("offset", map)
-      distance <- get[Double]("distance", map)
       range <- get[Double]("range", map)
-    yield proximitySensor withOffset Orientation(offset) withDistance distance withRange range
+    yield proximitySensor withOffset Orientation(offset) withRange range
 
 end YamlSimulationConfigParser

@@ -27,7 +27,6 @@ object Sensor:
   given Encoder[ProximitySensor[?, ?]] = (sensor: ProximitySensor[?, ?]) =>
     Json.obj(
       "offset" -> sensor.offset.degrees.asJson,
-      "distance" -> sensor.distance.asJson,
       "range" -> sensor.range.asJson,
     )
 end Sensor

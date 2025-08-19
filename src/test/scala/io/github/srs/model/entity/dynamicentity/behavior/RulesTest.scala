@@ -18,7 +18,7 @@ import io.github.srs.model.environment.Environment
 final class RulesTest extends AnyFlatSpec:
 
   private val front =
-    ProximitySensor[Robot, Environment](Orientation(0), 0.1, 1.0)
+    ProximitySensor[Robot, Environment](Orientation(0), 1.0)
 
   private def readings(d: Double): SensorReadings =
     Vector(SensorReading(front, d))

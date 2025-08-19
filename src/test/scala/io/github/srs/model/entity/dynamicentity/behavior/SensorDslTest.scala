@@ -16,7 +16,7 @@ import org.scalatest.matchers.should.Matchers.*
 final class SensorDslTest extends AnyFlatSpec:
 
   private val front =
-    ProximitySensor[Robot, Environment](Orientation(0), 0.1, 1.0)
+    ProximitySensor[Robot, Environment](Orientation(0), 1.0)
 
   private def readings(d: Double): SensorReadings =
     Vector(SensorReading(front, d))

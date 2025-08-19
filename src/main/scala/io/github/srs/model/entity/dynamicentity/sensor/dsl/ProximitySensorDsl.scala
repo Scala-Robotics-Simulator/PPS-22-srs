@@ -24,16 +24,6 @@ object ProximitySensorDsl:
       sensor.copy(range = range)
 
     /**
-     * Sets the distance from the center of the entity to the sensor.
-     * @param distance
-     *   the distance from the entity's center to the sensor.
-     * @return
-     *   a new [[ProximitySensor]] instance with the updated distance.
-     */
-    infix def withDistance(distance: Double): ProximitySensor[DynamicEntity, Environment] =
-      sensor.copy(distance = distance)
-
-    /**
      * Sets the offset orientation of the sensor relative to the entity's orientation.
      * @param offset
      *   the orientation offset of the sensor.

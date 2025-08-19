@@ -2,9 +2,10 @@ package io.github.srs.model.entity.dynamicentity.sensor
 
 import java.util.UUID
 
-import cats.effect.unsafe.implicits.global
 import cats.Monad
 import cats.effect.IO
+import cats.effect.kernel.Sync
+import cats.effect.unsafe.implicits.global
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
 import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.actuator.Actuator
@@ -16,7 +17,6 @@ import io.github.srs.model.environment.dsl.CreationDSL.*
 import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
-import cats.effect.kernel.Sync
 
 class SensorTest extends AnyFlatSpec with should.Matchers:
   given CanEqual[Sensor[?, ?], Sensor[?, ?]] = CanEqual.derived
@@ -26,7 +26,6 @@ class SensorTest extends AnyFlatSpec with should.Matchers:
   val shape: ShapeType.Circle = ShapeType.Circle(0.5)
 
   val offset: Orientation = Orientation(0.0)
-  val distance: Distance = 1.0
   val range: Range = 10.0
 
   class Dummy(
@@ -40,19 +39,18 @@ class SensorTest extends AnyFlatSpec with should.Matchers:
   ) extends DynamicEntity:
     def act[F[_]: Monad](): F[Dummy] = Monad[F].pure(this)
 
-  class DummySensor(override val offset: Orientation, override val distance: Distance, override val range: Range)
-      extends Sensor[Dummy, Environment]:
+  class DummySensor(override val offset: Orientation) extends Sensor[Dummy, Environment]:
     override type Data = Double
 
     override def sense[F[_]: Sync](entity: Dummy, env: Environment): F[Double] =
       Sync[F].pure(42.0) // Dummy implementation for sensing
 
-  "Sensor" should "have an offset orientation, distance, and range" in:
-    val sensor = new DummySensor(offset, distance, range)
-    (sensor.offset, sensor.distance, sensor.range) should be((offset, distance, range))
+  "Sensor" should "have an offset orientation" in:
+    val sensor = new DummySensor(offset)
+    sensor.offset should be(offset)
 
   it should "sense the environment and return data" in:
-    val sensor = new DummySensor(offset, distance, range)
+    val sensor = new DummySensor(offset)
     val entity = new Dummy(
       position = initialPosition,
       shape = shape,

@@ -19,7 +19,7 @@ final class PolicyTest extends AnyFlatSpec:
 
   // ---------- helpers -----------------------------------------------------
   private val front =
-    ProximitySensor[Robot, Environment](Orientation(0), 0.1, 1.0)
+    ProximitySensor[Robot, Environment](Orientation(0), 1.0)
   private def r(d: Double) = Vector(SensorReading(front, d))
 
   given CanEqual[Action[Id], Action[Id]] = CanEqual.derived

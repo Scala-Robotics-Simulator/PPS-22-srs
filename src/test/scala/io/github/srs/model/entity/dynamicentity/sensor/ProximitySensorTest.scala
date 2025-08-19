@@ -23,9 +23,8 @@ import org.scalatest.matchers.should.Matchers
 class ProximitySensorTest extends AnyFlatSpec with Matchers:
 
   val offset: Orientation = Orientation(0.0)
-  val distance: Double = 0.5
   val range: Double = 5.0
-  val sensor: ProximitySensor[DynamicEntity, Environment] = ProximitySensor(offset, distance, range)
+  val sensor: ProximitySensor[DynamicEntity, Environment] = ProximitySensor(offset, range)
 
   val pointingDownSensor: ProximitySensor[DynamicEntity, Environment] = createSensor(270)
   val pointingBackwardSensor: ProximitySensor[DynamicEntity, Environment] = createSensor(180)
@@ -46,7 +45,7 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
   ).validate.toOption.value
 
   private def createSensor(orientationDegrees: Double): ProximitySensor[DynamicEntity, Environment] =
-    ProximitySensor(Orientation(orientationDegrees), 0.5, 5.0)
+    ProximitySensor(Orientation(orientationDegrees), 5.0)
 
   private def createObstacle(
       id: UUID = UUID.randomUUID(),
@@ -75,19 +74,14 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
     sensor.sense[IO](robot, environment).unsafeRunSync()
 
   "ProximitySensor" should "have a valid offset, distance, and range" in:
-    inside(ProximitySensor(offset, distance, range).validate):
+    inside(ProximitySensor(offset, range).validate):
       case Right(sensor) =>
-        (sensor.offset, sensor.distance, sensor.range) should be(
-          (offset, distance, range),
+        (sensor.offset, sensor.range) should be(
+          (offset, range),
         )
 
-  it should "not be able to create a sensor with negative distance" in:
-    inside(ProximitySensor(offset, -1.0, range).validate):
-      case Left(error: DomainError) =>
-        error shouldBe a[DomainError.NegativeOrZero]
-
   it should "not be able to create a sensor with negative range" in:
-    inside(ProximitySensor(offset, distance, -1.0).validate):
+    inside(ProximitySensor(offset, -1.0).validate):
       case Left(error: DomainError) =>
         error shouldBe a[DomainError.NegativeOrZero]
 

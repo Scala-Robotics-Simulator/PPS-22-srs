@@ -93,25 +93,25 @@ object SimulationDefaults:
       val defaultSensors: Vector[Sensor[Robot, Environment]] = Vector.empty
 
       val stdProximitySensors: Vector[Sensor[Robot, Environment]] = Vector(
-        ProximitySensor(Orientation(0.0), radius, 5.0),
-        ProximitySensor(Orientation(45.0), radius, 5.0),
-        ProximitySensor(Orientation(90.0), radius, 5.0),
-        ProximitySensor(Orientation(135.0), radius, 5.0),
-        ProximitySensor(Orientation(180.0), radius, 5.0),
-        ProximitySensor(Orientation(225.0), radius, 5.0),
-        ProximitySensor(Orientation(270.0), radius, 5.0),
-        ProximitySensor(Orientation(315.0), radius, 5.0),
+        ProximitySensor(Orientation(0.0), radius),
+        ProximitySensor(Orientation(45.0), radius),
+        ProximitySensor(Orientation(90.0), radius),
+        ProximitySensor(Orientation(135.0), radius),
+        ProximitySensor(Orientation(180.0), radius),
+        ProximitySensor(Orientation(225.0), radius),
+        ProximitySensor(Orientation(270.0), radius),
+        ProximitySensor(Orientation(315.0), radius),
       )
 
       val stdLightSensors: Vector[Sensor[Robot, Environment]] = Vector(
-        LightSensor(Orientation(0.0), radius, 5.0),
-        LightSensor(Orientation(45.0), radius, 5.0),
-        LightSensor(Orientation(90.0), radius, 5.0),
-        LightSensor(Orientation(135.0), radius, 5.0),
-        LightSensor(Orientation(180.0), radius, 5.0),
-        LightSensor(Orientation(225.0), radius, 5.0),
-        LightSensor(Orientation(270.0), radius, 5.0),
-        LightSensor(Orientation(315.0), radius, 5.0),
+        LightSensor(Orientation(0.0)),
+        LightSensor(Orientation(45.0)),
+        LightSensor(Orientation(90.0)),
+        LightSensor(Orientation(135.0)),
+        LightSensor(Orientation(180.0)),
+        LightSensor(Orientation(225.0)),
+        LightSensor(Orientation(270.0)),
+        LightSensor(Orientation(315.0)),
       )
 
       val defaultBehavior: Rule[IO, SensorReadings, Action[IO]] = Rules.alwaysForward[IO]

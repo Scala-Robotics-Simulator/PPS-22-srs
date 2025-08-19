@@ -10,7 +10,6 @@ import io.github.srs.model.entity.staticentity.StaticEntity.Light
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.environment.dsl.CreationDSL.*
 import io.github.srs.utils.SimulationDefaults.StaticEntity.Light.{ defaultOrientation, defaultRadius }
-import org.scalatest.Inside.inside
 import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.compatible.Assertion
 import org.scalatest.flatspec.AnyFlatSpec
@@ -21,9 +20,8 @@ class LightSensorTest extends AnyFlatSpec with Matchers:
   given CanEqual[Orientation, Orientation] = CanEqual.derived
 
   val offset: Orientation = Orientation(0.0)
-  val distance: Double = 0.5
   val range: Double = 5.0
-  val sensor: LightSensor[DynamicEntity, Environment] = LightSensor(offset, distance, range)
+  val sensor: LightSensor[DynamicEntity, Environment] = LightSensor(offset)
 
   val pointingDownSensor: LightSensor[DynamicEntity, Environment] = createSensor(270)
   val pointingBackwardSensor: LightSensor[DynamicEntity, Environment] = createSensor(180)
@@ -44,7 +42,7 @@ class LightSensorTest extends AnyFlatSpec with Matchers:
   ).validate.toOption.value
 
   private def createSensor(orientationDegrees: Double): LightSensor[DynamicEntity, Environment] =
-    LightSensor(Orientation(orientationDegrees), 0.5, 5.0)
+    LightSensor(Orientation(orientationDegrees))
 
   private def createLight(
       position: Point2D,
@@ -75,14 +73,7 @@ class LightSensorTest extends AnyFlatSpec with Matchers:
     val environment = createEnvironment(entities + robot)
     sensor.sense[IO](robot, environment).unsafeRunSync()
 
-  "LightSensor" should "have a valid offset, distance, and range" in:
-    inside(LightSensor(offset, distance, range).validate) { case Right(s) =>
-      val _ = s.offset shouldBe offset
-      val _ = s.distance shouldBe distance
-      s.range shouldBe range
-    }
-
-  it should "sense correctly an environment without light" in:
+  "LightSensor" should "sense correctly an environment without light" in:
     val reading = getSensorReading(sensor, Set.empty)
     reading should be(0.0)
 

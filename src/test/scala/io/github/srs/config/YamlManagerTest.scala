@@ -177,9 +177,8 @@ class YamlManagerTest extends AnyFlatSpec with Matchers:
                 robot.sensors.headOption match
                   case Some(sensor) =>
                     sensor match
-                      case ProximitySensor(offset, distance, range) =>
+                      case ProximitySensor(offset, range) =>
                         val _ = offset.degrees should be(0.0)
-                        val _ = distance should be(0.5)
                         val _ = range should be > 2.29
                         val _ =
                           range should be < 2.31 // Allowing a small margin of error due to floating point precision
@@ -230,7 +229,7 @@ class YamlManagerTest extends AnyFlatSpec with Matchers:
     val lightId = SimulationDefaults.StaticEntity.Light.defaultId
     val robotId = SimulationDefaults.DynamicEntity.Robot.defaultId
     val dwm = differentialWheelMotor withLeftSpeed 2.0 withRightSpeed 3.0
-    val ps = proximitySensor withDistance 0.5 withOffset Orientation(90.0) withRange 1.5
+    val ps = proximitySensor withOffset Orientation(90.0) withRange 1.5
     val orientation = Orientation(0.0)
     val l =
       light withId lightId at (
@@ -275,7 +274,6 @@ class YamlManagerTest extends AnyFlatSpec with Matchers:
         |      sensors:
         |      - proximitySensor:
         |          offset: 90.0
-        |          distance: 0.5
         |          range: 1.5
         |      actuators:
         |      - differentialWheelMotor:
