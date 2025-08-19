@@ -83,7 +83,7 @@ object RobotDsl:
      *   a new [[Robot]] instance with the updated sensors.
      */
     infix def withSensors(sensors: Seq[Sensor[Robot, Environment]]): Robot =
-      robot.copy(sensors = sensors.toVector)
+      robot.copy(sensors = robot.sensors ++ sensors.toVector)
 
     /**
      * Adds an actuator to the robot.
@@ -156,7 +156,7 @@ object RobotDsl:
       robot.withSensors(stdProximitySensors)
 
     def withLightSensors: Robot =
-      robot // TODO: Implement light sensors when available
+      robot.withSensors(stdLightSensors)
 
     /**
      * Validates the robot entity to ensure it meets the domain constraints.

@@ -2,7 +2,9 @@ package io.github.srs.model.entity.dynamicentity
 
 import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
 
+import cats.effect.unsafe.implicits.global
 import cats.Id
+import cats.effect.IO
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.action.MovementActionFactory.*
 import io.github.srs.model.entity.dynamicentity.action.SequenceAction.thenDo
@@ -152,7 +154,10 @@ class RobotTest extends AnyFlatSpec with Matchers:
     inside((defaultRobot containing proximitySensor).validate):
       case Right(robot) =>
         val environment = Environment(10, 10)
-        val sensedData = robot.senseAll[Id](environment)
-        sensedData should contain only SensorReading(proximitySensor, proximitySensor.sense[Id](robot, environment))
+        val sensedData = robot.senseAll[IO](environment).unsafeRunSync()
+        sensedData should contain only SensorReading(
+          proximitySensor,
+          proximitySensor.sense[IO](robot, environment).unsafeRunSync(),
+        )
 
 end RobotTest

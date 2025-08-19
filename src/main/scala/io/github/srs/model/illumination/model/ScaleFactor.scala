@@ -26,6 +26,14 @@ object ScaleFactor:
     bounded("ScaleFactor", n, 1, 1000, includeMax = true).map(v => v: ScaleFactor)
 
   /**
+   * Returns the default scale factor of 100 cells per meter.
+   *
+   * @return
+   *   The default scale factor as an [[ScaleFactor]].
+   */
+  def default: ScaleFactor = 100
+
+  /**
    * Extension methods for [[ScaleFactor]] providing utility functions.
    */
   extension (s: ScaleFactor)

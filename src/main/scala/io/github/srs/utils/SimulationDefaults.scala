@@ -11,6 +11,7 @@ import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Rule
 import io.github.srs.model.entity.dynamicentity.behavior.Rules
 import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, Sensor, SensorReadings }
 import io.github.srs.model.environment.Environment
+import io.github.srs.model.entity.dynamicentity.sensor.LightSensor
 
 object SimulationDefaults:
 
@@ -102,8 +103,16 @@ object SimulationDefaults:
         ProximitySensor(Orientation(315.0), radius, 5.0),
       )
 
-      // TODO: Add light sensors when implemented
-      val stdLightSensors: Vector[Sensor[Robot, Environment]] = Vector.empty
+      val stdLightSensors: Vector[Sensor[Robot, Environment]] = Vector(
+        LightSensor(Orientation(0.0), radius, 5.0),
+        LightSensor(Orientation(45.0), radius, 5.0),
+        LightSensor(Orientation(90.0), radius, 5.0),
+        LightSensor(Orientation(135.0), radius, 5.0),
+        LightSensor(Orientation(180.0), radius, 5.0),
+        LightSensor(Orientation(225.0), radius, 5.0),
+        LightSensor(Orientation(270.0), radius, 5.0),
+        LightSensor(Orientation(315.0), radius, 5.0),
+      )
 
       val defaultBehavior: Rule[IO, SensorReadings, Action[IO]] = Rules.alwaysForward[IO]
     end Robot
