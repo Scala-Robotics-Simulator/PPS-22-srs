@@ -2,152 +2,127 @@ package io.github.srs.model.entity.dynamicentity.behavior.dsl
 
 import scala.annotation.targetName
 
-import cats.*
 import cats.data.Kleisli
-import cats.syntax.all.*
 import io.github.srs.model.entity.dynamicentity.*
-import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes
-import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.{ Behavior, Condition, Rule }
-import io.github.srs.model.entity.dynamicentity.sensor.*
-import io.github.srs.model.environment.Environment
+import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.{ Behavior, Condition, PartialBehavior }
 
 /**
- * Core DSL for defining behaviors and rules in the policy.
+ * # Behavior DSL (pure)
+ *
+ * Minimal DSL to build decision logic:
+ *
+ *   - [[PartialBehavior]] = `Kleisli[Option, I, A]` – a partial decision (“may produce”).
+ *   - [[Behavior]] = `Kleisli[Id, I, A]` – a total decision (“always produces”).
+ *
+ * Partial behaviors compose **left-biased** (the first `Some` wins) and are finalized into total behaviors via
+ * [[orElse]] (or the compatibility alias [[default]]).
+ *
+ * @example
+ *   {{{
+ * val isEven: Condition[Int] = _ % 2 == 0
+ *
+ * val rule: PartialBehavior[Int, String] =
+ *   (isEven ==> "even") | (_ => true) ==> "odd"
+ *
+ * val behavior: Behavior[Int, String] =
+ *   rule.orElse("n/a")
+ *
+ * behavior.run(2)  // "even"
+ * behavior.run(3)  // "odd"
+ *   }}}
  */
-private object DslCore:
+object BehaviorDsl:
 
-  extension [I, A, F[_]: Applicative](cond: Condition[I])
+  extension [I, A](cond: Condition[I])
 
     /**
-     * Builds a [[Rule]] This creates an implication: when the condition is satisfied, the action is executed.
+     * Build a partial behavior from a condition.
+     *
+     * Produces `Some(act)` when the condition holds; otherwise `None`. The action is call-by-name and evaluated only if
+     * needed.
      *
      * @param act
-     *   The action to execute when the condition is satisfied (call-by-name for lazy evaluation)
+     *   action to produce when the condition holds (lazy)
      * @return
-     *   A Rule that returns Some(act) if condition holds, None otherwise
+     *   a [[PartialBehavior]] that yields `Some(act)` if `cond(i)` is true, else `None`
      */
     @targetName("implies")
-    infix def ==>(act: => A): Rule[F, I, A] =
-      Kleisli(i => (if cond(i) then Some(act) else None).pure[F])
+    infix def ==>(act: => A): PartialBehavior[I, A] =
+      Kleisli(i => if cond(i) then Some(act) else None)
 
-  extension [I, A, F[_]: Monad](r1: Rule[F, I, A])
+  extension [I, A](r1: PartialBehavior[I, A])
 
     /**
-     * First-win composition operator for combining rules. If `r1` produces `Some(action)`, it is returned; otherwise,
-     * `r2` is tried. This implements a fallback strategy where rules are evaluated in order.
+     * Left-biased composition of two partial behaviors.
+     *
+     * Evaluates `r1(i)`: if it returns `Some(a)` the result is kept, otherwise `r2(i)` is evaluated.
      *
      * @param r2
-     *   The fallback rule to try if r1 doesn't produce an action
+     *   fallback partial behavior to try when `r1` defers
      * @return
-     *   A combined rule that tries r1 first, then r2 if r1 fails
+     *   a [[PartialBehavior]] that prefers `r1` over `r2`
      */
-    @targetName("orElse")
-    infix def |(r2: Rule[F, I, A]): Rule[F, I, A] =
-      Kleisli(i => r1.run(i).flatMap(_.fold(r2.run(i))(_.some.pure[F])))
+    @targetName("orElsePartial")
+    infix def |(r2: PartialBehavior[I, A]): PartialBehavior[I, A] =
+      Kleisli(i => r1.run(i).orElse(r2.run(i)))
 
     /**
-     * Transform the decided action. This allows you to map the output of the rule to a different type.
+     * Finalize a partial behavior into a total behavior by providing a fallback.
      *
-     * @param f
-     *   A function to transform the action
-     * @tparam B
-     *   The new output type
-     * @return
-     *   A Rule with the transformed action
-     */
-    def mapAction[B](f: A => B): Rule[F, I, B] =
-      r1.map(_.map(f))
-
-    /**
-     * Gate the rule with an extra input predicate.
-     *
-     * @param p
-     *   An additional condition to check
-     * @return
-     *   A Rule that only applies if the additional condition holds
-     */
-    def onlyIf(p: Condition[I]): Rule[F, I, A] =
-      Kleisli(i => r1.run(i).map(opt => if p(i) then opt else None))
-
-  end extension
-
-  extension [I, A, F[_]: Functor](rules: Rule[F, I, A])
-
-    /**
-     * Collapses a chain of rules into a [[Behavior]] that **always** returns an action, falling back if no rule fired.
-     * This ensures the behavior is total and always produces an action.
+     * If the composed partial chain yields `None`, the fallback is used.
      *
      * @param fallback
-     *   The default action to use when no rules match (call-by-name for lazy evaluation)
+     *   default action to use when no rule fires (lazy)
      * @return
-     *   A Behavior that guarantees to always return an action
+     *   a total [[Behavior]] that always produces an action
      */
-    def default(fallback: => A): Behavior[F, I, A] =
-      Kleisli(i => rules.run(i).map(_.getOrElse(fallback)))
-
-  extension [E <: DynamicEntity, Env <: Environment](s: ProximitySensor[E, Env])
+    def orElse(fallback: => A): Behavior[I, A] =
+      Kleisli(i => r1.run(i).getOrElse(fallback))
 
     /**
-     * Try to extract the reading from the `SensorReadings`. Searches through the sensor readings to find a matching
-     * proximity sensor.
+     * Compatibility alias for [[orElse]].
      *
-     * @param rs
-     *   The sensor readings collection to search through
+     * @param fallback
+     *   default action to use when no rule fires (lazy)
      * @return
-     *   Some(value) if a matching reading is found, None otherwise
+     *   a total [[Behavior]] that always produces an action
      */
-    private def reading(rs: SensorReadings): Option[Double] =
-      rs.collectFirst { case SensorReading(ss: ProximitySensor[?, ?], v: Double) if ss eq s => v }
+    def default(fallback: => A): Behavior[I, A] = orElse(fallback)
 
     /**
-     * Creates a [[Condition]] that checks if the sensor reading is less than `t`.
+     * Gate this partial behavior with an additional predicate.
      *
-     * @param t
-     *   The threshold value to compare against
-     * @return
-     *   A Condition function that returns true if sensor reading < t
-     * @example
-     *   `frontSensor < 0.3`
-     */
-    @targetName("lessThan")
-    infix def <(t: Double): Condition[SensorReadings] =
-      rs => reading(rs).exists(_ < t)
-
-    /**
-     * Creates a [[Condition]] that checks if the sensor reading is greater than `t`.
+     * When `p(i)` is false, this rule forcibly defers (`None`).
      *
-     * @param t
-     *   The threshold value to compare against
+     * @param p
+     *   additional predicate on the same input
      * @return
-     *   A Condition function that returns true if sensor reading > t
-     * @example
-     *   `frontSensor > 0.3`
+     *   a [[PartialBehavior]] that runs only if `p` holds
      */
-    @targetName("greaterThan")
-    infix def >(t: Double): Condition[SensorReadings] =
-      rs => reading(rs).exists(_ > t)
+    def onlyIf(p: Condition[I]): PartialBehavior[I, A] =
+      Kleisli(i => if p(i) then r1.run(i) else None)
 
   end extension
 
   extension [I](c: Condition[I])
 
     /**
-     * Logical AND between two conditions.
+     * Logical AND of two conditions.
      *
      * @param d
-     *   The second condition to combine
+     *   condition to combine with
      * @return
-     *   A Condition that is true if both conditions are true
+     *   a condition that holds only if both `c` and `d` hold
      */
     infix def and(d: Condition[I]): Condition[I] = i => c(i) && d(i)
 
     /**
-     * Logical OR between two conditions.
+     * Logical OR of two conditions.
      *
      * @param d
-     *   The second condition to combine
+     *   condition to combine with
      * @return
-     *   A Condition that is true if at least one condition is true
+     *   a condition that holds if either `c` or `d` holds
      */
     infix def or(d: Condition[I]): Condition[I] = i => c(i) || d(i)
 
@@ -155,19 +130,8 @@ private object DslCore:
      * Logical NOT of a condition.
      *
      * @return
-     *   A Condition that is true if the original condition is false
+     *   a condition that holds when `c` does not hold
      */
     def not: Condition[I] = i => !c(i)
   end extension
-
-end DslCore
-
-/**
- * Public facade for the behavior DSL.
- */
-object dsl:
-
-  export BehaviorTypes.Condition
-  export DslCore.{ ==>, |, default, mapAction, onlyIf }
-  export DslCore.{ and, not, or }
-  export DslCore.{ <, > }
+end BehaviorDsl
