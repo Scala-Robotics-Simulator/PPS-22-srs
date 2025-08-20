@@ -126,7 +126,7 @@ object YamlSimulationConfigParser:
     // TODO: Add support for robot behavior
     for
       id <- getOptional[UUID](EntityFields.id, map)
-      pos <- get[List[Int]](EntityFields.position, map)
+      pos <- get[List[Double]](EntityFields.position, map)
       orient <- getOptional[Double](EntityFields.orientation, map)
       radius <- getOptional[Double](RobotFields.radius, map)
       speed <- getOptional[Double](RobotFields.speed, map)
@@ -150,7 +150,7 @@ object YamlSimulationConfigParser:
   private def parseObstacle(map: Map[String, Any]): ConfigResult[Entity] =
     for
       id <- getOptional[UUID](EntityFields.id, map)
-      pos <- get[List[Int]](EntityFields.position, map)
+      pos <- get[List[Double]](EntityFields.position, map)
       orientation <- getOptional[Double](EntityFields.orientation, map)
       width <- getOptional[Double](ObstacleFields.width, map)
       height <- getOptional[Double](ObstacleFields.height, map)
@@ -170,7 +170,7 @@ object YamlSimulationConfigParser:
   private def parseLight(map: Map[String, Any]): ConfigResult[Entity] =
     for
       id <- getOptional[UUID](EntityFields.id, map)
-      pos <- get[List[Int]](EntityFields.position, map)
+      pos <- get[List[Double]](EntityFields.position, map)
       orientation <- getOptional[Double](EntityFields.orientation, map)
       radius <- getOptional[Double](LightFields.radius, map)
       illumination <- get[Double](LightFields.illuminationRadius, map)
