@@ -15,12 +15,15 @@ import io.github.srs.config.yaml.YamlManager
 import io.github.srs.utils.loader.ResourceFileLister
 
 /**
- * ConfigurationControlsPanel handles the configuration loading, saving, and management controls.
- * It provides buttons for loading/saving configurations and a dropdown for selecting default configurations.
+ * ConfigurationControlsPanel handles the configuration loading, saving, and management controls. It provides buttons
+ * for loading/saving configurations and a dropdown for selecting default configurations.
  *
- * @param onConfigLoaded callback triggered when a configuration is successfully loaded
- * @param onConfigSave callback triggered when user wants to save current configuration
- * @param onConfigChanged callback triggered when user selects a different default configuration
+ * @param onConfigLoaded
+ *   callback triggered when a configuration is successfully loaded
+ * @param onConfigSave
+ *   callback triggered when user wants to save current configuration
+ * @param onConfigChanged
+ *   callback triggered when user selects a different default configuration
  */
 @SuppressWarnings(
   Array(
@@ -60,11 +63,11 @@ class ConfigurationControlsPanel(
     val chooser = new JFileChooser()
     chooser.setFileFilter(new FileNameExtensionFilter("YAML files", "yml", "yaml"))
     val result = chooser.showOpenDialog(this)
-    
+
     if result == JFileChooser.APPROVE_OPTION then
       val path = Path.fromNioPath(java.nio.file.Paths.get(chooser.getSelectedFile.toURI))
       val loadResult = YamlConfigManager[IO](path).load.unsafeRunSync()
-      
+
       loadResult match
         case Left(errors) =>
           JOptionPane.showMessageDialog(
@@ -81,7 +84,7 @@ class ConfigurationControlsPanel(
         val chooser = new JFileChooser()
         chooser.setFileFilter(new FileNameExtensionFilter("YAML files", "yml", "yaml"))
         val result = chooser.showSaveDialog(this)
-        
+
         if result == JFileChooser.APPROVE_OPTION then
           val path = Path.fromNioPath(java.nio.file.Paths.get(chooser.getSelectedFile.toURI))
           val saveEffect = for
@@ -108,20 +111,21 @@ class ConfigurationControlsPanel(
   private def loadResourceConfiguration(configName: String): Unit =
     val pathString = s"/${configsPath}/${configName}.yml"
     val resource = getClass.getResourceAsStream(pathString)
-    
+
     if resource != null then
       val content = Source.fromInputStream(resource, "UTF-8").getLines().mkString("\n")
-      val parseEffect = for res <- YamlManager.parse[IO](content)
-      yield res match
-        case Left(errors) =>
-          JOptionPane.showMessageDialog(
-            this,
-            s"Parsing default configuration failed with errors: ${errors.mkString(", ")}",
-            "Error loading default config",
-            JOptionPane.ERROR_MESSAGE,
-          )
-        case Right(config) => onConfigLoaded(config)
-      
+      val parseEffect =
+        for res <- YamlManager.parse[IO](content)
+        yield res match
+          case Left(errors) =>
+            JOptionPane.showMessageDialog(
+              this,
+              s"Parsing default configuration failed with errors: ${errors.mkString(", ")}",
+              "Error loading default config",
+              JOptionPane.ERROR_MESSAGE,
+            )
+          case Right(config) => onConfigLoaded(config)
+
       parseEffect.unsafeRunAsync(_ => ())
 
   private def loadDefaultConfigs(): Unit =
@@ -131,7 +135,7 @@ class ConfigurationControlsPanel(
       case Success(files) =>
         val configNames = files.map(_.getFileName.toString.replaceAll("\\.[^.]*$", ""))
         configNames.foreach(configsComboBox.addItem)
-        
+
         // Load first configuration by default
         configNames.headOption.foreach(loadResourceConfiguration)
 

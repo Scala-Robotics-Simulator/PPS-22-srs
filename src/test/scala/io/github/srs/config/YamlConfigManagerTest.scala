@@ -1,9 +1,10 @@
 package io.github.srs.config
 
 import java.nio.file.Files as JNIOFiles
+
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
-import fs2.io.file.{Files, Path}
+import fs2.io.file.{ Files, Path }
 import io.github.srs.model.Simulation
 import io.github.srs.model.entity.ShapeType.Circle
 import io.github.srs.model.entity.dynamicentity.Robot
@@ -11,13 +12,13 @@ import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor
 import io.github.srs.model.entity.staticentity.dsl.LightDsl.*
 import io.github.srs.model.entity.staticentity.dsl.ObstacleDsl.*
-import io.github.srs.model.entity.{Orientation, Point2D}
+import io.github.srs.model.entity.{ Orientation, Point2D }
 import io.github.srs.model.environment.dsl.CreationDSL.*
 import io.github.srs.utils.SimulationDefaults
 import org.scalatest.OptionValues.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.{stdLightSensors, stdProximitySensors}
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.{ stdLightSensors, stdProximitySensors }
 
 class YamlConfigManagerTest extends AnyFlatSpec with Matchers:
   given CanEqual[Sensor[?, ?], Sensor[?, ?]] = CanEqual.derived
