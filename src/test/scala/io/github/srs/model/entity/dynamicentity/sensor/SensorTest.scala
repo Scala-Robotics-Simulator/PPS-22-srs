@@ -9,8 +9,8 @@ import cats.effect.unsafe.implicits.global
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
 import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.actuator.Actuator
-import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Rule
-import io.github.srs.model.entity.dynamicentity.behavior.Rules
+import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior
+import io.github.srs.model.entity.dynamicentity.behavior.Behaviors
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.environment.dsl.CreationDSL.*
@@ -35,7 +35,7 @@ class SensorTest extends AnyFlatSpec with should.Matchers:
       override val orientation: Orientation,
       override val actuators: Seq[Actuator[Dummy]],
       override val sensors: Vector[Sensor[Dummy, Environment]],
-      override val behavior: Rule[IO, SensorReadings, Action[IO]] = Rules.alwaysForward,
+      override val behavior: Behavior[SensorReadings, Action[IO]] = Behaviors.simple[IO],
   ) extends DynamicEntity:
     def act[F[_]: Monad](): F[Dummy] = Monad[F].pure(this)
 
