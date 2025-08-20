@@ -7,8 +7,8 @@ import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, Wheel as ActWheel }
-import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Rule
-import io.github.srs.model.entity.dynamicentity.behavior.Rules
+import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior
+import io.github.srs.model.entity.dynamicentity.behavior.Behaviors
 import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, Sensor, SensorReadings }
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.entity.dynamicentity.sensor.LightSensor
@@ -113,8 +113,7 @@ object SimulationDefaults:
         LightSensor(Orientation(270.0)),
         LightSensor(Orientation(315.0)),
       )
-
-      val defaultBehavior: Rule[IO, SensorReadings, Action[IO]] = Rules.alwaysForward[IO]
+      val defaultBehavior: Behavior[SensorReadings, Action[IO]] = Behaviors.simple[IO]
     end Robot
   end DynamicEntity
 
