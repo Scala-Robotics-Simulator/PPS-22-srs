@@ -4,7 +4,7 @@ import cats.effect.IO
 import io.github.srs.model.entity.Entity
 import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.actuator.Actuator
-import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Rule
+import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior
 import io.github.srs.model.entity.dynamicentity.sensor.{ Sensor, SensorReadings }
 import io.github.srs.model.environment.Environment
 
@@ -26,4 +26,10 @@ trait DynamicEntity extends Entity:
    */
   def sensors: Vector[Sensor[? <: DynamicEntity, ? <: Environment]]
 
-  def behavior: Rule[IO, SensorReadings, Action[IO]]
+  /**
+   * Returns the behavior of the dynamic entity, which defines how it reacts to sensor readings.
+   * @return
+   *   the behavior of the dynamic entity.
+   */
+  def behavior: Behavior[SensorReadings, Action[IO]]
+end DynamicEntity
