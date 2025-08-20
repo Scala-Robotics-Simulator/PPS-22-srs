@@ -10,10 +10,11 @@ import io.github.srs.model.environment.Environment
 import io.github.srs.model.environment.dsl.CreationDSL.*
 
 /**
- * EnvironmentSettingsPanel handles the environment-specific configuration settings.
- * It provides a form for configuring environment width and height.
+ * EnvironmentSettingsPanel handles the environment-specific configuration settings. It provides a form for configuring
+ * environment width and height.
  *
- * @param onValidationError callback triggered when validation fails
+ * @param onValidationError
+ *   callback triggered when validation fails
  */
 class EnvironmentSettingsPanel(
     onValidationError: Seq[String] => Unit,
@@ -32,15 +33,16 @@ class EnvironmentSettingsPanel(
     add(environmentPanel, BorderLayout.CENTER)
 
   /**
-   * Extracts the environment configuration from the form fields.
-   * Note: This returns the base environment without entities, which should be added separately.
+   * Extracts the environment configuration from the form fields. Note: This returns the base environment without
+   * entities, which should be added separately.
    *
-   * @return either validation errors or a valid Environment (without entities)
+   * @return
+   *   either validation errors or a valid Environment (without entities)
    */
   def getEnvironmentBase: ConfigResult[Environment] =
     import Decoder.{ get, given }
     val fieldValues = environmentPanel.getValues
-    
+
     for
       width <- get[Int]("width", fieldValues)
       height <- get[Int]("height", fieldValues)
@@ -49,7 +51,8 @@ class EnvironmentSettingsPanel(
   /**
    * Sets the environment configuration values in the form fields.
    *
-   * @param env the environment configuration to display
+   * @param env
+   *   the environment configuration to display
    */
   def setEnvironment(env: Environment): Unit =
     val environmentMap = Map(
@@ -61,7 +64,8 @@ class EnvironmentSettingsPanel(
   /**
    * Validates the current form values and returns whether they are valid.
    *
-   * @return true if values are valid, false otherwise
+   * @return
+   *   true if values are valid, false otherwise
    */
   def validateFields(): Boolean =
     getEnvironmentBase match
@@ -69,7 +73,8 @@ class EnvironmentSettingsPanel(
         val errorMessages = errors.map:
           case io.github.srs.config.ConfigError.MissingField(field) => s"Missing field: $field"
           case io.github.srs.config.ConfigError.ParsingError(message) => s"Parsing error: $message"
-          case io.github.srs.config.ConfigError.InvalidType(field, expected) => s"Invalid type for $field: expected $expected"
+          case io.github.srs.config.ConfigError.InvalidType(field, expected) =>
+            s"Invalid type for $field: expected $expected"
         onValidationError(errorMessages)
         false
       case Right(_) => true
