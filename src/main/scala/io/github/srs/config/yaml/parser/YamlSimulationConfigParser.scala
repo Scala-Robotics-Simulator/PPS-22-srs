@@ -7,17 +7,19 @@ import io.github.srs.config.{ ConfigError, ConfigResult, SimulationConfig }
 import io.github.srs.model.Simulation
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.Robot
-import io.github.srs.model.entity.dynamicentity.actuator.Actuator
-import io.github.srs.model.entity.dynamicentity.actuator.dsl.DifferentialWheelMotorDsl.*
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
-import io.github.srs.model.entity.dynamicentity.sensor.Sensor
-import io.github.srs.model.entity.dynamicentity.sensor.dsl.ProximitySensorDsl.*
 import io.github.srs.model.entity.staticentity.dsl.LightDsl.*
 import io.github.srs.model.entity.staticentity.dsl.ObstacleDsl.*
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.environment.dsl.CreationDSL.*
 import io.github.srs.utils.chaining.Pipe.given
 import org.virtuslab.yaml.*
+import io.github.srs.utils.SimulationDefaults.Fields.Simulation as SimulationFields
+import io.github.srs.utils.SimulationDefaults.Fields.Environment as EnvironmentFields
+import io.github.srs.utils.SimulationDefaults.Fields.Entity as EntityFields
+import io.github.srs.utils.SimulationDefaults.Fields.Entity.DynamicEntity.Robot as RobotFields
+import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Obstacle as ObstacleFields
+import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Light as LightFields
 
 /**
  * A parser for YAML configuration files, specifically for simulation configurations.
@@ -47,8 +49,8 @@ object YamlSimulationConfigParser:
         case Left(err) => Left[Seq[ConfigError], Map[String, Any]](Seq(ConfigError.ParsingError(err.getMessage)))
         case Right(map) => Right[Seq[ConfigError], Map[String, Any]](map)
 
-      simMap <- root.getOptionalSubMap("simulation")
-      envMap <- root.getOptionalSubMap("environment")
+      simMap <- root.getOptionalSubMap(SimulationFields.self)
+      envMap <- root.getOptionalSubMap(EnvironmentFields.self)
 
       sim <- parseSimulation(simMap)
       env <- parseEnvironment(envMap)
@@ -66,8 +68,8 @@ object YamlSimulationConfigParser:
       case None => Right[Seq[ConfigError], Simulation](Simulation.simulation)
       case Some(m) =>
         for
-          duration <- getOptional[Long]("duration", m)
-          seed <- getOptional[Long]("seed", m)
+          duration <- getOptional[Long](SimulationFields.duration, m)
+          seed <- getOptional[Long](SimulationFields.seed, m)
         yield Simulation.simulation
           |> (sim => duration.fold(sim)(sim.withDuration))
           |> (sim => seed.fold(sim)(sim.withSeed))
@@ -84,9 +86,9 @@ object YamlSimulationConfigParser:
       case None => Right[Seq[ConfigError], Environment](environment)
       case Some(m) =>
         for
-          width <- getOptional[Int]("width", m)
-          height <- getOptional[Int]("height", m)
-          entities <- m.parseSequence("entities", parseEntity)
+          width <- getOptional[Int](EnvironmentFields.width, m)
+          height <- getOptional[Int](EnvironmentFields.height, m)
+          entities <- m.parseSequence(EnvironmentFields.entities, parseEntity)
         yield Environment()
           |> (env => width.fold(env)(env.withWidth))
           |> (env => height.fold(env)(env.withHeight))
@@ -104,9 +106,10 @@ object YamlSimulationConfigParser:
    */
   private def parseEntity(map: Map[String, Any]): ConfigResult[Entity] =
     map.headOption match
-      case Some(("obstacle", v: Map[?, ?])) => parseObstacle(v.asInstanceOf[Map[String, Any]])
-      case Some(("light", v: Map[?, ?])) => parseLight(v.asInstanceOf[Map[String, Any]])
-      case Some(("robot", v: Map[?, ?])) => YamlSimulationConfigParser.parseRobot(v.asInstanceOf[Map[String, Any]])
+      case Some((ObstacleFields.self, v: Map[?, ?])) => parseObstacle(v.asInstanceOf[Map[String, Any]])
+      case Some((LightFields.self, v: Map[?, ?])) => parseLight(v.asInstanceOf[Map[String, Any]])
+      case Some((RobotFields.self, v: Map[?, ?])) =>
+        YamlSimulationConfigParser.parseRobot(v.asInstanceOf[Map[String, Any]])
       case Some((key, _)) => Left[Seq[ConfigError], Entity](Seq(ConfigError.ParsingError(s"Unknown entity type: $key")))
       case None => Left[Seq[ConfigError], Entity](Seq(ConfigError.ParsingError("Empty entity map")))
 
@@ -122,15 +125,13 @@ object YamlSimulationConfigParser:
   private def parseRobot(map: Map[String, Any]): ConfigResult[Entity] =
     // TODO: Add support for robot behavior
     for
-      id <- getOptional[UUID]("id", map)
-      pos <- get[List[Int]]("position", map)
-      orient <- getOptional[Double]("orientation", map)
-      radius <- getOptional[Double]("radius", map)
-      speed <- getOptional[Double]("speed", map)
-      prox <- getOptional[Boolean]("withProximitySensors", map)
-      light <- getOptional[Boolean]("withLightSensors", map)
-      actuators <- map.parseSequence("actuators", parseActuator)
-      sensors <- map.parseSequence("sensors", parseSensor)
+      id <- getOptional[UUID](EntityFields.id, map)
+      pos <- get[List[Int]](EntityFields.position, map)
+      orient <- getOptional[Double](EntityFields.orientation, map)
+      radius <- getOptional[Double](RobotFields.radius, map)
+      speed <- getOptional[Double](RobotFields.speed, map)
+      prox <- getOptional[Boolean](RobotFields.withProximitySensors, map)
+      light <- getOptional[Boolean](RobotFields.withLightSensors, map)
     yield Robot().at(Point2D(pos.head, pos(1)))
       |> (r => id.fold(r)(r.withId))
       |> (r => orient.fold(r)(o => r.withOrientation(Orientation(o))))
@@ -138,8 +139,6 @@ object YamlSimulationConfigParser:
       |> (r => speed.fold(r)(s => r.withSpeed(s)))
       |> (r => if prox.getOrElse(false) then r.withProximitySensors else r)
       |> (r => if light.getOrElse(false) then r.withLightSensors else r)
-      |> (r => if actuators.nonEmpty then r.withActuators(actuators) else r)
-      |> (r => if sensors.nonEmpty then r.withSensors(sensors) else r)
 
   /**
    * Parses an obstacle entity from the given map.
@@ -150,11 +149,11 @@ object YamlSimulationConfigParser:
    */
   private def parseObstacle(map: Map[String, Any]): ConfigResult[Entity] =
     for
-      id <- getOptional[UUID]("id", map)
-      pos <- get[List[Int]]("position", map)
-      orientation <- getOptional[Double]("orientation", map)
-      width <- getOptional[Double]("width", map)
-      height <- getOptional[Double]("height", map)
+      id <- getOptional[UUID](EntityFields.id, map)
+      pos <- get[List[Int]](EntityFields.position, map)
+      orientation <- getOptional[Double](EntityFields.orientation, map)
+      width <- getOptional[Double](ObstacleFields.width, map)
+      height <- getOptional[Double](ObstacleFields.height, map)
     yield obstacle.at(Point2D(pos.head, pos(1)))
       |> (obs => id.fold(obs)(obs.withId))
       |> (obs => orientation.fold(obs)(o => obs.withOrientation(Orientation(o))))
@@ -170,70 +169,18 @@ object YamlSimulationConfigParser:
    */
   private def parseLight(map: Map[String, Any]): ConfigResult[Entity] =
     for
-      id <- getOptional[UUID]("id", map)
-      pos <- get[List[Int]]("position", map)
-      radius <- get[Double]("illuminationRadius", map)
-      intensity <- getOptional[Double]("intensity", map)
-      attenuation <- getOptional[Double]("attenuation", map)
-    yield light.at(Point2D(pos.head, pos(1))).withIlluminationRadius(radius)
+      id <- getOptional[UUID](EntityFields.id, map)
+      pos <- get[List[Int]](EntityFields.position, map)
+      orientation <- getOptional[Double](EntityFields.orientation, map)
+      radius <- getOptional[Double](LightFields.radius, map)
+      illumintation <- get[Double](LightFields.illuminationRadius, map)
+      intensity <- getOptional[Double](LightFields.intensity, map)
+      attenuation <- getOptional[Double](LightFields.attenuation, map)
+    yield light.at(Point2D(pos.head, pos(1))).withIlluminationRadius(illumintation)
       |> (l => id.fold(l)(l.withId))
+      |> (l => orientation.fold(l)(o => l.withOrientation(Orientation(o))))
+      |> (l => radius.fold(l)(r => l.withRadius(r)))
       |> (l => intensity.fold(l)(i => l.withIntensity(i)))
       |> (l => attenuation.fold(l)(a => l.withAttenuation(a)))
-
-  /**
-   * Parses an actuator from the given map.
-   * @param map
-   *   the map containing actuator parameters
-   * @return
-   *   a `ConfigResult` containing the parsed `Actuator[Robot]` or the errors encountered during parsing.
-   */
-  private def parseActuator(map: Map[String, Any]): ConfigResult[Actuator[Robot]] =
-    map.headOption match
-      case Some(("differentialWheelMotor", v: Map[?, ?])) =>
-        parseDifferentialWheelMotor(v.asInstanceOf[Map[String, Any]])
-      case Some((key, _)) =>
-        Left[Seq[ConfigError], Actuator[Robot]](Seq(ConfigError.ParsingError(s"Unknown actuator type: $key")))
-      case None => Left[Seq[ConfigError], Actuator[Robot]](Seq(ConfigError.ParsingError("Empty actuator map")))
-
-  /**
-   * Parses a [[io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor]] from the given map.
-   * @param map
-   *   the map containing differential wheel motor parameters
-   * @return
-   *   a `ConfigResult` containing the parsed `Actuator[Robot]` or the errors encountered during parsing.
-   */
-  private def parseDifferentialWheelMotor(map: Map[String, Any]): ConfigResult[Actuator[Robot]] =
-    for
-      leftSpeed <- get[Double]("leftSpeed", map)
-      rightSpeed <- get[Double]("rightSpeed", map)
-    yield differentialWheelMotor withLeftSpeed leftSpeed withRightSpeed rightSpeed
-
-  /**
-   * Parses a [[Sensor]] from the given map.
-   * @param map
-   *   the map containing sensor parameters
-   * @return
-   *   a `ConfigResult` containing the parsed `Sensor[Robot, Environment]` or the errors encountered during parsing.
-   */
-  private def parseSensor(map: Map[String, Any]): ConfigResult[Sensor[Robot, Environment]] =
-    map.headOption match
-      case Some(("proximitySensor", v: Map[?, ?])) =>
-        parseProximitySensor(v.asInstanceOf[Map[String, Any]])
-      case Some((key, _)) =>
-        Left[Seq[ConfigError], Sensor[Robot, Environment]](Seq(ConfigError.ParsingError(s"Unknown sensor type: $key")))
-      case None => Left[Seq[ConfigError], Sensor[Robot, Environment]](Seq(ConfigError.ParsingError("Empty sensor map")))
-
-  /**
-   * Parses a [[io.github.srs.model.entity.dynamicentity.sensor.ProximitySensor]] from the given map.
-   * @param map
-   *   the map containing proximity sensor parameters
-   * @return
-   *   a `ConfigResult` containing the parsed `Sensor[Robot, Environment]` or the errors encountered during parsing.
-   */
-  private def parseProximitySensor(map: Map[String, Any]): ConfigResult[Sensor[Robot, Environment]] =
-    for
-      offset <- get[Double]("offset", map)
-      range <- get[Double]("range", map)
-    yield proximitySensor withOffset Orientation(offset) withRange range
 
 end YamlSimulationConfigParser

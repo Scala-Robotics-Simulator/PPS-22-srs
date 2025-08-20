@@ -117,4 +117,50 @@ object SimulationDefaults:
       val defaultBehavior: Rule[IO, SensorReadings, Action[IO]] = Rules.alwaysForward[IO]
     end Robot
   end DynamicEntity
+
+  object Fields:
+
+    object Simulation:
+      val self: String = "simulation"
+      val duration: String = "duration"
+      val seed: String = "seed"
+
+    object Environment:
+      val self: String = "environment"
+      val width: String = "width"
+      val height: String = "height"
+      val entities: String = "entities"
+
+    object Entity:
+      val id: String = "id"
+      val position: String = "position"
+      val x: String = "x"
+      val y: String = "y"
+      val orientation: String = "orientation"
+
+      object StaticEntity:
+
+        object Obstacle:
+          val self: String = "obstacle"
+          val width: String = "width"
+          val height: String = "height"
+
+        object Light:
+          val self: String = "light"
+          val radius: String = "radius"
+          val illuminationRadius: String = "illuminationRadius"
+          val intensity: String = "intensity"
+          val attenuation: String = "attenuation"
+
+      object DynamicEntity:
+
+        object Robot:
+          val self: String = "robot"
+          val radius: String = "radius"
+          val speed: String = "speed"
+          val withProximitySensors: String = "withProximitySensors"
+          val withLightSensors: String = "withLightSensors"
+          val behavior: String = "behavior"
+    end Entity
+  end Fields
 end SimulationDefaults

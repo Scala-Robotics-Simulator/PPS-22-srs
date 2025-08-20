@@ -9,6 +9,8 @@ import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.stdProximitySensors
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.stdLightSensors
+import io.github.srs.utils.SimulationDefaults.Fields.Entity as EntityFields
+import io.github.srs.utils.SimulationDefaults.Fields.Entity.DynamicEntity.Robot as RobotFields
 
 /**
  * Encoders for DynamicEntity types.
@@ -40,17 +42,18 @@ object DynamicEntity:
         "WARNING: encoding robot with custom sensors, those will be lost during the serialization",
       )
 
+    // TODO: Serialize robot behavior
     Json
       .obj(
-        "id" -> robot.id.asJson,
-        "position" -> robot.position.asJson,
-        "radius" -> robot.shape.radius.asJson,
-        "orientation" -> robot.orientation.degrees.asJson,
-        "withProximitySensors" -> withProximitySensors.asJson,
-        "withLightSensors" -> withLightSensors.asJson,
+        EntityFields.id -> robot.id.asJson,
+        EntityFields.position -> robot.position.asJson,
+        RobotFields.radius -> robot.shape.radius.asJson,
+        EntityFields.orientation -> robot.orientation.degrees.asJson,
+        RobotFields.withProximitySensors -> withProximitySensors.asJson,
+        RobotFields.withLightSensors -> withLightSensors.asJson,
       )
       .deepMerge(
-        speeds.map("speed" -> _._1.asJson).toList.toMap.asJson,
+        speeds.map(RobotFields.speed -> _._1.asJson).toList.toMap.asJson,
       )
 
 end DynamicEntity

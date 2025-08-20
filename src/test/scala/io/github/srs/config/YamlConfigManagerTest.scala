@@ -53,7 +53,7 @@ class YamlConfigManagerTest extends AnyFlatSpec with Matchers:
       light withId lightId at (
         1.0,
         1.0,
-      ) withIntensity 0.5 withAttenuation 1.0 withIlluminationRadius 8.0 withOrientation orientation
+      ) withIntensity 0.5 withAttenuation 1.0 withIlluminationRadius 8.0 withOrientation orientation withRadius 1
     val o = obstacle withId obstacleId at (2.0, 2.0) withWidth 1.0 withHeight 1.0 withOrientation orientation
     val r = robot withId robotId at (4.0, 4.0) withOrientation orientation withSpeed 1.0 withShape Circle(
       0.5,
@@ -79,7 +79,7 @@ class YamlConfigManagerTest extends AnyFlatSpec with Matchers:
         |      height: 1.0
         |  - light:
         |      id: 00000000-0000-0000-0000-000000000001
-        |      radius: 0.05
+        |      radius: 1.0
         |      attenuation: 1.0
         |      illuminationRadius: 8.0
         |      position: [1.0, 1.0]

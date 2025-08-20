@@ -8,6 +8,8 @@ import io.github.srs.config.ConfigResult
 import io.github.srs.config.yaml.parser.Decoder
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.environment.dsl.CreationDSL.*
+import io.github.srs.utils.SimulationDefaults.Fields.Environment as EnvironmentFields
+import io.github.srs.config.ConfigError
 
 /**
  * EnvironmentSettingsPanel handles the environment-specific configuration settings. It provides a form for configuring
@@ -21,8 +23,8 @@ class EnvironmentSettingsPanel(
 ) extends JPanel(new BorderLayout):
 
   private val environmentFields = Seq(
-    FieldSpec("width", "Width", io.github.srs.view.components.TextField(5)),
-    FieldSpec("height", "Height", io.github.srs.view.components.TextField(5)),
+    FieldSpec(EnvironmentFields.width, "Width", io.github.srs.view.components.TextField(5)),
+    FieldSpec(EnvironmentFields.height, "Height", io.github.srs.view.components.TextField(5)),
   )
 
   private val environmentPanel = new FormPanel("Environment Settings", environmentFields)
@@ -44,8 +46,8 @@ class EnvironmentSettingsPanel(
     val fieldValues = environmentPanel.getValues
 
     for
-      width <- get[Int]("width", fieldValues)
-      height <- get[Int]("height", fieldValues)
+      width <- get[Int](EnvironmentFields.width, fieldValues)
+      height <- get[Int](EnvironmentFields.height, fieldValues)
     yield environment withWidth width withHeight height
 
   /**
@@ -56,8 +58,8 @@ class EnvironmentSettingsPanel(
    */
   def setEnvironment(env: Environment): Unit =
     val environmentMap = Map(
-      "width" -> env.width.toString,
-      "height" -> env.height.toString,
+      EnvironmentFields.width -> env.width.toString,
+      EnvironmentFields.height -> env.height.toString,
     )
     environmentPanel.setValues(environmentMap)
 
@@ -71,9 +73,9 @@ class EnvironmentSettingsPanel(
     getEnvironmentBase match
       case Left(errors) =>
         val errorMessages = errors.map:
-          case io.github.srs.config.ConfigError.MissingField(field) => s"Missing field: $field"
-          case io.github.srs.config.ConfigError.ParsingError(message) => s"Parsing error: $message"
-          case io.github.srs.config.ConfigError.InvalidType(field, expected) =>
+          case ConfigError.MissingField(field) => s"Missing field: $field"
+          case ConfigError.ParsingError(message) => s"Parsing error: $message"
+          case ConfigError.InvalidType(field, expected) =>
             s"Invalid type for $field: expected $expected"
         onValidationError(errorMessages)
         false

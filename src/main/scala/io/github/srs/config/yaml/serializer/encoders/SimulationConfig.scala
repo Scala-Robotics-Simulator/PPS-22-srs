@@ -5,6 +5,8 @@ import io.circe.syntax.*
 import io.circe.{ Encoder, Json }
 import io.github.srs.config.SimulationConfig
 import io.github.srs.config.yaml.serializer.encoders.given
+import io.github.srs.utils.SimulationDefaults.Fields.Environment as EnvironmentFields
+import io.github.srs.utils.SimulationDefaults.Fields.Simulation as SimulationFields
 
 /**
  * Encoders for SimulationConfig types.
@@ -18,12 +20,12 @@ object SimulationConfig:
    */
   given Encoder[SimulationConfig] = (config: SimulationConfig) =>
     val baseFields = List(
-      "environment" -> config.environment.asJson,
+      EnvironmentFields.self -> config.environment.asJson,
     )
 
     val simulationFields =
       if config.simulation.duration.isDefined || config.simulation.seed.isDefined then
-        List("simulation" -> config.simulation.asJson)
+        List(SimulationFields.self -> config.simulation.asJson)
       else List.empty[(String, Json)]
 
     Json.obj(simulationFields ++ baseFields*)
