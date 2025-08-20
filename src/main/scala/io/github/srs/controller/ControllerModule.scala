@@ -1,8 +1,7 @@
 package io.github.srs.controller
 
-import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
+import scala.concurrent.duration.{ DurationInt, FiniteDuration, MILLISECONDS }
 import scala.language.postfixOps
-import scala.concurrent.duration.DurationInt
 
 import cats.effect.std.Queue
 import cats.effect.{ Clock, IO }
@@ -141,10 +140,8 @@ object ControllerModule:
           state.environment.entities.collect { case robot: Robot =>
             for
               sensorReadings <- robot.senseAll[IO](state.environment)
-              maybeAction <- robot.behavior.run(sensorReadings)
-              _ <- maybeAction match
-                case Some(a) => queue.offer(Event.RobotAction(queue, robot, a))
-                case None => IO.unit
+              action <- robot.behavior.run(sensorReadings)
+              _ <- queue.offer(Event.RobotAction(queue, robot, action))
             yield ()
           }.toList.parSequence.void
 
