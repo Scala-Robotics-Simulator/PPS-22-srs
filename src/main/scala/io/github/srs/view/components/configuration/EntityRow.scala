@@ -20,6 +20,10 @@ import io.github.srs.config.yaml.parser.Decoder
 import io.github.srs.config.ConfigResult
 import io.github.srs.model.entity.ShapeType
 import io.github.srs.model.entity.Orientation
+import io.github.srs.utils.SimulationDefaults.Fields.Entity as EntityFields
+import io.github.srs.utils.SimulationDefaults.Fields.Entity.DynamicEntity.Robot as RobotFields
+import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Obstacle as ObstacleFields
+import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Light as LightFields
 
 /**
  * EntityRow is a JPanel that represents a single entity in the configuration view. It allows users to select the type
@@ -98,9 +102,9 @@ class EntityRow(
    */
   def getEntity: ConfigResult[Entity] =
     getEntityType.toLowerCase(Locale.ENGLISH) match
-      case "robot" => parseRobot()
-      case "obstacle" => parseObstacle()
-      case "light" => parseLight()
+      case RobotFields.self => parseRobot()
+      case ObstacleFields.self => parseObstacle()
+      case LightFields.self => parseLight()
 
   /**
    * Sets the values of the properties panel.
@@ -115,13 +119,13 @@ class EntityRow(
     import Decoder.{ get, given }
     val map = propertiesPanel.getValues
     for
-      x <- get[Double]("x", map)
-      y <- get[Double]("y", map)
-      orientation <- get[Double]("orientation", map)
-      radius <- get[Double]("radius", map)
-      speed <- get[Double]("speed", map)
-      prox <- get[Boolean]("proxSens", map)
-      light <- get[Boolean]("lightSens", map)
+      x <- get[Double](EntityFields.x, map)
+      y <- get[Double](EntityFields.y, map)
+      orientation <- get[Double](EntityFields.orientation, map)
+      radius <- get[Double](RobotFields.radius, map)
+      speed <- get[Double](RobotFields.speed, map)
+      prox <- get[Boolean](RobotFields.withProximitySensors, map)
+      light <- get[Boolean](RobotFields.withLightSensors, map)
     yield robot
       .at((x, y))
       .withOrientation(Orientation(orientation))
@@ -134,21 +138,29 @@ class EntityRow(
     import Decoder.{ get, given }
     val map = propertiesPanel.getValues
     for
-      x <- get[Double]("x", map)
-      y <- get[Double]("y", map)
-      orientation <- get[Double]("orientation", map)
-      width <- get[Double]("width", map)
-      height <- get[Double]("height", map)
+      x <- get[Double](EntityFields.x, map)
+      y <- get[Double](EntityFields.y, map)
+      orientation <- get[Double](EntityFields.orientation, map)
+      width <- get[Double](ObstacleFields.width, map)
+      height <- get[Double](ObstacleFields.height, map)
     yield obstacle at (x, y) withOrientation Orientation(orientation) withWidth width withHeight height
 
   private def parseLight(): ConfigResult[StaticEntity.Light] =
     import Decoder.{ get, given }
     val map = propertiesPanel.getValues
     for
-      x <- get[Double]("x", map)
-      y <- get[Double]("y", map)
-      illumintation <- get[Double]("illumination", map)
-      intensity <- get[Double]("intensity", map)
-      attenuation <- get[Double]("attenuation", map)
-    yield light at (x, y) withIlluminationRadius illumintation withIntensity intensity withAttenuation attenuation
+      x <- get[Double](EntityFields.x, map)
+      y <- get[Double](EntityFields.y, map)
+      orientation <- get[Double](EntityFields.orientation, map)
+      radius <- get[Double](LightFields.radius, map)
+      illumintation <- get[Double](LightFields.illuminationRadius, map)
+      intensity <- get[Double](LightFields.intensity, map)
+      attenuation <- get[Double](LightFields.attenuation, map)
+    yield light
+      .at(x, y)
+      .withOrientation(Orientation(orientation))
+      .withRadius(radius)
+      .withIlluminationRadius(illumintation)
+      .withIntensity(intensity)
+      .withAttenuation(attenuation)
 end EntityRow

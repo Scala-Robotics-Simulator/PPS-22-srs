@@ -3,6 +3,9 @@ package io.github.srs.config.yaml.serializer.encoders
 import io.circe.syntax.*
 import io.circe.{ Encoder, Json }
 import io.github.srs.model.entity.staticentity.StaticEntity.{ Light, Obstacle }
+import io.github.srs.utils.SimulationDefaults.Fields.Entity as EntityFields
+import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Obstacle as ObstacleFields
+import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Light as LightFields
 
 /**
  * Encoders for StaticEntity types.
@@ -16,11 +19,11 @@ object StaticEntity:
    */
   given Encoder[Obstacle] = (obs: Obstacle) =>
     Json.obj(
-      "id" -> obs.id.asJson,
-      "position" -> obs.position.asJson,
-      "orientation" -> obs.orientation.degrees.asJson,
-      "width" -> obs.width.asJson,
-      "height" -> obs.height.asJson,
+      EntityFields.id -> obs.id.asJson,
+      EntityFields.position -> obs.position.asJson,
+      EntityFields.orientation -> obs.orientation.degrees.asJson,
+      ObstacleFields.width -> obs.width.asJson,
+      ObstacleFields.height -> obs.height.asJson,
     )
 
   /**
@@ -30,13 +33,13 @@ object StaticEntity:
    */
   given Encoder[Light] = (light: Light) =>
     Json.obj(
-      "id" -> light.id.asJson,
-      "position" -> light.position.asJson,
-      "orientation" -> light.orientation.degrees.asJson,
-      "radius" -> light.radius.asJson,
-      "illuminationRadius" -> light.illuminationRadius.asJson,
-      "intensity" -> light.intensity.asJson,
-      "attenuation" -> light.attenuation.asJson,
+      EntityFields.id -> light.id.asJson,
+      EntityFields.position -> light.position.asJson,
+      EntityFields.orientation -> light.orientation.degrees.asJson,
+      LightFields.radius -> light.radius.asJson,
+      LightFields.illuminationRadius -> light.illuminationRadius.asJson,
+      LightFields.intensity -> light.intensity.asJson,
+      LightFields.attenuation -> light.attenuation.asJson,
     )
 end StaticEntity
 

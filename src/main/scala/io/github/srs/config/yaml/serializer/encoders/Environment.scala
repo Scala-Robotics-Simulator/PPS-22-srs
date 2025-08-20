@@ -7,6 +7,7 @@ import io.circe.{ Encoder, Json }
 import io.github.srs.config.yaml.serializer.encoders.given
 import io.github.srs.model.entity.staticentity.StaticEntity.Boundary
 import io.github.srs.model.environment.Environment
+import io.github.srs.utils.SimulationDefaults.Fields.Environment as EnvironmentFields
 
 /**
  * Encodes an [[Environment]] to a JSON object.
@@ -21,8 +22,8 @@ object Environment:
    */
   given Encoder[Environment] = (environment: Environment) =>
     val baseFields = List(
-      "width" -> environment.width.asJson,
-      "height" -> environment.height.asJson,
+      EnvironmentFields.width -> environment.width.asJson,
+      EnvironmentFields.height -> environment.height.asJson,
     )
     val entitiesFields = environment.entities.filterNot {
       case Boundary(_, _, _, _, _) =>
@@ -32,7 +33,7 @@ object Environment:
     if environment.entities.isEmpty then Json.obj(baseFields*)
     else
       Json.obj(
-        baseFields ++ List("entities" -> entitiesFields)*,
+        baseFields ++ List(EnvironmentFields.entities -> entitiesFields)*,
       )
 end Environment
 

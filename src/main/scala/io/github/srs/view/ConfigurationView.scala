@@ -10,6 +10,11 @@ import io.github.srs.model.environment.dsl.CreationDSL.*
 import io.github.srs.model.validation.DomainError
 import io.github.srs.view.components.*
 import io.github.srs.view.components.configuration.*
+import io.github.srs.utils.SimulationDefaults.Fields.Entity
+import io.github.srs.utils.SimulationDefaults.Fields.Entity.DynamicEntity.Robot as RobotFields
+import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Obstacle as ObstacleFields
+import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Light as LightFields
+import io.github.srs.config.ConfigError
 
 /**
  * Defines how the configuration view should behave.
@@ -58,28 +63,27 @@ object ConfigurationView:
 
     // Define entity field specifications
     private val baseFieldSpec = Seq(
-      FieldSpec("x", "X position", TextField(3)),
-      FieldSpec("y", "Y position", TextField(3)),
+      FieldSpec(Entity.x, "X position", TextField(3)),
+      FieldSpec(Entity.y, "Y position", TextField(3)),
+      FieldSpec(Entity.orientation, "Orientation (degrees)", TextField(3)),
     )
 
-    private val baseAndOrient =
-      baseFieldSpec :+ FieldSpec("orientation", "Orientation (degrees)", TextField(3))
-
     private val entityFieldSpecs: Map[String, Seq[FieldSpec]] = Map(
-      "Robot" -> (baseAndOrient ++ Seq(
-        FieldSpec("radius", "Radius (meters)", TextField(2)),
-        FieldSpec("speed", "Speed", TextField(3)),
-        FieldSpec("proxSens", "With proximity sensors", CheckBox(true)),
-        FieldSpec("lightSens", "With light sensors", CheckBox(true)),
+      RobotFields.self.capitalize -> (baseFieldSpec ++ Seq(
+        FieldSpec(RobotFields.radius, "Radius (meters)", TextField(2)),
+        FieldSpec(RobotFields.speed, "Speed", TextField(3)),
+        FieldSpec(RobotFields.withProximitySensors, "With proximity sensors", CheckBox(true)),
+        FieldSpec(RobotFields.withLightSensors, "With light sensors", CheckBox(true)),
       )),
-      "Obstacle" -> (baseAndOrient ++ Seq(
-        FieldSpec("width", "Width", TextField(8)),
-        FieldSpec("height", "Height", TextField(5)),
+      ObstacleFields.self.capitalize -> (baseFieldSpec ++ Seq(
+        FieldSpec(ObstacleFields.width, "Width", TextField(8)),
+        FieldSpec(ObstacleFields.height, "Height", TextField(5)),
       )),
-      "Light" -> (baseFieldSpec ++ Seq(
-        FieldSpec("illumination", "Illumination radius", TextField(3)),
-        FieldSpec("intensity", "Intensity", TextField(3)),
-        FieldSpec("attenuation", "Attenuation", TextField(3)),
+      LightFields.self.capitalize -> (baseFieldSpec ++ Seq(
+        FieldSpec(LightFields.radius, "Radius (meters)", TextField(3)),
+        FieldSpec(LightFields.illuminationRadius, "Illumination radius", TextField(3)),
+        FieldSpec(LightFields.intensity, "Intensity", TextField(3)),
+        FieldSpec(LightFields.attenuation, "Attenuation", TextField(3)),
       )),
     )
 
@@ -188,9 +192,9 @@ object ConfigurationView:
             errors
           }.flatten
             .map:
-              case io.github.srs.config.ConfigError.MissingField(field) => s"Missing field: $field"
-              case io.github.srs.config.ConfigError.ParsingError(message) => s"Parsing error: $message"
-              case io.github.srs.config.ConfigError.InvalidType(field, expected) =>
+              case ConfigError.MissingField(field) => s"Missing field: $field"
+              case ConfigError.ParsingError(message) => s"Parsing error: $message"
+              case ConfigError.InvalidType(field, expected) =>
                 s"Invalid type for $field: expected $expected"
           showValidationErrors(allErrors)
           None

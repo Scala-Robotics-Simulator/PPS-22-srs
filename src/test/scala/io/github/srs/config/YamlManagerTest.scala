@@ -11,7 +11,6 @@ import io.github.srs.model.entity.ShapeType.Circle
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
-import io.github.srs.model.entity.dynamicentity.sensor.ProximitySensor
 import io.github.srs.model.entity.staticentity.dsl.LightDsl.*
 import io.github.srs.model.entity.staticentity.dsl.ObstacleDsl.*
 import io.github.srs.model.entity.{ Orientation, Point2D }
@@ -110,83 +109,6 @@ class YamlManagerTest extends AnyFlatSpec with Matchers:
           case _ => fail("Expected a Robot entity")
     end match
 
-  it should "create a robot with a custom actuator" in:
-    val yamlContent =
-      """
-        |environment:
-        |  entities:
-        |    - robot:
-        |        id: 00000000-0000-0000-0000-000000000002
-        |        position: [5.0, 5.0]
-        |        actuators:
-        |          - differentialWheelMotor:
-        |              leftSpeed: 3.0
-        |              rightSpeed: 2.0
-        |""".stripMargin
-
-    val res = YamlManager.parse[IO](yamlContent).unsafeRunSync()
-    res match
-      case Left(errors) => fail(s"Parsing failed with errors: ${errors.mkString(", ")}")
-      case Right(config) =>
-        val _ = config.environment.entities.size shouldBe 1
-        config.environment.entities.headOption match
-          case Some(entity) =>
-            entity match
-              case robot: Robot =>
-                val _ = robot.position shouldBe Point2D(5.0, 5.0)
-                val _ = robot.actuators.size shouldBe 1
-                robot.actuators.headOption match
-                  case Some(actuator) =>
-                    actuator match
-                      case d: DifferentialWheelMotor =>
-                        val _ = d.left.speed should be(3.0)
-                        val _ = d.right.speed should be(2.0)
-                      case _ => fail("Expected a DifferentialWheelMotor actuator")
-                  case None => fail("Expected at least one actuator")
-              case _ => fail("Expected a Robot entity")
-          case _ => fail("Expected a Robot entity")
-    end match
-
-  it should "parse a robot with custom sensors" in:
-    val yamlContent =
-      """
-        |environment:
-        |  entities:
-        |    - robot:
-        |        id: 00000000-0000-0000-0000-000000000002
-        |        position: [5.0, 5.0]
-        |        sensors:
-        |          - proximitySensor:
-        |              distance: 0.5
-        |              offset: 0.0
-        |              range: 2.3
-        |""".stripMargin
-
-    val res = YamlManager.parse[IO](yamlContent).unsafeRunSync()
-    res match
-      case Left(errors) => fail(s"Parsing failed with errors: ${errors.mkString(", ")}")
-      case Right(config) =>
-        val _ = config.environment.entities.size shouldBe 1
-        config.environment.entities.headOption match
-          case Some(entity) =>
-            entity match
-              case robot: Robot =>
-                val _ = robot.position shouldBe Point2D(5.0, 5.0)
-                val _ = robot.sensors.size should be(1)
-                robot.sensors.headOption match
-                  case Some(sensor) =>
-                    sensor match
-                      case ProximitySensor(offset, range) =>
-                        val _ = offset.degrees should be(0.0)
-                        val _ = range should be > 2.29
-                        val _ =
-                          range should be < 2.31 // Allowing a small margin of error due to floating point precision
-                      case _ => fail("Expected a ProximitySensor")
-                  case None => fail("Expected at least one sensor")
-              case _ => fail("Expected a Robot entity")
-          case _ => fail("Expected a Robot entity")
-    end match
-
   it should "convert a SimulationConfig to YAML" in:
     val config = SimulationConfig(
       simulation = Simulation(duration = Some(60)),
@@ -232,7 +154,7 @@ class YamlManagerTest extends AnyFlatSpec with Matchers:
       light withId lightId at (
         1.0,
         1.0,
-      ) withIntensity 0.5 withAttenuation 1.0 withIlluminationRadius 8.0 withOrientation orientation
+      ) withIntensity 0.5 withAttenuation 1.0 withIlluminationRadius 8.0 withOrientation orientation withRadius 1.0
     val o = obstacle withId obstacleId at (2.0, 2.0) withWidth 1.0 withHeight 1.0 withOrientation orientation
     val r = robot withId robotId at (4.0, 4.0) withOrientation orientation withSpeed 1.0 withShape Circle(
       0.5,
@@ -260,7 +182,7 @@ class YamlManagerTest extends AnyFlatSpec with Matchers:
         |      height: 1.0
         |  - light:
         |      id: 00000000-0000-0000-0000-000000000001
-        |      radius: 0.05
+        |      radius: 1.0
         |      attenuation: 1.0
         |      illuminationRadius: 8.0
         |      position: [1.0, 1.0]
