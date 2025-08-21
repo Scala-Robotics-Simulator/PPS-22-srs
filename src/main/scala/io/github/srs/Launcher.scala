@@ -46,7 +46,6 @@ def mkInitialState(cfg: SimulationConfig): SimulationState =
     sys.exit(1),
   )
   SimulationState(
-    i = 0,
     simulationTime = cfg.simulation.duration.map(FiniteDuration(_, MILLISECONDS)),
     simulationSpeed = SimulationSpeed.NORMAL,
     simulationRNG = SimpleRNG(cfg.simulation.seed.getOrElse(42)),

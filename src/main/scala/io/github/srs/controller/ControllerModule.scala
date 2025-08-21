@@ -1,9 +1,10 @@
 package io.github.srs.controller
 
-import scala.concurrent.duration.{DurationInt, FiniteDuration, MILLISECONDS}
+import scala.concurrent.duration.{ DurationInt, FiniteDuration, MILLISECONDS }
 import scala.language.postfixOps
+
 import cats.effect.std.Queue
-import cats.effect.{Clock, IO}
+import cats.effect.{ Clock, IO }
 import cats.syntax.all.*
 import io.github.srs.controller.message.RobotProposal
 import io.github.srs.controller.protocol.Event
@@ -15,7 +16,7 @@ import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
 import io.github.srs.model.logic.*
 import io.github.srs.utils.SimulationDefaults.debugMode
 import io.github.srs.utils.random.RNG
-import io.github.srs.utils.random.RandomDSL.{generate, shuffle}
+import io.github.srs.utils.random.RandomDSL.{ generate, shuffle }
 
 /**
  * Module that defines the controller logic for the Scala Robotics Simulator.
@@ -176,8 +177,6 @@ object ControllerModule:
 
         private def handleEvent(state: S, event: Event): IO[S] =
           event match
-            case Event.Increment if state.simulationStatus == SimulationStatus.RUNNING =>
-              context.model.increment(state)
             case Event.Tick(deltaTime) if state.simulationStatus == SimulationStatus.RUNNING =>
               context.model.tick(state, deltaTime)
             case Event.TickSpeed(speed) => context.model.tickSpeed(state, speed)

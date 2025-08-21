@@ -8,7 +8,7 @@ import cats.effect.unsafe.implicits.global
   val runner = for
     cfg <- configurationView.init()
     state = mkInitialState(cfg)
-    _ <- configurationView.close()
+//    _ <- configurationView.close()
     _ <- Launcher.runMVC(state)
   yield ()
   runner.unsafeRunSync()

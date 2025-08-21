@@ -21,9 +21,6 @@ object UpdateLogic:
     ): IO[S] =
       bundle.robotActions.handleRobotActionsProposals(s, queue, proposals)
 
-    def increment(s: S)(using bundle: LogicsBundle[S]): IO[S] =
-      bundle.increment.increment(s)
-
     def tick(s: S, delta: FiniteDuration)(using bundle: LogicsBundle[S]): IO[S] =
       bundle.tick.tick(s, delta)
 
