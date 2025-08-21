@@ -2,7 +2,7 @@ package io.github.srs.view
 
 import cats.effect.IO
 import cats.effect.std.Queue
-import io.github.srs.controller.Event
+import io.github.srs.controller.protocol.Event
 import io.github.srs.model.ModelModule
 
 /**
