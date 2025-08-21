@@ -6,6 +6,7 @@ import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import java.awt.Insets
 import java.util.Locale
+import java.awt.CardLayout
 
 import io.github.srs.utils.chaining.Pipe.given
 import io.github.srs.view.components.FieldSpec
@@ -36,11 +37,6 @@ import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Light a
  * @param removeRow
  *   a function to call when the user wants to remove this row from the configuration
  */
-@SuppressWarnings(
-  Array(
-    "org.wartremover.warts.Var",
-  ),
-)
 class EntityRow(
     initialType: String,
     fieldSpecsByType: Map[String, Seq[FieldSpec]],
@@ -50,7 +46,16 @@ class EntityRow(
   private val typeCombo = new JComboBox[String](fieldSpecsByType.keys.toArray)
   typeCombo.setSelectedItem(initialType)
 
-  private var propertiesPanel: FormPanel = new FormPanel("", fieldSpecsByType(initialType))
+  private val cardLayout = new CardLayout()
+  private val propertiesContainer = new JPanel(cardLayout)
+
+  private val propertyPanels: Map[String, FormPanel] = fieldSpecsByType.map { (entityType, fields) =>
+    val panel = new FormPanel("", fields)
+    propertiesContainer.add(panel, entityType)
+    entityType -> panel
+  }
+
+  cardLayout.show(propertiesContainer, initialType)
 
   private val btnRemove = new JButton("X")
   btnRemove.setToolTipText("Remove this entity")
@@ -64,7 +69,7 @@ class EntityRow(
   rowPanel.add(typeCombo, gbc)
 
   gbc.gridx = 1; gbc.weightx = 1.0
-  rowPanel.add(propertiesPanel, gbc)
+  rowPanel.add(propertiesContainer, gbc)
 
   gbc.gridx = 2; gbc.weightx = 0
   rowPanel.add(btnRemove, gbc)
@@ -74,24 +79,15 @@ class EntityRow(
 
   typeCombo.addActionListener(_ =>
     typeCombo.getSelectedItem() match
-      case selected: String =>
-        rowPanel.remove(propertiesPanel)
-        propertiesPanel = new FormPanel("", fieldSpecsByType(selected))
-        gbc.gridx = 1; gbc.weightx = 1.0
-        rowPanel.add(propertiesPanel, gbc)
-        revalidate()
-        repaint()
+      case selected: String => cardLayout.show(propertiesContainer, selected)
       case _ => (),
   )
 
   btnRemove.addActionListener(_ => removeRow(this))
 
-  /**
-   * Retrieves the type and values of the entity represented by this row.
-   *
-   * @return
-   *   a tuple containing the entity type and a map of its properties
-   */
+  private def getCurrentPropertiesPanel: FormPanel =
+    propertyPanels(getEntityType)
+
   private def getEntityType: String =
     typeCombo.getSelectedItem match
       case selected: String => selected
@@ -104,30 +100,18 @@ class EntityRow(
         )
         ""
 
-  /**
-   * Retrieves the entity represented by this row.
-   *
-   * @return
-   *   a [[ConfigResult]] containing either the parsed entity or a sequence of configuration errors
-   */
   def getEntity: ConfigResult[Entity] =
     getEntityType.toLowerCase(Locale.ENGLISH) match
       case RobotFields.self => parseRobot()
       case ObstacleFields.self => parseObstacle()
       case LightFields.self => parseLight()
 
-  /**
-   * Sets the values of the properties panel.
-   *
-   * @param values
-   *   a map where keys are property names and values are the corresponding values (either String or Boolean)
-   */
   def setValues(values: Map[String, String | Boolean]): Unit =
-    propertiesPanel.setValues(values)
+    getCurrentPropertiesPanel.setValues(values)
 
   private def parseRobot(): ConfigResult[Robot] =
     import Decoder.{ get, given }
-    val map = propertiesPanel.getValues
+    val map = getCurrentPropertiesPanel.getValues
     for
       x <- get[Double](EntityFields.x, map)
       y <- get[Double](EntityFields.y, map)
@@ -146,7 +130,7 @@ class EntityRow(
 
   private def parseObstacle(): ConfigResult[StaticEntity.Obstacle] =
     import Decoder.{ get, given }
-    val map = propertiesPanel.getValues
+    val map = getCurrentPropertiesPanel.getValues
     for
       x <- get[Double](EntityFields.x, map)
       y <- get[Double](EntityFields.y, map)
@@ -157,7 +141,7 @@ class EntityRow(
 
   private def parseLight(): ConfigResult[StaticEntity.Light] =
     import Decoder.{ get, given }
-    val map = propertiesPanel.getValues
+    val map = getCurrentPropertiesPanel.getValues
     for
       x <- get[Double](EntityFields.x, map)
       y <- get[Double](EntityFields.y, map)
