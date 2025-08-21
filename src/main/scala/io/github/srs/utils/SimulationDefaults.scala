@@ -94,6 +94,12 @@ object SimulationDefaults:
       val defaultActuators: Seq[Actuator[Robot]] = Seq.empty
       val defaultSensors: Vector[Sensor[Robot, Environment]] = Vector.empty
 
+      val selectionStroke: Float = 3f
+      val normalStroke: Float = 1f
+      val arrowLengthFactor: Double = 0.6
+      val arrowWidthFactor: Double = 0.3
+      val minArrowWidth: Float = 2f
+
       val stdProximitySensors: Vector[Sensor[Robot, Environment]] = Vector(
         ProximitySensor(Orientation(0.0), radius),
         ProximitySensor(Orientation(45.0), radius),
@@ -164,4 +170,35 @@ object SimulationDefaults:
           val behavior: String = "behavior"
     end Entity
   end Fields
+
+  object Layout:
+    val splitPaneWeight: Double = 0.8
+    val splitPaneLocation: Double = 0.8
+
+  object Frame:
+    val minWidth = 800
+    val minHeight = 600
+    val prefWidth = 1200
+    val prefHeight = 720
+    val splitWeight = 0.8
+    val canvasBorder: Int = 2
+
+  object Canvas:
+    val borderSize = 2
+    val minZoom = 0.2
+    val maxZoom = 5.0
+    val zoomInFactor = 1.2
+    val zoomOutFactor = 0.8
+    val desiredLabelPixels = 40.0
+    val gridStrokeWidth = 1f
+    val labelDesiredPx: Double = 40.0
+    val minLightSize: Int = 12
+    val lightStroke: Float = 2f
+    val labelBottomOffset: Int = 4
+    val labelYOffset: Int = 12
+    val labelXOffset: Int = 2
+
+  object ControlsPanel:
+    val startStopButtonText: String = "Start/Stop"
+
 end SimulationDefaults
