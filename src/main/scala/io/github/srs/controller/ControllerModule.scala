@@ -9,7 +9,7 @@ import cats.syntax.all.*
 import io.github.srs.controller.message.RobotProposal
 import io.github.srs.controller.protocol.Event
 import io.github.srs.model.*
-import io.github.srs.model.SimulationConfig.SimulationStatus
+import io.github.srs.model.SimulationConfig.SimulationStatus.{ PAUSED, RUNNING, STOPPED }
 import io.github.srs.model.UpdateLogic.*
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
@@ -104,38 +104,35 @@ object ControllerModule:
           def loop(state: S): IO[Unit] =
             for
               startTime <- Clock[IO].realTime.map(_.toMillis)
-              _ <- runBehavior(queue, state).whenA(state.simulationStatus == SimulationStatus.RUNNING)
-
+              _ <- runBehavior(queue, state).whenA(state.simulationStatus == RUNNING)
               events <- queue.tryTakeN(Some(50))
               shuffledEvents <- shuffleEvents(queue, state, events)
               newState <- handleEvents(state, shuffledEvents)
-
               _ <- context.view.render(newState)
-
               nextState <- nextStep(newState, startTime)
-
-              stop = newState.simulationStatus == SimulationStatus.STOPPED ||
-                newState.simulationTime.exists(max => newState.elapsedTime >= max)
-
               endTime <- Clock[IO].realTime.map(_.toMillis)
               _ <- if debugMode then IO.println(s"Simulation loop took ${endTime - startTime} ms") else IO.unit
-
-              _ <- if stop then IO.unit else loop(nextState)
+              _ <- if stopCondition(nextState) then IO.unit else loop(nextState)
             yield ()
 
           loop(s)
 
-        end simulationLoop
+        private def stopCondition(state: S): Boolean =
+          state.simulationStatus == STOPPED ||
+            elapsedTimeReached(state.simulationTime, state.elapsedTime)
+
+        private def elapsedTimeReached(simulationTime: Option[FiniteDuration], elapsedTime: FiniteDuration): Boolean =
+          simulationTime.exists(max => elapsedTime >= max)
 
         private def nextStep(state: S, startTime: Long): IO[S] =
           state.simulationStatus match
-            case SimulationStatus.RUNNING =>
+            case RUNNING =>
               tickEvents(startTime, state.simulationSpeed.tickSpeed, state)
 
-            case SimulationStatus.PAUSED =>
+            case PAUSED =>
               IO.sleep(50.millis).as(state)
 
-            case SimulationStatus.STOPPED =>
+            case STOPPED =>
               IO.pure(state)
 
         private def runBehavior(queue: Queue[IO, Event], state: S): IO[Unit] =
@@ -177,8 +174,7 @@ object ControllerModule:
 
         private def handleEvent(state: S, event: Event): IO[S] =
           event match
-            case Event.Tick(deltaTime) if state.simulationStatus == SimulationStatus.RUNNING =>
-              context.model.tick(state, deltaTime)
+            case Event.Tick(deltaTime) => context.model.tick(state, deltaTime)
             case Event.TickSpeed(speed) => context.model.tickSpeed(state, speed)
             case Event.Random(rng) => context.model.random(state, rng)
             case Event.Pause => context.model.pause(state)
