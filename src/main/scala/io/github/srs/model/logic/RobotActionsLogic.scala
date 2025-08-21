@@ -3,10 +3,8 @@ package io.github.srs.model.logic
 import scala.concurrent.duration.{ DurationInt, FiniteDuration }
 
 import cats.effect.IO
-import cats.effect.std.Queue
 import cats.syntax.parallel.catsSyntaxParallelTraverse1
 import io.github.srs.controller.message.RobotProposal
-import io.github.srs.controller.protocol.Event
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor.applyMovementActions
@@ -20,7 +18,6 @@ trait RobotActionsLogic[S <: ModelModule.State]:
 
   def handleRobotActionsProposals(
       s: S,
-      queue: Queue[IO, Event],
       proposals: List[RobotProposal],
   ): IO[S]
 
@@ -30,7 +27,6 @@ object RobotActionsLogic:
 
     def handleRobotActionsProposals(
         s: SimulationState,
-        queue: Queue[IO, Event],
         proposals: List[RobotProposal],
     ): IO[SimulationState] =
 
