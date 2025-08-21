@@ -137,12 +137,12 @@ object ControllerModule:
 
         private def runBehavior(queue: Queue[IO, Event], state: S): IO[Unit] =
           for
-            proposals <- state.environment.entities.collect { case robot: Robot =>
+            proposals <- state.environment.entities.collect { case robot: Robot => robot }.toList.parTraverse { robot =>
               for
                 sensorReadings <- robot.senseAll[IO](state.environment)
-                maybeAction <- robot.behavior.run(sensorReadings)
-              yield maybeAction.map(a => RobotProposal(robot, a))
-            }.toList.sequence.map(_.flatten)
+                action <- robot.behavior.run(sensorReadings)
+              yield IO.pure(RobotProposal(robot, action))
+            }
             _ <- queue.offer(Event.RobotActionProposals(queue, proposals))
           yield ()
 

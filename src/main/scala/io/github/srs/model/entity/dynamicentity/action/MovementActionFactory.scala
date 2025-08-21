@@ -48,22 +48,22 @@ object MovementActionFactory:
   infix def moveBackward[F[_]]: MovementAction[F] = MovementAction(-maxSpeed, -maxSpeed)
 
   /**
-   * Turns the robot left by applying a negative speed to the left wheel and a positive speed to the right wheel.
+   * Turns the robot left by applying a positive speed to the left wheel and a negative speed to the right wheel.
    * @tparam F
    *   the effect type of the action.
    * @return
    *   the [[MovementAction]] representing the left turn.
    */
-  infix def turnLeft[F[_]]: MovementAction[F] = MovementAction(-halfSpeed, halfSpeed)
+  infix def turnLeft[F[_]]: MovementAction[F] = MovementAction(halfSpeed, -halfSpeed)
 
   /**
-   * Turns the robot right by applying a positive speed to the left wheel and a negative speed to the right wheel.
+   * Turns the robot right by applying a negative speed to the left wheel and a positive speed to the right wheel.
    * @tparam F
    *   the effect type of the action.
    * @return
    *   the [[MovementAction]] representing the right turn.
    */
-  infix def turnRight[F[_]]: MovementAction[F] = MovementAction(halfSpeed, -halfSpeed)
+  infix def turnRight[F[_]]: MovementAction[F] = MovementAction(-halfSpeed, halfSpeed)
 
   /**
    * Stops the robot by applying zero speed to both wheels.
