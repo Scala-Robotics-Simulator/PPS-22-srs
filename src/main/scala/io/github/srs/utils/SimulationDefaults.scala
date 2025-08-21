@@ -82,6 +82,8 @@ object SimulationDefaults:
     object Robot:
       import SimulationDefaults.DynamicEntity.Robot.defaultShape.radius
 
+      val maxRetries = 10
+
       val defaultId: UUID = UUID.fromString("00000000-0000-0000-0000-000000000002")
       val defaultPosition: Point2D = (0.0, 0.0)
       val defaultShape: ShapeType.Circle = ShapeType.Circle(0.5)

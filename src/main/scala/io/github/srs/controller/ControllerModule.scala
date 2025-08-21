@@ -137,13 +137,15 @@ object ControllerModule:
               IO.pure(state)
 
         private def runBehavior(queue: Queue[IO, Event], state: S): IO[Unit] =
-          state.environment.entities.collect { case robot: Robot =>
-            for
-              sensorReadings <- robot.senseAll[IO](state.environment)
-              action = robot.behavior.run(sensorReadings)
-              _ <- queue.offer(Event.RobotAction(queue, robot, action))
-            yield ()
-          }.toList.parSequence.void
+          for
+            proposals <- state.environment.entities.collect { case robot: Robot =>
+              for
+                sensorReadings <- robot.senseAll[IO](state.environment)
+                maybeAction <- robot.behavior.run(sensorReadings)
+              yield maybeAction.map(a => RobotProposal(robot, a))
+            }.toList.sequence.map(_.flatten)
+            _ <- queue.offer(Event.RobotActionProposals(queue, proposals))
+          yield ()
 
         private def tickEvents(start: Long, tickSpeed: FiniteDuration, state: S): IO[S] =
           for
@@ -182,9 +184,8 @@ object ControllerModule:
             case Event.Pause => context.model.pause(state)
             case Event.Resume => context.model.resume(state)
             case Event.Stop => context.model.stop(state)
-            case Event.RobotAction(queue, robot, action) => context.model.handleRobotAction(state, queue, robot, action)
-            case Event.CollisionDetected(queue, robot, updatedRobot) =>
-              context.model.handleCollision(state, queue, robot, updatedRobot)
+            case Event.RobotActionProposals(queue, proposals) =>
+              context.model.handleRobotActionsProposals(state, queue, proposals)
             case _ => IO.pure(state)
 
       end ControllerImpl

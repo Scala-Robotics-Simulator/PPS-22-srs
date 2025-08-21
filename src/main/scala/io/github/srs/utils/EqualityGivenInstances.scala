@@ -12,6 +12,7 @@ import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior
 import io.github.srs.model.entity.dynamicentity.sensor.*
 import io.github.srs.model.entity.staticentity.StaticEntity
 import io.github.srs.model.entity.staticentity.StaticEntity.{ Light, Obstacle }
+import io.github.srs.model.environment.ValidEnvironment.ValidEnvironment
 
 object EqualityGivenInstances:
   given CanEqual[StaticEntity, StaticEntity] = CanEqual.derived
@@ -26,3 +27,4 @@ object EqualityGivenInstances:
   given CanEqual[Seq[Actuator[Robot]], Seq[Actuator[Robot]]] = CanEqual.derived
   given CanEqual[Vector[Sensor[Robot, Environment]], Vector[Sensor[Robot, Environment]]] = CanEqual.derived
   given CanEqual[Behavior[SensorReadings, Action[IO]], Behavior[SensorReadings, Action[IO]]] = CanEqual.derived
+  given CanEqual[ValidEnvironment, ValidEnvironment] = CanEqual.derived

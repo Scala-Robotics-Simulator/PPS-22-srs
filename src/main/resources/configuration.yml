@@ -7,7 +7,7 @@ environment:
   entities:
     - obstacle:
         id: 00000000-0000-0000-0000-000000000000
-        position: [5, 5]
+        position: [4.5, 4.5]
         orientation: 0.0
         width: 1.0
         height: 1.0
@@ -18,18 +18,28 @@ environment:
         intensity: 1.0
         attenuation: 1.0
     - robot:
+        bb: but-of-course
         id: 00000000-0000-0000-0000-000000000002
-        position: [3, 1]
+        position: [ 3, 4 ]
+        orientation: -90.0
+        radius: 0.5
+        speed: 1.0
+        withProximitySensors: true
+        withLightSensors: false
+    - robot:
+        tr: but-of-course
+        id: 00000000-0000-0000-0000-000000000003
+        position: [ 4, 3 ]
         orientation: 90.0
         radius: 0.5
         speed: 1.0
         withProximitySensors: true
         withLightSensors: false
     - robot:
-        id: 00000000-0000-0000-0000-000000000003
-        position: [7,7]
+        tl: but-of-course
+        id: 00000000-0000-0000-0000-000000000004
+        position: [ 1, 3 ]
         orientation: 0.0
         radius: 0.5
         speed: 1.0
         withProximitySensors: true
-        withLightSensors: true
