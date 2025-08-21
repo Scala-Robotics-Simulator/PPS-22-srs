@@ -5,9 +5,23 @@ import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings
 import io.github.srs.model.entity.dynamicentity.action.Action
 import cats.effect.IO
 
+/**
+ * Policy defines the behavior of a dynamic entity based on sensor readings.
+ *
+ * @param behavior
+ *   The behavior to be executed based on sensor readings.
+ */
 enum Policy(behavior: Behavior[SensorReadings, Action[IO]]):
   case Simple extends Policy(Behaviors.simple[IO])
   case AlwaysForward extends Policy(Behaviors.alwaysForward[IO])
 
+  /**
+   * Executes the behavior defined by this policy using the provided sensor readings.
+   *
+   * @param readings
+   *   The sensor readings to be used for executing the behavior.
+   * @return
+   *   An action that results from executing the behavior with the given sensor readings.
+   */
   def run(readings: SensorReadings): Action[IO] =
     behavior.run(readings)
