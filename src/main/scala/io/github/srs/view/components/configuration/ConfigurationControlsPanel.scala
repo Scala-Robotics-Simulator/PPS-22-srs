@@ -59,7 +59,7 @@ class ConfigurationControlsPanel(
       val path = Path.fromNioPath(java.nio.file.Paths.get(chooser.getSelectedFile.toURI))
       YamlConfigManager[IO](path).load.attempt.unsafeRunAsync { result =>
         SwingUtilities.invokeLater { () =>
-          val finalResult = result.flatMap(identity).flatMap(identity) // Flatten the triple-nested Either
+          val finalResult = result.flatten.flatten
           finalResult match
             case Left(_: NoSuchFileException) =>
               JOptionPane.showMessageDialog(
