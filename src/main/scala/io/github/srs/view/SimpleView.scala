@@ -18,7 +18,6 @@ class SimpleView[S <: ModelModule.State]:
   private val rbtnSlow = new JRadioButton("Slow")
   private val rbtnNormal = new JRadioButton("Normal", true)
   private val rbtnFast = new JRadioButton("Fast")
-  private val btnIncrement = new JButton("Increment")
   private val btnPause = new JButton("Pause")
   private val btnResume = new JButton("Resume")
   private val btnStop = new JButton("Stop")
@@ -36,7 +35,6 @@ class SimpleView[S <: ModelModule.State]:
     frame.getContentPane.add(contentPanel, BorderLayout.CENTER)
 
     val buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER))
-    buttonPanel.add(btnIncrement)
     buttonPanel.add(btnPause)
     buttonPanel.add(btnResume)
     buttonPanel.add(btnStop)
@@ -65,10 +63,6 @@ class SimpleView[S <: ModelModule.State]:
     }
     rbtnFast.addActionListener { _ =>
       queue.offer(Event.TickSpeed(SimulationSpeed.FAST)).unsafeRunAndForget()
-    }
-
-    btnIncrement.addActionListener { _ =>
-      queue.offer(Event.Increment).unsafeRunAndForget()
     }
 
     btnPause.addActionListener { _ =>

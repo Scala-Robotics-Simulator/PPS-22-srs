@@ -3,9 +3,7 @@ package io.github.srs.model
 import scala.concurrent.duration.FiniteDuration
 
 import cats.effect.IO
-import cats.effect.std.Queue
 import io.github.srs.controller.message.RobotProposal
-import io.github.srs.controller.protocol.Event
 import io.github.srs.model.ModelModule
 import io.github.srs.model.ModelModule.Model
 import io.github.srs.model.SimulationConfig.SimulationSpeed
@@ -16,10 +14,10 @@ object UpdateLogic:
 
   extension [S <: ModelModule.State](m: Model[S])
 
-    def handleRobotActionsProposals(s: S, queue: Queue[IO, Event], proposals: List[RobotProposal])(using
+    def handleRobotActionsProposals(s: S, proposals: List[RobotProposal])(using
         bundle: LogicsBundle[S],
     ): IO[S] =
-      bundle.robotActions.handleRobotActionsProposals(s, queue, proposals)
+      bundle.robotActions.handleRobotActionsProposals(s, proposals)
 
     def tick(s: S, delta: FiniteDuration)(using bundle: LogicsBundle[S]): IO[S] =
       bundle.tick.tick(s, delta)

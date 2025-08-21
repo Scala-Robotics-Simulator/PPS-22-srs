@@ -15,8 +15,7 @@ import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
 import io.github.srs.model.logic.*
 import io.github.srs.utils.SimulationDefaults.debugMode
-import io.github.srs.utils.random.RNG
-import io.github.srs.utils.random.RandomDSL.{ generate, shuffle }
+import io.github.srs.utils.EqualityGivenInstances.given_CanEqual_Event_Event
 
 /**
  * Module that defines the controller logic for the Scala Robotics Simulator.
@@ -106,8 +105,7 @@ object ControllerModule:
               startTime <- Clock[IO].realTime.map(_.toMillis)
               _ <- runBehavior(queue, state).whenA(state.simulationStatus == RUNNING)
               events <- queue.tryTakeN(Some(50))
-              shuffledEvents <- shuffleEvents(queue, state, events)
-              newState <- handleEvents(state, shuffledEvents)
+              newState <- handleEvents(state, events)
               _ <- context.view.render(newState)
               nextState <- nextStep(newState, startTime)
               endTime <- Clock[IO].realTime.map(_.toMillis)
@@ -156,13 +154,6 @@ object ControllerModule:
             tick <- handleEvent(state, Event.Tick(tickSpeed))
           yield tick
 
-        private def shuffleEvents(queue: Queue[IO, Event], state: S, events: Seq[Event]): IO[Seq[Event]] =
-          val (controllerEvents, otherEvents) = events.partition:
-            case _: Event.RobotAction => false
-            case _ => true
-          val (shuffledEvents, nextRNG: RNG) = state.simulationRNG generate (otherEvents shuffle)
-          queue.offer(Event.Random(nextRNG)).as(controllerEvents ++ shuffledEvents)
-
         private def handleEvents(state: S, shuffledEvents: Seq[Event]): IO[S] =
           for finalState <- shuffledEvents.foldLeft(IO.pure(state)) { (taskState, event) =>
               for
@@ -180,9 +171,7 @@ object ControllerModule:
             case Event.Pause => context.model.pause(state)
             case Event.Resume => context.model.resume(state)
             case Event.Stop => context.model.stop(state)
-            case Event.RobotActionProposals(queue, proposals) =>
-              context.model.handleRobotActionsProposals(state, queue, proposals)
-            case _ => IO.pure(state)
+            case Event.RobotActionProposals(proposals) => context.model.handleRobotActionsProposals(state, proposals)
 
       end ControllerImpl
 
