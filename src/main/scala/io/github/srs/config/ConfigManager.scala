@@ -8,6 +8,7 @@ import cats.syntax.all.*
 import fs2.io.file.{ Files, Path }
 import fs2.text
 import io.github.srs.config.yaml.YamlManager
+import cats.effect.kernel.Resource
 
 /**
  * A trait for managing simulation configurations.
@@ -63,8 +64,15 @@ final case class YamlConfigManager[F[_]: {Files, Sync}](path: Path) extends Conf
    */
   override def save(config: SimulationConfig): F[Unit] =
     val nioPath = path.toNioPath
-    for yamlContent <- YamlManager.toYaml[F](config)
-    yield
-      val _ = JNIOFiles.writeString(nioPath, yamlContent, StandardCharsets.UTF_8)
-      ()
+
+    val writerResource = Resource.fromAutoCloseable(
+      Sync[F].blocking(JNIOFiles.newBufferedWriter(nioPath, StandardCharsets.UTF_8)),
+    )
+
+    for
+      yamlContent <- YamlManager.toYaml[F](config)
+      _ <- writerResource.use { writer =>
+        Sync[F].blocking(writer.write(yamlContent))
+      }
+    yield ()
 end YamlConfigManager

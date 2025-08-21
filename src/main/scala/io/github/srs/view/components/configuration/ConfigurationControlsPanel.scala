@@ -3,6 +3,7 @@ package io.github.srs.view.components.configuration
 import java.awt.FlowLayout
 import javax.swing.*
 import javax.swing.filechooser.FileNameExtensionFilter
+import java.nio.file.NoSuchFileException
 
 import scala.util.{ Failure, Success }
 import scala.io.Source
@@ -13,6 +14,7 @@ import fs2.io.file.Path
 import io.github.srs.config.{ SimulationConfig, YamlConfigManager }
 import io.github.srs.config.yaml.YamlManager
 import io.github.srs.utils.loader.ResourceFileLister
+import io.github.srs.config.ConfigError
 
 /**
  * ConfigurationControlsPanel handles the configuration loading, saving, and management controls. It provides buttons
@@ -23,11 +25,6 @@ import io.github.srs.utils.loader.ResourceFileLister
  * @param onConfigSave
  *   callback triggered when user wants to save current configuration
  */
-@SuppressWarnings(
-  Array(
-    "scalafix:DisableSyntax.null",
-  ),
-)
 class ConfigurationControlsPanel(
     onConfigLoaded: SimulationConfig => Unit,
     onConfigSave: () => Option[SimulationConfig],
@@ -58,43 +55,76 @@ class ConfigurationControlsPanel(
     val chooser = new JFileChooser()
     chooser.setFileFilter(new FileNameExtensionFilter("YAML files", "yml", "yaml"))
     val result = chooser.showOpenDialog(this)
-
     if result == JFileChooser.APPROVE_OPTION then
       val path = Path.fromNioPath(java.nio.file.Paths.get(chooser.getSelectedFile.toURI))
-      val loadResult = YamlConfigManager[IO](path).load.unsafeRunSync()
+      YamlConfigManager[IO](path).load.attempt.unsafeRunAsync { result =>
+        SwingUtilities.invokeLater { () =>
+          val finalResult = result.flatMap(identity).flatMap(identity) // Flatten the triple-nested Either
+          finalResult match
+            case Left(_: NoSuchFileException) =>
+              JOptionPane.showMessageDialog(
+                this,
+                s"File `${chooser.getSelectedFile.getAbsolutePath()}` not found",
+                "Error loading config",
+                JOptionPane.ERROR_MESSAGE,
+              )
+            case Left(exception: Throwable) =>
+              JOptionPane.showMessageDialog(
+                this,
+                s"Failed to load file: ${exception.getMessage}",
+                "File Error",
+                JOptionPane.ERROR_MESSAGE,
+              )
+            case Left(errors: Seq[ConfigError] @unchecked) =>
+              JOptionPane.showMessageDialog(
+                this,
+                s"Parsing failed with error: ${errors.mkString("\n")}",
+                "Error loading config",
+                JOptionPane.ERROR_MESSAGE,
+              )
+            case Right(config) =>
+              onConfigLoaded(config)
+          end match
+        }
+      }
 
-      loadResult match
-        case Left(errors) =>
-          JOptionPane.showMessageDialog(
-            this,
-            s"Parsing failed with errors: ${errors.mkString(", ")}",
-            "Error loading config",
-            JOptionPane.ERROR_MESSAGE,
-          )
-        case Right(config) => onConfigLoaded(config)
+    end if
+
+  end handleLoadConfiguration
 
   private def handleSaveConfiguration(): Unit =
     onConfigSave() match
+      case None => ()
       case Some(config) =>
         val chooser = new JFileChooser()
         chooser.setFileFilter(new FileNameExtensionFilter("YAML files", "yml", "yaml"))
         val result = chooser.showSaveDialog(this)
-
         if result == JFileChooser.APPROVE_OPTION then
           val path = Path.fromNioPath(java.nio.file.Paths.get(chooser.getSelectedFile.toURI))
-          val saveEffect = for
-            _ <- YamlConfigManager[IO](path).save(config)
-            _ <- IO.pure(
-              JOptionPane.showMessageDialog(
-                this,
-                "Configuration saved successfully",
-                "Save configuration",
-                JOptionPane.INFORMATION_MESSAGE,
-              ),
-            )
-          yield ()
-          saveEffect.unsafeRunAsync(_ => ())
-      case None => ()
+          YamlConfigManager[IO](path)
+            .save(config)
+            .attempt
+            .unsafeRunAsync { result =>
+              SwingUtilities.invokeLater { () =>
+                val finalResult = result.flatMap(identity)
+                finalResult match
+                  case Left(exception) =>
+                    JOptionPane.showMessageDialog(
+                      this,
+                      s"Failed to save file: ${exception.getMessage}",
+                      "Save Error",
+                      JOptionPane.ERROR_MESSAGE,
+                    )
+                  case Right(_) =>
+                    JOptionPane.showMessageDialog(
+                      this,
+                      "Configuration saved successfully",
+                      "Save configuration",
+                      JOptionPane.INFORMATION_MESSAGE,
+                    )
+              }
+            }
+        end if
 
   private def handleConfigurationSelection(): Unit =
     configsComboBox.getSelectedItem match
@@ -104,23 +134,31 @@ class ConfigurationControlsPanel(
 
   private def loadResourceConfiguration(configName: String): Unit =
     val pathString = s"/${configsPath}/${configName}.yml"
-    val resource = getClass.getResourceAsStream(pathString)
+    Option(getClass.getResourceAsStream(pathString)) match
+      case Some(resource) =>
+        val content = Source.fromInputStream(resource, "UTF-8").getLines().mkString("\n")
+        val parseEffect =
+          for res <- YamlManager.parse[IO](content)
+          yield res match
+            case Left(errors) =>
+              JOptionPane.showMessageDialog(
+                this,
+                s"Parsing default configuration failed with errors: ${errors.mkString(", ")}",
+                "Error loading default config",
+                JOptionPane.ERROR_MESSAGE,
+              )
+            case Right(config) => onConfigLoaded(config)
+        parseEffect.unsafeRunAsync(_ => ())
+      case None =>
+        JOptionPane.showMessageDialog(
+          this,
+          s"Configuration file not found: $pathString",
+          "Resource not found",
+          JOptionPane.ERROR_MESSAGE,
+        )
+    end match
 
-    if resource != null then
-      val content = Source.fromInputStream(resource, "UTF-8").getLines().mkString("\n")
-      val parseEffect =
-        for res <- YamlManager.parse[IO](content)
-        yield res match
-          case Left(errors) =>
-            JOptionPane.showMessageDialog(
-              this,
-              s"Parsing default configuration failed with errors: ${errors.mkString(", ")}",
-              "Error loading default config",
-              JOptionPane.ERROR_MESSAGE,
-            )
-          case Right(config) => onConfigLoaded(config)
-
-      parseEffect.unsafeRunAsync(_ => ())
+  end loadResourceConfiguration
 
   private def loadDefaultConfigs(): Unit =
     ResourceFileLister.listConfigurationFilesWithExtension(configsPath, "yml") match
