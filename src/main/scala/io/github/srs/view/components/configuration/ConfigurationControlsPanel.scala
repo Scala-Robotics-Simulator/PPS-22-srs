@@ -22,8 +22,6 @@ import io.github.srs.utils.loader.ResourceFileLister
  *   callback triggered when a configuration is successfully loaded
  * @param onConfigSave
  *   callback triggered when user wants to save current configuration
- * @param onConfigChanged
- *   callback triggered when user selects a different default configuration
  */
 @SuppressWarnings(
   Array(
@@ -35,7 +33,6 @@ import io.github.srs.utils.loader.ResourceFileLister
 class ConfigurationControlsPanel(
     onConfigLoaded: SimulationConfig => Unit,
     onConfigSave: () => Option[SimulationConfig],
-    @annotation.unused onConfigChanged: String => Unit,
 ) extends JPanel(new FlowLayout(FlowLayout.CENTER)):
 
   private val configsPath = "configurations/default"

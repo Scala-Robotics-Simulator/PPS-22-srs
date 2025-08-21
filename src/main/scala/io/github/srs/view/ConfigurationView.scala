@@ -4,7 +4,6 @@ import java.awt.{ BorderLayout, Dimension, FlowLayout }
 import javax.swing.*
 
 import cats.effect.IO
-import cats.effect.unsafe.implicits.global
 import io.github.srs.config.SimulationConfig
 import io.github.srs.model.environment.dsl.CreationDSL.*
 import io.github.srs.model.validation.DomainError
@@ -50,18 +49,9 @@ object ConfigurationView:
    */
   def apply(): ConfigurationView = new ConfigurationViewImpl()
 
-  @SuppressWarnings(
-    Array(
-      "org.wartremover.warts.Var",
-    ),
-  )
   private class ConfigurationViewImpl extends ConfigurationView:
     private val frame = new JFrame("Scala Robotics Simulator - Configuration")
 
-    // State to hold the result promise
-    private var resultPromise: Option[cats.effect.Deferred[IO, SimulationConfig]] = None
-
-    // Define entity field specifications
     private val baseFieldSpec = Seq(
       FieldSpec(Entity.x, "X position", TextField(3)),
       FieldSpec(Entity.y, "Y position", TextField(3)),
@@ -101,10 +91,8 @@ object ConfigurationView:
     private val controlsPanel = new ConfigurationControlsPanel(
       onConfigLoaded = loadConfiguration,
       onConfigSave = getCurrentConfiguration,
-      onConfigChanged = _ => (), // Not needed as load handles this
     )
 
-    // Additional control for starting simulation
     private val startButton = new JButton("Start Simulation")
 
     private def showValidationErrors(errors: Seq[String]): Unit =
@@ -122,19 +110,7 @@ object ConfigurationView:
       entitiesPanel.setEntities(config.environment.entities)
 
     private def getCurrentConfiguration(): Option[SimulationConfig] =
-      extractConfig() match
-        case Some(config) =>
-          Some(config)
-        case None => None
-
-    private def startSimulation(): Unit =
-      extractConfig() match
-        case Some(config) =>
-          // Complete the promise to return the configuration
-          resultPromise.foreach(_.complete(config).unsafeRunSync())
-          frame.dispose()
-        case None =>
-          showValidationErrors(Seq("Please fix configuration errors before starting"))
+      extractConfig()
 
     private def setupUI(): Unit =
       frame.setMinimumSize(new Dimension(700, 500))
@@ -151,7 +127,6 @@ object ConfigurationView:
 
       // Bottom panel with start button
       val bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT))
-      startButton.addActionListener(_ => startSimulation())
       bottomPanel.add(startButton)
 
       frame.add(topPanel, BorderLayout.NORTH)
@@ -164,14 +139,15 @@ object ConfigurationView:
     end setupUI
 
     def init(): IO[SimulationConfig] =
-      for
-        promise <- cats.effect.Deferred[IO, SimulationConfig]
-        _ <- IO.delay:
-          resultPromise = Some(promise)
-          setupUI()
-          frame.setVisible(true)
-        config <- promise.get
-      yield config
+      setupUI()
+      frame.setVisible(true)
+      IO.async_(cb =>
+        startButton.addActionListener: _ =>
+          extractConfig() match
+            case Some(config) => cb(Right[Throwable, SimulationConfig](config))
+            case None =>
+              showValidationErrors(Seq("Please fix configuration errors before starting")),
+      )
 
     private def extractConfig(): Option[SimulationConfig] =
       val simulationResult = simulationPanel.getSimulation
