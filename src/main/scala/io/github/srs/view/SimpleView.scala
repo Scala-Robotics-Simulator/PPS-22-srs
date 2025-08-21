@@ -6,7 +6,7 @@ import javax.swing.*
 import cats.effect.IO
 import cats.effect.std.Queue
 import cats.effect.unsafe.implicits.global
-import io.github.srs.controller.Event
+import io.github.srs.controller.protocol.Event
 import io.github.srs.model.ModelModule
 import io.github.srs.model.SimulationConfig.SimulationSpeed
 import io.github.srs.utils.time.TimeUtils.formatTime

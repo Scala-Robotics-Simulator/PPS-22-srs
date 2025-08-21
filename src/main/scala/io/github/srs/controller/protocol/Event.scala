@@ -1,14 +1,14 @@
-package io.github.srs.controller
-
-import scala.concurrent.duration.FiniteDuration
+package io.github.srs.controller.protocol
 
 import cats.effect.IO
 import cats.effect.std.Queue
-import io.github.srs.controller.RobotProposal
+import io.github.srs.controller.message.RobotProposal
 import io.github.srs.model.SimulationConfig.SimulationSpeed
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.utils.random.RNG
+
+import scala.concurrent.duration.FiniteDuration
 
 enum Event derives CanEqual:
   case Increment

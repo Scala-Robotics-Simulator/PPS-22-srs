@@ -5,7 +5,8 @@ import scala.concurrent.duration.{ DurationInt, FiniteDuration }
 import cats.effect.IO
 import cats.effect.std.Queue
 import cats.syntax.parallel.catsSyntaxParallelTraverse1
-import io.github.srs.controller.{ Event, RobotProposal }
+import io.github.srs.controller.message.RobotProposal
+import io.github.srs.controller.protocol.Event
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor.applyMovementActions

@@ -4,7 +4,8 @@ import scala.concurrent.duration.FiniteDuration
 
 import cats.effect.IO
 import cats.effect.std.Queue
-import io.github.srs.controller.{ Event, RobotProposal }
+import io.github.srs.controller.message.RobotProposal
+import io.github.srs.controller.protocol.Event
 import io.github.srs.model.ModelModule
 import io.github.srs.model.ModelModule.Model
 import io.github.srs.model.SimulationConfig.SimulationSpeed

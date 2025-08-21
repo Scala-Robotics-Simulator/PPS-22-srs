@@ -1,4 +1,4 @@
-package io.github.srs.controller
+package io.github.srs.controller.message
 
 import cats.effect.IO
 import io.github.srs.model.entity.dynamicentity.Robot
