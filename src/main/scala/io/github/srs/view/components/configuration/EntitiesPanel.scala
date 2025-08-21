@@ -25,6 +25,11 @@ import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Obstacl
  * @param fieldSpecsByType
  *   a map where keys are entity types and values are sequences of FieldSpec defining the fields for each entity type
  */
+@SuppressWarnings(
+  Array(
+    "org.wartremover.warts.ToString",
+  ),
+)
 class EntitiesPanel(fieldSpecsByType: Map[String, Seq[FieldSpec]]) extends JPanel(new BorderLayout):
   private val entityListPanel = new JPanel()
   private val btnAddEntity = new JButton("+")
@@ -106,6 +111,7 @@ class EntitiesPanel(fieldSpecsByType: Map[String, Seq[FieldSpec]]) extends JPane
             }.getOrElse(""),
             RobotFields.withProximitySensors -> stdProximitySensors.forall(robot.sensors.contains),
             RobotFields.withLightSensors -> stdLightSensors.forall(robot.sensors.contains),
+            RobotFields.behavior -> robot.behavior.toString(),
           )
           row.setValues(robotMap)
         case obs: StaticEntity.Obstacle =>

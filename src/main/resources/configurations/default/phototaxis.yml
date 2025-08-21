@@ -21,7 +21,8 @@ environment:
       speed: 1.0
       withProximitySensors: true
       withLightSensors: true
-      behavior: phototaxis
+      # TODO: When other behaviors are added correct this
+      # behavior: phototaxis
   - robot:
       position: [1, 7]
       orientation: 270.0
@@ -29,7 +30,8 @@ environment:
       speed: 1.0
       withProximitySensors: true
       withLightSensors: true
-      behavior: phototaxis
+      # TODO: When other behaviors are added correct this
+      # behavior: phototaxis
   - obstacle:
       position: [8.0, 4.0]
       orientation: 90.0

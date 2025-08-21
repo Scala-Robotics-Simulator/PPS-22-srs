@@ -25,6 +25,7 @@ import io.github.srs.utils.SimulationDefaults.Fields.Entity as EntityFields
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.DynamicEntity.Robot as RobotFields
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Obstacle as ObstacleFields
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Light as LightFields
+import io.github.srs.model.entity.dynamicentity.behavior.Policy
 
 /**
  * EntityRow is a JPanel that represents a single entity in the configuration view. It allows users to select the type
@@ -120,13 +121,17 @@ class EntityRow(
       speed <- get[Double](RobotFields.speed, map)
       prox <- get[Boolean](RobotFields.withProximitySensors, map)
       light <- get[Boolean](RobotFields.withLightSensors, map)
+      behavior <- get[Policy](RobotFields.behavior, map)
     yield robot
       .at((x, y))
       .withOrientation(Orientation(orientation))
       .withShape(ShapeType.Circle(radius))
       .withSpeed(speed)
+      .withBehavior(behavior)
       |> (r => if prox then r.withProximitySensors else r)
       |> (r => if light then r.withLightSensors else r)
+
+  end parseRobot
 
   private def parseObstacle(): ConfigResult[StaticEntity.Obstacle] =
     import Decoder.{ get, given }

@@ -21,4 +21,5 @@ environment:
       position: [3.0, 1.0]
       radius: 0.5
       withProximitySensors: true
-      behavior: collision-avoidance
+      # TODO: When other behaviors are added correct this
+      # behavior: collision-avoidance

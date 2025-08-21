@@ -22,7 +22,8 @@ environment:
       speed: 1.0
       withProximitySensors: true
       withLightSensors: true
-      behavior: aggression
+      # TODO: When other behaviors are added correct this
+      # behavior: aggression
   - robot:
       position: [1, 7]
       orientation: 270.0
@@ -30,4 +31,5 @@ environment:
       speed: 1.0
       withProximitySensors: true
       withLightSensors: true
-      behavior: aggression
+      # TODO: When other behaviors are added correct this
+      # behavior: aggression
