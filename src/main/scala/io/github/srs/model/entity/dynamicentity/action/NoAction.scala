@@ -5,12 +5,8 @@ import io.github.srs.model.entity.dynamicentity.DynamicEntity
 
 /**
  * NoAction represents an action that does nothing on the dynamic entity.
- * @param monad$F$0
- *   the implicit Monad instance for the effect type F.
  * @tparam F
  *   the effect type of the action.
- * @tparam E
- *   the type of the dynamic entity on which the action will be executed.
  */
 final case class NoAction[F[_]: Monad]() extends Action[F]:
 
