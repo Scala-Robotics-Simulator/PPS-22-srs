@@ -91,6 +91,13 @@ object ControllerModule:
        */
       private class ControllerImpl(using bundle: LogicsBundle[S]) extends Controller[S]:
 
+        /**
+         * Starts the controller with the initial state.
+         * @param initialState
+         *   the initial state of the simulation.
+         * @return
+         *   an [[IO]] task that completes when the controller is started.
+         */
         override def start(initialState: S): IO[Unit] =
           for
             queueSim <- Queue.unbounded[IO, Event]
@@ -99,6 +106,15 @@ object ControllerModule:
             _ <- simulationLoop(initialState, queueSim)
           yield ()
 
+        /**
+         * Runs the simulation loop, processing events from the queue and updating the state.
+         * @param s
+         *   the current state of the simulation.
+         * @param queue
+         *   a concurrent queue that holds events to be processed.
+         * @return
+         *   an [[IO]] task that completes when the simulation loop ends.
+         */
         override def simulationLoop(s: S, queue: Queue[IO, Event]): IO[Unit] =
           def loop(state: S): IO[Unit] =
             for
@@ -115,13 +131,38 @@ object ControllerModule:
 
           loop(s)
 
+        /**
+         * Checks if the simulation should stop based on the current state.
+         * @param state
+         *   the current state of the simulation.
+         * @return
+         *   a boolean indicating whether the simulation should stop.
+         */
         private def stopCondition(state: S): Boolean =
           state.simulationStatus == STOPPED ||
             elapsedTimeReached(state.simulationTime, state.elapsedTime)
 
+        /**
+         * Checks if the elapsed time has reached the maximum simulation time.
+         * @param simulationTime
+         *   the maximum simulation time, if defined.
+         * @param elapsedTime
+         *   the elapsed time since the simulation started.
+         * @return
+         *   a boolean indicating whether the elapsed time has reached the maximum simulation time.
+         */
         private def elapsedTimeReached(simulationTime: Option[FiniteDuration], elapsedTime: FiniteDuration): Boolean =
           simulationTime.exists(max => elapsedTime >= max)
 
+        /**
+         * Processes the next step in the simulation based on the current state and start time.
+         * @param state
+         *   the current state of the simulation.
+         * @param startTime
+         *   the start time of the current simulation step in milliseconds.
+         * @return
+         *   the next state of the simulation wrapped in an [[IO]] task.
+         */
         private def nextStep(state: S, startTime: Long): IO[S] =
           state.simulationStatus match
             case RUNNING =>
@@ -133,6 +174,15 @@ object ControllerModule:
             case STOPPED =>
               IO.pure(state)
 
+        /**
+         * Runs the behavior of all robots in the environment and collects their action proposals.
+         * @param queue
+         *   the queue to which the proposals will be offered through the [[Event.RobotActionProposals]] event.
+         * @param state
+         *   the current state of the simulation.
+         * @return
+         *   an [[IO]] task that completes when the behavior has been run.
+         */
         private def runBehavior(queue: Queue[IO, Event], state: S): IO[Unit] =
           for
             proposals <- state.environment.entities.collect { case robot: Robot => robot }.toList.parTraverse { robot =>
@@ -144,6 +194,17 @@ object ControllerModule:
             _ <- queue.offer(Event.RobotActionProposals(queue, proposals))
           yield ()
 
+        /**
+         * Processes tick events, adjusting the tick speed based on the elapsed time since the last tick.
+         * @param start
+         *   the start time of the current tick in milliseconds.
+         * @param tickSpeed
+         *   the speed of the tick in [[FiniteDuration]].
+         * @param state
+         *   the current state of the simulation.
+         * @return
+         *   the next state of the simulation wrapped in an [[IO]] task.
+         */
         private def tickEvents(start: Long, tickSpeed: FiniteDuration, state: S): IO[S] =
           for
             now <- Clock[IO].realTime.map(_.toMillis)
@@ -154,8 +215,18 @@ object ControllerModule:
             tick <- handleEvent(state, Event.Tick(tickSpeed))
           yield tick
 
-        private def handleEvents(state: S, shuffledEvents: Seq[Event]): IO[S] =
-          for finalState <- shuffledEvents.foldLeft(IO.pure(state)) { (taskState, event) =>
+        /**
+         * Handles a sequence of events, processing them in the order they were received.
+         * @param state
+         *   the current state of the simulation.
+         * @param events
+         *   the sequence of events to be processed.
+         * @return
+         *   the final state of the simulation after processing all events, wrapped in an [[IO]] task.
+         */
+        private def handleEvents(state: S, events: Seq[Event]): IO[S] =
+          // TODO
+          for finalState <- events.foldLeft(IO.pure(state)) { (taskState, event) =>
               for
                 currentState <- taskState
                 newState <- handleEvent(currentState, event)
@@ -163,6 +234,15 @@ object ControllerModule:
             }
           yield finalState
 
+        /**
+         * Handles a single event and updates the state accordingly.
+         * @param state
+         *   the current state of the simulation.
+         * @param event
+         *   the event to be processed.
+         * @return
+         *   the updated state of the simulation after processing the event, wrapped in an [[IO]] task.
+         */
         private def handleEvent(state: S, event: Event): IO[S] =
           event match
             case Event.Tick(deltaTime) => context.model.tick(state, deltaTime)
