@@ -196,6 +196,7 @@ class YamlManagerTest extends AnyFlatSpec with Matchers:
         |      speed: 2.0
         |      withProximitySensors: true
         |      withLightSensors: true
+        |      behavior: AlwaysForward
         |""".stripMargin
 
     val yamlContent = YamlManager.toYaml[IO](config).unsafeRunSync()

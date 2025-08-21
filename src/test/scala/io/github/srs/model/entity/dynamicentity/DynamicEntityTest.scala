@@ -5,11 +5,8 @@ import java.util.UUID
 import scala.concurrent.duration.FiniteDuration
 
 import cats.Monad
-import cats.effect.IO
-import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.actuator.Actuator
-import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior
-import io.github.srs.model.entity.dynamicentity.behavior.Behaviors
+import io.github.srs.model.entity.dynamicentity.behavior.Policy
 import io.github.srs.model.entity.dynamicentity.sensor.*
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.environment.Environment
@@ -37,7 +34,7 @@ class DynamicEntityTest extends AnyFlatSpec with Matchers:
       override val orientation: Orientation,
       override val actuators: Seq[Actuator[Dummy]],
       override val sensors: Vector[Sensor[Dummy, Environment]],
-      override val behavior: Behavior[SensorReadings, Action[IO]] = Behaviors.simple[IO],
+      override val behavior: Policy = Policy.Simple,
   ) extends DynamicEntity:
     def act[F[_]: Monad](): F[Dummy] = Monad[F].pure(this)
 

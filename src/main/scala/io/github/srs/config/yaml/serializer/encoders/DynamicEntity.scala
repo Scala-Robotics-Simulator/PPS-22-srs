@@ -15,6 +15,11 @@ import io.github.srs.utils.SimulationDefaults.Fields.Entity.DynamicEntity.Robot 
 /**
  * Encoders for DynamicEntity types.
  */
+@SuppressWarnings(
+  Array(
+    "org.wartremover.warts.ToString",
+  ),
+)
 object DynamicEntity:
 
   /**
@@ -42,7 +47,6 @@ object DynamicEntity:
         "WARNING: encoding robot with custom sensors, those will be lost during the serialization",
       )
 
-    // TODO: Serialize robot behavior
     Json
       .obj(
         EntityFields.id -> robot.id.asJson,
@@ -51,6 +55,7 @@ object DynamicEntity:
         EntityFields.orientation -> robot.orientation.degrees.asJson,
         RobotFields.withProximitySensors -> withProximitySensors.asJson,
         RobotFields.withLightSensors -> withLightSensors.asJson,
+        RobotFields.behavior -> robot.behavior.toString().asJson,
       )
       .deepMerge(
         speeds.map(RobotFields.speed -> _._1.asJson).toList.toMap.asJson,

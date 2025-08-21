@@ -20,6 +20,7 @@ import io.github.srs.utils.SimulationDefaults.Fields.Entity as EntityFields
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.DynamicEntity.Robot as RobotFields
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Obstacle as ObstacleFields
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Light as LightFields
+import io.github.srs.model.entity.dynamicentity.behavior.Policy
 
 /**
  * A parser for YAML configuration files, specifically for simulation configurations.
@@ -120,7 +121,6 @@ object YamlSimulationConfigParser:
    *   a `ConfigResult` containing the parsed `Robot` or the errors encountered during parsing.
    */
   private def parseRobot(map: Map[String, Any]): ConfigResult[Entity] =
-    // TODO: Add support for robot behavior
     for
       id <- getOptional[UUID](EntityFields.id, map)
       pos <- get[List[Double]](EntityFields.position, map)
@@ -130,6 +130,7 @@ object YamlSimulationConfigParser:
       speed <- getOptional[Double](RobotFields.speed, map)
       prox <- getOptional[Boolean](RobotFields.withProximitySensors, map)
       light <- getOptional[Boolean](RobotFields.withLightSensors, map)
+      behavior <- getOptional[Policy](RobotFields.behavior, map)
     yield Robot().at(position)
       |> (r => id.fold(r)(r.withId))
       |> (r => orient.fold(r)(o => r.withOrientation(Orientation(o))))
@@ -137,6 +138,7 @@ object YamlSimulationConfigParser:
       |> (r => speed.fold(r)(s => r.withSpeed(s)))
       |> (r => if prox.getOrElse(false) then r.withProximitySensors else r)
       |> (r => if light.getOrElse(false) then r.withLightSensors else r)
+      |> (r => behavior.fold(r)(b => r.withBehavior(b)))
 
   /**
    * Parses an obstacle entity from the given map.

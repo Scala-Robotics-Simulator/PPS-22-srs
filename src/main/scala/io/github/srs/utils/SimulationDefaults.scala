@@ -2,16 +2,13 @@ package io.github.srs.utils
 
 import java.util.UUID
 
-import cats.effect.IO
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.Robot
-import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, Wheel as ActWheel }
-import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior
-import io.github.srs.model.entity.dynamicentity.behavior.Behaviors
-import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, Sensor, SensorReadings }
+import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, Sensor }
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.entity.dynamicentity.sensor.LightSensor
+import io.github.srs.model.entity.dynamicentity.behavior.Policy
 
 object SimulationDefaults:
 
@@ -113,7 +110,7 @@ object SimulationDefaults:
         LightSensor(Orientation(270.0)),
         LightSensor(Orientation(315.0)),
       )
-      val defaultBehavior: Behavior[SensorReadings, Action[IO]] = Behaviors.simple[IO]
+      val defaultPolicy: Policy = Policy.AlwaysForward
     end Robot
   end DynamicEntity
 
