@@ -104,7 +104,6 @@ class YamlConfigManagerTest extends AnyFlatSpec with Matchers:
     val manager = YamlConfigManager[IO](path)
     manager.save(config).unsafeRunSync()
     val yamlContent = Files[IO].readAll(path).through(fs2.text.utf8.decode).compile.string.unsafeRunSync()
-    println(yamlContent)
     // Normalize the YAML content as the serialization may not preserve the order of keys
     val yamlContentSplit = yamlContent.split("\n").filter(_.nonEmpty).sorted
     val expectedYamlSplit = expectedYaml.split("\n").filter(_.nonEmpty).sorted
