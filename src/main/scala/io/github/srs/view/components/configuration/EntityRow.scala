@@ -38,8 +38,6 @@ import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Light a
  */
 @SuppressWarnings(
   Array(
-    "org.wartremover.warts.AsInstanceOf",
-    "scalafix:DisableSyntax.asInstanceOf",
     "org.wartremover.warts.Var",
   ),
 )
@@ -75,13 +73,15 @@ class EntityRow(
   add(new JSeparator(SwingConstants.HORIZONTAL), BorderLayout.SOUTH)
 
   typeCombo.addActionListener(_ =>
-    val selected = typeCombo.getSelectedItem.asInstanceOf[String]
-    rowPanel.remove(propertiesPanel)
-    propertiesPanel = new FormPanel("", fieldSpecsByType(selected))
-    gbc.gridx = 1; gbc.weightx = 1.0
-    rowPanel.add(propertiesPanel, gbc)
-    revalidate()
-    repaint(),
+    typeCombo.getSelectedItem() match
+      case selected: String =>
+        rowPanel.remove(propertiesPanel)
+        propertiesPanel = new FormPanel("", fieldSpecsByType(selected))
+        gbc.gridx = 1; gbc.weightx = 1.0
+        rowPanel.add(propertiesPanel, gbc)
+        revalidate()
+        repaint()
+      case _ => (),
   )
 
   btnRemove.addActionListener(_ => removeRow(this))
@@ -92,7 +92,17 @@ class EntityRow(
    * @return
    *   a tuple containing the entity type and a map of its properties
    */
-  private def getEntityType: String = typeCombo.getSelectedItem.asInstanceOf[String]
+  private def getEntityType: String =
+    typeCombo.getSelectedItem match
+      case selected: String => selected
+      case _ =>
+        JOptionPane.showMessageDialog(
+          this,
+          "Invalid entity type selected.",
+          "Error",
+          JOptionPane.ERROR_MESSAGE,
+        )
+        ""
 
   /**
    * Retrieves the entity represented by this row.

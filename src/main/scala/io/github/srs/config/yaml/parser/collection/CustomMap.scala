@@ -4,12 +4,6 @@ import io.github.srs.config.{ ConfigError, ConfigResult }
 
 import CustomSeq.sequence
 
-@SuppressWarnings(
-  Array(
-    "org.wartremover.warts.AsInstanceOf",
-    "scalafix:DisableSyntax.asInstanceOf",
-  ),
-)
 object CustomMap:
 
   extension (map: Map[String, Any])
@@ -25,7 +19,7 @@ object CustomMap:
      */
     def getSubMap(key: String): ConfigResult[Map[String, Any]] =
       map.get(key) match
-        case Some(m: Map[?, ?]) => Right[Seq[ConfigError], Map[String, Any]](m.asInstanceOf[Map[String, Any]])
+        case Some(m: Map[String, Any] @unchecked) => Right[Seq[ConfigError], Map[String, Any]](m)
         case Some(_) => Left[Seq[ConfigError], Map[String, Any]](Seq(ConfigError.InvalidType(key, "Map[String, Any]")))
         case None => Left[Seq[ConfigError], Map[String, Any]](Seq(ConfigError.MissingField(key)))
 
@@ -70,8 +64,8 @@ object CustomMap:
         case Some(list: List[?]) =>
           val parsed = list.zipWithIndex.map { case (e, i) =>
             e match
-              case em: Map[?, ?] =>
-                parseFunc(em.asInstanceOf[Map[String, Any]])
+              case em: Map[String, Any] @unchecked =>
+                parseFunc(em)
               case _ =>
                 Left[Seq[ConfigError], A](Seq(ConfigError.InvalidType(s"$key[$i]", "Map[String, Any]")))
           }
