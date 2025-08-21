@@ -1,20 +1,19 @@
 package io.github.srs.view
 
-import java.awt.{ BorderLayout, Dimension, FlowLayout }
-import javax.swing.*
-
 import cats.effect.IO
-import io.github.srs.config.SimulationConfig
+import io.github.srs.config.{ConfigError, SimulationConfig}
+import io.github.srs.model.entity.dynamicentity.behavior.Policy
 import io.github.srs.model.environment.dsl.CreationDSL.*
 import io.github.srs.model.validation.DomainError
-import io.github.srs.view.components.*
-import io.github.srs.view.components.configuration.*
 import io.github.srs.utils.SimulationDefaults.Fields.Entity
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.DynamicEntity.Robot as RobotFields
-import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Obstacle as ObstacleFields
-import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Light as LightFields
-import io.github.srs.config.ConfigError
-import io.github.srs.model.entity.dynamicentity.behavior.Policy
+import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.{Light as LightFields, Obstacle as ObstacleFields}
+import io.github.srs.utils.SimulationDefaults.Frame
+import io.github.srs.view.components.*
+import io.github.srs.view.components.configuration.*
+
+import java.awt.{BorderLayout, Dimension, FlowLayout}
+import javax.swing.*
 
 /**
  * Defines how the configuration view should behave.
@@ -115,8 +114,12 @@ object ConfigurationView:
       extractConfig()
 
     private def setupUI(): Unit =
-      frame.setMinimumSize(new Dimension(700, 500))
+      frame.setMinimumSize(new Dimension(Frame.minWidth, Frame.minHeight))
+      frame.setPreferredSize(new Dimension(Frame.prefWidth, Frame.prefHeight))
+
       frame.setLayout(new BorderLayout())
+      frame.pack()
+      frame.centerFrame()
 
       // Top panel with controls and settings
       val topPanel = new JPanel(new BorderLayout())
@@ -134,8 +137,6 @@ object ConfigurationView:
       frame.add(topPanel, BorderLayout.NORTH)
       frame.add(entitiesPanel, BorderLayout.CENTER)
       frame.add(bottomPanel, BorderLayout.SOUTH)
-
-      frame.pack()
       frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
 
     end setupUI
