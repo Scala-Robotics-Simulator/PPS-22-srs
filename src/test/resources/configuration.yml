@@ -26,4 +26,4 @@ environment:
         speed: 1.0
         withProximitySensors: true
         withLightSensors: true
-        behavior: "randomWalk"
+        behavior: AlwaysForward

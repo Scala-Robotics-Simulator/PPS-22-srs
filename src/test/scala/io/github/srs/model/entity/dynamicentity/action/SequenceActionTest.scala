@@ -4,14 +4,12 @@ import java.util.UUID
 
 import scala.concurrent.duration.FiniteDuration
 
-import cats.effect.IO
 import cats.{ Id, Monad }
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
 import io.github.srs.model.entity.dynamicentity.action.MovementActionFactory.{ moveForward, turnRight }
 import io.github.srs.model.entity.dynamicentity.actuator.Actuator
-import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior
-import io.github.srs.model.entity.dynamicentity.behavior.Behaviors
-import io.github.srs.model.entity.dynamicentity.sensor.{ Sensor, SensorReadings }
+import io.github.srs.model.entity.dynamicentity.behavior.Policy
+import io.github.srs.model.entity.dynamicentity.sensor.Sensor
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.environment.Environment
 import org.scalatest.flatspec.AnyFlatSpec
@@ -43,7 +41,7 @@ class SequenceActionTest extends AnyFlatSpec with Matchers:
       override val orientation: Orientation,
       override val actuators: Seq[DummyActuator],
       override val sensors: Vector[Sensor[Dummy, Environment]],
-      override val behavior: Behavior[SensorReadings, Action[IO]] = Behaviors.simple[IO],
+      override val behavior: Policy = Policy.Simple,
   ) extends DynamicEntity:
     def act[F[_]: Monad](): F[Dummy] = Monad[F].pure(this)
 

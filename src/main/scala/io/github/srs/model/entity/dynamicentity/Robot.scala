@@ -4,14 +4,14 @@ import java.util.UUID
 
 import cats.effect.IO
 import io.github.srs.model.entity.*
-import io.github.srs.model.entity.dynamicentity.action.{ Action, ActionAlg }
+import io.github.srs.model.entity.dynamicentity.action.ActionAlg
 import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, DifferentialWheelMotor }
-import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.withActuators
-import io.github.srs.model.entity.dynamicentity.sensor.{ Sensor, SensorReadings }
+import io.github.srs.model.entity.dynamicentity.sensor.Sensor
 import io.github.srs.model.environment.Environment
 import io.github.srs.utils.EqualityGivenInstances.given
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.*
+import io.github.srs.model.entity.dynamicentity.behavior.Policy
 
 /**
  * Represents a robot entity in the simulation.
@@ -28,7 +28,7 @@ final case class Robot(
     override val orientation: Orientation = defaultOrientation,
     override val actuators: Seq[Actuator[Robot]] = defaultActuators,
     override val sensors: Vector[Sensor[Robot, Environment]] = defaultSensors,
-    override val behavior: Behavior[SensorReadings, Action[IO]] = defaultBehavior,
+    override val behavior: Policy = defaultPolicy,
 ) extends DynamicEntity:
 
   // TODO: serialize the id
@@ -44,7 +44,7 @@ final case class Robot(
       this.orientation == that.orientation &&
       this.actuators == that.actuators &&
       this.sensors == that.sensors &&
-      this.behavior == that.behavior
+      this.behavior.ordinal == that.behavior.ordinal
     case _ => false
 
 end Robot

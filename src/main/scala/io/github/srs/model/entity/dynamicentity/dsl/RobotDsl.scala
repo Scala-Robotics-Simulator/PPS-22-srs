@@ -11,6 +11,7 @@ import io.github.srs.model.environment.Environment
 import io.github.srs.model.validation.Validation
 import io.github.srs.model.validation.Validation.{ notInfinite, notNaN, validateCountOfType }
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.*
+import io.github.srs.model.entity.dynamicentity.behavior.Policy
 
 /**
  * The DSL for creating and configuring a Robot entity.
@@ -157,6 +158,9 @@ object RobotDsl:
 
     def withLightSensors: Robot =
       robot.withSensors(stdLightSensors)
+
+    infix def withBehavior(behavior: Policy): Robot =
+      robot.copy(behavior = behavior)
 
     /**
      * Validates the robot entity to ensure it meets the domain constraints.

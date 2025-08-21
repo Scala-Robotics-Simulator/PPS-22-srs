@@ -2,7 +2,12 @@ package io.github.srs.config.yaml.parser
 
 import java.util.UUID
 
+import scala.util.Try
+import scala.util.Success
+import scala.util.Failure
+
 import io.github.srs.config.{ ConfigError, ConfigResult }
+import io.github.srs.model.entity.dynamicentity.behavior.Policy
 
 /**
  * A trait for decoding configuration values from a map. It provides methods to decode various types of values, such as
@@ -86,6 +91,19 @@ object Decoder:
       value match
         case s: String => Right[Seq[ConfigError], UUID](UUID.fromString(s))
         case _ => Left[Seq[ConfigError], UUID](Seq(ConfigError.InvalidType(field, "UUID")))
+
+  given Decoder[Policy] with
+
+    def decode(field: String, value: Any): ConfigResult[Policy] =
+      for
+        name <- summon[Decoder[String]].decode(field, value)
+        behavior <- Try(Policy.valueOf(name)) match
+          case Success(value) => Right[Seq[ConfigError], Policy](value)
+          case Failure(_) =>
+            Left[Seq[ConfigError], Policy](
+              Seq(ConfigError.ParsingError(s"Unable to find behavior: $name")),
+            )
+      yield behavior
 
   given [A](using decoder: Decoder[A]): Decoder[List[A]] with
 

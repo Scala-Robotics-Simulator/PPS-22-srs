@@ -9,12 +9,18 @@ import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.environment.Environment
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import cats.effect.IO
+import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings
+import io.github.srs.model.entity.dynamicentity.action.Action
+import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior
+import io.github.srs.model.entity.dynamicentity.behavior.Policy
 
 class RobotDslTest extends AnyFlatSpec with Matchers:
   given CanEqual[ShapeType.Circle, ShapeType.Circle] = CanEqual.derived
   given CanEqual[Orientation, Orientation] = CanEqual.derived
   given CanEqual[Actuator[Robot], Actuator[Robot]] = CanEqual.derived
   given CanEqual[Sensor[Robot, Environment], Sensor[Robot, Environment]] = CanEqual.derived
+  given CanEqual[Behavior[SensorReadings, Action[IO]], Behavior[SensorReadings, Action[IO]]] = CanEqual.derived
 
   import RobotDsl.*
 
@@ -97,4 +103,9 @@ class RobotDslTest extends AnyFlatSpec with Matchers:
     val entity = robot containing wheelMotor and wheelMotor2
     val validationResult = entity.validate
     validationResult.isLeft shouldBe true
+
+  it should "set the behavior of the robot" in:
+    val behavior = Policy.AlwaysForward
+    val entity = robot withBehavior behavior
+    entity.behavior.ordinal shouldBe behavior.ordinal
 end RobotDslTest

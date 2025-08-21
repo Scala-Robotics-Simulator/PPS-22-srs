@@ -46,4 +46,18 @@ object Behaviors:
       frontCloserThan(0.3) ==> MovementActionFactory.turnRight[F] |
         always ==> MovementActionFactory.moveForward[F]
     ).orElse(NoAction[F]())
+
+  /**
+   * “Always move forward” — pure decision returning an action.
+   *
+   * Semantics:
+   *   - always move forward
+   *
+   * @tparam F
+   *   effect type of the produced [[Action]]
+   * @return
+   *   a total [[Behavior]] from [[SensorReadings]] to [[Action]][F]
+   */
+  def alwaysForward[F[_]: Monad]: Behavior[SensorReadings, Action[F]] =
+    (always ==> MovementActionFactory.moveForward[F]).orElse(NoAction[F]())
 end Behaviors

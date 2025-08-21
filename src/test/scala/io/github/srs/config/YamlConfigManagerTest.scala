@@ -19,10 +19,13 @@ import org.scalatest.OptionValues.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.{ stdLightSensors, stdProximitySensors }
+import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior
+import io.github.srs.model.entity.dynamicentity.behavior.Policy
 
 class YamlConfigManagerTest extends AnyFlatSpec with Matchers:
   given CanEqual[Sensor[?, ?], Sensor[?, ?]] = CanEqual.derived
   given CanEqual[SimulationConfig, SimulationConfig] = CanEqual.derived
+  given CanEqual[Behavior[?, ?], Behavior[?, ?]] = CanEqual.derived
 
   "YamlConfigLoader" should "load the correct configuration" in:
     val uri = getClass.getResource("/configuration.yml").toURI
@@ -40,8 +43,9 @@ class YamlConfigManagerTest extends AnyFlatSpec with Matchers:
     val _ = config.environment.entities.exists(_.position == Point2D(2, 2)) should be(true)
     val _ = config.environment.entities.exists(e =>
       e.position == Point2D(3, 1) && (e match
-        case Robot(_, _, _, _, _, sensors, _) =>
-          sensors == stdProximitySensors ++ stdLightSensors),
+        case Robot(_, _, _, _, _, sensors, behavior) =>
+          sensors == stdProximitySensors ++ stdLightSensors &&
+          behavior.ordinal == Policy.AlwaysForward.ordinal),
     ) should be(true)
 
   "YamlConfigManager" should "save the configuration correctly" in:
@@ -93,12 +97,14 @@ class YamlConfigManagerTest extends AnyFlatSpec with Matchers:
         |      speed: 2.0
         |      withProximitySensors: true
         |      withLightSensors: true
+        |      behavior: AlwaysForward
         |""".stripMargin
 
     val path = Path.fromNioPath(JNIOFiles.createTempFile("test", ".yml"))
     val manager = YamlConfigManager[IO](path)
     manager.save(config).unsafeRunSync()
     val yamlContent = Files[IO].readAll(path).through(fs2.text.utf8.decode).compile.string.unsafeRunSync()
+    println(yamlContent)
     // Normalize the YAML content as the serialization may not preserve the order of keys
     val yamlContentSplit = yamlContent.split("\n").filter(_.nonEmpty).sorted
     val expectedYamlSplit = expectedYaml.split("\n").filter(_.nonEmpty).sorted

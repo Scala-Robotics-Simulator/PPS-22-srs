@@ -140,7 +140,7 @@ object ControllerModule:
           state.environment.entities.collect { case robot: Robot =>
             for
               sensorReadings <- robot.senseAll[IO](state.environment)
-              action <- robot.behavior.run(sensorReadings)
+              action = robot.behavior.run(sensorReadings)
               _ <- queue.offer(Event.RobotAction(queue, robot, action))
             yield ()
           }.toList.parSequence.void
