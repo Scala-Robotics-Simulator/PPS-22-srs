@@ -25,12 +25,6 @@ import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Obstacl
  * @param fieldSpecsByType
  *   a map where keys are entity types and values are sequences of FieldSpec defining the fields for each entity type
  */
-@SuppressWarnings(
-  Array(
-    "org.wartremover.warts.AsInstanceOf",
-    "scalafix:DisableSyntax.asInstanceOf",
-  ),
-)
 class EntitiesPanel(fieldSpecsByType: Map[String, Seq[FieldSpec]]) extends JPanel(new BorderLayout):
   private val entityListPanel = new JPanel()
   private val btnAddEntity = new JButton("+")
@@ -61,11 +55,13 @@ class EntitiesPanel(fieldSpecsByType: Map[String, Seq[FieldSpec]]) extends JPane
         JOptionPane.PLAIN_MESSAGE,
       )
       if result == JOptionPane.OK_OPTION then
-        val selected = selector.getSelectedItem.asInstanceOf[String]
-        val row = new EntityRow(selected, fieldSpecsByType, removeEntityRow)
-        entityListPanel.add(row)
-        entityListPanel.revalidate()
-        entityListPanel.repaint(),
+        selector.getSelectedItem() match
+          case selected: String =>
+            val row = new EntityRow(selected, fieldSpecsByType, removeEntityRow)
+            entityListPanel.add(row)
+            entityListPanel.revalidate()
+            entityListPanel.repaint()
+          case _ => (),
     )
 
   end initPanel

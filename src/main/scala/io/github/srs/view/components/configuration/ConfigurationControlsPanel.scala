@@ -25,8 +25,6 @@ import io.github.srs.utils.loader.ResourceFileLister
  */
 @SuppressWarnings(
   Array(
-    "org.wartremover.warts.AsInstanceOf",
-    "scalafix:DisableSyntax.asInstanceOf",
     "scalafix:DisableSyntax.null",
   ),
 )
@@ -99,11 +97,10 @@ class ConfigurationControlsPanel(
       case None => ()
 
   private def handleConfigurationSelection(): Unit =
-    Option(configsComboBox.getSelectedItem) match
-      case Some(item) =>
-        val configName = item.asInstanceOf[String]
+    configsComboBox.getSelectedItem match
+      case configName: String =>
         loadResourceConfiguration(configName)
-      case None => ()
+      case _ => ()
 
   private def loadResourceConfiguration(configName: String): Unit =
     val pathString = s"/${configsPath}/${configName}.yml"
@@ -140,6 +137,8 @@ class ConfigurationControlsPanel(
    * Gets the currently selected configuration name.
    */
   def getSelectedConfiguration: Option[String] =
-    Option(configsComboBox.getSelectedItem).map(_.asInstanceOf[String])
+    configsComboBox.getSelectedItem match
+      case configName: String => Some(configName)
+      case _ => None
 
 end ConfigurationControlsPanel

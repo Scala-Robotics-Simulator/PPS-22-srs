@@ -24,14 +24,6 @@ import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Light a
 /**
  * A parser for YAML configuration files, specifically for simulation configurations.
  */
-@SuppressWarnings(
-  Array(
-    "org.wartremover.warts.AsInstanceOf",
-    "org.wartremover.warts.IterableOps",
-    "org.wartremover.warts.SeqApply",
-    "scalafix:DisableSyntax.asInstanceOf",
-  ),
-)
 object YamlSimulationConfigParser:
 
   import Decoder.{ get, getOptional, given }
@@ -106,12 +98,17 @@ object YamlSimulationConfigParser:
    */
   private def parseEntity(map: Map[String, Any]): ConfigResult[Entity] =
     map.headOption match
-      case Some((ObstacleFields.self, v: Map[?, ?])) => parseObstacle(v.asInstanceOf[Map[String, Any]])
-      case Some((LightFields.self, v: Map[?, ?])) => parseLight(v.asInstanceOf[Map[String, Any]])
-      case Some((RobotFields.self, v: Map[?, ?])) =>
-        YamlSimulationConfigParser.parseRobot(v.asInstanceOf[Map[String, Any]])
+      case Some((ObstacleFields.self, v: Map[String, Any] @unchecked)) => parseObstacle(v)
+      case Some((LightFields.self, v: Map[String, Any] @unchecked)) => parseLight(v)
+      case Some((RobotFields.self, v: Map[String, Any] @unchecked)) => YamlSimulationConfigParser.parseRobot(v)
       case Some((key, _)) => Left[Seq[ConfigError], Entity](Seq(ConfigError.ParsingError(s"Unknown entity type: $key")))
       case None => Left[Seq[ConfigError], Entity](Seq(ConfigError.ParsingError("Empty entity map")))
+
+  private def parsePosition(pos: List[Double]): ConfigResult[Point2D] =
+    pos match
+      case x :: y :: Nil => Right[Seq[ConfigError], Point2D]((x, y))
+      case _ =>
+        Left[Seq[ConfigError], Point2D](Seq(ConfigError.ParsingError("Position must be in the format: `[x, y]`")))
 
   /**
    * Parses a robot entity from the given map.
@@ -127,12 +124,13 @@ object YamlSimulationConfigParser:
     for
       id <- getOptional[UUID](EntityFields.id, map)
       pos <- get[List[Double]](EntityFields.position, map)
+      position <- parsePosition(pos)
       orient <- getOptional[Double](EntityFields.orientation, map)
       radius <- getOptional[Double](RobotFields.radius, map)
       speed <- getOptional[Double](RobotFields.speed, map)
       prox <- getOptional[Boolean](RobotFields.withProximitySensors, map)
       light <- getOptional[Boolean](RobotFields.withLightSensors, map)
-    yield Robot().at(Point2D(pos.head, pos(1)))
+    yield Robot().at(position)
       |> (r => id.fold(r)(r.withId))
       |> (r => orient.fold(r)(o => r.withOrientation(Orientation(o))))
       |> (r => radius.fold(r)(radius => r.withShape(ShapeType.Circle(radius))))
@@ -151,10 +149,11 @@ object YamlSimulationConfigParser:
     for
       id <- getOptional[UUID](EntityFields.id, map)
       pos <- get[List[Double]](EntityFields.position, map)
+      position <- parsePosition(pos)
       orientation <- getOptional[Double](EntityFields.orientation, map)
       width <- getOptional[Double](ObstacleFields.width, map)
       height <- getOptional[Double](ObstacleFields.height, map)
-    yield obstacle.at(Point2D(pos.head, pos(1)))
+    yield obstacle.at(position)
       |> (obs => id.fold(obs)(obs.withId))
       |> (obs => orientation.fold(obs)(o => obs.withOrientation(Orientation(o))))
       |> (obs => width.fold(obs)(w => obs.withWidth(w)))
@@ -171,12 +170,13 @@ object YamlSimulationConfigParser:
     for
       id <- getOptional[UUID](EntityFields.id, map)
       pos <- get[List[Double]](EntityFields.position, map)
+      position <- parsePosition(pos)
       orientation <- getOptional[Double](EntityFields.orientation, map)
       radius <- getOptional[Double](LightFields.radius, map)
       illumination <- get[Double](LightFields.illuminationRadius, map)
       intensity <- getOptional[Double](LightFields.intensity, map)
       attenuation <- getOptional[Double](LightFields.attenuation, map)
-    yield light.at(Point2D(pos.head, pos(1))).withIlluminationRadius(illumination)
+    yield light.at(position).withIlluminationRadius(illumination)
       |> (l => id.fold(l)(l.withId))
       |> (l => orientation.fold(l)(o => l.withOrientation(Orientation(o))))
       |> (l => radius.fold(l)(r => l.withRadius(r)))
