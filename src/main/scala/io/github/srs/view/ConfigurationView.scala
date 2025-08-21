@@ -14,6 +14,7 @@ import io.github.srs.utils.SimulationDefaults.Fields.Entity.DynamicEntity.Robot 
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Obstacle as ObstacleFields
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Light as LightFields
 import io.github.srs.config.ConfigError
+import io.github.srs.model.entity.dynamicentity.behavior.Policy
 
 /**
  * Defines how the configuration view should behave.
@@ -39,6 +40,11 @@ trait ConfigurationView:
   /**
    * Companion object for ConfigurationView that provides a factory method to create an instance of ConfigurationView.
    */
+@SuppressWarnings(
+  Array(
+    "org.wartremover.warts.ToString",
+  ),
+)
 object ConfigurationView:
 
   /**
@@ -64,6 +70,7 @@ object ConfigurationView:
         FieldSpec(RobotFields.speed, "Speed", TextField(3)),
         FieldSpec(RobotFields.withProximitySensors, "With proximity sensors", CheckBox(true)),
         FieldSpec(RobotFields.withLightSensors, "With light sensors", CheckBox(true)),
+        FieldSpec(RobotFields.behavior, "Behavior", ComboBox(Policy.values.map(_.toString))),
       )),
       ObstacleFields.self.capitalize -> (baseFieldSpec ++ Seq(
         FieldSpec(ObstacleFields.width, "Width", TextField(8)),
