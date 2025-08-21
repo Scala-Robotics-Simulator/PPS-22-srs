@@ -72,7 +72,7 @@ object ViewModule:
        * Private view implementation that uses a simple GUI.
        */
       private class ViewImpl extends View[S]:
-        private val gui = new SimpleView[S]
+        private val gui = SimulationView[S]()
 
         /**
          * @inheritdoc
