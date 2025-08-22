@@ -1,15 +1,12 @@
 package io.github.srs.utils
 
-import java.util.UUID
-
-import scala.concurrent.duration.DurationInt
-
+import cats.effect.IO
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.action.Action
-import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, Wheel as ActWheel }
+import io.github.srs.model.entity.dynamicentity.actuator.{Actuator, Wheel as ActWheel}
 import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior
-import io.github.srs.model.entity.dynamicentity.behavior.Policy
+import io.github.srs.model.entity.dynamicentity.behavior.{Behaviors, Policy}
 import io.github.srs.model.entity.dynamicentity.sensor.*
 import io.github.srs.model.environment.Environment
 
@@ -74,7 +71,7 @@ object SimulationDefaults:
   val duration: Option[Long] = None
   val seed: Option[Long] = None
   val debugMode = true
-  val binarySearchDurationThreshold = 1.microseconds
+  val binarySearchDurationThreshold: Any = 1.microseconds
 
   object SimulationConfig:
     val maxCount = 10_000
