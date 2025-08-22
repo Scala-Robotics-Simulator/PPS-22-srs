@@ -1,11 +1,13 @@
 package io.github.srs.view
 
-import java.awt.{ BorderLayout, Dimension, FlowLayout }
+import java.awt.{ BorderLayout, FlowLayout }
 import javax.swing.*
 
 import cats.effect.IO
+import cats.effect.unsafe.implicits.global
 import io.github.srs.config.{ ConfigError, SimulationConfig }
 import io.github.srs.model.entity.dynamicentity.behavior.Policy
+import io.github.srs.model.environment.Environment
 import io.github.srs.model.environment.dsl.CreationDSL.*
 import io.github.srs.model.validation.DomainError
 import io.github.srs.utils.SimulationDefaults.Fields.Entity
@@ -14,12 +16,9 @@ import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.{
   Light as LightFields,
   Obstacle as ObstacleFields,
 }
-import io.github.srs.utils.SimulationDefaults.Frame
 import io.github.srs.view.components.*
 import io.github.srs.view.components.configuration.*
 import io.github.srs.view.components.simulation.SimulationCanvas
-import cats.effect.unsafe.implicits.global
-import io.github.srs.model.environment.Environment
 
 /**
  * Defines how the configuration view should behave.
@@ -128,9 +127,7 @@ object ConfigurationView:
       extractConfig()
 
     private def setupUI(splitRatio: Double = 0.5): Unit =
-      frame.setMinimumSize(new Dimension(Frame.minWidth, Frame.minHeight))
-      frame.setPreferredSize(new Dimension(Frame.prefWidth, Frame.prefHeight))
-
+      frame.applyDefaultAndPreferSize()
       frame.setLayout(new BorderLayout())
       frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
 

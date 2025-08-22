@@ -4,10 +4,11 @@ import javax.swing.*
 import java.awt.*
 import java.awt.event.{ MouseAdapter, MouseEvent }
 import javax.swing.border.LineBorder
-import io.github.srs.utils.SimulationDefaults.UI
-import io.github.srs.view.components.UIUtils
 
 import scala.collection.immutable.List
+
+import io.github.srs.utils.SimulationDefaults.UI
+import io.github.srs.view.components.UIUtils
 
 /**
  * Control panel containing simulation controls (start/stop, pause/resume) and speed adjustment options.
@@ -163,7 +164,7 @@ class ControlsPanel extends JPanel:
     Seq(
       Box.createRigidArea(new Dimension(0, 10)),
       createControlGroup("Simulation", startStopButton, pauseResumeButton),
-      createControlGroup("Speed", slowButton, normalButton, fastButton)
+      createControlGroup("Speed", slowButton, normalButton, fastButton),
     ).foreach(add)
-  
+
 end ControlsPanel

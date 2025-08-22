@@ -1,9 +1,10 @@
 package io.github.srs.view.components
 
-import java.awt.{Dimension, Toolkit}
+import java.awt.{ Dimension, Toolkit }
 import javax.swing.BorderFactory
 import javax.swing.border.TitledBorder
-import io.github.srs.utils.SimulationDefaults.{Frame, UI}
+
+import io.github.srs.utils.SimulationDefaults.{ Frame, UI }
 
 /**
  * Centralized UI styling to ensure consistency across components
@@ -47,5 +48,5 @@ extension (frame: javax.swing.JFrame)
    * Applies default and preferred size to the frame.
    */
   def applyDefaultAndPreferSize(): Unit =
-      frame.setMinimumSize(new Dimension(Frame.minWidth, Frame.minHeight))
-      frame.setPreferredSize(new Dimension(Frame.prefWidth, Frame.prefHeight))
+    frame.setMinimumSize(new Dimension(Frame.minWidth, Frame.minHeight))
+    frame.setPreferredSize(new Dimension(Frame.prefWidth, Frame.prefHeight))
