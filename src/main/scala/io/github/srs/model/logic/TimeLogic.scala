@@ -34,6 +34,8 @@ trait TickLogic[S <: ModelModule.State]:
    */
   def tickSpeed(s: S, speed: SimulationSpeed): IO[S]
 
+end TickLogic
+
 /**
  * Companion object for [[TickLogic]] containing given instances.
  */
