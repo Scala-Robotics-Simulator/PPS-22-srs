@@ -225,7 +225,6 @@ object ControllerModule:
          *   the final state of the simulation after processing all events, wrapped in an [[IO]] task.
          */
         private def handleEvents(state: S, events: Seq[Event]): IO[S] =
-          // TODO
           for finalState <- events.foldLeft(IO.pure(state)) { (taskState, event) =>
               for
                 currentState <- taskState
