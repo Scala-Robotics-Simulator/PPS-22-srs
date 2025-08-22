@@ -188,10 +188,10 @@ object ControllerModule:
             proposals <- state.environment.entities.collect { case robot: Robot => robot }.toList.parTraverse { robot =>
               for
                 sensorReadings <- robot.senseAll[IO](state.environment)
-                action <- robot.behavior.run(sensorReadings)
-              yield IO.pure(RobotProposal(robot, action))
+                action = robot.behavior.run(sensorReadings)
+              yield RobotProposal(robot, action)
             }
-            _ <- queue.offer(Event.RobotActionProposals(queue, proposals))
+            _ <- queue.offer(Event.RobotActionProposals(proposals))
           yield ()
 
         /**
