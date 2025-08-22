@@ -17,6 +17,9 @@ import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.{
 import io.github.srs.utils.SimulationDefaults.Frame
 import io.github.srs.view.components.*
 import io.github.srs.view.components.configuration.*
+import io.github.srs.view.components.simulation.SimulationCanvas
+import cats.effect.unsafe.implicits.global
+import io.github.srs.model.environment.Environment
 
 /**
  * Defines how the configuration view should behave.
@@ -90,6 +93,12 @@ object ConfigurationView:
       onValidationError = showValidationErrors,
     )
 
+    private val fieldCanvas = new SimulationCanvas(alwaysRefresh = true)
+
+    private def refreshCanvas(env: Environment): IO[Unit] =
+      IO:
+        fieldCanvas.update(env = env, selectedId = None)
+
     private val entitiesPanel = new EntitiesPanel(entityFieldSpecs)
 
     private val controlsPanel = new ConfigurationControlsPanel(
@@ -97,6 +106,7 @@ object ConfigurationView:
       onConfigSave = getCurrentConfiguration,
     )
 
+    private val refreshFieldButton = new JButton("Refresh Field")
     private val startButton = new JButton("Start Simulation")
 
     private def showValidationErrors(errors: Seq[String]): Unit =
@@ -112,17 +122,17 @@ object ConfigurationView:
       simulationPanel.setSimulation(config.simulation)
       environmentPanel.setEnvironment(config.environment)
       entitiesPanel.setEntities(config.environment.entities)
+      refreshCanvas(config.environment).unsafeRunAsync(_ => ())
 
     private def getCurrentConfiguration(): Option[SimulationConfig] =
       extractConfig()
 
-    private def setupUI(): Unit =
+    private def setupUI(splitRatio: Double = 0.5): Unit =
       frame.setMinimumSize(new Dimension(Frame.minWidth, Frame.minHeight))
       frame.setPreferredSize(new Dimension(Frame.prefWidth, Frame.prefHeight))
 
       frame.setLayout(new BorderLayout())
-      frame.pack()
-      frame.centerFrame()
+      frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
 
       // Top panel with controls and settings
       val topPanel = new JPanel(new BorderLayout())
@@ -133,14 +143,34 @@ object ConfigurationView:
       settingsPanel.add(environmentPanel, BorderLayout.SOUTH)
       topPanel.add(settingsPanel, BorderLayout.SOUTH)
 
-      // Bottom panel with start button
+      // Bottom panel with start/refresh buttons
       val bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT))
+      bottomPanel.add(refreshFieldButton)
       bottomPanel.add(startButton)
 
-      frame.add(topPanel, BorderLayout.NORTH)
-      frame.add(entitiesPanel, BorderLayout.CENTER)
+      // Left side (settings + entities)
+      val leftPanel = new JPanel(new BorderLayout())
+      leftPanel.add(topPanel, BorderLayout.NORTH)
+      leftPanel.add(entitiesPanel, BorderLayout.CENTER)
+
+      // Split pane: left panels vs simulation canvas
+      val splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, fieldCanvas)
+      splitPane.setResizeWeight(splitRatio)
+      splitPane.setContinuousLayout(true)
+
+      frame.add(splitPane, BorderLayout.CENTER)
       frame.add(bottomPanel, BorderLayout.SOUTH)
-      frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
+
+      frame.pack()
+      frame.centerFrame()
+
+      refreshFieldButton.addActionListener: _ =>
+        val env = environmentPanel.getEnvironmentBase
+        val entities = entitiesPanel.getEntities
+        (env, entities) match
+          case (Right(env), Right(entities)) =>
+            refreshCanvas(env.copy(entities = entities.toSet)).unsafeRunAsync(_ => ())
+          case _ => ()
 
     end setupUI
 

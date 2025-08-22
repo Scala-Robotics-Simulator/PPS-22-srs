@@ -19,7 +19,7 @@ import io.github.srs.view.state.SimulationViewState
  * Canvas responsible for rendering the simulation environment and entities. This version preserves aspect ratio (no
  * stretching) using a uniform scale + letterboxing.
  */
-class SimulationCanvas extends JPanel:
+class SimulationCanvas(private val alwaysRefresh: Boolean = false) extends JPanel:
 
   import java.awt.{ BasicStroke, Graphics, Graphics2D, RadialGradientPaint }
 
@@ -106,7 +106,7 @@ class SimulationCanvas extends JPanel:
    */
   private def ensureStaticLayer(env: Environment): Unit =
     val size = (env.width, env.height, getWidth, getHeight)
-    if state.get.needsStaticLayerUpdate(size) then
+    if alwaysRefresh || state.get.needsStaticLayerUpdate(size) then
       val img = createStaticLayerImage(env)
       state.updateAndGet(_.withStaticLayer(img, size)): Unit
 
