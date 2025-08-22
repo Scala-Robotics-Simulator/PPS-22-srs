@@ -13,6 +13,7 @@ import io.github.srs.model.environment.ValidEnvironment.ValidEnvironment
 import io.github.srs.model.environment.dsl.CreationDSL.validate
 import io.github.srs.model.{ ModelModule, SimulationState }
 import io.github.srs.utils.EqualityGivenInstances.given
+import io.github.srs.utils.SimulationDefaults.debugMode
 
 /**
  * Logic for handling robot actions proposals.
@@ -137,9 +138,10 @@ object RobotActionsLogic:
           val candidate = applyAllMoves(s.environment, moves)
           candidate.validate match
             case Right(validEnv) =>
-              moves.foreach { case (_, newR) =>
-                println(s"[${newR.position._1}, ${newR.position._2}],")
-              }
+              if debugMode then
+                moves.foreach { case (_, newR) =>
+                  println(s"[${newR.position._1}, ${newR.position._2}],")
+                }
               validEnv
             case Left(_) =>
               s.environment
