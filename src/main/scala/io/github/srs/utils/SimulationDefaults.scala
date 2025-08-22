@@ -6,13 +6,70 @@ import scala.concurrent.duration.DurationInt
 
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.Robot
+import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, Wheel as ActWheel }
-import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, Sensor }
-import io.github.srs.model.environment.Environment
-import io.github.srs.model.entity.dynamicentity.sensor.LightSensor
+import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior
 import io.github.srs.model.entity.dynamicentity.behavior.Policy
+import io.github.srs.model.entity.dynamicentity.sensor.*
+import io.github.srs.model.environment.Environment
+
+import java.awt.Color
+import java.util.UUID
 
 object SimulationDefaults:
+
+  object UI:
+
+    object Colors:
+      @inline private def rgb(r: Int, g: Int, b: Int) = new java.awt.Color(r, g, b)
+      @inline private def rgba(r: Int, g: Int, b: Int, a: Int) = new java.awt.Color(r, g, b, a)
+      def backgroundLight: Color = rgb(250, 250, 250)
+      def backgroundMedium: Color = rgb(245, 245, 245)
+      def border: Color = rgb(200, 200, 200)
+      def text: Color = rgb(60, 60, 60)
+      def obstacleGradientStart: Color = rgb(120, 120, 120)
+      def obstacleGradientEnd: Color = rgb(80, 80, 80)
+      def obstacleBorder: Color = rgb(60, 60, 60)
+      def robotDefault: Color = rgb(100, 150, 255)
+      def robotDefaultDark: Color = rgb(50, 100, 200)
+      def robotDefaultBorder: Color = rgb(0, 50, 150)
+      def robotSelected: Color = rgb(255, 100, 100)
+      def robotSelectedDark: Color = rgb(200, 50, 50)
+      def robotSelectedBorder: Color = rgb(150, 0, 0)
+      def robotShadow: Color = rgba(0, 0, 0, 50)
+      def lightCenter: Color = rgba(255, 255, 200, 200)
+      def lightEdge: Color = rgba(255, 140, 0, 80)
+      def buttonHover: Color = rgb(230, 230, 230)
+      def buttonPressed: Color = rgb(220, 235, 250)
+
+    end Colors
+
+    object Fonts:
+      val family = "Arial"
+      val titleSize = 12
+
+    object Spacing:
+      val standardPadding = 10
+      val innerPadding = 5
+      val componentGap = 10
+
+    object Dimensions:
+      val buttonWidth = 150
+      val buttonHeight = 30
+      val robotListWidth = 200
+      val robotListHeight = 300
+      val infoAreaRows = 5
+      val infoAreaColumns = 20
+
+    object Strokes:
+      val obstacleStroke = 1.5f
+      val robotShadowStroke = 3f
+
+    object Icons:
+      val play = "\u25B6"
+      val stop = "\u23F9"
+      val pause = "\u23F8"
+  end UI
 
   val duration: Option[Long] = None
   val seed: Option[Long] = None
