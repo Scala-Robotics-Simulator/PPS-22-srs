@@ -7,7 +7,7 @@ import cats.effect.kernel.Ref
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.illumination.engine.FovEngine
 import io.github.srs.model.illumination.model.{ LightField, ScaleFactor }
-import io.github.srs.model.illumination.utils.StaticSignature
+import io.github.srs.model.illumination.utils.{ LightFieldSignature, StaticSignature }
 
 trait LightMap[F[_]]:
   /**
@@ -45,7 +45,8 @@ object LightMap:
     )
 
   /**
-   * Create a stateful [[LightMap]] facade that caches static precomputation results
+   * Create a stateful [[LightMap]] facade that caches computed light fields and
+   * the static precomputation results required to build them.
    *
    * @param fov
    *   The Field of View (FoV) engine used for light propagation.
@@ -59,23 +60,37 @@ object LightMap:
    *   A new [[LightMap]] instance wrapped in the effect type `F`.
    */
   def cached[F[_]](fov: FovEngine, scale: ScaleFactor, maxEntries: Int = 256)(using F: Sync[F]): F[LightMap[F]] =
-    F.flatMap(Ref.of[F, ListMap[Int, Illumination.Prepared]](ListMap.empty)) { ref =>
+    F.flatMap(Ref.of[F, ListMap[Int, Illumination.Prepared]](ListMap.empty)) { statRef =>
+      F.flatMap(Ref.of[F, ListMap[Int, LightField]](ListMap.empty)) { fieldRef =>
 
-      def getOrBuild(env: Environment): F[Illumination.Prepared] =
-        F.flatMap(F.delay(StaticSignature.of(env, scale))) { sig =>
-          F.flatMap(ref.get) { m =>
-            m.get(sig) match
-              case Some(p) => F.pure(p)
-              case None =>
-                val p = Illumination.prepareStatics(env, scale)
-                val updated = (m + (sig -> p)).takeRight(maxEntries)
-                F.map(ref.set(updated))(_ => p)
+        def getPrepared(env: Environment): F[Illumination.Prepared] =
+          F.flatMap(F.delay(StaticSignature.of(env, scale))) { sig =>
+            F.flatMap(statRef.get) { m =>
+              m.get(sig) match
+                case Some(p) => F.pure(p)
+                case None =>
+                  val p = Illumination.prepareStatics(env, scale)
+                  val updated = (m + (sig -> p)).takeRight(maxEntries)
+                  F.map(statRef.set(updated))(_ => p)
+            }
           }
-        }
 
-      F.pure[LightMap[F]] { (env: Environment, includeDynamic: Boolean) =>
-        F.flatMap(getOrBuild(env)) { p =>
-          F.delay(Illumination.field(env, p, fov, includeDynamic))
+        def getField(env: Environment, includeDynamic: Boolean): F[LightField] =
+          F.flatMap(F.delay(LightFieldSignature.of(env, scale, includeDynamic))) { sig =>
+            F.flatMap(fieldRef.get) { m =>
+              m.get(sig) match
+                case Some(fld) => F.pure(fld)
+                case None =>
+                  F.flatMap(getPrepared(env)) { p =>
+                    val fld = Illumination.field(env, p, fov, includeDynamic)
+                    val updated = (m + (sig -> fld)).takeRight(maxEntries)
+                    F.map(fieldRef.set(updated))(_ => fld)
+                  }
+            }
+          }
+
+        F.pure[LightMap[F]] { (env: Environment, includeDynamic: Boolean) =>
+          getField(env, includeDynamic)
         }
       }
     }
