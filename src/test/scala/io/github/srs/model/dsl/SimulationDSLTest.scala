@@ -4,15 +4,18 @@ import scala.language.postfixOps
 
 import io.github.srs.model.Simulation.simulation
 import io.github.srs.model.dsl.SimulationDSL.on
-import io.github.srs.model.environment.dsl.CreationDSL.{ environment, withHeight, withWidth }
+import io.github.srs.model.entity.staticentity.dsl.ObstacleDsl.{ at, obstacle }
+import io.github.srs.model.environment.Environment
+import io.github.srs.model.environment.dsl.CreationDSL.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalactic.Prettifier.default
 
 class SimulationDSLTest extends AnyFlatSpec with Matchers:
 
+  val env: Environment = environment withWidth 3 withHeight 3
+
   "SimulationDSL" should "render an empty 3x3 grid" in:
-    val env = environment withWidth 3 withHeight 3
     val gridString = simulation on env asGrid
 
     val expected =
@@ -25,3 +28,19 @@ class SimulationDSLTest extends AnyFlatSpec with Matchers:
         |+---+---+---+""".stripMargin
 
     gridString shouldBe expected
+
+  it should "render an environment 3x3 with an obstacle" in:
+    val updatedEnv = env containing (obstacle at (1, 1))
+    val gridString = simulation on updatedEnv asGrid
+
+    val expected =
+      """+---+---+---+
+        ||   |   |   |
+        |+---+---+---+
+        ||   | X |   |
+        |+---+---+---+
+        ||   |   |   |
+        |+---+---+---+""".stripMargin
+
+    gridString shouldBe expected
+end SimulationDSLTest
