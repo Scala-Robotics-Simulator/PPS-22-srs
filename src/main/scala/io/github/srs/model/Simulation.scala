@@ -23,7 +23,7 @@ object Simulation:
    * @return
    *   A new simulation instance with default values for duration and seed.
    */
-  def simulation = Simulation()
+  def simulation: Simulation = Simulation()
 
   extension (simulation: Simulation)
 
