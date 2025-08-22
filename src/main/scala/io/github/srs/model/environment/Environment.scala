@@ -1,6 +1,7 @@
 package io.github.srs.model.environment
 
 import io.github.srs.model.entity.Entity
+import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.utils.SimulationDefaults.Environment.*
 
 /**
@@ -54,3 +55,12 @@ object ValidEnvironment:
   given Conversion[ValidEnvironment, Environment] = identity
 
 export ValidEnvironment.ValidEnvironment
+
+extension (env: Environment)
+
+  /**
+   * A list of static entities in the environment.
+   * @return
+   *   A set of robots
+   */
+  def robots: List[Robot] = env.entities.collect { case r: Robot => r }.toList
