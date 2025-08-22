@@ -15,11 +15,6 @@ import io.github.srs.utils.SimulationDefaults.Fields.Entity.DynamicEntity.Robot 
 /**
  * Encoders for DynamicEntity types.
  */
-@SuppressWarnings(
-  Array(
-    "org.wartremover.warts.ToString",
-  ),
-)
 object DynamicEntity:
 
   /**
