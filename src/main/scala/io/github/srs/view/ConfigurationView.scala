@@ -40,11 +40,6 @@ trait ConfigurationView:
   /**
    * Companion object for ConfigurationView that provides a factory method to create an instance of ConfigurationView.
    */
-@SuppressWarnings(
-  Array(
-    "org.wartremover.warts.ToString",
-  ),
-)
 object ConfigurationView:
 
   /**
