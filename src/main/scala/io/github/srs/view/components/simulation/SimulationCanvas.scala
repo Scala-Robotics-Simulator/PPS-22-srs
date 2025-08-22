@@ -13,7 +13,7 @@ import io.github.srs.model.entity.{ Point2D, ShapeType }
 import io.github.srs.model.environment.Environment
 import io.github.srs.utils.SimulationDefaults
 import io.github.srs.utils.SimulationDefaults.Canvas.*
-import io.github.srs.view.state.SimulationState
+import io.github.srs.view.state.SimulationViewState
 
 /**
  * Canvas responsible for rendering the simulation environment and entities. This version preserves aspect ratio (no
@@ -38,7 +38,7 @@ class SimulationCanvas extends JPanel:
 
   // ---- State & strokes ------------------------------------------------------
 
-  private val state = new AtomicReference(SimulationState())
+  private val state = new AtomicReference(SimulationViewState())
   private val robotShape = new Ellipse2D.Double()
   private val gridStroke = new BasicStroke(gridStrokeWidth)
 

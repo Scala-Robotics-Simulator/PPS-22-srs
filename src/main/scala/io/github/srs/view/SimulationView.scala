@@ -12,7 +12,7 @@ import io.github.srs.model.ModelModule
 import io.github.srs.model.entity.Point2D.*
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.view.components.simulation.{ ControlsPanel, RobotPanel, SimulationCanvas }
-import io.github.srs.view.state.SimulationState
+import io.github.srs.view.state.SimulationViewState
 
 /**
  * Abstraction for the simulation user interface.
@@ -55,7 +55,7 @@ object SimulationView:
     private val canvas = new SimulationCanvas
     private val robotPanel = new RobotPanel
     private val controls = new ControlsPanel
-    private val viewState = new AtomicReference(SimulationState())
+    private val viewState = new AtomicReference(SimulationViewState())
 
     override def init(queue: Queue[IO, Event]): IO[Unit] = IO:
       setupUI()
