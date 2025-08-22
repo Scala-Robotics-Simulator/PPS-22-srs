@@ -1,7 +1,7 @@
 package io.github.srs.model.dsl
 
 import io.github.srs.model.Simulation
-import io.github.srs.model.entity.Point2D
+import io.github.srs.model.entity.Point2D.*
 import io.github.srs.model.entity.staticentity.StaticEntity.Obstacle
 import io.github.srs.model.environment.Environment
 
@@ -12,7 +12,10 @@ class SimulationGridBuilder(env: Environment):
 
   private def cellContent(x: Int, y: Int): String =
     env.entities.collectFirst {
-      case o: Obstacle if o.pos == Point2D(x, y) => "X"
+      case o: Obstacle
+          if x >= o.pos.x && x < o.pos.x + o.width &&
+            y >= o.pos.y && y < o.pos.y + o.height =>
+        "X"
     }.getOrElse(" ")
 
   def asGrid: String =
@@ -24,6 +27,8 @@ class SimulationGridBuilder(env: Environment):
       s"$horizontalLine\n$rowContent"
     }
     (rows :+ horizontalLine).mkString("\n")
+
+end SimulationGridBuilder
 
 object SimulationDSL:
   extension (sim: Simulation) infix def on(env: Environment) = new SimulationGridBuilder(env)
