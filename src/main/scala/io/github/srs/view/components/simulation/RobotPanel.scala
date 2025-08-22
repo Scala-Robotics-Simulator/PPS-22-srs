@@ -2,76 +2,116 @@ package io.github.srs.view.components.simulation
 
 import java.awt.{ BorderLayout, Dimension }
 import java.util.concurrent.atomic.AtomicReference
-import javax.swing.{ BorderFactory, JPanel }
+import javax.swing.*
 
 import io.github.srs.utils.SimulationDefaults.UI
-import io.github.srs.view.components.UIStyles
+import io.github.srs.view.components.UIUtils
 
 /**
- * Panel displaying the list of robots and their related information.
+ * Panel displaying the list of active robots and detailed information about the currently selected robot.
  */
 class RobotPanel extends JPanel(new BorderLayout()):
 
-  import io.github.srs.utils.SimulationDefaults.UI.Dimensions
-
-  import javax.swing.{ DefaultListModel, JList, JScrollPane, JTextArea, ListSelectionModel }
-
   private val listModel = new DefaultListModel[String]()
   private val robotList = new JList[String](listModel)
-  private val infoArea = new JTextArea(Dimensions.infoAreaRows, Dimensions.infoAreaColumns)
+  private val infoArea = new JTextArea(8, 25)
   private val currentIds = new AtomicReference[List[String]](Nil)
 
-  // Initialize components using consistent styling
+  initComponents()
+  setupLayout()
+
+  /**
+   * Initializes the visual components with their properties.
+   */
   private def initComponents(): Unit =
     robotList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION)
 
     infoArea.setEditable(false)
+    infoArea.setFont(new java.awt.Font("Monospaced", java.awt.Font.PLAIN, 11))
     infoArea.setBackground(UI.Colors.backgroundLight)
     infoArea.setBorder(
       BorderFactory.createCompoundBorder(
         BorderFactory.createLineBorder(UI.Colors.border),
-        UIStyles.paddedBorder(),
+        BorderFactory.createEmptyBorder(5, 5, 5, 5),
       ),
     )
 
-  private def createScrollPane(): JScrollPane =
-    val pane = new JScrollPane(robotList)
-    pane.setBorder(UIStyles.titledBorder("Active Robots"))
-    pane.setPreferredSize(new Dimension(Dimensions.robotListWidth, Dimensions.robotListHeight))
-    pane
+  /**
+   * Sets up the panel layout with info area at top and robot list below.
+   */
+  private def setupLayout(): Unit =
+    setBackground(UI.Colors.backgroundMedium)
+    setBorder(UIUtils.paddedBorder())
 
-  private def createInfoPanel(): JPanel =
-    val panel = new JPanel(new BorderLayout())
-    panel.setBorder(UIStyles.titledBorder("Robot Information"))
-    panel.add(infoArea, BorderLayout.CENTER)
-    panel
+    val infoPanel = new JPanel(new BorderLayout())
+    infoPanel.setBorder(UIUtils.titledBorder("Robot Information"))
+    infoPanel.add(new JScrollPane(infoArea), BorderLayout.CENTER)
+    infoPanel.setPreferredSize(new Dimension(250, 150))
 
-  // Initialize the panel
-  initComponents()
-  setBackground(UI.Colors.backgroundMedium)
-  setBorder(UIStyles.paddedBorder())
-  add(createScrollPane(), BorderLayout.CENTER)
-  add(createInfoPanel(), BorderLayout.SOUTH)
+    val listScrollPane = new JScrollPane(robotList)
+    listScrollPane.setBorder(UIUtils.titledBorder("Active Robots"))
+    listScrollPane.setPreferredSize(new Dimension(250, 250))
+
+    add(infoPanel, BorderLayout.NORTH)
+    add(listScrollPane, BorderLayout.CENTER)
 
   /**
-   * Updates robot list preserving selection when possible.
+   * Updates the list of robot IDs, preserving selection when possible.
+   *
+   * @param ids
+   *   List of robot IDs to display
    */
   def setRobotIds(ids: List[String]): Unit =
     if ids != currentIds.get then
       updateList(ids, Option(robotList.getSelectedValue))
       currentIds.set(ids)
 
+  /**
+   * Updates the list model with new IDs.
+   *
+   * @param ids
+   *   New list of robot IDs
+   * @param previousSelection
+   *   Previously selected ID to restore if still present
+   */
   private def updateList(ids: List[String], previousSelection: Option[String]): Unit =
     listModel.clear()
     ids.foreach(listModel.addElement)
     previousSelection.filter(ids.contains).foreach(robotList.setSelectedValue(_, true))
 
+  /**
+   * Gets the currently selected robot ID.
+   *
+   * @return
+   *   Option containing the selected ID, None if no selection
+   */
   def selectedId: Option[String] = Option(robotList.getSelectedValue)
 
+  /**
+   * Programmatically selects a robot by ID.
+   *
+   * @param id
+   *   The robot ID to select
+   */
   def selectRobot(id: String): Unit = robotList.setSelectedValue(id, true)
 
-  def setInfo(text: String): Unit = infoArea.setText(text)
+  /**
+   * Updates the information display area.
+   *
+   * @param text
+   *   The text to display in the info area
+   */
+  def setInfo(text: String): Unit =
+    infoArea.setText(text)
 
+  /**
+   * Registers a callback for selection change events.
+   *
+   * @param callback
+   *   Function to call when selection changes
+   */
   def onSelectionChanged(callback: () => Unit): Unit =
-    robotList.addListSelectionListener(_ => if !robotList.getValueIsAdjusting then callback())
+    robotList.addListSelectionListener { e =>
+      if !e.getValueIsAdjusting then callback()
+    }
 end RobotPanel
