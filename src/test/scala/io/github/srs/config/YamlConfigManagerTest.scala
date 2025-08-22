@@ -26,6 +26,7 @@ class YamlConfigManagerTest extends AnyFlatSpec with Matchers:
   given CanEqual[Sensor[?, ?], Sensor[?, ?]] = CanEqual.derived
   given CanEqual[SimulationConfig, SimulationConfig] = CanEqual.derived
   given CanEqual[Behavior[?, ?], Behavior[?, ?]] = CanEqual.derived
+  given CanEqual[Policy, Policy] = CanEqual.derived
 
   "YamlConfigLoader" should "load the correct configuration" in:
     val uri = getClass.getResource("/configuration.yml").toURI
@@ -45,7 +46,7 @@ class YamlConfigManagerTest extends AnyFlatSpec with Matchers:
       e.position == Point2D(3, 1) && (e match
         case Robot(_, _, _, _, _, sensors, behavior) =>
           sensors == stdProximitySensors ++ stdLightSensors &&
-          behavior.ordinal == Policy.AlwaysForward.ordinal),
+          behavior == Policy.AlwaysForward),
     ) should be(true)
 
   "YamlConfigManager" should "save the configuration correctly" in:

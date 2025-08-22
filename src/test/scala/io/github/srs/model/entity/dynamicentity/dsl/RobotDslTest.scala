@@ -21,6 +21,7 @@ class RobotDslTest extends AnyFlatSpec with Matchers:
   given CanEqual[Actuator[Robot], Actuator[Robot]] = CanEqual.derived
   given CanEqual[Sensor[Robot, Environment], Sensor[Robot, Environment]] = CanEqual.derived
   given CanEqual[Behavior[SensorReadings, Action[IO]], Behavior[SensorReadings, Action[IO]]] = CanEqual.derived
+  given CanEqual[Policy, Policy] = CanEqual.derived
 
   import RobotDsl.*
 
@@ -107,5 +108,5 @@ class RobotDslTest extends AnyFlatSpec with Matchers:
   it should "set the behavior of the robot" in:
     val behavior = Policy.AlwaysForward
     val entity = robot withBehavior behavior
-    entity.behavior.ordinal shouldBe behavior.ordinal
+    entity.behavior shouldBe behavior
 end RobotDslTest

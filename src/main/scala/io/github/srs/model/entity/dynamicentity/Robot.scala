@@ -31,6 +31,8 @@ final case class Robot(
     override val behavior: Policy = defaultPolicy,
 ) extends DynamicEntity:
 
+  given CanEqual[Policy, Policy] = CanEqual.derived
+
   // TODO: serialize the id
   //  override def equals(obj: Any): Boolean = obj match
   //    case that: Robot => this.id == that.id
@@ -44,7 +46,7 @@ final case class Robot(
       this.orientation == that.orientation &&
       this.actuators == that.actuators &&
       this.sensors == that.sensors &&
-      this.behavior.ordinal == that.behavior.ordinal
+      this.behavior == that.behavior
     case _ => false
 
 end Robot
