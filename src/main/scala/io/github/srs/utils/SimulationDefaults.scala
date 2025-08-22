@@ -1,21 +1,27 @@
 package io.github.srs.utils
 
-import cats.effect.IO
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.Robot
-import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.actuator.{Actuator, Wheel as ActWheel}
-import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior
-import io.github.srs.model.entity.dynamicentity.behavior.{Behaviors, Policy}
+import io.github.srs.model.entity.dynamicentity.behavior.Policy
 import io.github.srs.model.entity.dynamicentity.sensor.*
 import io.github.srs.model.environment.Environment
 
 import java.awt.Color
 import java.util.UUID
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
 
 object SimulationDefaults:
 
   object UI:
+
+    object SimulationViewConstants:
+      val IdDisplayLength = 8
+      val PositionDecimals = 2
+      val OrientationDecimals = 1
+      val DefaultRobotInfo = "Select a robot to view details"
+      val StopConfirmMessage = "Are you sure you want to stop the simulation?\n\nClick Yes to stop, No to continue."
+      val StopConfirmTitle = "Stop Simulation"
 
     object Colors:
       @inline private def rgb(r: Int, g: Int, b: Int) = new java.awt.Color(r, g, b)
@@ -53,10 +59,10 @@ object SimulationDefaults:
     object Dimensions:
       val buttonWidth = 150
       val buttonHeight = 30
-      val robotListWidth = 200
+      val robotListWidth = 250
       val robotListHeight = 300
-      val infoAreaRows = 5
-      val infoAreaColumns = 20
+      val infoAreaRows = 6
+      val infoAreaColumns = 25
 
     object Strokes:
       val obstacleStroke = 1.5f
@@ -71,7 +77,7 @@ object SimulationDefaults:
   val duration: Option[Long] = None
   val seed: Option[Long] = None
   val debugMode = true
-  val binarySearchDurationThreshold: Any = 1.microseconds
+  val binarySearchDurationThreshold: FiniteDuration = 1.microseconds
 
   object SimulationConfig:
     val maxCount = 10_000
