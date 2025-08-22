@@ -56,4 +56,17 @@ class SimulationDSLTest extends AnyFlatSpec with Matchers:
         |+---+---+---+""".stripMargin
     gridString shouldBe expected
 
+  it should "render an environment 3x3 with multiple obstacles" in:
+    val updatedEnv = env containing (obstacle at (0, 0) withWidth 2 withHeight 2) and (obstacle at (2, 2))
+    val gridString = simulation on updatedEnv asGrid
+    val expected =
+      """+---+---+---+
+        || X | X |   |
+        |+---+---+---+
+        || X | X |   |
+        |+---+---+---+
+        ||   |   | X |
+        |+---+---+---+""".stripMargin
+    gridString shouldBe expected
+
 end SimulationDSLTest
