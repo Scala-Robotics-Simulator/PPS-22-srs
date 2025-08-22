@@ -4,6 +4,7 @@ import scala.language.postfixOps
 
 import io.github.srs.model.Simulation.simulation
 import io.github.srs.model.dsl.SimulationDSL.on
+import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 import io.github.srs.model.entity.staticentity.dsl.ObstacleDsl.*
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.environment.dsl.CreationDSL.*
@@ -17,56 +18,67 @@ class SimulationDSLTest extends AnyFlatSpec with Matchers:
 
   "SimulationDSL" should "render an empty 3x3 grid" in:
     val gridString = simulation on env asGrid
-
     val expected =
-      """+---+---+---+
-        ||   |   |   |
-        |+---+---+---+
-        ||   |   |   |
-        |+---+---+---+
-        ||   |   |   |
-        |+---+---+---+""".stripMargin
-
+      """+----+----+----+
+        ||    |    |    |
+        |+----+----+----+
+        ||    |    |    |
+        |+----+----+----+
+        ||    |    |    |
+        |+----+----+----+""".stripMargin
     gridString shouldBe expected
 
-  it should "render an environment 3x3 with an obstacle" in:
+  it should "render an environment 3x3 containing an obstacle" in:
     val updatedEnv = env containing (obstacle at (1, 1))
     val gridString = simulation on updatedEnv asGrid
     val expected =
-      """+---+---+---+
-        ||   |   |   |
-        |+---+---+---+
-        ||   | X |   |
-        |+---+---+---+
-        ||   |   |   |
-        |+---+---+---+""".stripMargin
-
+      """+----+----+----+
+        ||    |    |    |
+        |+----+----+----+
+        ||    | X0 |    |
+        |+----+----+----+
+        ||    |    |    |
+        |+----+----+----+""".stripMargin
     gridString shouldBe expected
 
-  it should "render an environment 3x3 with an obstacles 2x3" in:
+  it should "render an environment 3x3 containing an obstacles 2x2" in:
     val updatedEnv = env containing (obstacle at (0, 0) withWidth 2 withHeight 2)
     val gridString = simulation on updatedEnv asGrid
     val expected =
-      """+---+---+---+
-        || X | X |   |
-        |+---+---+---+
-        || X | X |   |
-        |+---+---+---+
-        ||   |   |   |
-        |+---+---+---+""".stripMargin
+      """+----+----+----+
+        || X0 | X0 |    |
+        |+----+----+----+
+        || X0 | X0 |    |
+        |+----+----+----+
+        ||    |    |    |
+        |+----+----+----+""".stripMargin
     gridString shouldBe expected
 
-  it should "render an environment 3x3 with multiple obstacles" in:
-    val updatedEnv = env containing (obstacle at (0, 0) withWidth 2 withHeight 2) and (obstacle at (2, 2))
+  it should "render an environment 3x3 containing multiple obstacles" in:
+    val updatedEnv =
+      env containing (obstacle at (0, 0) withWidth 1 withHeight 2) and (obstacle at (2, 0)) and (obstacle at (2, 2))
     val gridString = simulation on updatedEnv asGrid
     val expected =
-      """+---+---+---+
-        || X | X |   |
-        |+---+---+---+
-        || X | X |   |
-        |+---+---+---+
-        ||   |   | X |
-        |+---+---+---+""".stripMargin
+      """+----+----+----+
+        || X0 |    | X1 |
+        |+----+----+----+
+        || X0 |    |    |
+        |+----+----+----+
+        ||    |    | X2 |
+        |+----+----+----+""".stripMargin
+    gridString shouldBe expected
+
+  it should "render an environment 3x3 containing a robot" in:
+    val updatedEnv = env containing (robot at (1, 1))
+    val gridString = simulation on updatedEnv asGrid
+    val expected =
+      """+----+----+----+
+        ||    |    |    |
+        |+----+----+----+
+        ||    | R0→|    |
+        |+----+----+----+
+        ||    |    |    |
+        |+----+----+----+""".stripMargin
     gridString shouldBe expected
 
 end SimulationDSLTest
