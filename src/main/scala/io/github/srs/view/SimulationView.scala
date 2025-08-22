@@ -1,18 +1,19 @@
 package io.github.srs.view
 
-import java.awt.{ BorderLayout, Dimension }
-import java.util.concurrent.atomic.AtomicReference
-import javax.swing.*
-
 import cats.effect.IO
 import cats.effect.std.Queue
 import cats.effect.unsafe.implicits.global
-import io.github.srs.controller.Event
+import io.github.srs.controller.protocol.Event
 import io.github.srs.model.ModelModule
+import io.github.srs.model.SimulationConfig.SimulationSpeed
 import io.github.srs.model.entity.Point2D.*
 import io.github.srs.model.entity.dynamicentity.Robot
-import io.github.srs.view.components.simulation.{ ControlsPanel, RobotPanel, SimulationCanvas }
+import io.github.srs.view.components.simulation.{ControlsPanel, RobotPanel, SimulationCanvas}
 import io.github.srs.view.state.SimulationViewState
+
+import java.awt.{BorderLayout, Dimension}
+import java.util.concurrent.atomic.AtomicReference
+import javax.swing.*
 
 /**
  * Abstraction for the simulation user interface.
@@ -64,7 +65,6 @@ object SimulationView:
 
     override def render(state: S): IO[Unit] = IO:
       val newState = viewState.updateAndGet(_.withEnvironment(state.environment))
-
       SwingUtilities.invokeLater(() =>
         robotPanel.setRobotIds(newState.robots.map(_.id.toString))
         canvas.update(state.environment, robotPanel.selectedId)
@@ -75,8 +75,8 @@ object SimulationView:
 
     private def setupUI(): Unit =
       import io.github.srs.view.components.centerFrame
-      canvas.setBorder(BorderFactory.createLineBorder(java.awt.Color.BLACK, Frame.canvasBorder))
 
+      canvas.setBorder(BorderFactory.createLineBorder(java.awt.Color.BLACK, Frame.canvasBorder))
       frame.setMinimumSize(new Dimension(Frame.minWidth, Frame.minHeight))
       frame.setPreferredSize(new Dimension(Frame.prefWidth, Frame.prefHeight))
       frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
@@ -105,8 +105,6 @@ object SimulationView:
       canvas.addSelectionListener(robotPanel.selectRobot)
 
     private def setupControlHandlers(queue: Queue[IO, Event]): Unit =
-      import io.github.srs.model.SimulationConfig.SimulationSpeed
-
       controls.pauseResumeButton.setEnabled(false)
 
       controls.startStopButton.addActionListener { _ =>
@@ -119,27 +117,49 @@ object SimulationView:
         handlePauseResume(queue, isPause)
       }
 
-      // Add speed control handler
       controls.onSpeedChanged { speed =>
-        val simulationSpeed = speed match
-          case "slow" => SimulationSpeed.SLOW
-          case "fast" => SimulationSpeed.FAST
-          case _ => SimulationSpeed.NORMAL
+        val simulationSpeed = parseSpeed(speed)
         queue.offer(Event.TickSpeed(simulationSpeed)).unsafeRunAndForget()
       }
 
-    end setupControlHandlers
+    private def parseSpeed(speed: String): SimulationSpeed = speed match
+      case "slow" => SimulationSpeed.SLOW
+      case "fast" => SimulationSpeed.FAST
+      case _ => SimulationSpeed.NORMAL
 
     private def handleSimulationControl(queue: Queue[IO, Event], isStart: Boolean): Unit =
-
       if isStart then
-        queue.offer(Event.Resume).unsafeRunAndForget()
-        controls.updateButtonText(isRunning = true, isPaused = false)
-        controls.pauseResumeButton.setEnabled(true)
+        startSimulation(queue)
       else
+        showStopConfirmation(queue)
+
+    private def startSimulation(queue: Queue[IO, Event]): Unit =
+      queue.offer(Event.Resume).unsafeRunAndForget()
+      controls.updateButtonText(isRunning = true, isPaused = false)
+      controls.pauseResumeButton.setEnabled(true)
+
+    private def showStopConfirmation(queue: Queue[IO, Event]): Unit =
+      // First pause the simulation before showing dialog
+      queue.offer(Event.Pause).unsafeRunAndForget()
+      controls.updateButtonText(isRunning = true, isPaused = true)
+
+      val result = JOptionPane.showConfirmDialog(
+        frame,
+        "Are you sure you want to stop the simulation?\n\nClick Yes to stop, No to continue.",
+        "Stop Simulation",
+        JOptionPane.YES_NO_OPTION,
+        JOptionPane.QUESTION_MESSAGE
+      )
+
+      if result == JOptionPane.YES_OPTION then
+        // User confirmed stop
         queue.offer(Event.Stop).unsafeRunAndForget()
         controls.updateButtonText(isRunning = false, isPaused = false)
         controls.pauseResumeButton.setEnabled(false)
+      else
+        // User cancelled - resume the simulation
+        queue.offer(Event.Resume).unsafeRunAndForget()
+        controls.updateButtonText(isRunning = true, isPaused = false)
 
     private def handlePauseResume(queue: Queue[IO, Event], isPause: Boolean): Unit =
       val event = if isPause then Event.Pause else Event.Resume
@@ -147,16 +167,17 @@ object SimulationView:
       controls.updateButtonText(isRunning = true, isPaused = isPause)
 
     private def updateRobotInfo(): Unit =
-      val info = viewState.get.selectedRobot
-        .map(formatRobotInfo)
-        .getOrElse("Select a robot")
+      val currentState = viewState.get
+      val info = for {
+        selectedId <- robotPanel.selectedId
+        robot <- currentState.robots.find(_.id.toString == selectedId)
+      } yield formatRobotInfo(robot)
 
-      robotPanel.setInfo(info)
+      robotPanel.setInfo(info.getOrElse("Select a robot to view details"))
 
     private def formatRobotInfo(robot: Robot): String =
-      s"""Robot ID: ${robot.id.toString.take(5)}
+      s"""Robot ID: ${robot.id.toString.take(8)}...
          |Position: (${f"${robot.position.x}%.2f"}, ${f"${robot.position.y}%.2f"})
-         |Orientation: ${f"${robot.orientation.degrees}%.2f"}°
+         |Orientation: ${f"${robot.orientation.degrees}%.1f"}°
          |N.Sensors: ${robot.sensors.size}""".stripMargin
-  end SimulationViewImpl
-end SimulationView
+
