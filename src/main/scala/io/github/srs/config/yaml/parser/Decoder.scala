@@ -2,10 +2,6 @@ package io.github.srs.config.yaml.parser
 
 import java.util.UUID
 
-import scala.util.Try
-import scala.util.Success
-import scala.util.Failure
-
 import io.github.srs.config.{ ConfigError, ConfigResult }
 import io.github.srs.model.entity.dynamicentity.behavior.Policy
 
@@ -97,9 +93,11 @@ object Decoder:
     def decode(field: String, value: Any): ConfigResult[Policy] =
       for
         name <- summon[Decoder[String]].decode(field, value)
-        behavior <- Try(Policy.valueOf(name)) match
-          case Success(value) => Right[Seq[ConfigError], Policy](value)
-          case Failure(_) =>
+        maybeBehavior = Policy.values.collectFirst:
+          case p: Policy if p.toString == name => p
+        behavior <- maybeBehavior match
+          case Some(value) => Right[Seq[ConfigError], Policy](value)
+          case None =>
             Left[Seq[ConfigError], Policy](
               Seq(ConfigError.ParsingError(s"Unable to find behavior: $name")),
             )

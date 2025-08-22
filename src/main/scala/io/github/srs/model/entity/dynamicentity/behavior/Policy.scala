@@ -11,9 +11,9 @@ import cats.effect.IO
  * @param behavior
  *   The behavior to be executed based on sensor readings.
  */
-enum Policy(behavior: Behavior[SensorReadings, Action[IO]]):
-  case Simple extends Policy(Behaviors.simple[IO])
-  case AlwaysForward extends Policy(Behaviors.alwaysForward[IO])
+enum Policy(name: String, behavior: Behavior[SensorReadings, Action[IO]]):
+  case Simple extends Policy("Simple", Behaviors.simple[IO])
+  case AlwaysForward extends Policy("AlwaysForward", Behaviors.alwaysForward[IO])
 
   /**
    * Executes the behavior defined by this policy using the provided sensor readings.
@@ -25,3 +25,5 @@ enum Policy(behavior: Behavior[SensorReadings, Action[IO]]):
    */
   def run(readings: SensorReadings): Action[IO] =
     behavior.run(readings)
+
+  override def toString: String = name
