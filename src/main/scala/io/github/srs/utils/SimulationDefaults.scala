@@ -1,15 +1,16 @@
 package io.github.srs.utils
 
+import java.awt.Color
+import java.util.UUID
+
+import scala.concurrent.duration.{ DurationInt, FiniteDuration }
+
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.Robot
-import io.github.srs.model.entity.dynamicentity.actuator.{Actuator, Wheel as ActWheel}
+import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, Wheel as ActWheel }
 import io.github.srs.model.entity.dynamicentity.behavior.Policy
 import io.github.srs.model.entity.dynamicentity.sensor.*
 import io.github.srs.model.environment.Environment
-
-import java.awt.Color
-import java.util.UUID
-import scala.concurrent.duration.{DurationInt, FiniteDuration}
 
 object SimulationDefaults:
 

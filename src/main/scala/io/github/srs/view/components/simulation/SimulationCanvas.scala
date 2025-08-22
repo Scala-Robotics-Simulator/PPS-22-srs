@@ -1,10 +1,13 @@
 package io.github.srs.view.components.simulation
 
+import java.awt.*
 import java.awt.event.{ MouseAdapter, MouseEvent }
 import java.awt.geom.Ellipse2D
 import java.awt.image.BufferedImage
 import java.util.concurrent.atomic.AtomicReference
 import javax.swing.JPanel
+
+import scala.collection.immutable.List
 
 import io.github.srs.model.entity.Point2D.*
 import io.github.srs.model.entity.dynamicentity.Robot
@@ -16,78 +19,58 @@ import io.github.srs.utils.SimulationDefaults.Canvas.*
 import io.github.srs.view.state.SimulationViewState
 
 /**
- * Canvas responsible for rendering the simulation environment and entities. This version preserves aspect ratio (no
- * stretching) using a uniform scale + letterboxing.
+ * Canvas component responsible for rendering the simulation environment. Supports static layer caching for improved
+ * performance.
+ *
+ * @param alwaysRefresh
+ *   If true, the static layer is recreated on every paint
  */
 class SimulationCanvas(private val alwaysRefresh: Boolean = false) extends JPanel:
 
-  import java.awt.{ BasicStroke, Graphics, Graphics2D, RadialGradientPaint }
-
-  // ---- Viewport (uniform scale + offsets) -----------------------------------
-
-  private case class Viewport(s: Double, ox: Int, oy: Int, dw: Int, dh: Int)
-
-  /** Compute a uniform scale that fits the world in the panel and center it. */
-  private def viewport(env: Environment): Viewport =
-    val s = math.min(getWidth.toDouble / env.width, getHeight.toDouble / env.height)
-    val dw = (env.width * s).toInt
-    val dh = (env.height * s).toInt
-    val ox = (getWidth - dw) / 2
-    val oy = (getHeight - dh) / 2
-    Viewport(s, ox, oy, dw, dh)
-
-  // ---- State & strokes ------------------------------------------------------
+  /**
+   * Viewport configuration for world-to-screen transformation.
+   *
+   * @param scale
+   *   Scaling factor from world-to-screen coordinates
+   * @param offsetX
+   *   Horizontal offset for centering
+   * @param offsetY
+   *   Vertical offset for centering
+   * @param width
+   *   Scaled width of the environment
+   * @param height
+   *   Scaled height of the environment
+   */
+  private case class Viewport(scale: Double, offsetX: Int, offsetY: Int, width: Int, height: Int)
 
   private val state = new AtomicReference(SimulationViewState())
   private val robotShape = new Ellipse2D.Double()
   private val gridStroke = new BasicStroke(gridStrokeWidth)
 
-  // ---- Public API -----------------------------------------------------------
-
   /**
-   * Updates the canvas state and triggers a repaint.
+   * Updates the canvas with new environment data.
    *
    * @param env
-   *   The environment to be displayed
+   *   The environment to render
    * @param selectedId
-   *   The ID of the selected robot, if any
+   *   Optional ID of the selected robot
    */
   def update(env: Environment, selectedId: Option[String]): Unit =
     state.updateAndGet(_.withEnvironment(env).withSelection(selectedId))
     repaint()
 
   /**
-   * Adds a listener that is invoked when a robot is clicked.
+   * Adds a mouse-click listener for robot selection.
+   *
+   * @param onSelect
+   *   Callback function called with robot ID when clicked
    */
   def addSelectionListener(onSelect: String => Unit): Unit =
     addMouseListener(
-      new MouseAdapter():
+      new MouseAdapter:
         override def mouseClicked(e: MouseEvent): Unit =
           findRobotAt(e.getX, e.getY).foreach(r => onSelect(r.id.toString)),
     )
-
-  // ---- Input / hit testing --------------------------------------------------
-
-  /**
-   * Finds a robot at the specified screen coordinates using the current environment.
-   */
-  private def findRobotAt(x: Int, y: Int): Option[Robot] =
-    import io.github.srs.model.environment.robots
-    val currentState = state.get
-    for
-      env <- currentState.environment
-      vp = viewport(env)
-      if x >= vp.ox && x <= vp.ox + vp.dw && y >= vp.oy && y <= vp.oy + vp.dh
-      worldX = (x - vp.ox) / vp.s
-      worldY = (y - vp.oy) / vp.s
-      robot <- env.robots.find { r =>
-        val dx = worldX - r.position.x
-        val dy = worldY - r.position.y
-        dx * dx + dy * dy <= r.shape.radius * r.shape.radius
-      }
-    yield robot
-
-  // ---- Painting -------------------------------------------------------------
 
   override def paintComponent(g: Graphics): Unit =
     super.paintComponent(g)
@@ -102,7 +85,52 @@ class SimulationCanvas(private val alwaysRefresh: Boolean = false) extends JPane
     }
 
   /**
-   * Ensures that the static layer is up-to-date with the current environment and canvas size.
+   * Calculates viewport transformation for centering and scaling.
+   *
+   * @param env
+   *   The environment to fit in the viewport
+   * @return
+   *   Viewport configuration
+   */
+  private def viewport(env: Environment): Viewport =
+    val scale = math.min(getWidth.toDouble / env.width, getHeight.toDouble / env.height)
+    val width = (env.width * scale).toInt
+    val height = (env.height * scale).toInt
+    val offsetX = (getWidth - width) / 2
+    val offsetY = (getHeight - height) / 2
+    Viewport(scale, offsetX, offsetY, width, height)
+
+  /**
+   * Finds a robot at the given screen coordinates.
+   *
+   * @param x
+   *   Screen X coordinate
+   * @param y
+   *   Screen Y coordinate
+   * @return
+   *   Option containing the robot at that position, if any
+   */
+  private def findRobotAt(x: Int, y: Int): Option[Robot] =
+    import io.github.srs.model.environment.robots
+    val currentState = state.get
+    for
+      env <- currentState.environment
+      vp = viewport(env)
+      if x >= vp.offsetX && x <= vp.offsetX + vp.width && y >= vp.offsetY && y <= vp.offsetY + vp.height
+      worldX = (x - vp.offsetX) / vp.scale
+      worldY = (y - vp.offsetY) / vp.scale
+      robot <- env.robots.find { r =>
+        val dx = worldX - r.position.x
+        val dy = worldY - r.position.y
+        dx * dx + dy * dy <= r.shape.radius * r.shape.radius
+      }
+    yield robot
+
+  /**
+   * Ensures the static layer is up to date with the current environment.
+   *
+   * @param env
+   *   The environment to render
    */
   private def ensureStaticLayer(env: Environment): Unit =
     val size = (env.width, env.height, getWidth, getHeight)
@@ -111,14 +139,18 @@ class SimulationCanvas(private val alwaysRefresh: Boolean = false) extends JPane
       state.updateAndGet(_.withStaticLayer(img, size)): Unit
 
   /**
-   * Creates a new image for the static layer (grid, labels, static entities).
+   * Creates a buffered image containing static elements (grid, obstacles, lights).
+   *
+   * @param env
+   *   The environment to render
+   * @return
+   *   BufferedImage with static elements
    */
   private def createStaticLayerImage(env: Environment): BufferedImage =
     val img = new BufferedImage(getWidth, getHeight, BufferedImage.TYPE_INT_ARGB)
     val g2 = img.createGraphics()
     val vp = viewport(env)
 
-    // letterbox background
     g2.setColor(getBackground)
     g2.fillRect(0, 0, getWidth, getHeight)
 
@@ -129,38 +161,60 @@ class SimulationCanvas(private val alwaysRefresh: Boolean = false) extends JPane
     g2.dispose()
     img
 
-  // ---- Grid & labels --------------------------------------------------------
-
+  /**
+   * Draws the coordinate grid.
+   *
+   * @param g2
+   *   Graphics context
+   * @param env
+   *   Environment for dimensions
+   * @param vp
+   *   Viewport configuration
+   */
   private def drawGrid(g2: Graphics2D, env: Environment, vp: Viewport): Unit =
-    g2.setColor(java.awt.Color.LIGHT_GRAY)
+    g2.setColor(Color.LIGHT_GRAY)
     g2.setStroke(gridStroke)
 
     (0 to env.width).foreach { x =>
-      val sx = vp.ox + (x * vp.s).toInt
-      g2.drawLine(sx, vp.oy, sx, vp.oy + vp.dh)
+      val sx = vp.offsetX + (x * vp.scale).toInt
+      g2.drawLine(sx, vp.offsetY, sx, vp.offsetY + vp.height)
     }
     (0 to env.height).foreach { y =>
-      val sy = vp.oy + (y * vp.s).toInt
-      g2.drawLine(vp.ox, sy, vp.ox + vp.dw, sy)
-    }
-
-  private def drawLabels(g2: Graphics2D, env: Environment, vp: Viewport): Unit =
-    g2.setColor(java.awt.Color.DARK_GRAY)
-    val bottom = vp.oy + vp.dh - labelBottomOffset
-
-    val stepX = adaptiveLabelStep(vp.s)
-    val stepY = adaptiveLabelStep(vp.s)
-
-    (0 to env.width by stepX).foreach { x =>
-      g2.drawString(x.toString, vp.ox + (x * vp.s).toInt + labelXOffset, bottom)
-    }
-    (0 to env.height by stepY).foreach { y =>
-      val py = vp.oy + (y * vp.s).toInt
-      g2.drawString(y.toString, vp.ox + labelXOffset, Math.min(bottom, py + labelYOffset))
+      val sy = vp.offsetY + (y * vp.scale).toInt
+      g2.drawLine(vp.offsetX, sy, vp.offsetX + vp.width, sy)
     }
 
   /**
-   * Calculates an adaptive step size for grid labels based on the current scale to maintain readability.
+   * Draws coordinate labels with adaptive stepping.
+   *
+   * @param g2
+   *   Graphics context
+   * @param env
+   *   Environment for dimensions
+   * @param vp
+   *   Viewport configuration
+   */
+  private def drawLabels(g2: Graphics2D, env: Environment, vp: Viewport): Unit =
+    g2.setColor(Color.DARK_GRAY)
+    val bottom = vp.offsetY + vp.height - labelBottomOffset
+
+    val step = adaptiveLabelStep(vp.scale)
+
+    (0 to env.width by step).foreach { x =>
+      g2.drawString(x.toString, vp.offsetX + (x * vp.scale).toInt + labelXOffset, bottom)
+    }
+    (0 to env.height by step).foreach { y =>
+      val py = vp.offsetY + (y * vp.scale).toInt
+      g2.drawString(y.toString, vp.offsetX + labelXOffset, Math.min(bottom, py + labelYOffset))
+    }
+
+  /**
+   * Calculates adaptive step size for labels based on zoom level.
+   *
+   * @param scale
+   *   Current zoom scale
+   * @return
+   *   Step size for label spacing
    */
   private def adaptiveLabelStep(scale: Double): Int =
     val raw = labelDesiredPx / scale
@@ -171,8 +225,16 @@ class SimulationCanvas(private val alwaysRefresh: Boolean = false) extends JPane
       .find(_ >= raw)
       .getOrElse(1)
 
-  // ---- Static entities ------------------------------------------------------
-
+  /**
+   * Draws all static entities (obstacles and lights).
+   *
+   * @param g2
+   *   Graphics context
+   * @param env
+   *   Environment containing entities
+   * @param vp
+   *   Viewport configuration
+   */
   private def drawStaticEntities(g2: Graphics2D, env: Environment, vp: Viewport): Unit =
     env.entities.foreach:
       case StaticEntity.Obstacle(_, pos, orientation, w, h) =>
@@ -181,6 +243,22 @@ class SimulationCanvas(private val alwaysRefresh: Boolean = false) extends JPane
         drawLight(g2, pos, radius, vp)
       case _ => ()
 
+  /**
+   * Draws an obstacle with gradient fill.
+   *
+   * @param g2
+   *   Graphics context
+   * @param pos
+   *   Position in world coordinates
+   * @param orientation
+   *   Rotation in degrees
+   * @param w
+   *   Width of an obstacle
+   * @param h
+   *   Height of an obstacle
+   * @param vp
+   *   Viewport configuration
+   */
   private def drawObstacle(
       g2: Graphics2D,
       pos: Point2D,
@@ -192,55 +270,53 @@ class SimulationCanvas(private val alwaysRefresh: Boolean = false) extends JPane
     import io.github.srs.utils.SimulationDefaults.UI.{ Colors, Strokes }
 
     val savedTransform = g2.getTransform
-
-    // rotate around obstacle center (screen space)
-    val centerX = vp.ox + pos.x * vp.s
-    val centerY = vp.oy + pos.y * vp.s
+    val centerX = vp.offsetX + pos.x * vp.scale
+    val centerY = vp.offsetY + pos.y * vp.scale
     g2.rotate(orientation.toRadians, centerX, centerY)
 
-    val rect = calculateRect(pos, w, h, vp)
+    val x = (vp.offsetX + (pos.x - w / 2) * vp.scale).toInt
+    val y = (vp.offsetY + (pos.y - h / 2) * vp.scale).toInt
+    val width = (w * vp.scale).toInt
+    val height = (h * vp.scale).toInt
 
-    val gradient = createGradient(rect, Colors.obstacleGradientStart, Colors.obstacleGradientEnd)
+    val gradient = new GradientPaint(
+      x.toFloat,
+      y.toFloat,
+      Colors.obstacleGradientStart,
+      (x + width).toFloat,
+      (y + height).toFloat,
+      Colors.obstacleGradientEnd,
+    )
 
     g2.setPaint(gradient)
-    g2.fillRect(rect._1, rect._2, rect._3, rect._4)
+    g2.fillRect(x, y, width, height)
 
     g2.setColor(Colors.obstacleBorder)
     g2.setStroke(new BasicStroke(Strokes.obstacleStroke))
-    g2.drawRect(rect._1, rect._2, rect._3, rect._4)
+    g2.drawRect(x, y, width, height)
 
     g2.setTransform(savedTransform)
 
   end drawObstacle
 
-  private def calculateRect(pos: Point2D, w: Double, h: Double, vp: Viewport): (Int, Int, Int, Int) =
-    val x = (vp.ox + (pos.x - w / 2) * vp.s).toInt
-    val y = (vp.oy + (pos.y - h / 2) * vp.s).toInt
-    val width = (w * vp.s).toInt
-    val height = (h * vp.s).toInt
-    (x, y, width, height)
-
-  private def createGradient(
-      rect: (Int, Int, Int, Int),
-      c1: java.awt.Color,
-      c2: java.awt.Color,
-  ): java.awt.GradientPaint =
-    new java.awt.GradientPaint(
-      rect._1.toFloat,
-      rect._2.toFloat,
-      c1,
-      (rect._1 + rect._3).toFloat,
-      (rect._2 + rect._4).toFloat,
-      c2,
-    )
-
+  /**
+   * Draws a light source with radial gradient.
+   *
+   * @param g2
+   *   Graphics context
+   * @param pos
+   *   Position in world coordinates
+   * @param radius
+   *   Effective radius of the light
+   * @param vp
+   *   Viewport configuration
+   */
   private def drawLight(g2: Graphics2D, pos: Point2D, radius: Double, vp: Viewport): Unit =
-    import io.github.srs.utils.SimulationDefaults.Canvas.{ lightStroke, minLightSize }
     import io.github.srs.utils.SimulationDefaults.UI.Colors
 
-    val cx = (vp.ox + pos.x * vp.s).toInt
-    val cy = (vp.oy + pos.y * vp.s).toInt
-    val size = Math.max(minLightSize, (4 * radius * vp.s).toInt)
+    val cx = (vp.offsetX + pos.x * vp.scale).toInt
+    val cy = (vp.offsetY + pos.y * vp.scale).toInt
+    val size = Math.max(minLightSize, (4 * radius * vp.scale).toInt)
     val x = cx - size / 2
     val y = cy - size / 2
 
@@ -253,19 +329,38 @@ class SimulationCanvas(private val alwaysRefresh: Boolean = false) extends JPane
 
     g2.setPaint(paint)
     g2.fill(new Ellipse2D.Double(x, y, size, size))
-    g2.setColor(java.awt.Color.ORANGE)
+    g2.setColor(Color.ORANGE)
     g2.setStroke(new BasicStroke(lightStroke))
     g2.drawOval(x, y, size, size)
+
   end drawLight
 
-  // ---- Robots ---------------------------------------------------------------
-
+  /**
+   * Draws all robots in the environment.
+   *
+   * @param g2
+   *   Graphics context
+   * @param env
+   *   Environment containing robots
+   */
   private def drawRobots(g2: Graphics2D, env: Environment): Unit =
     import io.github.srs.model.environment.robots
     val vp = viewport(env)
     val currentState = state.get
     env.robots.foreach(drawRobot(g2, _, vp, currentState.selectedRobotId))
 
+  /**
+   * Draws a single robot with body and direction indicator.
+   *
+   * @param g2
+   *   Graphics context
+   * @param robot
+   *   The robot to draw
+   * @param vp
+   *   Viewport configuration
+   * @param selectedId
+   *   Optional ID of the selected robot
+   */
   private def drawRobot(g2: Graphics2D, robot: Robot, vp: Viewport, selectedId: Option[String]): Unit =
     robot.shape match
       case ShapeType.Circle(radius) =>
@@ -273,19 +368,27 @@ class SimulationCanvas(private val alwaysRefresh: Boolean = false) extends JPane
         drawRobotBody(g2, robot, radius, vp, isSelected)
         drawRobotDirection(g2, robot, radius, vp)
 
-  private def drawRobotBody(
-      g2: Graphics2D,
-      robot: Robot,
-      radius: Double,
-      vp: Viewport,
-      isSelected: Boolean,
-  ): Unit =
+  /**
+   * Draws the robot's circular body with gradient and border.
+   *
+   * @param g2
+   *   Graphics context
+   * @param robot
+   *   The robot to draw
+   * @param radius
+   *   Radius of the robot
+   * @param vp
+   *   Viewport configuration
+   * @param isSelected
+   *   True if this robot is currently selected
+   */
+  private def drawRobotBody(g2: Graphics2D, robot: Robot, radius: Double, vp: Viewport, isSelected: Boolean): Unit =
     import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.{ normalStroke, selectionStroke }
     import io.github.srs.utils.SimulationDefaults.UI.{ Colors, Strokes }
 
-    val x = vp.ox + (robot.position.x - radius) * vp.s
-    val y = vp.oy + (robot.position.y - radius) * vp.s
-    val d = 2 * radius * vp.s
+    val x = vp.offsetX + (robot.position.x - radius) * vp.scale
+    val y = vp.offsetY + (robot.position.y - radius) * vp.scale
+    val d = 2 * radius * vp.scale
 
     robotShape.setFrame(x, y, d, d)
 
@@ -294,9 +397,9 @@ class SimulationCanvas(private val alwaysRefresh: Boolean = false) extends JPane
       else (Colors.robotDefault, Colors.robotDefaultDark, Colors.robotDefaultBorder)
 
     val gradient = new RadialGradientPaint(
-      (vp.ox + robot.position.x * vp.s).toFloat,
-      (vp.oy + robot.position.y * vp.s).toFloat,
-      (radius * vp.s).toFloat,
+      (vp.offsetX + robot.position.x * vp.scale).toFloat,
+      (vp.offsetY + robot.position.y * vp.scale).toFloat,
+      (radius * vp.scale).toFloat,
       Array(0f, 1f),
       Array(colors._1, colors._2),
     )
@@ -315,24 +418,52 @@ class SimulationCanvas(private val alwaysRefresh: Boolean = false) extends JPane
 
   end drawRobotBody
 
+  /**
+   * Draws an arrow indicating the robot's orientation.
+   *
+   * @param g2
+   *   Graphics context
+   * @param robot
+   *   The robot to draw
+   * @param radius
+   *   Radius of the robot
+   * @param vp
+   *   Viewport configuration
+   */
   private def drawRobotDirection(g2: Graphics2D, robot: Robot, radius: Double, vp: Viewport): Unit =
     import SimulationDefaults.DynamicEntity.Robot.*
 
-    val cx = (vp.ox + robot.position.x * vp.s).toInt
-    val cy = (vp.oy + robot.position.y * vp.s).toInt
+    val cx = (vp.offsetX + robot.position.x * vp.scale).toInt
+    val cy = (vp.offsetY + robot.position.y * vp.scale).toInt
     val angle = robot.orientation.toRadians
-    val length = radius * arrowLengthFactor * vp.s
-    val width = math.max(minArrowWidth.toDouble, radius * vp.s * arrowWidthFactor)
+    val length = radius * arrowLengthFactor * vp.scale
+    val width = math.max(minArrowWidth.toDouble, radius * vp.scale * arrowWidthFactor)
 
     val arrow = createArrowPolygon(cx, cy, angle, length, width)
-    g2.setColor(java.awt.Color.BLACK)
+    g2.setColor(Color.BLACK)
     g2.fillPolygon(arrow)
 
-  private def createArrowPolygon(cx: Int, cy: Int, angle: Double, length: Double, width: Double): java.awt.Polygon =
+  /**
+   * Creates a triangular polygon representing an arrow.
+   *
+   * @param cx
+   *   Center X coordinate
+   * @param cy
+   *   Center Y coordinate
+   * @param angle
+   *   Direction angle in radians
+   * @param length
+   *   Length of the arrow
+   * @param width
+   *   Width of the arrow base
+   * @return
+   *   Polygon representing the arrow
+   */
+  private def createArrowPolygon(cx: Int, cy: Int, angle: Double, length: Double, width: Double): Polygon =
     val (cosA, sinA) = (math.cos(angle), math.sin(angle))
     val halfWidth = width / 2
 
-    new java.awt.Polygon(
+    new Polygon(
       Array(
         (cx + cosA * length).toInt,
         (cx - sinA * halfWidth).toInt,
@@ -345,5 +476,4 @@ class SimulationCanvas(private val alwaysRefresh: Boolean = false) extends JPane
       ),
       3,
     )
-
 end SimulationCanvas
