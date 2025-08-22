@@ -4,9 +4,26 @@ import cats.effect.IO
 import io.github.srs.model.{ ModelModule, SimulationState }
 import io.github.srs.utils.random.RNG
 
+/**
+ * Logic for random number generation and state updates.
+ * @tparam S
+ *   the type of the model state.
+ */
 trait RandomLogic[S <: ModelModule.State]:
+  /**
+   * Generate a new random state based on the current state and RNG.
+   * @param s
+   *   the current state.
+   * @param rng
+   *   the random number generator.
+   * @return
+   *   an [[IO]] effect producing the new state with updated RNG.
+   */
   def random(s: S, rng: RNG): IO[S]
 
+/**
+ * Companion object for [[RandomLogic]] containing given instances.
+ */
 object RandomLogic:
 
   given RandomLogic[SimulationState] with

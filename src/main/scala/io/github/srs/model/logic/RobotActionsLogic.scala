@@ -14,13 +14,30 @@ import io.github.srs.model.environment.dsl.CreationDSL.validate
 import io.github.srs.model.{ ModelModule, SimulationState }
 import io.github.srs.utils.EqualityGivenInstances.given
 
+/**
+ * Logic for handling robot actions proposals.
+ * @tparam S
+ *   the type of the simulation state.
+ */
 trait RobotActionsLogic[S <: ModelModule.State]:
 
+  /**
+   * Handles a list of robot action proposals and updates the simulation state accordingly.
+   * @param s
+   *   the current simulation state.
+   * @param proposals
+   *   the list of robot action proposals.
+   * @return
+   *   an [[IO]] effect that produces the updated simulation state.
+   */
   def handleRobotActionsProposals(
       s: S,
       proposals: List[RobotProposal],
   ): IO[S]
 
+/**
+ * Companion object for [[RobotActionsLogic]] containing given instances.
+ */
 object RobotActionsLogic:
 
   given RobotActionsLogic[SimulationState] with
@@ -30,6 +47,22 @@ object RobotActionsLogic:
         proposals: List[RobotProposal],
     ): IO[SimulationState] =
 
+      /**
+       * Safely moves a robot based on the given action, ensuring no collisions occur. Uses a binary search approach to
+       * find the maximum safe movement duration.
+       * @param env
+       *   the valid environment in which the robot operates.
+       * @param robot
+       *   the robot to be moved.
+       * @param action
+       *   the action to be applied to the robot.
+       * @param maxDt
+       *   the maximum duration for which the action can be applied.
+       * @param maxAttempts
+       *   the maximum number of attempts for the binary search.
+       * @return
+       *   an [[IO]] effect that produces the updated robot after applying the safe movement.
+       */
       def safeMove(
           env: ValidEnvironment,
           robot: Robot,
@@ -38,6 +71,19 @@ object RobotActionsLogic:
           maxAttempts: Int = 50,
       ): IO[Robot] =
 
+        /**
+         * Performs a binary search to find the maximum safe movement duration.
+         * @param low
+         *   the lower bound of the search interval.
+         * @param high
+         *   the upper bound of the search interval.
+         * @param best
+         *   the best valid robot found so far.
+         * @param attempts
+         *   the current number of attempts made.
+         * @return
+         *   an [[IO]] effect that produces the best valid robot found.
+         */
         def binarySearch(low: FiniteDuration, high: FiniteDuration, best: Option[Robot], attempts: Int): IO[Robot] =
           if attempts >= maxAttempts || (high - low) <= 1.microsecond then IO.pure(best.getOrElse(robot))
           else
@@ -54,11 +100,29 @@ object RobotActionsLogic:
         binarySearch(0.nanos, maxDt, None, 0)
       end safeMove
 
+      /**
+       * Computes the moves for all robot proposals in parallel.
+       * @param env
+       *   the valid environment.
+       * @param proposals
+       *   the list of robot action proposals.
+       * @return
+       *   an [[IO]] effect that produces a list of tuples containing the original and updated robots.
+       */
       def computeMovesParallel(env: ValidEnvironment, proposals: List[RobotProposal]): IO[List[(Robot, Robot)]] =
         proposals.parTraverse:
           case RobotProposal(robot, action) =>
             safeMove(env, robot, action, s.dt).map(updatedRobot => (robot, updatedRobot))
 
+      /**
+       * Applies all computed moves to the environment.
+       * @param env
+       *   the valid environment.
+       * @param moves
+       *   the list of tuples containing the original and updated robots.
+       * @return
+       *   the updated environment with all moves applied.
+       */
       def applyAllMoves(env: ValidEnvironment, moves: List[(Robot, Robot)]): Environment =
         env.copy(entities = env.entities.map {
           case r: Robot =>
