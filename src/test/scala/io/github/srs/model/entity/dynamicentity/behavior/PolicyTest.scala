@@ -25,7 +25,7 @@ final class BehaviorsTest extends AnyFlatSpec:
   given CanEqual[Action[Id], Action[Id]] = CanEqual.derived
 
   "simple behavior" should "choose turnRight when obstacle is close" in:
-    Behaviors.simple[Id].run(readings(0.05)) shouldBe turnRight[Id]
+    Policy.simple[Id].run(readings(0.05)) shouldBe turnRight[Id]
 
   it should "choose moveForward when obstacle is far" in:
-    Behaviors.simple[Id].run(readings(0.80)) shouldBe moveForward[Id]
+    Policy.simple[Id].run(readings(0.80)) shouldBe moveForward[Id]
