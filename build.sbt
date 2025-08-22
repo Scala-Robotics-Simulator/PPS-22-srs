@@ -68,7 +68,6 @@ lazy val root = project
       Wart.Overloading,
       Wart.Recursion,
       Wart.ImplicitParameter,
-      Wart.ToString,
     ),
     jacocoReportSettings := JacocoReportSettings(
       title = "PR report",
