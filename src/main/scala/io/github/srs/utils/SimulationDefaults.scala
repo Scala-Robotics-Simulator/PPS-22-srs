@@ -2,6 +2,8 @@ package io.github.srs.utils
 
 import java.util.UUID
 
+import scala.concurrent.duration.DurationInt
+
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, Wheel as ActWheel }
@@ -15,6 +17,7 @@ object SimulationDefaults:
   val duration: Option[Long] = None
   val seed: Option[Long] = None
   val debugMode = true
+  val binarySearchDurationThreshold = 1.microseconds
 
   object SimulationConfig:
     val maxCount = 10_000
@@ -82,7 +85,7 @@ object SimulationDefaults:
     object Robot:
       import SimulationDefaults.DynamicEntity.Robot.defaultShape.radius
 
-      val maxRetries = 10
+      val defaultMaxRetries = 10
 
       val defaultId: UUID = UUID.fromString("00000000-0000-0000-0000-000000000002")
       val defaultPosition: Point2D = (0.0, 0.0)
