@@ -4,6 +4,7 @@ import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
 
 import io.github.srs.model.SimulationConfig.{ SimulationSpeed, SimulationStatus }
 import io.github.srs.model.environment.ValidEnvironment
+import io.github.srs.model.illumination.model.LightField
 import io.github.srs.utils.random.RNG
 
 final case class SimulationState(
@@ -14,4 +15,5 @@ final case class SimulationState(
     override val simulationRNG: RNG,
     override val simulationStatus: SimulationStatus,
     override val environment: ValidEnvironment,
+    override val lightField: LightField,
 ) extends ModelModule.State

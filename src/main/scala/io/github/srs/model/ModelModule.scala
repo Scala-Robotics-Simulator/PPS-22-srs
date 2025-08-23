@@ -2,10 +2,11 @@ package io.github.srs.model
 
 import scala.concurrent.duration.FiniteDuration
 
-import cats.effect.IO
 import io.github.srs.model.SimulationConfig.{ SimulationSpeed, SimulationStatus }
 import io.github.srs.model.environment.ValidEnvironment.ValidEnvironment
 import io.github.srs.utils.random.RNG
+import cats.effect.IO
+import io.github.srs.model.illumination.model.LightField
 
 /**
  * Module that defines the model logic for the Scala Robotics Simulator.
@@ -48,6 +49,8 @@ object ModelModule:
     def simulationStatus: SimulationStatus
 
     def environment: ValidEnvironment
+
+    def lightField: LightField
   end State
 
   /**
