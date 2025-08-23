@@ -3,15 +3,15 @@ package io.github.srs.model.entity.dynamicentity
 import java.util.UUID
 
 import cats.effect.IO
+import io.github.srs.model.ModelModule
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.action.ActionAlg
 import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, DifferentialWheelMotor }
+import io.github.srs.model.entity.dynamicentity.behavior.Policy
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.withActuators
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor
-import io.github.srs.model.environment.Environment
 import io.github.srs.utils.EqualityGivenInstances.given
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.*
-import io.github.srs.model.entity.dynamicentity.behavior.Policy
 
 /**
  * Represents a robot entity in the simulation.
@@ -27,7 +27,7 @@ final case class Robot(
     override val shape: ShapeType.Circle = defaultShape,
     override val orientation: Orientation = defaultOrientation,
     override val actuators: Seq[Actuator[Robot]] = defaultActuators,
-    override val sensors: Vector[Sensor[Robot, Environment]] = defaultSensors,
+    override val sensors: Vector[Sensor[Robot, ModelModule.State]] = defaultSensors,
     override val behavior: Policy = defaultPolicy,
 ) extends DynamicEntity:
 

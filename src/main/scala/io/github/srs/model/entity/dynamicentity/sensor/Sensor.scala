@@ -1,18 +1,14 @@
 package io.github.srs.model.entity.dynamicentity.sensor
 
+import cats.effect.kernel.Sync
 import cats.syntax.all.*
-import io.github.srs.model.PositiveDouble
 import io.github.srs.model.entity.dynamicentity.{ DynamicEntity, Robot }
-import io.github.srs.model.entity.{ Orientation, Point2D }
-import io.github.srs.model.environment.Environment
+import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
+import io.github.srs.model.illumination.model.ScaleFactor
 import io.github.srs.model.validation.Validation
+import io.github.srs.model.{ ModelModule, PositiveDouble }
 import io.github.srs.utils.Ray.intersectRay
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Sensor.ProximitySensor as ProximitySensorDefaults
-import io.github.srs.model.illumination.LightMap
-import io.github.srs.model.illumination.engine.SquidLibFovEngine
-import io.github.srs.model.illumination.model.ScaleFactor
-import cats.effect.kernel.Sync
-import io.github.srs.model.entity.ShapeType
 
 /**
  * Represents the range of a sensor.
@@ -26,7 +22,7 @@ type Range = Double
  * @tparam Env
  *   the type of environment in which the sensor operates.
  */
-trait Sensor[-Entity <: DynamicEntity, -Env <: Environment]:
+trait Sensor[-Entity <: DynamicEntity, -S <: ModelModule.State]:
   /**
    * The type of data that the sensor returns. This type can vary based on the specific sensor implementation.
    */
@@ -50,7 +46,7 @@ trait Sensor[-Entity <: DynamicEntity, -Env <: Environment]:
    * @return
    *   a monadic effect containing the data sensed by the sensor.
    */
-  def sense[F[_]: Sync](entity: Entity, env: Env): F[Data]
+  def sense[F[_]: Sync](entity: Entity, s: S): F[Data]
 
   private[sensor] def direction(entity: Entity): Point2D =
     val globalOrientation = entity.orientation.toRadians + offset.toRadians
@@ -99,10 +95,10 @@ type SensorReadings = Vector[SensorReading[? <: Sensor[?, ?], ?]]
  * @tparam Env
  *   the type of environment in which the sensor operates.
  */
-final case class ProximitySensor[Entity <: DynamicEntity, Env <: Environment](
+final case class ProximitySensor[Entity <: DynamicEntity, S <: ModelModule.State](
     override val offset: Orientation = Orientation(ProximitySensorDefaults.defaultOffset),
     val range: Range = ProximitySensorDefaults.defaultRange,
-) extends Sensor[Entity, Env]:
+) extends Sensor[Entity, S]:
 
   override type Data = Double
 
@@ -110,12 +106,12 @@ final case class ProximitySensor[Entity <: DynamicEntity, Env <: Environment](
     import Point2D.*
     origin(entity) + direction(entity) * range
 
-  override def sense[F[_]: Sync](entity: Entity, env: Env): F[Data] =
+  override def sense[F[_]: Sync](entity: Entity, state: S): F[Data] =
     Sync[F].pure:
       val o = origin(entity)
       val end = rayEnd(entity)
 
-      val distances = env.entities
+      val distances = state.environment.entities
         .filter(!_.equals(entity))
         .flatMap(intersectRay(_, o, end))
         .filter(_ <= range)
@@ -137,9 +133,9 @@ end ProximitySensor
  * @tparam Env
  *   the type of environment in which the sensor operates.
  */
-final case class LightSensor[Entity <: DynamicEntity, Env <: Environment](
+final case class LightSensor[Entity <: DynamicEntity, S <: ModelModule.State](
     offset: Orientation = Orientation(ProximitySensorDefaults.defaultOffset),
-) extends Sensor[Entity, Env]:
+) extends Sensor[Entity, S]:
 
   override type Data = Double
 
@@ -153,23 +149,18 @@ final case class LightSensor[Entity <: DynamicEntity, Env <: Environment](
    * @return
    *   a monadic effect containing the light intensity sensed by the sensor.
    */
-  override def sense[F[_]: Sync](entity: Entity, env: Env): F[Data] =
-    val o = origin(entity)
-    for
-      lightMap <- LightMap.cached[F](SquidLibFovEngine, ScaleFactor.default)
-      field <- lightMap.computeField(env = env, includeDynamic = true)
-    yield field.sampleAtWorld(o)(using ScaleFactor.default)
-
-end LightSensor
+  override def sense[F[_]: Sync](entity: Entity, state: S): F[Data] =
+    Sync[F].pure:
+      state.lightField.sampleAtWorld(origin(entity))(using ScaleFactor.default)
 
 object Sensor:
 
-  extension [E <: DynamicEntity, Env <: Environment](s: ProximitySensor[E, Env])
+  extension [E <: DynamicEntity, S <: ModelModule.State](s: ProximitySensor[E, S])
 
     /**
      * Validates the properties of a sensor.
      */
-    def validate: Validation[ProximitySensor[E, Env]] =
+    def validate: Validation[ProximitySensor[E, S]] =
       for _ <- PositiveDouble(s.range).validate
       yield s
 
@@ -182,7 +173,7 @@ object Sensor:
      * @return
      *   a vector of sensor readings.
      */
-    def senseAll[F[_]: Sync](env: Environment): F[SensorReadings] =
+    def senseAll[F[_]: Sync](state: ModelModule.State): F[SensorReadings] =
       r.sensors.traverse: sensor =>
-        sensor.sense(r, env).map(reading => SensorReading(sensor, reading))
+        sensor.sense(r, state).map(reading => SensorReading(sensor, reading))
 end Sensor

@@ -5,13 +5,13 @@ import java.util.UUID
 import scala.concurrent.duration.FiniteDuration
 
 import cats.{ Id, Monad }
+import io.github.srs.model.ModelModule
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
 import io.github.srs.model.entity.dynamicentity.action.MovementActionFactory.{ moveForward, turnRight }
 import io.github.srs.model.entity.dynamicentity.actuator.Actuator
 import io.github.srs.model.entity.dynamicentity.behavior.Policy
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
-import io.github.srs.model.environment.Environment
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -40,7 +40,7 @@ class SequenceActionTest extends AnyFlatSpec with Matchers:
       override val shape: ShapeType,
       override val orientation: Orientation,
       override val actuators: Seq[DummyActuator],
-      override val sensors: Vector[Sensor[Dummy, Environment]],
+      override val sensors: Vector[Sensor[Dummy, ModelModule.State]],
       override val behavior: Policy = Policy.Simple,
   ) extends DynamicEntity:
     def act[F[_]: Monad](): F[Dummy] = Monad[F].pure(this)
@@ -50,7 +50,7 @@ class SequenceActionTest extends AnyFlatSpec with Matchers:
     shape = ShapeType.Circle(1.0),
     orientation = Orientation(0),
     actuators = Seq(DummyActuator()),
-    sensors = Vector.empty[Sensor[Dummy, Environment]],
+    sensors = Vector.empty[Sensor[Dummy, ModelModule.State]],
   )
 
   "SequenceAction" should "execute multiple actions in sequence" in:

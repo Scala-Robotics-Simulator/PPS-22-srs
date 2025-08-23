@@ -2,24 +2,23 @@ package io.github.srs.model.entity.dynamicentity.dsl
 
 import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
 
-import io.github.srs.model.entity.dynamicentity.*
-import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, DifferentialWheelMotor, Wheel }
-import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, Sensor }
-import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
-import io.github.srs.model.environment.Environment
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should.Matchers
 import cats.effect.IO
-import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings
+import io.github.srs.model.ModelModule
+import io.github.srs.model.entity.dynamicentity.*
 import io.github.srs.model.entity.dynamicentity.action.Action
+import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, DifferentialWheelMotor, Wheel }
 import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior
 import io.github.srs.model.entity.dynamicentity.behavior.Policy
+import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, Sensor, SensorReadings }
+import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 class RobotDslTest extends AnyFlatSpec with Matchers:
   given CanEqual[ShapeType.Circle, ShapeType.Circle] = CanEqual.derived
   given CanEqual[Orientation, Orientation] = CanEqual.derived
   given CanEqual[Actuator[Robot], Actuator[Robot]] = CanEqual.derived
-  given CanEqual[Sensor[Robot, Environment], Sensor[Robot, Environment]] = CanEqual.derived
+  given CanEqual[Sensor[Robot, ModelModule.State], Sensor[Robot, ModelModule.State]] = CanEqual.derived
   given CanEqual[Behavior[SensorReadings, Action[IO]], Behavior[SensorReadings, Action[IO]]] = CanEqual.derived
   given CanEqual[Policy, Policy] = CanEqual.derived
 
@@ -34,9 +33,9 @@ class RobotDslTest extends AnyFlatSpec with Matchers:
   val wheelMotor2: DifferentialWheelMotor =
     DifferentialWheelMotor(Wheel(3.0, ShapeType.Circle(wheelRadius)), Wheel(4.0, ShapeType.Circle(wheelRadius)))
 
-  val sensor: Sensor[Robot, Environment] = ProximitySensor(Orientation(0.0), 3.0)
+  val sensor: Sensor[Robot, ModelModule.State] = ProximitySensor(Orientation(0.0), 3.0)
 
-  val sensor2: Sensor[Robot, Environment] = ProximitySensor(Orientation(90.0), 3.0)
+  val sensor2: Sensor[Robot, ModelModule.State] = ProximitySensor(Orientation(90.0), 3.0)
 
   "Robot DSL" should "create a robot with default properties" in:
     import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.*

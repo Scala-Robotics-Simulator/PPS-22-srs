@@ -4,8 +4,8 @@ import java.util.UUID
 
 import cats.effect.IO
 import io.github.srs.controller.protocol.Event
+import io.github.srs.model.ModelModule
 import io.github.srs.model.entity.*
-import io.github.srs.model.environment.Environment
 import io.github.srs.model.entity.dynamicentity.*
 import io.github.srs.model.entity.dynamicentity.action.*
 import io.github.srs.model.entity.dynamicentity.actuator.Actuator
@@ -26,7 +26,7 @@ object EqualityGivenInstances:
   given CanEqual[ShapeType, ShapeType] = CanEqual.derived
   given CanEqual[Orientation, Orientation] = CanEqual.derived
   given CanEqual[Seq[Actuator[Robot]], Seq[Actuator[Robot]]] = CanEqual.derived
-  given CanEqual[Vector[Sensor[Robot, Environment]], Vector[Sensor[Robot, Environment]]] = CanEqual.derived
+  given CanEqual[Vector[Sensor[Robot, ModelModule.State]], Vector[Sensor[Robot, ModelModule.State]]] = CanEqual.derived
   given CanEqual[Behavior[SensorReadings, Action[IO]], Behavior[SensorReadings, Action[IO]]] = CanEqual.derived
   given CanEqual[ValidEnvironment, ValidEnvironment] = CanEqual.derived
   given CanEqual[Event, Event] = CanEqual.derived

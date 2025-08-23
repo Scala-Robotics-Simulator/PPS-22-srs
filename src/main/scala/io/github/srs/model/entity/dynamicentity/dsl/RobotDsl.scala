@@ -2,16 +2,16 @@ package io.github.srs.model.entity.dynamicentity.dsl
 
 import java.util.UUID
 
+import io.github.srs.model.ModelModule
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.actuator.dsl.DifferentialWheelMotorDsl.{ differentialWheelMotor, ws }
 import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, DifferentialWheelMotor }
+import io.github.srs.model.entity.dynamicentity.behavior.Policy
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
-import io.github.srs.model.environment.Environment
 import io.github.srs.model.validation.Validation
 import io.github.srs.model.validation.Validation.{ notInfinite, notNaN, validateCountOfType }
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.*
-import io.github.srs.model.entity.dynamicentity.behavior.Policy
 
 /**
  * The DSL for creating and configuring a Robot entity.
@@ -83,7 +83,7 @@ object RobotDsl:
      * @return
      *   a new [[Robot]] instance with the updated sensors.
      */
-    infix def withSensors(sensors: Seq[Sensor[Robot, Environment]]): Robot =
+    infix def withSensors(sensors: Seq[Sensor[Robot, ModelModule.State]]): Robot =
       robot.copy(sensors = robot.sensors ++ sensors.toVector)
 
     /**
@@ -123,7 +123,7 @@ object RobotDsl:
      * @return
      *   a new [[Robot]] instance with the sensor added.
      */
-    infix def withSensor(sensor: Sensor[Robot, Environment]): Robot =
+    infix def withSensor(sensor: Sensor[Robot, ModelModule.State]): Robot =
       robot.copy(sensors = robot.sensors :+ sensor)
 
     /**
@@ -133,7 +133,7 @@ object RobotDsl:
      * @return
      *   a new [[Robot]] instance with the sensor added.
      */
-    infix def containing(sensor: Sensor[Robot, Environment]): Robot =
+    infix def containing(sensor: Sensor[Robot, ModelModule.State]): Robot =
       withSensor(sensor)
 
     /**
@@ -143,7 +143,7 @@ object RobotDsl:
      * @return
      *   a new [[Robot]] instance with the sensor added.
      */
-    infix def and(sensor: Sensor[Robot, Environment]): Robot =
+    infix def and(sensor: Sensor[Robot, ModelModule.State]): Robot =
       containing(sensor)
 
     infix def withSpeed(speed: Double): Robot =

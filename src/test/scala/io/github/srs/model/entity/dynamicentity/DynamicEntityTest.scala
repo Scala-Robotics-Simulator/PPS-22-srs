@@ -5,11 +5,11 @@ import java.util.UUID
 import scala.concurrent.duration.FiniteDuration
 
 import cats.Monad
+import io.github.srs.model.ModelModule
 import io.github.srs.model.entity.dynamicentity.actuator.Actuator
 import io.github.srs.model.entity.dynamicentity.behavior.Policy
 import io.github.srs.model.entity.dynamicentity.sensor.*
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
-import io.github.srs.model.environment.Environment
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -22,7 +22,7 @@ class DynamicEntityTest extends AnyFlatSpec with Matchers:
   val sensorOffset: Orientation = Orientation(0.0)
   val sensorRange: Double = 1.0
 
-  val sensor: ProximitySensor[DynamicEntity, Environment] = ProximitySensor(
+  val sensor: ProximitySensor[DynamicEntity, ModelModule.State] = ProximitySensor(
     offset = sensorOffset,
     range = sensorRange,
   )
@@ -33,7 +33,7 @@ class DynamicEntityTest extends AnyFlatSpec with Matchers:
       override val shape: ShapeType,
       override val orientation: Orientation,
       override val actuators: Seq[Actuator[Dummy]],
-      override val sensors: Vector[Sensor[Dummy, Environment]],
+      override val sensors: Vector[Sensor[Dummy, ModelModule.State]],
       override val behavior: Policy = Policy.Simple,
   ) extends DynamicEntity:
     def act[F[_]: Monad](): F[Dummy] = Monad[F].pure(this)
@@ -47,7 +47,7 @@ class DynamicEntityTest extends AnyFlatSpec with Matchers:
       shape = shape,
       orientation = initialOrientation,
       actuators = Seq.empty[Actuator[Dummy]],
-      sensors = Vector.empty[Sensor[Dummy, Environment]],
+      sensors = Vector.empty[Sensor[Dummy, ModelModule.State]],
     )
     entity.actuators should be(Seq.empty)
 
@@ -58,7 +58,7 @@ class DynamicEntityTest extends AnyFlatSpec with Matchers:
       shape = shape,
       orientation = initialOrientation,
       actuators = Seq(actuator),
-      sensors = Vector.empty[Sensor[Dummy, Environment]],
+      sensors = Vector.empty[Sensor[Dummy, ModelModule.State]],
     )
     entity.actuators should be(Seq(actuator))
 
@@ -68,7 +68,7 @@ class DynamicEntityTest extends AnyFlatSpec with Matchers:
       shape = shape,
       orientation = initialOrientation,
       actuators = Seq.empty[Actuator[Dummy]],
-      sensors = Vector.empty[Sensor[Dummy, Environment]],
+      sensors = Vector.empty[Sensor[Dummy, ModelModule.State]],
     )
     entity.sensors should be(Vector.empty)
 

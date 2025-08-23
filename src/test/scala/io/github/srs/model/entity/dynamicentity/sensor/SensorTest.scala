@@ -6,6 +6,7 @@ import cats.Monad
 import cats.effect.IO
 import cats.effect.kernel.Sync
 import cats.effect.unsafe.implicits.global
+import io.github.srs.model.{ ModelModule, SimulationState }
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
 import io.github.srs.model.entity.dynamicentity.actuator.Actuator
 import io.github.srs.model.entity.dynamicentity.behavior.Policy
@@ -15,6 +16,10 @@ import io.github.srs.model.environment.dsl.CreationDSL.*
 import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
+import io.github.srs.model.SimulationConfig.SimulationSpeed
+import io.github.srs.model.SimulationConfig.SimulationStatus
+import io.github.srs.utils.SimulationDefaults
+import io.github.srs.utils.random.SimpleRNG
 
 class SensorTest extends AnyFlatSpec with should.Matchers:
   given CanEqual[Sensor[?, ?], Sensor[?, ?]] = CanEqual.derived
@@ -32,15 +37,15 @@ class SensorTest extends AnyFlatSpec with should.Matchers:
       override val shape: ShapeType,
       override val orientation: Orientation,
       override val actuators: Seq[Actuator[Dummy]],
-      override val sensors: Vector[Sensor[Dummy, Environment]],
+      override val sensors: Vector[Sensor[Dummy, ModelModule.State]],
       override val behavior: Policy = Policy.Simple,
   ) extends DynamicEntity:
     def act[F[_]: Monad](): F[Dummy] = Monad[F].pure(this)
 
-  class DummySensor(override val offset: Orientation) extends Sensor[Dummy, Environment]:
+  class DummySensor(override val offset: Orientation) extends Sensor[Dummy, ModelModule.State]:
     override type Data = Double
 
-    override def sense[F[_]: Sync](entity: Dummy, env: Environment): F[Double] =
+    override def sense[F[_]: Sync](entity: Dummy, state: ModelModule.State): F[Double] =
       Sync[F].pure(42.0) // Dummy implementation for sensing
 
   "Sensor" should "have an offset orientation" in:
@@ -57,7 +62,16 @@ class SensorTest extends AnyFlatSpec with should.Matchers:
       sensors = Vector(sensor),
     )
     val environment = Environment(10, 10).validate.toOption.value
-    val data = sensor.sense[IO](entity, environment).unsafeRunSync()
+    val state = SimulationState(
+      simulationTime = None,
+      simulationSpeed = SimulationSpeed.NORMAL,
+      simulationRNG = SimpleRNG(42),
+      simulationStatus = SimulationStatus.PAUSED,
+      environment = environment,
+      lightField = SimulationDefaults.lightMap.computeField(environment, includeDynamic = true).unsafeRunSync(),
+    )
+
+    val data = sensor.sense[IO](entity, state).unsafeRunSync()
     data should be(42.0)
 
 end SensorTest

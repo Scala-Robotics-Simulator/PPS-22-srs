@@ -2,9 +2,10 @@ package io.github.srs.model.entity.dynamicentity
 
 import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
 
-import cats.effect.unsafe.implicits.global
 import cats.Id
 import cats.effect.IO
+import cats.effect.unsafe.implicits.global
+import io.github.srs.model.SimulationConfig.{ SimulationSpeed, SimulationStatus }
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.action.MovementActionFactory.*
 import io.github.srs.model.entity.dynamicentity.action.SequenceAction.thenDo
@@ -15,6 +16,11 @@ import io.github.srs.model.entity.dynamicentity.actuator.{ DifferentialWheelMoto
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, Sensor, SensorReading }
 import io.github.srs.model.environment.Environment
+import io.github.srs.model.environment.dsl.CreationDSL.*
+import io.github.srs.model.environment.ValidEnvironment.ValidEnvironment
+import io.github.srs.model.{ ModelModule, SimulationState }
+import io.github.srs.utils.SimulationDefaults
+import io.github.srs.utils.random.SimpleRNG
 import org.scalatest.Inside.inside
 import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.flatspec.AnyFlatSpec
@@ -30,12 +36,22 @@ class RobotTest extends AnyFlatSpec with Matchers:
   val wheelMotor: DifferentialWheelMotor =
     DifferentialWheelMotor(Wheel(1.0, ShapeType.Circle(0.5)), Wheel(1.0, ShapeType.Circle(0.5)))
 
-  val proximitySensor: Sensor[Robot, Environment] =
+  val proximitySensor: Sensor[Robot, ModelModule.State] =
     ProximitySensor(Orientation(0.0), 3.0)
 
   val defaultRobot: Robot = robot at initialPosition withShape shape withOrientation initialOrientation
 
   val emptyActions: Action[Id] = NoAction[Id]()
+
+  private def createState(env: ValidEnvironment): ModelModule.State =
+    SimulationState(
+      simulationTime = None,
+      simulationSpeed = SimulationSpeed.NORMAL,
+      simulationRNG = SimpleRNG(42),
+      simulationStatus = SimulationStatus.PAUSED,
+      environment = env,
+      lightField = SimulationDefaults.lightMap.computeField(env, includeDynamic = true).unsafeRunSync(),
+    )
 
   given CanEqual[Point2D, Point2D] = CanEqual.derived
 
@@ -153,11 +169,11 @@ class RobotTest extends AnyFlatSpec with Matchers:
     import Sensor.senseAll
     inside((defaultRobot containing proximitySensor).validate):
       case Right(robot) =>
-        val environment = Environment(10, 10)
-        val sensedData = robot.senseAll[IO](environment).unsafeRunSync()
+        val state = createState(Environment(10, 10).validate.toOption.value)
+        val sensedData = robot.senseAll[IO](state).unsafeRunSync()
         sensedData should contain only SensorReading(
           proximitySensor,
-          proximitySensor.sense[IO](robot, environment).unsafeRunSync(),
+          proximitySensor.sense[IO](robot, state).unsafeRunSync(),
         )
 
 end RobotTest

@@ -1,10 +1,10 @@
 package io.github.srs.model.entity.dynamicentity
 
+import io.github.srs.model.ModelModule
 import io.github.srs.model.entity.Entity
 import io.github.srs.model.entity.dynamicentity.actuator.Actuator
 import io.github.srs.model.entity.dynamicentity.behavior.Policy
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor
-import io.github.srs.model.environment.Environment
 
 /**
  * Represents a dynamic entity. A dynamic entity is an entity that can change its state over time.
@@ -22,7 +22,7 @@ trait DynamicEntity extends Entity:
    * @return
    *   the sequence of sensors.
    */
-  def sensors: Vector[Sensor[? <: DynamicEntity, ? <: Environment]]
+  def sensors: Vector[Sensor[? <: DynamicEntity, ? <: ModelModule.State]]
 
   /**
    * Returns the behavior of the dynamic entity, which defines how it reacts to sensor readings.
