@@ -52,4 +52,6 @@ enum Event:
    *   the list of [[RobotProposal]] to be processed.
    */
   case RobotActionProposals(proposals: List[RobotProposal])
+
+  case UpdateLightField
 end Event

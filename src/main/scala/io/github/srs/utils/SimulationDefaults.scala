@@ -3,12 +3,18 @@ package io.github.srs.utils
 import java.util.UUID
 
 import scala.concurrent.duration.DurationInt
+import scala.concurrent.duration.FiniteDuration
 
+import cats.effect.IO
+import cats.effect.unsafe.implicits.global
+import io.github.srs.model.ModelModule
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, Wheel as ActWheel }
+import io.github.srs.model.illumination.LightMap
+import io.github.srs.model.illumination.engine.SquidLibFovEngine
+import io.github.srs.model.illumination.model.ScaleFactor
 import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, Sensor }
-import io.github.srs.model.environment.Environment
 import io.github.srs.model.entity.dynamicentity.sensor.LightSensor
 import io.github.srs.model.entity.dynamicentity.behavior.Policy
 
@@ -17,7 +23,8 @@ object SimulationDefaults:
   val duration: Option[Long] = None
   val seed: Option[Long] = None
   val debugMode = true
-  val binarySearchDurationThreshold = 1.microseconds
+  val binarySearchDurationThreshold: FiniteDuration = 1.microseconds
+  val lightMap: LightMap[IO] = LightMap.create[IO](SquidLibFovEngine, ScaleFactor.default).unsafeRunSync()
 
   object SimulationConfig:
     val maxCount = 10_000
@@ -92,9 +99,9 @@ object SimulationDefaults:
       val defaultShape: ShapeType.Circle = ShapeType.Circle(0.5)
       val defaultOrientation: Orientation = Orientation(0.0)
       val defaultActuators: Seq[Actuator[Robot]] = Seq.empty
-      val defaultSensors: Vector[Sensor[Robot, Environment]] = Vector.empty
+      val defaultSensors: Vector[Sensor[Robot, ModelModule.State]] = Vector.empty
 
-      val stdProximitySensors: Vector[Sensor[Robot, Environment]] = Vector(
+      val stdProximitySensors: Vector[Sensor[Robot, ModelModule.State]] = Vector(
         ProximitySensor(Orientation(0.0), radius),
         ProximitySensor(Orientation(45.0), radius),
         ProximitySensor(Orientation(90.0), radius),
@@ -105,7 +112,7 @@ object SimulationDefaults:
         ProximitySensor(Orientation(315.0), radius),
       )
 
-      val stdLightSensors: Vector[Sensor[Robot, Environment]] = Vector(
+      val stdLightSensors: Vector[Sensor[Robot, ModelModule.State]] = Vector(
         LightSensor(Orientation(0.0)),
         LightSensor(Orientation(45.0)),
         LightSensor(Orientation(90.0)),

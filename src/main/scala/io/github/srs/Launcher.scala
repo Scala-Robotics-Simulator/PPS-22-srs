@@ -2,6 +2,7 @@ package io.github.srs
 
 import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
 
+import cats.effect.unsafe.implicits.global
 import cats.effect.IO
 import io.github.srs.config.SimulationConfig
 import io.github.srs.controller.ControllerModule
@@ -11,6 +12,7 @@ import io.github.srs.model.SimulationConfig.{ SimulationSpeed, SimulationStatus 
 import io.github.srs.model.environment.dsl.CreationDSL.validate
 import io.github.srs.model.logic.simulationStateLogicsBundle
 import io.github.srs.model.{ ModelModule, SimulationState }
+import io.github.srs.utils.SimulationDefaults
 import io.github.srs.utils.random.SimpleRNG
 import io.github.srs.view.ViewModule
 import io.github.srs.view.ViewModule.View
@@ -51,4 +53,5 @@ def mkInitialState(cfg: SimulationConfig): SimulationState =
     simulationRNG = SimpleRNG(cfg.simulation.seed.getOrElse(42)),
     simulationStatus = SimulationStatus.RUNNING,
     environment = environment,
+    lightField = SimulationDefaults.lightMap.computeField(environment, includeDynamic = true).unsafeRunSync(),
   )

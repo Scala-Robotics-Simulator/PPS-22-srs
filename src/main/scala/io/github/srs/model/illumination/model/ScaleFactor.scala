@@ -31,7 +31,7 @@ object ScaleFactor:
    * @return
    *   The default scale factor as an [[ScaleFactor]].
    */
-  def default: ScaleFactor = 100
+  def default: ScaleFactor = 10
 
   /**
    * Extension methods for [[ScaleFactor]] providing utility functions.

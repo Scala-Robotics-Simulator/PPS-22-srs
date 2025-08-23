@@ -14,6 +14,9 @@ object UpdateLogic:
 
   extension [S <: ModelModule.State](m: Model[S])
 
+    def updateLightField(s: S)(using bundle: LogicsBundle[S]): IO[S] =
+      bundle.illumination.updateLightField(s)
+
     def handleRobotActionsProposals(s: S, proposals: List[RobotProposal])(using
         bundle: LogicsBundle[S],
     ): IO[S] =

@@ -19,6 +19,7 @@ trait LogicsBundle[S <: State]:
   def resume: ResumeLogic[S]
   def stop: StopLogic[S]
   def robotActions: RobotActionsLogic[S]
+  def illumination: IlluminationLogic[S]
 
 /**
  * Companion object for [[LogicsBundle]] containing given instances.
@@ -30,3 +31,4 @@ given simulationStateLogicsBundle: LogicsBundle[SimulationState] with
   val resume: ResumeLogic[SimulationState] = summon[ResumeLogic[SimulationState]]
   val stop: StopLogic[SimulationState] = summon[StopLogic[SimulationState]]
   val robotActions: RobotActionsLogic[SimulationState] = summon[RobotActionsLogic[SimulationState]]
+  val illumination: IlluminationLogic[SimulationState] = summon[IlluminationLogic[SimulationState]]

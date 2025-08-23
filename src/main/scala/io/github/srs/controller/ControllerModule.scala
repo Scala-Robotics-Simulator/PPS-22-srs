@@ -14,8 +14,9 @@ import io.github.srs.model.UpdateLogic.*
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
 import io.github.srs.model.logic.*
-import io.github.srs.utils.SimulationDefaults.debugMode
 import io.github.srs.utils.EqualityGivenInstances.given_CanEqual_Event_Event
+import io.github.srs.utils.SimulationDefaults.debugMode
+import io.github.srs.model.SimulationConfig.SimulationStatus
 
 /**
  * Module that defines the controller logic for the Scala Robotics Simulator.
@@ -119,6 +120,7 @@ object ControllerModule:
           def loop(state: S): IO[Unit] =
             for
               startTime <- Clock[IO].realTime.map(_.toMillis)
+              _ <- updateField(queue, state)
               _ <- runBehavior(queue, state).whenA(state.simulationStatus == RUNNING)
               events <- queue.tryTakeN(Some(50))
               newState <- handleEvents(state, events)
@@ -174,6 +176,12 @@ object ControllerModule:
             case STOPPED =>
               IO.pure(state)
 
+        private def updateField(queue: Queue[IO, Event], state: S): IO[Unit] =
+          for _ <-
+              if state.simulationStatus == SimulationStatus.RUNNING then queue.offer(Event.UpdateLightField)
+              else IO.unit
+          yield ()
+
         /**
          * Runs the behavior of all robots in the environment and collects their action proposals.
          * @param queue
@@ -187,7 +195,7 @@ object ControllerModule:
           for
             proposals <- state.environment.entities.collect { case robot: Robot => robot }.toList.parTraverse { robot =>
               for
-                sensorReadings <- robot.senseAll[IO](state.environment)
+                sensorReadings <- robot.senseAll[IO](state)
                 action = robot.behavior.run(sensorReadings)
               yield RobotProposal(robot, action)
             }
@@ -251,6 +259,7 @@ object ControllerModule:
             case Event.Resume => context.model.resume(state)
             case Event.Stop => context.model.stop(state)
             case Event.RobotActionProposals(proposals) => context.model.handleRobotActionsProposals(state, proposals)
+            case Event.UpdateLightField => context.model.updateLightField(state)
 
       end ControllerImpl
 
