@@ -28,9 +28,7 @@ object Launcher
   val controller: Controller[SimulationState] = Controller()
 
   def runMVC(state: SimulationState): IO[Unit] =
-    for
-      _ <- controller.start(state)
-      _ <- IO.never
+    for _ <- controller.start(state)
     yield ()
 
 /**
