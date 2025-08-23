@@ -20,6 +20,5 @@ object IlluminationLogic:
   given IlluminationLogic[SimulationState] with
 
     def updateLightField(s: SimulationState): IO[SimulationState] =
-      println("Updating light field...")
       for newField <- SimulationDefaults.lightMap.computeField(s.environment, includeDynamic = true)
       yield s.copy(lightField = newField)
