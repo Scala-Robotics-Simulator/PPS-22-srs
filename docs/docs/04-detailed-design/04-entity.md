@@ -81,8 +81,8 @@ sull’ambiente, come:
 Ogni `StaticEntity` ha una forma geometrica (`shape: ShapeType`) e una posizione (`position: Point2D`) e
 un orientamento (`orientation: Orientation`) coerente:
 
-* `Obstacle`/`Boundary` sono rappresentati da un rettangolo, che può essere orientato;
-* `Light` è rappresentato da un cerchio, che non ha orientamento.
+- `Obstacle`/`Boundary` sono rappresentati da un rettangolo, che può essere orientato;
+- `Light` è rappresentato da un cerchio, che non ha orientamento.
 
 > i `boundary` vengono creati da `CreationDSL.validate(insertBoundaries = true)`. Sono rettangoli sottili posizionati
 > sui bordi e partecipano a collisioni/resistenza come gli ostacoli.
@@ -96,9 +96,9 @@ movimento ed evitare collisioni.
 
 Ogni ostacolo ha:
 
-* una **posizione** (`position`) e un’**orientazione** (`orientation`) nello spazio;
-* due **dimensioni** (`width`, `height`);
-* una **forma** coerente, esposta come `ShapeType.Rectangle(width, height)`.
+- una **posizione** (`position`) e un’**orientazione** (`orientation`) nello spazio;
+- due **dimensioni** (`width`, `height`);
+- una **forma** coerente, esposta come `ShapeType.Rectangle(width, height)`.
 
 In fase di **validazione** verifichiamo che le dimensioni siano **> 0**, che l’ostacolo stia **dentro i limiti**
 dell’ambiente e che **non si sovrapponga** ad altre entità.
@@ -111,10 +111,10 @@ l’ambiente leggibile per futuri foto-sensori e utile per esperimenti di percez
 
 Ogni luce definisce:
 
-* un **raggio fisico** (`radius`) usato per la sua forma (`ShapeType.Circle(radius)`);
-* un **raggio di illuminazione** (`illuminationRadius`) che ne delimita la portata;
-* **intensità** (`intensity`) e **attenuazione** (`attenuation`) per controllare quanto e come “decade” la luce;
-* un’**orientazione** presente per uniformità del modello, ma l’emissione è **isotropica** (non direzionale).
+- un **raggio fisico** (`radius`) usato per la sua forma (`ShapeType.Circle(radius)`);
+- un **raggio di illuminazione** (`illuminationRadius`) che ne delimita la portata;
+- **intensità** (`intensity`) e **attenuazione** (`attenuation`) per controllare quanto e come “decade” la luce;
+- un’**orientazione** presente per uniformità del modello, ma l’emissione è **isotropica** (non direzionale).
 
 In fase di **validazione** verifichiamo che raggio, intensità e attenuazione siano **> 0** e che la luce sia
 posizionata **all'interno** dell'ambiente.
@@ -195,11 +195,7 @@ I sensori sono parametrizzati su due tipi:
   stesso).
 - `Data`: il tipo di dato restituito dal sensore.
 
-Inoltre, i sensori contengono alcune informazioni di base, quali:
-
-- `offset`: l'offset del sensore rispetto all'entità che lo possiede.
-- `distance`: la distanza del sensore dal centro dell'entità.
-- `range`: il raggio di azione del sensore.
+Inoltre i sensori contengono un campo `offset` che rappresenta la posizione del sensore rispetto all'entità che lo possiede.
 
 Infine un metodo `sense[F[_]](entity: Entity, env: Environment): F[Data]` che permette di ottenere i dati di rilevamento
 dal sensore.
@@ -207,7 +203,7 @@ Il tipo `F[_]` è un tipo di effetto generico (come `IO`, `Task`, etc.) che perm
 
 - Astrazione rispetto al tipo di effetto utilizzato per l'esecuzione.
 - Composizione funzionale con altre operazioni monadiche.
-- Testabilità tramite interpreti fittizi, mock o utilizzando `Id` per esecuzioni sincrone e deterministiche.
+- Testabilità tramite interpreti fittizi o mock.
 
 Il tipo `SensorReading` è un tipo di utilità che aiuta a rappresentare i dati letti da un sensore.
 Si tratta di un _case class_ che contiene:
@@ -224,7 +220,14 @@ l'elaborazione dei dati raccolti.
 
 La _case class_ `ProximitySensor` estende `Sensor[Robot, Environment]` e rappresenta un sensore di prossimità che rileva
 la presenza di altre entità nell'ambiente.
+Questo sensore dispone di un campo `range` che rappresenta il raggio di azione del sensore.
 I valori ritornati da questo sensore sono di tipo `Double`, che rappresenta la distanza alla quale si trova l'entità più
 vicina, normalizzata tra 0 e 1, dove 0 indica che l'entità è molto vicina e 1 che è molto lontana.
 Il metodo `sense` implementa la logica di rilevamento, tramite _Ray Casting_, che calcola la distanza tra il sensore e
 le entità nell'ambiente, restituendo il valore normalizzato.
+
+### Sensori di luce
+
+La _case class_ `LightSensor` estende `Sensor[Robot, Environment]` e rappresenta un sensore di luce, in grado di rilevare l'intensità luminosa in una determinata area.
+Anche in questo caso i valori restituiti dal sensore sono `Double`, e rappresentano l'intensità luminosa normalizzata tra 0 e 1, dove 0 indica assenza di luce e 1 indica luce massima.
+La distribuzione della luce nell'ambiente è rappresentata da un campo `lightField` all'interno di `Environment`, il metodo `sense` implementa la logica di rilevamento, utilizzando il `lightField` per ottenere i dati di intensità luminosa.
