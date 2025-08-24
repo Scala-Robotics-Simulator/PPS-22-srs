@@ -94,8 +94,8 @@ export const backlogData = [
     id: 14,
     item: "Come utente, voglio gestire i fotosensori, in modo aggiungerli, o rimuoverli, dal robot",
     stima: 8,
-    effettivo: 0,
-    sprints: [0, 0, 0, 0, 0]
+    effettivo: 16,
+    sprints: [0, 0, 0, 16, 0]
   },
   {
     id: 15,
@@ -128,9 +128,9 @@ export const backlogData = [
   {
     id: 19,
     item: "Come un utente, voglio poter caricare e salvare un file di configurazione personalizzato della simulazione, così che possa verificare nuovamente comportamenti eseguiti precedentemente",
-    stima: 9,
-    effettivo: 12,
-    sprints: [0, 0, 12, 0, 0]
+    stima: 11,
+    effettivo: 16,
+    sprints: [0, 0, 12, 4, 0]
   },
   {
     id: 20,
@@ -138,5 +138,12 @@ export const backlogData = [
     stima: 1,
     effettivo: 1,
     sprints: [0, 0, 1, 0, 0]
+  },
+  {
+    id: 21,
+    item: "Come un utente, voglio poter scegliere una configurazione della simulazione, così che possa osservare determinati comportamenti.",
+    stima: 14,
+    effettivo: 14,
+    sprints: [0, 0, 0, 14, 0]
   }
 ];
