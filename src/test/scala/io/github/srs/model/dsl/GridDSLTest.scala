@@ -2,8 +2,10 @@ package io.github.srs.model.dsl
 
 import scala.language.postfixOps
 
-import io.github.srs.model.dsl.Cell.{ --, X }
+import io.github.srs.model.dsl.Cell.*
 import io.github.srs.model.dsl.GridDSL.{ *, given }
+import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
+import io.github.srs.model.entity.staticentity.dsl.LightDsl.*
 import io.github.srs.model.entity.staticentity.dsl.ObstacleDsl.*
 import io.github.srs.model.entity.{ Entity, Point2D }
 import io.github.srs.model.environment.Environment
@@ -35,5 +37,17 @@ class GridDSLTest extends AnyFlatSpec with Matchers:
         X | -- | --
     val expectedEnv = environment withWidth 3 withHeight 3 containing
       (obstacle at Point2D(2, 0)) and (obstacle at Point2D(0, 2))
+    env shouldEqualExceptIds expectedEnv
+
+  it should "create an environment with different entities" in:
+    val env: Environment =
+      -- | X | X ||
+        -- | R | -- ||
+        ** | -- | --
+    val expectedEnv = environment withWidth 3 withHeight 3 containing
+      (obstacle at Point2D(1, 0)) and (obstacle at Point2D(2, 0)) and (robot at Point2D(1, 1)) and (light at Point2D(
+        0,
+        2,
+      ))
     env shouldEqualExceptIds expectedEnv
 end GridDSLTest
