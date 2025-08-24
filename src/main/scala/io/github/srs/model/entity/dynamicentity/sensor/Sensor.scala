@@ -8,8 +8,6 @@ import io.github.srs.model.environment.Environment
 import io.github.srs.model.validation.Validation
 import io.github.srs.utils.Ray.intersectRay
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Sensor.ProximitySensor as ProximitySensorDefaults
-import io.github.srs.model.illumination.LightMap
-import io.github.srs.model.illumination.engine.SquidLibFovEngine
 import io.github.srs.model.illumination.model.ScaleFactor
 import cats.effect.kernel.Sync
 import io.github.srs.model.entity.ShapeType
@@ -154,11 +152,9 @@ final case class LightSensor[Entity <: DynamicEntity, Env <: Environment](
    *   a monadic effect containing the light intensity sensed by the sensor.
    */
   override def sense[F[_]: Sync](entity: Entity, env: Env): F[Data] =
-    val o = origin(entity)
-    for
-      lightMap <- LightMap.cached[F](SquidLibFovEngine, ScaleFactor.default)
-      field <- lightMap.computeField(env = env, includeDynamic = true)
-    yield field.sampleAtWorld(o)(using ScaleFactor.default)
+    Sync[F].pure:
+      val o = origin(entity)
+      env.lightField.sampleAtWorld(o)(using ScaleFactor.default)
 
 end LightSensor
 

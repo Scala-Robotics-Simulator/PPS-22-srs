@@ -3,6 +3,9 @@ package io.github.srs.model.environment
 import io.github.srs.model.entity.Entity
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.utils.SimulationDefaults.Environment.*
+import io.github.srs.model.illumination.model.LightField
+import io.github.srs.utils.SimulationDefaults
+import cats.effect.unsafe.implicits.global
 
 /**
  * Represents the environment in which entities exist.
@@ -17,7 +20,7 @@ trait EnvironmentParameters:
    * @return
    *   a Double representing the width of the environment.
    */
-  val width: Int
+  def width: Int
 
   /**
    * The height of the environment.
@@ -25,7 +28,7 @@ trait EnvironmentParameters:
    * @return
    *   a Double representing the height of the environment.
    */
-  val height: Int
+  def height: Int
 
   /**
    * A set of entities that exist within the environment.
@@ -33,7 +36,15 @@ trait EnvironmentParameters:
    * @return
    *   a Set of [[Entity]] representing the entities in the environment.
    */
-  val entities: Set[Entity]
+  def entities: Set[Entity]
+
+  /**
+   * The light field of the environment, representing the illumination conditions.
+   *
+   * @return
+   *   a [[LightField]] representing the light field of the environment.
+   */
+  def lightField: LightField
 
 end EnvironmentParameters
 
@@ -44,7 +55,10 @@ final case class Environment(
     override val width: Int = defaultWidth,
     override val height: Int = defaultHeight,
     override val entities: Set[Entity] = defaultEntities,
-) extends EnvironmentParameters
+) extends EnvironmentParameters:
+
+  lazy val lightField: LightField =
+    SimulationDefaults.lightMap.computeField(this, includeDynamic = true).unsafeRunSync()
 
 object ValidEnvironment:
   opaque type ValidEnvironment = Environment

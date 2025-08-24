@@ -5,12 +5,17 @@ import java.util.UUID
 
 import scala.concurrent.duration.{ DurationInt, FiniteDuration }
 
+import cats.effect.unsafe.implicits.global
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, Wheel as ActWheel }
 import io.github.srs.model.entity.dynamicentity.behavior.Policy
 import io.github.srs.model.entity.dynamicentity.sensor.*
 import io.github.srs.model.environment.Environment
+import cats.effect.IO
+import io.github.srs.model.illumination.LightMap
+import io.github.srs.model.illumination.engine.SquidLibFovEngine
+import io.github.srs.model.illumination.model.ScaleFactor
 
 object SimulationDefaults:
 
@@ -79,6 +84,7 @@ object SimulationDefaults:
   val seed: Option[Long] = None
   val debugMode = true
   val binarySearchDurationThreshold: FiniteDuration = 1.microseconds
+  val lightMap: LightMap[IO] = LightMap.create[IO](SquidLibFovEngine, ScaleFactor.default).unsafeRunSync()
 
   object SimulationConfig:
     val maxCount = 10_000
@@ -140,7 +146,6 @@ object SimulationDefaults:
 
       object ProximitySensor:
         val defaultOffset: Double = 0.0
-        val defaultDistance: Double = 0.5
         val defaultRange: Double = 5.0
 
     object Robot:

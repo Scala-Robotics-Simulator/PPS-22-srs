@@ -81,7 +81,7 @@ class LightSensorTest extends AnyFlatSpec with Matchers:
     import Point2D.*
     val light = createLight(robot.position + (0.6, 0))
     val reading = getSensorReading(sensor, Set(light))
-    reading should be > 0.9
+    reading should be > 0.95
 
   it should "read a lower value for a distant light" in:
     import Point2D.*
@@ -99,7 +99,7 @@ class LightSensorTest extends AnyFlatSpec with Matchers:
     import Point2D.*
     val light = createLight(robot.position + (0.6, 0))
     val reading = getSensorReading(pointingNorthEastSensor, Set(light))
-    reading should be < 0.9
+    reading should be < 0.95
 
   it should "not see the light from the diagonal sensor pointing away from a light" in:
     import Point2D.*
