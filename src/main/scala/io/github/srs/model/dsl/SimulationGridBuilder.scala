@@ -26,9 +26,13 @@ class SimulationGridBuilder(env: Environment):
             y >= o.pos.y && y < o.pos.y + o.height =>
         s"X${obstacleIds(o.id)}"
 
-      case r: Robot if math.pow(x - r.position.x, 2) + math.pow(y - r.position.y, 2) <= math.pow(r.shape.radius, 2) =>
+      case r: Robot if {
+            val rx = math.round(r.position.x).toInt
+            val ry = math.round(r.position.y).toInt
+            x == rx && y == ry
+          } =>
         val symbols = Array("→", "↘", "↓", "↙", "←", "↖", "↑", "↗")
-        val idx = ((r.orientation.degrees + 22.5) / 45).toInt % 8
+        val idx = (((r.orientation.degrees + 22.5) / 45).toInt) % 8
         s"R${robotIds(r.id)}${symbols(idx)}"
     }.getOrElse(" ")
 
