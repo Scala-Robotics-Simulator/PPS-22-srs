@@ -4,6 +4,7 @@ import java.util.UUID
 
 import cats.effect.IO
 import io.github.srs.controller.protocol.Event
+import io.github.srs.model.dsl.Cell
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.*
 import io.github.srs.model.entity.dynamicentity.action.*
@@ -31,3 +32,4 @@ object EqualityGivenInstances:
   given CanEqual[Behavior[BehaviorContext, Action[IO]], Behavior[BehaviorContext, Action[IO]]] = CanEqual.derived
   given CanEqual[ValidEnvironment, ValidEnvironment] = CanEqual.derived
   given CanEqual[Event, Event] = CanEqual.derived
+  given CanEqual[Cell, Cell] = CanEqual.derived
