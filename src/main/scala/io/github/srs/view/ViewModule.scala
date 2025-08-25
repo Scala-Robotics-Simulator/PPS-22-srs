@@ -59,34 +59,23 @@ object ViewModule:
   trait Component[S <: ModelModule.State]:
     context: Requirements[S] =>
 
+    /**
+     * Factory method to create a new instance of the view.
+     */
     object View:
       /**
-       * Creates a view instance.
-       *
+       * Creates a new instance of the view.
        * @return
-       *   a [[View]] instance.
+       *   the newly created view instance.
        */
-      def apply(): View[S] = new ViewImpl
+      def apply(): View[S] = makeView()
 
-      /**
-       * Private view implementation that uses a simple GUI.
-       */
-      private class ViewImpl extends View[S]:
-        private val gui = SimulationView[S]()
-
-        /**
-         * @inheritdoc
-         */
-        override def init(queue: Queue[IO, Event]): IO[Unit] = gui.init(queue)
-
-        /**
-         * @inheritdoc
-         */
-        override def render(state: S): IO[Unit] = gui.render(state)
-
-    end View
-
-  end Component
+    /**
+     * Creates a new instance of the view.
+     * @return
+     *   the newly created view instance.
+     */
+    protected def makeView(): View[S]
 
   /**
    * Interface trait that combines the provider and component traits for the view module.
