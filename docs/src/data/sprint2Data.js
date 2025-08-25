@@ -36,6 +36,42 @@ export const sprint2Data = [
         days: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0]
     },
     {
+        backlogItem: "Come utente, voglio modificare il comportamento dei robot, così da poter personalizzare le loro azioni",
+        id: "15.1",
+        task: "Implementazione prima versione del DSL per la definizione dei comportamenti",
+        volontario: "Cohen",
+        stima: 3,
+        effettivo: 3,
+        days: [0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    },
+    {
+        backlogItem: "Come utente, voglio modificare il comportamento dei robot, così da poter personalizzare le loro azioni",
+        id: "15.2",
+        task: "Implementazione della logica di esecuzione del comportamento sui robot",
+        volontario: "Cohen",
+        stima: 2,
+        effettivo: 1,
+        days: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    },
+    {
+        backlogItem: "Come utente, voglio modificare il comportamento dei robot, così da poter personalizzare le loro azioni",
+        id: "15.3",
+        task: "Seconda versione del DSL per la definizione dei comportamenti",
+        volontario: "Cohen",
+        stima: 3,
+        effettivo: 5,
+        days: [0, 0, 0, 0, 0, 0, 0, 0, 3, 2, 0, 0, 0, 0]
+    },
+    {
+        backlogItem: "Come utente, voglio modificare il comportamento dei robot, così da poter personalizzare le loro azioni",
+        id: "15.4",
+        task: "Implementazione di regole e politica di esecuzione del comportamento sui robot",
+        volontario: "Cohen",
+        stima: 2,
+        effettivo: 2,
+        days: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0]
+    },
+    {
         backlogItem: "Come un utente, durante la simulazione voglio: poter mettere in pausa la simulazione; poter riprendere la simulazione, se in pausa; poter fermare la simulazione; così che possa gestire il controllo della simulazione",
         id: "16.1",
         task: "Modellazione del motore di simulazione",
@@ -82,7 +118,7 @@ export const sprint2Data = [
     },
     {
         backlogItem: "Come un utente, voglio modificare la durata della simulazione, così da avere simulazioni di durata differente",
-        id: "17.1",
+        id: "17.2",
         task: "Implementazione della logica del tempo (rimanente/trascorso)",
         volontario: "Nardicchia",
         stima: 3,
@@ -99,45 +135,9 @@ export const sprint2Data = [
         days: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0]
     },
     {
-        backlogItem: "Come utente, voglio modificare il comportamento dei robot, così da poter personalizzare le loro azioni",
-        id: "19.1",
-        task: "Implementazione prima versione del DSL per la definizione dei comportamenti",
-        volontario: "Cohen",
-        stima: 3,
-        effettivo: 3,
-        days: [0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    },
-    {
-        backlogItem: "Come utente, voglio modificare il comportamento dei robot, così da poter personalizzare le loro azioni",
-        id: "19.2",
-        task: "Implementazione della logica di esecuzione del comportamento sui robot",
-        volontario: "Cohen",
-        stima: 2,
-        effettivo: 1,
-        days: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    },
-    {
-        backlogItem: "Come utente, voglio modificare il comportamento dei robot, così da poter personalizzare le loro azioni",
-        id: "19.3",
-        task: "Seconda versione del DSL per la definizione dei comportamenti",
-        volontario: "Cohen",
-        stima: 3,
-        effettivo: 5,
-        days: [0, 0, 0, 0, 0, 0, 0, 0, 3, 2, 0, 0, 0, 0]
-    },
-    {
-        backlogItem: "Come utente, voglio modificare il comportamento dei robot, così da poter personalizzare le loro azioni",
-        id: "19.4",
-        task: "Implementazione di regole e politica di esecuzione del comportamento sui robot",
-        volontario: "Cohen",
-        stima: 2,
-        effettivo: 2,
-        days: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0]
-    },
-    {
         backlogItem: "Come un utente, voglio poter caricare e salvare un file di configurazione personalizzato della simulazione, così che possa verificare nuovamente comportamenti eseguiti precedentemente",
-        id: "20.1",
-        task: "Implementazione dei dsl per la configurazione di tutti gli elementi della simulazione salvabili",
+        id: "19.1",
+        task: "Implementazione dei DSL per la configurazione di tutti gli elementi della simulazione salvabili",
         volontario: "Ceredi",
         stima: 5,
         effettivo: 5,
@@ -145,7 +145,7 @@ export const sprint2Data = [
     },
     {
         backlogItem: "Come un utente, voglio poter caricare e salvare un file di configurazione personalizzato della simulazione, così che possa verificare nuovamente comportamenti eseguiti precedentemente",
-        id: "20.2",
+        id: "19.2",
         task: "Implementazione della logica di caricamento del file di configurazione",
         volontario: "Ceredi",
         stima: 4,
@@ -154,7 +154,7 @@ export const sprint2Data = [
     },
     {
         backlogItem: "Come un utente, voglio poter caricare e salvare un file di configurazione personalizzato della simulazione, così che possa verificare nuovamente comportamenti eseguiti precedentemente",
-        id: "20.3",
+        id: "19.3",
         task: "Implementazione della logica di salvataggio della configurazione",
         volontario: "Ceredi",
         stima: 1,
@@ -163,7 +163,7 @@ export const sprint2Data = [
     },
     {
         backlogItem: "Deliverable sprint-2 (GUI con visualizzazione dello stato, gestione del tempo e della riproducibilità)",
-        id: "22.1",
+        id: "20.1",
         task: "Implementazione della GUI per la gestione della simulazione",
         volontario: "Nardicchia",
         stima: 1,
