@@ -4,6 +4,7 @@ import cats.effect.Sync
 import io.github.srs.config.yaml.parser.YamlSimulationConfigParser
 import io.github.srs.config.yaml.serializer.YamlSimulationConfigSerializer
 import io.github.srs.config.{ ConfigResult, SimulationConfig }
+import io.github.srs.model.environment.Environment
 
 /**
  * A parser for YAML configuration files.
@@ -46,7 +47,7 @@ object YamlManager:
    *   }}}
    */
 
-  def parse[F[_]: Sync](content: String): F[ConfigResult[SimulationConfig]] =
+  def parse[F[_]: Sync](content: String): F[ConfigResult[SimulationConfig[Environment]]] =
     Sync[F].pure(YamlSimulationConfigParser.parseSimulationConfig(content))
 
   /**
@@ -58,6 +59,6 @@ object YamlManager:
    * @return
    *   a `F[String]` containing the YAML representation of the configuration
    */
-  def toYaml[F[_]: Sync](config: SimulationConfig): F[String] =
+  def toYaml[F[_]: Sync](config: SimulationConfig[Environment]): F[String] =
     Sync[F].pure(YamlSimulationConfigSerializer.serializeSimulationConfig(config))
 end YamlManager

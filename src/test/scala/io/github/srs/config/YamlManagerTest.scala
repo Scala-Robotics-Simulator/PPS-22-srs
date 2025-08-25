@@ -24,7 +24,7 @@ import org.scalatest.matchers.should.Matchers
 
 class YamlManagerTest extends AnyFlatSpec with Matchers:
   given CanEqual[Environment, Environment] = CanEqual.derived
-  given CanEqual[SimulationConfig, SimulationConfig] = CanEqual.derived
+  given CanEqual[SimulationConfig[Environment], SimulationConfig[Environment]] = CanEqual.derived
 
   "YamlParser" should "parse a valid YAML configuration" in:
     val uri = getClass.getResource("/configuration.yml").toURI

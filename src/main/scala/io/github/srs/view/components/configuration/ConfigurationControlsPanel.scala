@@ -15,6 +15,7 @@ import io.github.srs.config.{ SimulationConfig, YamlConfigManager }
 import io.github.srs.config.yaml.YamlManager
 import io.github.srs.utils.loader.ResourceFileLister
 import io.github.srs.config.ConfigError
+import io.github.srs.model.environment.Environment
 
 /**
  * ConfigurationControlsPanel handles the configuration loading, saving, and management controls. It provides buttons
@@ -26,8 +27,8 @@ import io.github.srs.config.ConfigError
  *   callback triggered when user wants to save current configuration
  */
 class ConfigurationControlsPanel(
-    onConfigLoaded: SimulationConfig => Unit,
-    onConfigSave: () => Option[SimulationConfig],
+    onConfigLoaded: SimulationConfig[Environment] => Unit,
+    onConfigSave: () => Option[SimulationConfig[Environment]],
 ) extends JPanel(new FlowLayout(FlowLayout.CENTER)):
 
   private val configsPath = "configurations/default"

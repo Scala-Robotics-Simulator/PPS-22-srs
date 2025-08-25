@@ -61,7 +61,7 @@ final case class Environment(
     SimulationDefaults.lightMap.computeField(this, includeDynamic = true).unsafeRunSync()
 
 object ValidEnvironment:
-  opaque type ValidEnvironment = Environment
+  opaque type ValidEnvironment <: EnvironmentParameters = Environment
 
   private[environment] def from(env: Environment): ValidEnvironment =
     env

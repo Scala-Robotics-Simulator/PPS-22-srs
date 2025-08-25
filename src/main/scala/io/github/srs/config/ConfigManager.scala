@@ -9,6 +9,7 @@ import fs2.io.file.{ Files, Path }
 import fs2.text
 import io.github.srs.config.yaml.YamlManager
 import cats.effect.kernel.Resource
+import io.github.srs.model.environment.Environment
 
 /**
  * A trait for managing simulation configurations.
@@ -22,7 +23,7 @@ trait ConfigManager[F[_]]:
    * @return
    *   a `ConfigResult` containing the parsed `SimulationConfig`
    */
-  def load: F[ConfigResult[SimulationConfig]]
+  def load: F[ConfigResult[SimulationConfig[Environment]]]
 
   /**
    * Saves the simulation configuration to a file.
@@ -31,7 +32,7 @@ trait ConfigManager[F[_]]:
    * @return
    *   an effect that completes when the configuration is saved
    */
-  def save(config: SimulationConfig): F[Unit]
+  def save(config: SimulationConfig[Environment]): F[Unit]
 
 /**
  * A configuration manager that reads a YAML file from the specified path and provides methods to save a yaml
@@ -48,7 +49,7 @@ final case class YamlConfigManager[F[_]: {Files, Sync}](path: Path) extends Conf
    * @return
    *   a `ConfigResult` containing the parsed `SimulationConfig`
    */
-  override def load: F[ConfigResult[SimulationConfig]] =
+  override def load: F[ConfigResult[SimulationConfig[Environment]]] =
     for
       content <- Files[F].readAll(path).through(text.utf8.decode).compile.string
       config <- YamlManager.parse[F](content)
@@ -62,7 +63,7 @@ final case class YamlConfigManager[F[_]: {Files, Sync}](path: Path) extends Conf
    * @return
    *   an effect that completes when the configuration is saved
    */
-  override def save(config: SimulationConfig): F[Unit] =
+  override def save(config: SimulationConfig[Environment]): F[Unit] =
     val nioPath = path.toNioPath
 
     val writerResource = Resource.fromAutoCloseable(
