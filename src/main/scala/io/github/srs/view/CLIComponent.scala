@@ -29,11 +29,11 @@ trait CLIComponent[S <: ModelModule.State] extends Component[S]:
      * @inheritdoc
      */
     override def init(queue: Queue[IO, Event]): IO[Unit] =
-      IO.println("CLI View initialized. Type 'help' for commands.")
+      IO.println("CLI View initialized")
 
     /**
      * @inheritdoc
      */
     override def render(state: S): IO[Unit] =
-      IO.println(s"Current State: $state")
+      IO.unit
 end CLIComponent
