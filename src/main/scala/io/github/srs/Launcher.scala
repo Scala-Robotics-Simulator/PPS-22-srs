@@ -12,24 +12,40 @@ import io.github.srs.model.environment.ValidEnvironment
 import io.github.srs.model.logic.simulationStateLogicsBundle
 import io.github.srs.model.{ ModelModule, SimulationState }
 import io.github.srs.utils.random.SimpleRNG
-import io.github.srs.view.ViewModule
+import io.github.srs.view.{ CLIComponent, GUIComponent, ViewModule }
 import io.github.srs.view.ViewModule.View
 
 /**
- * Launcher object that initializes the simulation.
+ * Base trait for launching the Scala Robotics Simulator application.
+ *
+ * It sets up the Model-View-Controller (MVC) architecture and provides a method to run the simulation.
+ *
+ * The specific view implementation (GUI or CLI) is provided by the extending objects.
  */
-object Launcher
+trait BaseLauncher
     extends ModelModule.Interface[SimulationState]
-    with ViewModule.Interface[SimulationState]
-    with ControllerModule.Interface[SimulationState]:
+    with ControllerModule.Interface[SimulationState]
+    with ViewModule.Interface[SimulationState]:
 
   val model: Model[SimulationState] = Model()
-  val view: View[SimulationState] = View()
   val controller: Controller[SimulationState] = Controller()
+  val view: View[SimulationState]
 
   def runMVC(state: SimulationState): IO[Unit] =
     for _ <- controller.start(state)
     yield ()
+
+/**
+ * Launcher object for the GUI version of the Scala Robotics Simulator.
+ */
+object GUILauncher extends BaseLauncher with GUIComponent[SimulationState]:
+  override val view: View[SimulationState] = View()
+
+/**
+ * Launcher object for the CLI version of the Scala Robotics Simulator.
+ */
+object CLILauncher extends BaseLauncher with CLIComponent[SimulationState]:
+  override val view: View[SimulationState] = View()
 
 /**
  * Creates the initial state of the simulation based on the provided configuration.
