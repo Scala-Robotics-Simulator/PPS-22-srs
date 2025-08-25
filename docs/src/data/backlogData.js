@@ -159,5 +159,12 @@ export const backlogData = [
     stima: 1,
     effettivo: 1,
     sprints: [0, 0, 0, 1, 0]
-  }
+  },
+  {
+    id: 24,
+    item: "Come utente voglio creare un DSL con cui posso testare facilmente le funzionalità del sistema e i comportamenti dei robot",
+    stima: 0,
+    effettivo: 0,
+    sprints: [0, 0, 0, 0, 0]
+  },
 ];
