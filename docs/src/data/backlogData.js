@@ -93,23 +93,23 @@ export const backlogData = [
   {
     id: 14,
     item: "Come utente, voglio gestire i fotosensori, in modo aggiungerli, o rimuoverli, dal robot",
-    stima: 8,
-    effettivo: 16,
-    sprints: [0, 0, 0, 16, 0]
+    stima: 3,
+    effettivo: 2,
+    sprints: [0, 0, 0, 2, 0]
   },
   {
     id: 15,
     item: "Come utente, voglio modificare il comportamento dei robot, così da poter personalizzare le loro azioni",
-    stima: 10,
-    effettivo: 11,
-    sprints: [0, 0, 11, 0, 0]
+    stima: 13,
+    effettivo: 13,
+    sprints: [0, 0, 11, 3, 0]
   },
   {
     id: 16,
     item: "Come un utente, durante la simulazione voglio: poter mettere in pausa la simulazione; poter riprendere la simulazione, se in pausa; poter fermare la simulazione; così che possa gestire il controllo della simulazione",
-    stima: 12,
-    effettivo: 11,
-    sprints: [0, 0, 11, 0, 0]
+    stima: 17,
+    effettivo: 16,
+    sprints: [0, 0, 11, 5, 0]
   },
   {
     id: 17,
@@ -142,8 +142,22 @@ export const backlogData = [
   {
     id: 21,
     item: "Come un utente, voglio poter scegliere una configurazione della simulazione, così che possa osservare determinati comportamenti.",
-    stima: 14,
-    effettivo: 14,
-    sprints: [0, 0, 0, 14, 0]
+    stima: 15,
+    effettivo: 16,
+    sprints: [0, 0, 0, 16, 0]
+  },
+  {
+    id: 22,
+    item: "Come utente voglio visualizzare l'andamento della simulazione in tempo reale, per studiare il comportamento dei robot",
+    stima: 13,
+    effettivo: 15,
+    sprints: [0, 0, 0, 15, 0]
+  },
+  {
+    id: 23,
+    item: "Come utente voglio monitorare i dettagli dei singoli robot in tempo reale, per studiarne il comportamento",
+    stima: 1,
+    effettivo: 1,
+    sprints: [0, 0, 0, 1, 0]
   }
 ];
