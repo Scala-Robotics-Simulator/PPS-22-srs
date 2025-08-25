@@ -10,12 +10,28 @@ import {sprint3Data} from '@site/src/data/sprint3Data'
 <SprintTable data={sprint3Data} />
 
 ## Sprint Goal
-
+Gli obiettivi dello Sprint 3 sono stati:
+- Implementazione GUI/CLI configurazione
+- Implementazione GUI/CLI simulazione
+- Implementazione fotosensori
+- Implementazione della logica di evento per il movimento e la collisione dei robot a ogni step di simulazione.
 
 ## Sprint Deadline
 
+Lo Sprint 3 è iniziato l'11 Agosto 2025 e si è concluso il 24 Agosto 2025.
 
 ## Sprint Review
 
+Durante la Sprint Review sono stati presentati i seguenti risultati:
+- La GUI/CLI di configurazione è stata implementata;
+- La GUI/CLI di simulazione è stata implementata;
+- I fotosensori sono stati implementati;
+- La logica di evento per il movimento e la collisione dei robot a ogni step di simulazione è stata implementata;
 
 ## Sprint Retrospective
+
+Il caricamento dei behavior dei robot da file di configurazione ha richiesto più tempo del previsto, a causa della
+complessità della serializzazione e deserializzazione di funzioni.
+
+Ora che sono disponibili le interfacce grafiche, possiamo confermare che quanto implementato e finora verificato solo
+con unit test funziona correttamente ed è facilmente integrabile.
