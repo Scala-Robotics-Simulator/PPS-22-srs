@@ -77,6 +77,8 @@ object ViewModule:
      */
     protected def makeView(): View[S]
 
+  end Component
+
   /**
    * Interface trait that combines the provider and component traits for the view module.
    * @tparam S
