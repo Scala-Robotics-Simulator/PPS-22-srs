@@ -54,6 +54,7 @@ lazy val root = project
       "-feature",
       "-language:strictEquality",
       "-language:implicitConversions",
+      "-deprecation"
     ),
     coverageEnabled := true,
     semanticdbEnabled := true,
