@@ -35,7 +35,7 @@ object ControllerModule:
      * @param initialState
      *   the initial state of the simulation.
      */
-    def start(initialState: S): IO[Unit]
+    def start(initialState: S): IO[S]
 
     /**
      * Runs the simulation loop, processing events from the queue and updating the state.
@@ -47,7 +47,7 @@ object ControllerModule:
      * @return
      *   an [[IO]] task that completes when the simulation loop ends.
      */
-    def simulationLoop(s: S, queue: Queue[IO, Event]): IO[Unit]
+    def simulationLoop(s: S, queue: Queue[IO, Event]): IO[S]
 
   end Controller
 
@@ -98,13 +98,13 @@ object ControllerModule:
          * @return
          *   an [[IO]] task that completes when the controller is started.
          */
-        override def start(initialState: S): IO[Unit] =
+        override def start(initialState: S): IO[S] =
           for
             queueSim <- Queue.unbounded[IO, Event]
             _ <- context.view.init(queueSim)
             _ <- runBehavior(queueSim, initialState)
-            _ <- simulationLoop(initialState, queueSim)
-          yield ()
+            result <- simulationLoop(initialState, queueSim)
+          yield result
 
         /**
          * Runs the simulation loop, processing events from the queue and updating the state.
@@ -115,21 +115,28 @@ object ControllerModule:
          * @return
          *   an [[IO]] task that completes when the simulation loop ends.
          */
-        override def simulationLoop(s: S, queue: Queue[IO, Event]): IO[Unit] =
-          def loop(state: S): IO[Unit] =
+        override def simulationLoop(s: S, queue: Queue[IO, Event]): IO[S] =
+          def loop(state: S): IO[S] =
             for
               startTime <- Clock[IO].realTime.map(_.toMillis)
               _ <- runBehavior(queue, state).whenA(state.simulationStatus == RUNNING)
               events <- queue.tryTakeN(Some(50))
               newState <- handleEvents(state, events)
               _ <- context.view.render(newState)
-              nextState <- nextStep(newState, startTime)
-              endTime <- Clock[IO].realTime.map(_.toMillis)
-              _ <- if debugMode then IO.println(s"Simulation loop took ${endTime - startTime} ms") else IO.unit
-              _ <- if stopCondition(nextState) then IO.unit else loop(nextState)
-            yield ()
+              result <-
+                if stopCondition(newState) then IO.pure(newState)
+                else
+                  for
+                    nextState <- nextStep(newState, startTime)
+                    endTime <- Clock[IO].realTime.map(_.toMillis)
+                    _ <- if debugMode then IO.println(s"Simulation loop took ${endTime - startTime} ms") else IO.unit
+                    res <- loop(nextState)
+                  yield res
+            yield result
 
           loop(s)
+
+        end simulationLoop
 
         /**
          * Checks if the simulation should stop based on the current state.
