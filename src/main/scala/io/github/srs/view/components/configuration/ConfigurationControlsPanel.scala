@@ -64,7 +64,7 @@ class ConfigurationControlsPanel(
             case Left(_: NoSuchFileException) =>
               JOptionPane.showMessageDialog(
                 this,
-                s"File `${chooser.getSelectedFile.getAbsolutePath()}` not found",
+                s"File `${chooser.getSelectedFile.getAbsolutePath}` not found",
                 "Error loading config",
                 JOptionPane.ERROR_MESSAGE,
               )
@@ -133,7 +133,7 @@ class ConfigurationControlsPanel(
       case _ => ()
 
   private def loadResourceConfiguration(configName: String): Unit =
-    val pathString = s"/${configsPath}/${configName}.yml"
+    val pathString = s"/$configsPath/${configName}.yml"
     Option(getClass.getResourceAsStream(pathString)) match
       case Some(resource) =>
         val content = Source.fromInputStream(resource, "UTF-8").getLines().mkString("\n")

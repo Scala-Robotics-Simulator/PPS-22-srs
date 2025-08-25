@@ -42,9 +42,9 @@ trait ConfigurationView:
   def close(): IO[Unit]
 
   /**
-   * Companion object for ConfigurationView that provides a factory method to create an instance of ConfigurationView.
+   * ConfigurationView companion object with factory method to create an instance of a GUI-based configuration view.
    */
-object ConfigurationView:
+object ConfigurationGUI:
 
   /**
    * Factory method to create an instance of ConfigurationView.
@@ -52,7 +52,7 @@ object ConfigurationView:
    * @return
    *   a new instance of ConfigurationView.
    */
-  def apply(): ConfigurationView = new ConfigurationViewImpl()
+  def apply(): ConfigurationView = new ConfigurationViewImpl
 
   private class ConfigurationViewImpl extends ConfigurationView:
     private val frame = new JFrame("Scala Robotics Simulator - Configuration")
@@ -69,7 +69,7 @@ object ConfigurationView:
         FieldSpec(RobotFields.speed, "Speed", TextField(3)),
         FieldSpec(RobotFields.withProximitySensors, "With proximity sensors", CheckBox(true)),
         FieldSpec(RobotFields.withLightSensors, "With light sensors", CheckBox(true)),
-        FieldSpec(RobotFields.behavior, "Behavior", ComboBox(Policy.values.map(_.toString))),
+        FieldSpec(RobotFields.behavior, "Behavior", ComboBox(Policy.values.toSeq.map(_.toString))),
       )),
       ObstacleFields.self.capitalize -> (baseFieldSpec ++ Seq(
         FieldSpec(ObstacleFields.width, "Width", TextField(8)),
@@ -102,7 +102,7 @@ object ConfigurationView:
 
     private val controlsPanel = new ConfigurationControlsPanel(
       onConfigLoaded = loadConfiguration,
-      onConfigSave = getCurrentConfiguration,
+      onConfigSave = () => getCurrentConfiguration,
     )
 
     private val refreshFieldButton = new JButton("Refresh Field")
@@ -123,7 +123,7 @@ object ConfigurationView:
       entitiesPanel.setEntities(config.environment.entities)
       refreshCanvas(config.environment).unsafeRunAsync(_ => ())
 
-    private def getCurrentConfiguration(): Option[SimulationConfig] =
+    private def getCurrentConfiguration: Option[SimulationConfig] =
       extractConfig()
 
     private def setupUI(splitRatio: Double = 0.5): Unit =
@@ -171,7 +171,7 @@ object ConfigurationView:
 
     end setupUI
 
-    def init(): IO[SimulationConfig] =
+    override def init(): IO[SimulationConfig] =
       setupUI()
       frame.setVisible(true)
       IO.async_(cb =>
@@ -214,4 +214,4 @@ object ConfigurationView:
 
   end ConfigurationViewImpl
 
-end ConfigurationView
+end ConfigurationGUI
