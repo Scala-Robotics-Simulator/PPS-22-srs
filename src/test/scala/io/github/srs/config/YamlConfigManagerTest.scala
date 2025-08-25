@@ -21,10 +21,11 @@ import org.scalatest.matchers.should.Matchers
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.{ stdLightSensors, stdProximitySensors }
 import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior
 import io.github.srs.model.entity.dynamicentity.behavior.Policy
+import io.github.srs.model.environment.Environment
 
 class YamlConfigManagerTest extends AnyFlatSpec with Matchers:
   given CanEqual[Sensor[?, ?], Sensor[?, ?]] = CanEqual.derived
-  given CanEqual[SimulationConfig, SimulationConfig] = CanEqual.derived
+  given CanEqual[SimulationConfig[Environment], SimulationConfig[Environment]] = CanEqual.derived
   given CanEqual[Behavior[?, ?], Behavior[?, ?]] = CanEqual.derived
   given CanEqual[Policy, Policy] = CanEqual.derived
 
@@ -33,7 +34,7 @@ class YamlConfigManagerTest extends AnyFlatSpec with Matchers:
     val path = Path.fromNioPath(java.nio.file.Paths.get(uri))
     val loader = YamlConfigManager[IO](path)
     val result = loader.load.unsafeRunSync()
-    val _ = result shouldBe a[Right[?, SimulationConfig]]
+    val _ = result shouldBe a[Right[?, SimulationConfig[Environment]]]
     val config = result.toOption.value
     val _ = config.environment.width should be(10)
     val _ = config.environment.height should be(10)

@@ -8,7 +8,7 @@ import io.github.srs.controller.ControllerModule
 import io.github.srs.controller.ControllerModule.Controller
 import io.github.srs.model.ModelModule.Model
 import io.github.srs.model.SimulationConfig.{ SimulationSpeed, SimulationStatus }
-import io.github.srs.model.environment.dsl.CreationDSL.validate
+import io.github.srs.model.environment.ValidEnvironment
 import io.github.srs.model.logic.simulationStateLogicsBundle
 import io.github.srs.model.{ ModelModule, SimulationState }
 import io.github.srs.utils.random.SimpleRNG
@@ -39,14 +39,11 @@ object Launcher
  * @return
  *   the initial state of the simulation
  */
-def mkInitialState(cfg: SimulationConfig): SimulationState =
-  val environment = cfg.environment.validate.getOrElse(
-    sys.exit(1),
-  )
+def mkInitialState(cfg: SimulationConfig[ValidEnvironment]): SimulationState =
   SimulationState(
     simulationTime = cfg.simulation.duration.map(FiniteDuration(_, MILLISECONDS)),
     simulationSpeed = SimulationSpeed.NORMAL,
     simulationRNG = SimpleRNG(cfg.simulation.seed.getOrElse(42)),
     simulationStatus = SimulationStatus.PAUSED,
-    environment = environment,
+    environment = cfg.environment,
   )

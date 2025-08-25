@@ -5,6 +5,7 @@ import io.circe.syntax.*
 import io.circe.yaml.syntax.*
 import io.github.srs.config.SimulationConfig
 import io.github.srs.config.yaml.serializer.encoders.given
+import io.github.srs.model.environment.Environment
 
 object YamlSimulationConfigSerializer:
 
@@ -16,5 +17,5 @@ object YamlSimulationConfigSerializer:
    * @return
    *   A YAML string representation of the `SimulationConfig`.
    */
-  def serializeSimulationConfig(config: SimulationConfig): String =
+  def serializeSimulationConfig(config: SimulationConfig[Environment]): String =
     config.asJson.asYaml.spaces2.replaceAll("\'", "") // Remove single quotes for YAML parser compatibility

@@ -10,7 +10,6 @@ import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 import io.github.srs.model.entity.staticentity.dsl.LightDsl.*
 import io.github.srs.model.entity.staticentity.dsl.ObstacleDsl.*
-import io.github.srs.model.environment.Environment
 import io.github.srs.model.environment.dsl.CreationDSL.*
 import io.github.srs.utils.chaining.Pipe.given
 import org.virtuslab.yaml.*
@@ -21,6 +20,7 @@ import io.github.srs.utils.SimulationDefaults.Fields.Entity.DynamicEntity.Robot 
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Obstacle as ObstacleFields
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Light as LightFields
 import io.github.srs.model.entity.dynamicentity.behavior.Policy
+import io.github.srs.model.environment.Environment
 
 /**
  * A parser for YAML configuration files, specifically for simulation configurations.
@@ -36,7 +36,7 @@ object YamlSimulationConfigParser:
    * @return
    *   a `ConfigResult` containing the parsed `SimulationConfig`
    */
-  def parseSimulationConfig(content: String): ConfigResult[SimulationConfig] =
+  def parseSimulationConfig(content: String): ConfigResult[SimulationConfig[Environment]] =
     for
       root <- content.as[Map[String, Any]] match
         case Left(err) => Left[Seq[ConfigError], Map[String, Any]](Seq(ConfigError.ParsingError(err.getMessage)))
