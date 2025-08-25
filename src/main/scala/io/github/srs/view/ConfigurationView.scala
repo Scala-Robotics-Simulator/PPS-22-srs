@@ -42,9 +42,9 @@ trait ConfigurationView:
   def close(): IO[Unit]
 
   /**
-   * Companion object for ConfigurationView that provides a factory method to create an instance of ConfigurationView.
+   * ConfigurationView companion object with factory method to create an instance of a GUI-based configuration view.
    */
-object ConfigurationView:
+object ConfigurationGUI:
 
   /**
    * Factory method to create an instance of ConfigurationView.
@@ -52,7 +52,7 @@ object ConfigurationView:
    * @return
    *   a new instance of ConfigurationView.
    */
-  def apply(): ConfigurationView = new ConfigurationViewImpl()
+  def apply(): ConfigurationView = new ConfigurationViewImpl
 
   private class ConfigurationViewImpl extends ConfigurationView:
     private val frame = new JFrame("Scala Robotics Simulator - Configuration")
@@ -217,4 +217,4 @@ object ConfigurationView:
 
   end ConfigurationViewImpl
 
-end ConfigurationView
+end ConfigurationGUI
