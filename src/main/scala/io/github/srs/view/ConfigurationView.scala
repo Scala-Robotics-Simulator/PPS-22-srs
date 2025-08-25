@@ -69,7 +69,7 @@ object ConfigurationView:
         FieldSpec(RobotFields.speed, "Speed", TextField(3)),
         FieldSpec(RobotFields.withProximitySensors, "With proximity sensors", CheckBox(true)),
         FieldSpec(RobotFields.withLightSensors, "With light sensors", CheckBox(true)),
-        FieldSpec(RobotFields.behavior, "Behavior", ComboBox(Policy.values.map(_.toString))),
+        FieldSpec(RobotFields.behavior, "Behavior", ComboBox(Policy.values.toSeq.map(_.toString))),
       )),
       ObstacleFields.self.capitalize -> (baseFieldSpec ++ Seq(
         FieldSpec(ObstacleFields.width, "Width", TextField(8)),
