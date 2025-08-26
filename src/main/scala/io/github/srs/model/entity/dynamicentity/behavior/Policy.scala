@@ -2,9 +2,10 @@ package io.github.srs.model.entity.dynamicentity.behavior
 
 import cats.Monad
 import cats.data.Kleisli
-import io.github.srs.model.entity.dynamicentity.action.{ Action, MovementActionFactory, NoAction }
+import io.github.srs.model.entity.dynamicentity.action.{Action, MovementActionFactory, NoAction}
 import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior
 import io.github.srs.model.entity.dynamicentity.behavior.Policy.*
+import io.github.srs.utils.SimulationDefaults.DynamicEntity
 import io.github.srs.utils.random.RNG
 
 /**
@@ -79,7 +80,7 @@ object Policy:
   private def randomWalkBehavior[F[_]: Monad]: Decision[F] =
     Kleisli { ctx =>
       import io.github.srs.utils.random.RandomDSL.*
-      val range = -1.0 to 1.0
+      val range = DynamicEntity.minSpeed to DynamicEntity.maxSpeed
       val (w1, r1) = ctx.rng generate range.includeMax
       val (w2, r2) = r1 generate range.includeMax
       val action =
