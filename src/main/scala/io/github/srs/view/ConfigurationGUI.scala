@@ -7,7 +7,7 @@ import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import io.github.srs.config.{ ConfigError, SimulationConfig }
 import io.github.srs.model.entity.dynamicentity.behavior.Policy
-import io.github.srs.model.environment.Environment
+import io.github.srs.model.environment.{ Environment, ValidEnvironment }
 import io.github.srs.model.environment.dsl.CreationDSL.*
 import io.github.srs.model.validation.DomainError
 import io.github.srs.utils.SimulationDefaults.Fields.Entity
@@ -20,9 +20,6 @@ import io.github.srs.view.components.*
 import io.github.srs.view.components.configuration.*
 import io.github.srs.view.components.simulation.SimulationCanvas
 
-/**
- * ConfigurationView companion object with factory method to create an instance of a GUI-based configuration view.
- */
 object ConfigurationGUI:
 
   /**
@@ -31,7 +28,7 @@ object ConfigurationGUI:
    * @return
    *   a new instance of ConfigurationView.
    */
-  def apply(): ConfigurationView = new ConfigurationViewImpl
+  def apply(): ConfigurationView = new ConfigurationViewImpl()
 
   private class ConfigurationViewImpl extends ConfigurationView:
     private val frame = new JFrame("Scala Robotics Simulator - Configuration")
@@ -81,7 +78,7 @@ object ConfigurationGUI:
 
     private val controlsPanel = new ConfigurationControlsPanel(
       onConfigLoaded = loadConfiguration,
-      onConfigSave = () => getCurrentConfiguration,
+      onConfigSave = extractConfig,
     )
 
     private val refreshFieldButton = new JButton("Refresh Field")
@@ -95,15 +92,12 @@ object ConfigurationGUI:
         JOptionPane.ERROR_MESSAGE,
       )
 
-    private def loadConfiguration(config: SimulationConfig): Unit =
+    private def loadConfiguration(config: SimulationConfig[Environment]): Unit =
       // Update all panels with the loaded configuration
       simulationPanel.setSimulation(config.simulation)
       environmentPanel.setEnvironment(config.environment)
       entitiesPanel.setEntities(config.environment.entities)
       refreshCanvas(config.environment).unsafeRunAsync(_ => ())
-
-    private def getCurrentConfiguration: Option[SimulationConfig] =
-      extractConfig()
 
     private def setupUI(splitRatio: Double = 0.5): Unit =
       frame.applyDefaultAndPreferSize()
@@ -150,18 +144,30 @@ object ConfigurationGUI:
 
     end setupUI
 
-    override def init(): IO[SimulationConfig] =
+    def init(): IO[SimulationConfig[ValidEnvironment]] =
       setupUI()
       frame.setVisible(true)
       IO.async_(cb =>
         startButton.addActionListener: _ =>
           extractConfig() match
-            case Some(config) => cb(Right[Throwable, SimulationConfig](config))
+            case Some(config) =>
+              config.environment.validate match
+                case Left(error) =>
+                  showValidationErrors(Seq(s"Environment validation error: ${error.errorMessage}"))
+                case Right(validatedEnv) =>
+                  cb(
+                    Right[Throwable, SimulationConfig[ValidEnvironment]](
+                      SimulationConfig[ValidEnvironment](config.simulation, validatedEnv),
+                    ),
+                  )
+
             case None =>
               showValidationErrors(Seq("Please fix configuration errors before starting")),
       )
 
-    private def extractConfig(): Option[SimulationConfig] =
+    end init
+
+    private def extractConfig(): Option[SimulationConfig[Environment]] =
       val simulationResult = simulationPanel.getSimulation
       val environmentResult = environmentPanel.getEnvironmentBase
       val entitiesResult = entitiesPanel.getEntities
@@ -169,12 +175,7 @@ object ConfigurationGUI:
       (simulationResult, environmentResult, entitiesResult) match
         case (Right(simulation), Right(environmentBase), Right(entities)) =>
           val environment = environmentBase.copy(entities = entities.toSet)
-          environment.validate match
-            case Left(error) =>
-              showValidationErrors(Seq(s"Environment validation error: ${error.errorMessage}"))
-              None
-            case Right(validatedEnv) =>
-              Some(SimulationConfig(simulation, validatedEnv))
+          Some(SimulationConfig(simulation, environment))
         case _ =>
           val allErrors = Seq(simulationResult, environmentResult, entitiesResult).collect { case Left(errors) =>
             errors
@@ -186,7 +187,6 @@ object ConfigurationGUI:
                 s"Invalid type for $field: expected $expected"
           showValidationErrors(allErrors)
           None
-      end match
     end extractConfig
 
     override def close(): IO[Unit] = IO.pure(frame.dispose())

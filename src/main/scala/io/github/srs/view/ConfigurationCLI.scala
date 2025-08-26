@@ -1,7 +1,9 @@
 package io.github.srs.view
 
 import cats.effect.IO
-import io.github.srs.config.{ SimulationConfig, YamlConfigManager }
+import io.github.srs.config.{ ConfigError, SimulationConfig, YamlConfigManager }
+import io.github.srs.model.environment.ValidEnvironment.ValidEnvironment
+import io.github.srs.model.environment.dsl.CreationDSL.validate
 
 /**
  * ConfigurationView companion object with factory method to create an instance of a CLI-based configuration view.
@@ -27,7 +29,7 @@ object ConfigurationCLI:
       seedOpt: Option[Long],
   ) extends ConfigurationView:
 
-    override def init(): IO[SimulationConfig] =
+    override def init(): IO[SimulationConfig[ValidEnvironment]] =
       for
         configPath <- pathOpt match
           case Some(p) => IO.pure(p)
@@ -50,17 +52,17 @@ object ConfigurationCLI:
               case Some(s) => IO.pure(s)
               case None => askSeed
 
-        cfgCLI = cfg.copy(
+        cfgWithParams: SimulationConfig[ValidEnvironment] = cfg.copy(
           simulation = cfg.simulation.copy(
             duration = Some(simTime),
             seed = Some(seed),
           ),
         )
-      yield cfgCLI
+      yield cfgWithParams
 
     private def askSimulationTime: IO[Long] =
       for
-        _ <- IO.print("Enter simulation duration (ms): ")
+        _ <- IO.print("Enter simulation time (ms): ")
         line <- IO.readLine
         duration <- IO(line.toLong)
           .handleErrorWith(_ => IO.println("Invalid input, try again.") *> askSimulationTime)
@@ -74,16 +76,29 @@ object ConfigurationCLI:
           .handleErrorWith(_ => IO.println("Invalid input, try again.") *> askSeed)
       yield seed
 
-    private def loadConfig(path: String): IO[SimulationConfig] =
+    private def loadConfig(path: String): IO[SimulationConfig[ValidEnvironment]] =
       val configPath = fs2.io.file.Path.fromNioPath(java.nio.file.Paths.get(path))
       YamlConfigManager[IO](configPath).load.attempt.flatMap:
         case Left(_: java.nio.file.NoSuchFileException) =>
-          IO.raiseError[SimulationConfig](new RuntimeException(s"File not found: $path"))
+          IO.raiseError[SimulationConfig[ValidEnvironment]](new RuntimeException(s"File not found: $path"))
         case Left(ex) =>
-          IO.raiseError[SimulationConfig](new RuntimeException(s"Failed to load file: ${ex.getMessage}"))
-        case Right(Left(errors: Seq[io.github.srs.config.ConfigError] @unchecked)) =>
-          IO.raiseError[SimulationConfig](new RuntimeException(s"Parsing failed:\n${errors.mkString("\n")}"))
-        case Right(Right(config)) => IO.pure(config)
+          IO.raiseError[SimulationConfig[ValidEnvironment]](
+            new RuntimeException(s"Failed to load file: ${ex.getMessage}"),
+          )
+        case Right(Left(errors: Seq[ConfigError] @unchecked)) =>
+          IO.raiseError[SimulationConfig[ValidEnvironment]](
+            new RuntimeException(s"Parsing failed:\n${errors.mkString("\n")}"),
+          )
+        case Right(Right(cfg)) =>
+          cfg.environment.validate match
+            case Left(error) =>
+              IO.raiseError[SimulationConfig[ValidEnvironment]](
+                new RuntimeException(s"Environment validation error: ${error.errorMessage}"),
+              )
+            case Right(validEnv) =>
+              IO.pure(SimulationConfig[ValidEnvironment](cfg.simulation, validEnv))
+
+    end loadConfig
 
     override def close(): IO[Unit] =
       IO.println("Closing CLI Configuration View")
