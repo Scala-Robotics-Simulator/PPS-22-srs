@@ -60,33 +60,19 @@ object GUILauncher extends BaseLauncher with GUIComponent[SimulationState]:
 object CLILauncher extends BaseLauncher with CLIComponent[SimulationState]:
   override val view: View[SimulationState] = View()
 
-  private def askSimulationTime: IO[FiniteDuration] =
-    for
-      _ <- IO.print("Enter the simulation time (ms): ")
-      line <- IO.readLine
-      duration <- IO(line.toLong)
-        .map(FiniteDuration(_, MILLISECONDS))
-        .handleErrorWith(_ => IO.println("Invalid input, please try again.") *> askSimulationTime)
-    yield duration
-
   /**
    * @inheritdoc
    */
   override def runMVC(state: SimulationState): IO[Unit] =
+
+    val stateCLI = state.copy(
+      simulationSpeed = SimulationSpeed.SUPERFAST,
+      simulationStatus = SimulationStatus.RUNNING,
+    )
     for
-      simTime <- state.simulationTime match
-        case Some(t) => IO.pure(t)
-        case None => askSimulationTime
-      cliState = state.copy(
-        simulationTime = Some(simTime),
-        simulationSpeed = SimulationSpeed.SUPERFAST,
-        simulationStatus = SimulationStatus.RUNNING,
-      )
-      result <- controller.start(cliState)
+      result <- controller.start(stateCLI)
       _ <- IO.println(s"Simulation finished. Final state:\n$result")
     yield ()
-
-end CLILauncher
 
 /**
  * Creates the initial state of the simulation based on the provided configuration.

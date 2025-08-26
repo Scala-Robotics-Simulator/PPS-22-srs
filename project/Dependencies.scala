@@ -22,6 +22,7 @@ object Dependencies {
   val circeGeneric = "io.circe" %% "circe-generic" % "0.14.14"
   val fs2Io = "co.fs2" %% "fs2-io" % "3.12.0"
   val parallelCollections = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.2.0"
+  val scopt = "com.github.scopt" %% "scopt" % "4.1.0"
   /*
    * Bundles
    */
