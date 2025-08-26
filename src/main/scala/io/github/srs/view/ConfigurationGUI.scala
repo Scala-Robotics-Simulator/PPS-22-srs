@@ -20,6 +20,9 @@ import io.github.srs.view.components.*
 import io.github.srs.view.components.configuration.*
 import io.github.srs.view.components.simulation.SimulationCanvas
 
+/**
+ * ConfigurationView companion object with factory method to create an instance of a GUI-based configuration view.
+ */
 object ConfigurationGUI:
 
   /**

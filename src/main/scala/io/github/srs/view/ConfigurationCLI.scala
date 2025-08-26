@@ -29,6 +29,9 @@ object ConfigurationCLI:
       seedOpt: Option[Long],
   ) extends ConfigurationView:
 
+    /**
+     * @inheritdoc
+     */
     override def init(): IO[SimulationConfig[ValidEnvironment]] =
       for
         configPath <- pathOpt match
@@ -60,6 +63,11 @@ object ConfigurationCLI:
         )
       yield cfgWithParams
 
+    /**
+     * Asks the user for the simulation time in milliseconds.
+     * @return
+     *   an [[IO]] action that yields the simulation time as a [[Long]].
+     */
     private def askSimulationTime: IO[Long] =
       for
         _ <- IO.print("Enter simulation time (ms): ")
@@ -68,6 +76,11 @@ object ConfigurationCLI:
           .handleErrorWith(_ => IO.println("Invalid input, try again.") *> askSimulationTime)
       yield duration
 
+    /**
+     * Asks the user for a random seed.
+     * @return
+     *   an [[IO]] action that yields the random seed as a [[Long]].
+     */
     private def askSeed: IO[Long] =
       for
         _ <- IO.print("Enter random seed: ")
@@ -76,6 +89,13 @@ object ConfigurationCLI:
           .handleErrorWith(_ => IO.println("Invalid input, try again.") *> askSeed)
       yield seed
 
+    /**
+     * Loads the configuration from the specified path.
+     * @param path
+     *   the path to the configuration file.
+     * @return
+     *   an [[IO]] action that yields the loaded [[SimulationConfig]].
+     */
     private def loadConfig(path: String): IO[SimulationConfig[ValidEnvironment]] =
       val configPath = fs2.io.file.Path.fromNioPath(java.nio.file.Paths.get(path))
       YamlConfigManager[IO](configPath).load.attempt.flatMap:
@@ -100,6 +120,9 @@ object ConfigurationCLI:
 
     end loadConfig
 
+    /**
+     * @inheritdoc
+     */
     override def close(): IO[Unit] =
       IO.println("Closing CLI Configuration View")
 
