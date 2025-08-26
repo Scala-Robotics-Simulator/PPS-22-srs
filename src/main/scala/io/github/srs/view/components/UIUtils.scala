@@ -1,11 +1,11 @@
 package io.github.srs.view.components
 
-import java.awt.{Dimension, Font, Toolkit}
+import java.awt.{ Dimension, Font, Toolkit }
 import javax.swing.BorderFactory
 import javax.swing.border.TitledBorder
-import io.github.srs.utils.SimulationDefaults.{Frame, UI}
-
 import java.util.Locale
+
+import io.github.srs.utils.SimulationDefaults.{ Frame, UI }
 
 /**
  * Centralized UI styling to ensure consistency across components
@@ -24,7 +24,7 @@ object UIUtils:
     val newFont = new Font(
       currentFont.getFamily,
       currentFont.getStyle,
-      UI.Fonts.titleSize
+      UI.Fonts.titleSize,
     )
     titledBorder.setTitleFont(newFont)
 
@@ -32,6 +32,8 @@ object UIUtils:
       titledBorder,
       BorderFactory.createEmptyBorder(spacing, spacing, spacing, spacing),
     )
+
+  end titledBorder
 
   def paddedBorder(padding: Int = UI.Spacing.standardPadding): javax.swing.border.Border =
     BorderFactory.createEmptyBorder(padding, padding, padding, padding)
