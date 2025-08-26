@@ -50,11 +50,12 @@ object SimulationDefaults:
       def lightEdge: Color = rgba(255, 140, 0, 80)
       def buttonHover: Color = rgb(230, 230, 230)
       def buttonPressed: Color = rgb(220, 235, 250)
+      def timeDisplay: Color = rgb(50, 50, 50)
 
     end Colors
 
     object Fonts:
-      val family = "Arial"
+      val fontSize = 12
       val titleSize = 12
 
     object Spacing:

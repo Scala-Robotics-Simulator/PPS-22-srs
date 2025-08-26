@@ -54,7 +54,7 @@ class RobotPanel extends JPanel(new BorderLayout()):
     add(infoPanel, BorderLayout.NORTH)
     add(listScrollPane, BorderLayout.CENTER)
 
-
+  end initLayout
 
   /**
    * Updates the list of robot IDs, preserving selection when possible.
