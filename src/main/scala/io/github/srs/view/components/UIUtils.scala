@@ -1,30 +1,36 @@
 package io.github.srs.view.components
 
-import java.awt.{ Dimension, Toolkit }
+import java.awt.{Dimension, Font, Toolkit}
 import javax.swing.BorderFactory
 import javax.swing.border.TitledBorder
+import io.github.srs.utils.SimulationDefaults.{Frame, UI}
 
-import io.github.srs.utils.SimulationDefaults.{ Frame, UI }
+import java.util.Locale
 
 /**
  * Centralized UI styling to ensure consistency across components
  */
 object UIUtils:
 
-  def titledBorder(title: String): javax.swing.border.Border =
+  def titledBorder(title: String, spacing: Int = UI.Spacing.innerPadding): javax.swing.border.Border =
+    val titledBorder = BorderFactory.createTitledBorder(
+      BorderFactory.createLineBorder(UI.Colors.border),
+      title.toUpperCase(Locale.ITALIAN),
+      TitledBorder.LEFT,
+      TitledBorder.TOP,
+    )
+
+    val currentFont = titledBorder.getTitleFont
+    val newFont = new Font(
+      currentFont.getFamily,
+      currentFont.getStyle,
+      UI.Fonts.titleSize
+    )
+    titledBorder.setTitleFont(newFont)
+
     BorderFactory.createCompoundBorder(
-      BorderFactory.createTitledBorder(
-        BorderFactory.createLineBorder(UI.Colors.border),
-        title,
-        TitledBorder.LEFT,
-        TitledBorder.TOP,
-      ),
-      BorderFactory.createEmptyBorder(
-        UI.Spacing.innerPadding,
-        UI.Spacing.innerPadding,
-        UI.Spacing.innerPadding,
-        UI.Spacing.innerPadding,
-      ),
+      titledBorder,
+      BorderFactory.createEmptyBorder(spacing, spacing, spacing, spacing),
     )
 
   def paddedBorder(padding: Int = UI.Spacing.standardPadding): javax.swing.border.Border =
