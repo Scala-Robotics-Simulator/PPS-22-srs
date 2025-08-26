@@ -36,6 +36,15 @@ object ViewModule:
      */
     def render(state: S): IO[Unit]
 
+    /**
+     * Closes the view and releases any resources.
+     * @return
+     *   an [[IO]] task that completes when the view is closed.
+     */
+    def close(): IO[Unit]
+
+  end View
+
   /**
    * Provider trait that defines the interface for providing a view.
    * @tparam S
