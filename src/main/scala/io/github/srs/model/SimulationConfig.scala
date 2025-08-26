@@ -17,4 +17,4 @@ object SimulationConfig:
     def tickSpeed: FiniteDuration = this match
       case SLOW => FiniteDuration(200, MILLISECONDS)
       case NORMAL => FiniteDuration(100, MILLISECONDS)
-      case FAST => FiniteDuration(50, MILLISECONDS)
+      case FAST => FiniteDuration(10, MILLISECONDS)
