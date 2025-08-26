@@ -2,13 +2,12 @@ package io.github.srs.model.entity.dynamicentity.behavior
 
 import cats.data.Kleisli
 import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 /**
  * Unit tests for the BehaviorTypes aliases.
- *
- * This test suite verifies the behavior of the Behavior and Condition type aliases.
  */
-final class BehaviorTypesTest extends AnyFlatSpec:
+final class BehaviorTypesTest extends AnyFlatSpec with Matchers:
 
   import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.*
 

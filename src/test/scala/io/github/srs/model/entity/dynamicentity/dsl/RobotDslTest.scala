@@ -2,25 +2,24 @@ package io.github.srs.model.entity.dynamicentity.dsl
 
 import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
 
+import cats.effect.IO
 import io.github.srs.model.entity.dynamicentity.*
+import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, DifferentialWheelMotor, Wheel }
+import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior
+import io.github.srs.model.entity.dynamicentity.behavior.{ BehaviorContext, Policy }
 import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, Sensor }
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.environment.Environment
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import cats.effect.IO
-import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings
-import io.github.srs.model.entity.dynamicentity.action.Action
-import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior
-import io.github.srs.model.entity.dynamicentity.behavior.Policy
 
 class RobotDslTest extends AnyFlatSpec with Matchers:
   given CanEqual[ShapeType.Circle, ShapeType.Circle] = CanEqual.derived
   given CanEqual[Orientation, Orientation] = CanEqual.derived
   given CanEqual[Actuator[Robot], Actuator[Robot]] = CanEqual.derived
   given CanEqual[Sensor[Robot, Environment], Sensor[Robot, Environment]] = CanEqual.derived
-  given CanEqual[Behavior[SensorReadings, Action[IO]], Behavior[SensorReadings, Action[IO]]] = CanEqual.derived
+  given CanEqual[Behavior[BehaviorContext, Action[IO]], Behavior[BehaviorContext, Action[IO]]] = CanEqual.derived
   given CanEqual[Policy, Policy] = CanEqual.derived
 
   import RobotDsl.*
