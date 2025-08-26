@@ -11,7 +11,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 /**
- * Unit tests for `Policy` (name parsing and execution semantics).
+ * Unit tests for [[Policy]] enum and its behaviors.
  */
 final class PolicyTest extends AnyFlatSpec with Matchers:
 
