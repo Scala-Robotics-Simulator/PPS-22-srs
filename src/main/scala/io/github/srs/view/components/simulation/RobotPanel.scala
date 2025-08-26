@@ -18,13 +18,12 @@ class RobotPanel extends JPanel(new BorderLayout()):
   private val infoArea = new JTextArea(8, 25)
   private val currentIds = new AtomicReference[List[String]](Nil)
 
-  initComponents()
-  setupLayout()
+  initLayout()
 
   /**
    * Initializes the visual components with their properties.
    */
-  private def initComponents(): Unit =
+  private def initLayout(): Unit =
     robotList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION)
 
     infoArea.setEditable(false)
@@ -40,10 +39,6 @@ class RobotPanel extends JPanel(new BorderLayout()):
       ),
     )
 
-  /**
-   * Sets up the panel layout with info area at top and robot list below.
-   */
-  private def setupLayout(): Unit =
     setBackground(UI.Colors.backgroundMedium)
     setBorder(UIUtils.paddedBorder())
 
@@ -58,6 +53,8 @@ class RobotPanel extends JPanel(new BorderLayout()):
 
     add(infoPanel, BorderLayout.NORTH)
     add(listScrollPane, BorderLayout.CENTER)
+
+
 
   /**
    * Updates the list of robot IDs, preserving selection when possible.
