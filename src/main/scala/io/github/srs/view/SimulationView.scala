@@ -12,7 +12,7 @@ import io.github.srs.model.ModelModule
 import io.github.srs.model.entity.Point2D.*
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.utils.SimulationDefaults.UI
-import io.github.srs.view.components.simulation.{ ControlsPanel, RobotPanel, SimulationCanvas }
+import io.github.srs.view.components.simulation.*
 import io.github.srs.view.state.SimulationViewState
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
@@ -86,6 +86,7 @@ object SimulationView:
     private val frame = new JFrame("Scala Robotics Simulator")
     private val canvas = new SimulationCanvas
     private val robotPanel = new RobotPanel
+    private val timePanel = new TimePanel
     private val controls = new ControlsPanel
     private val viewState = new AtomicReference(SimulationViewState())
 
@@ -99,6 +100,7 @@ object SimulationView:
       SwingUtilities.invokeLater(() =>
         robotPanel.setRobotIds(newState.robots.map(_.id.toString))
         canvas.update(state.environment, robotPanel.selectedId)
+        timePanel.updateTimes(state.elapsedTime, state.simulationTime)
         updateRobotInfo(),
       )
 
@@ -134,7 +136,12 @@ object SimulationView:
      */
     private def createSidePanel(): JPanel =
       val panel = new JPanel(new BorderLayout())
-      panel.add(robotPanel, BorderLayout.CENTER)
+
+      val infoContainer = new JPanel(new BorderLayout())
+      infoContainer.add(robotPanel, BorderLayout.CENTER)
+      infoContainer.add(timePanel, BorderLayout.SOUTH)
+
+      panel.add(infoContainer, BorderLayout.CENTER)
       panel.add(controls, BorderLayout.SOUTH)
       panel
 
