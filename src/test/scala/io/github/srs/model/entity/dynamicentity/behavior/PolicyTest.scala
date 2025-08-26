@@ -43,7 +43,7 @@ final class PolicyTest extends AnyFlatSpec with Matchers:
     val simpleRNG = SimpleRNG(C.Seed)
     val (randomAction, rngAfter) = Policy.RandomWalk.run[Id](ctx(C.Seed))
 
-    val ok = (rngAfter != simpleRNG) && (randomAction != null)
+    val ok = (rngAfter != simpleRNG) && Option(randomAction).isDefined
     ok shouldBe true
 
   it should "be deterministic given the same seed" in:
