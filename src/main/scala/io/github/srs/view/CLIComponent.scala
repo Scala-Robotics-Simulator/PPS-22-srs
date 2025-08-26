@@ -29,7 +29,8 @@ trait CLIComponent[S <: ModelModule.State] extends Component[S]:
      * @inheritdoc
      */
     override def init(queue: Queue[IO, Event]): IO[Unit] =
-      IO.unit
+      for _ <- IO.println("Welcome to the Scala Robotics Simulator CLI Configuration")
+      yield ()
 
     /**
      * @inheritdoc
@@ -41,5 +42,7 @@ trait CLIComponent[S <: ModelModule.State] extends Component[S]:
      * @inheritdoc
      */
     override def close(): IO[Unit] =
-      IO.unit
+      for _ <- IO.println("Exiting the Scala Robotics Simulator CLI. Goodbye!")
+      yield ()
+  end CLIViewImpl
 end CLIComponent
