@@ -87,6 +87,7 @@ lazy val root = project
     libraryDependencies ++= scalaTestBundle,
     libraryDependencies ++= catsBundle,
     libraryDependencies ++= yamlBundle,
+    libraryDependencies += parallelCollections,
     libraryDependencies += scalaTestJUnit5,
     libraryDependencies += squidLib,
     libraryDependencies += fs2Io,
