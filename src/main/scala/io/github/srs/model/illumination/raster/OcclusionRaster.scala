@@ -276,7 +276,7 @@ object OcclusionRaster:
    *   true if the angle is a multiple of 90 degrees (within tolerance)
    */
   private def isPerpendicularAngle(degrees: Double): Boolean =
-    math.abs(degrees % 180 - 90) < Occlusion.almostZero
+    math.abs(degrees % 180 - 90) < Occlusion.AlmostZero
 
   /**
    * Check if an angle is axis-aligned (0, 90, 180, 270 degrees) within a small tolerance.
@@ -287,9 +287,9 @@ object OcclusionRaster:
    *   true if the angle is axis-aligned (within tolerance)
    */
   inline private def isAxisAlignedAngle(deg: Double): Boolean =
-    val r = ((deg % Occlusion.fullRotation) + Occlusion.fullRotation) % Occlusion.fullRotation
+    val r = ((deg % Occlusion.FullRotation) + Occlusion.FullRotation) % Occlusion.FullRotation
     val m = r % 90.0
-    math.min(m, 90.0 - m) < Occlusion.almostZero
+    math.min(m, 90.0 - m) < Occlusion.AlmostZero
 
   /**
    * Convert a real-valued span [min, max] (grid-space) to an inclusive, clamped integer range of cell indices for a
