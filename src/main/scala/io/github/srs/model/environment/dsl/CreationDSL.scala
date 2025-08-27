@@ -1,10 +1,14 @@
 package io.github.srs.model.environment.dsl
 
+import cats.syntax.all.*
 import io.github.srs.model.entity.Entity
 import io.github.srs.model.entity.staticentity.StaticEntity.Boundary
 import io.github.srs.model.environment.{ Environment, ValidEnvironment }
 import io.github.srs.model.validation.Validation
 import io.github.srs.model.validation.Validation.{ bounded, noCollisions, withinBounds }
+import io.github.srs.model.entity.dynamicentity.Robot
+import io.github.srs.utils.SimulationDefaults.Environment.*
+import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.validateRobot
 
 /**
  * The DSL for creating an environment in the simulation.
@@ -78,17 +82,19 @@ object CreationDSL:
      *   A [[Validation]] that contains the validated environment or an error message if validation fails.
      */
     infix def validate: Validation[ValidEnvironment] =
-      import io.github.srs.utils.SimulationDefaults.Environment.*
       val entities = env.entities.filterNot:
         case _: Boundary => true
         case _ => false
       val boundaries = Boundary.createBoundaries(env.width, env.height)
+      val robots = env.entities.collect:
+        case r: Robot => r
       for
         width <- bounded("width", env.width, minWidth, maxWidth, includeMax = true)
         height <- bounded("height", env.height, minHeight, maxHeight, includeMax = true)
         _ <- bounded("entities", env.entities.size, 0, maxEntities, includeMax = true)
         entities <- withinBounds("entities", entities, width, height)
         entities <- noCollisions("entities", entities ++ boundaries)
+        _ <- robots.toList.traverse_(validateRobot(_))
       yield ValidEnvironment.from(Environment(width, height, entities))
   end extension
 end CreationDSL

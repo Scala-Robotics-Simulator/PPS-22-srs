@@ -27,6 +27,15 @@ import io.github.srs.model.entity.dynamicentity.behavior.Policy
  */
 object RobotDsl:
 
+  /**
+   * Validates a Robot entity to ensure it meets the domain constraints.
+   * @param r
+   *   the Robot entity to validate.
+   * @return
+   *   [[Right]] if the robot is valid, or [[Left]] with a validation
+   */
+  def validateRobot(r: Robot): Validation[Robot] = r.validate
+
   /** Creates a new Robot with default properties. */
   def robot: Robot = Robot()
 
