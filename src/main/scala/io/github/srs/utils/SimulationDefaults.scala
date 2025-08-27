@@ -19,6 +19,15 @@ import io.github.srs.model.illumination.model.ScaleFactor
 
 object SimulationDefaults:
 
+  object Illumination:
+
+    val GridThreshold = 10_000
+    val LightThreshold = 2
+
+    object Occlusion:
+      val FullRotation: Double = 90.0
+      val AlmostZero: Double = 1e-6
+
   object UI:
 
     object SimulationViewConstants:
@@ -85,7 +94,72 @@ object SimulationDefaults:
   val seed: Option[Long] = None
   val debugMode = true
   val binarySearchDurationThreshold: FiniteDuration = 1.microseconds
-  val lightMap: LightMap[IO] = LightMap.create[IO](SquidLibFovEngine, ScaleFactor.default).unsafeRunSync()
+
+  /**
+   * Alternative light map configurations for different use cases
+   */
+  object LightMapConfigs:
+
+    /**
+     * Default light map with caching enabled Uses scale factor 10 for a good balance of performance and precision
+     */
+    lazy val baseLightMap: LightMap[IO] =
+      LightMap
+        .create[IO](ScaleFactor.default, SquidLibFovEngine)
+        .unsafeRunSync()
+
+    /**
+     * High-precision light map for detailed rendering Uses scale factor 100 for maximum precision.
+     *
+     * @return
+     *   A [[LightMap]] configured for high precision, or the default light map if the scale factor is invalid.
+     */
+    def HPLightMap: LightMap[IO] =
+      ScaleFactor
+        .validate(80)
+        .map { scale =>
+          LightMap
+            .create[IO](scale, SquidLibFovEngine)
+            .unsafeRunSync()
+        }
+        .getOrElse(baseLightMap)
+
+    /**
+     * Fast light map for real-time simulation Uses scale factor 5 for maximum performance.
+     *
+     * @return
+     *   A [[LightMap]] configured for fast computation, or the default light map if the scale factor is invalid.
+     */
+    def fastLightMap: LightMap[IO] =
+      ScaleFactor
+        .validate(10)
+        .map { scale =>
+          LightMap
+            .create[IO](scale, SquidLibFovEngine)
+            .unsafeRunSync()
+        }
+        .getOrElse(baseLightMap)
+
+    /**
+     * Custom light map with specific scale factor Curried for better composition.
+     *
+     * @param scaleFactor
+     *   The desired scale factor (cells per meter).
+     * @return
+     *   A [[LightMap]] configured with the specified scale factor, or the default light map if the scale factor is
+     *   invalid.
+     */
+    def withScale(scaleFactor: Int): LightMap[IO] =
+      ScaleFactor
+        .validate(scaleFactor)
+        .map { scale =>
+          LightMap
+            .create[IO](scale, SquidLibFovEngine)
+            .unsafeRunSync()
+        }
+        .getOrElse(baseLightMap)
+
+  end LightMapConfigs
 
   object SimulationConfig:
     val maxCount = 10_000
