@@ -1,9 +1,10 @@
 package io.github.srs.model.illumination.model
 
 import scala.language.postfixOps
+
 import io.github.srs.model.environment.ValidEnvironment.ValidEnvironment
 import io.github.srs.model.environment.dsl.CreationDSL.*
-import io.github.srs.model.illumination.model.{GridDims, ScaleFactor}
+import io.github.srs.model.illumination.model.{ GridDims, ScaleFactor }
 import org.scalatest.OptionValues.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers

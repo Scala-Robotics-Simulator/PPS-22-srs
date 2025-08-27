@@ -10,7 +10,6 @@ import io.github.srs.model.entity.staticentity.StaticEntity.Light
 import io.github.srs.model.illumination.LightMap
 import io.github.srs.utils.SimulationDefaults.LightMapConfigs
 
-
 /**
  * Represents the environment in which entities exist.
  *
@@ -67,8 +66,6 @@ final case class Environment(
 
   lazy val lightField: LightField =
     lightMap.computeField(ValidEnvironment.from(this), includeDynamic = true).unsafeRunSync()
-
-end Environment
 
 object ValidEnvironment:
   opaque type ValidEnvironment <: EnvironmentParameters = Environment
