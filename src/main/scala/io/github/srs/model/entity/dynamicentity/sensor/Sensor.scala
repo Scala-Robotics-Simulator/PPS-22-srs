@@ -9,7 +9,7 @@ import io.github.srs.model.validation.Validation
 import io.github.srs.utils.Ray.intersectRay
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Sensor.ProximitySensor as ProximitySensorDefaults
 import io.github.srs.model.illumination.model.ScaleFactor
-import cats.effect.kernel.Sync
+import cats.Monad
 import io.github.srs.model.entity.ShapeType
 
 /**
@@ -48,7 +48,7 @@ trait Sensor[-Entity <: DynamicEntity, -Env <: Environment]:
    * @return
    *   a monadic effect containing the data sensed by the sensor.
    */
-  def sense[F[_]: Sync](entity: Entity, env: Env): F[Data]
+  def sense[F[_]: Monad](entity: Entity, env: Env): F[Data]
 
   private[sensor] def direction(entity: Entity): Point2D =
     val globalOrientation = entity.orientation.toRadians + offset.toRadians
@@ -82,6 +82,19 @@ final case class SensorReading[S <: Sensor[?, ?], A](sensor: S, value: A)
  */
 type SensorReadings = Vector[SensorReading[? <: Sensor[?, ?], ?]]
 
+object SensorReadings:
+
+  extension (readings: SensorReadings)
+
+    def prettyPrint: Vector[String] =
+      readings
+        .map(r =>
+          r.sensor match
+            case ProximitySensor(offset, range) =>
+              s"Proximity (offset: ${offset.degrees}°, range: $range m) -> ${r.value}"
+            case LightSensor(offset) => s"Light (offset: ${offset.degrees}°) -> ${r.value}",
+        )
+
 /**
  * A proximity sensor that can sense the distance to other entities in the environment. It calculates the distance to
  * the nearest entity within its range and returns a normalized value. The value is normalized to a range between 0.0
@@ -108,8 +121,8 @@ final case class ProximitySensor[Entity <: DynamicEntity, Env <: Environment](
     import Point2D.*
     origin(entity) + direction(entity) * range
 
-  override def sense[F[_]: Sync](entity: Entity, env: Env): F[Data] =
-    Sync[F].pure:
+  override def sense[F[_]: Monad](entity: Entity, env: Env): F[Data] =
+    Monad[F].pure:
       val o = origin(entity)
       val end = rayEnd(entity)
 
@@ -151,8 +164,8 @@ final case class LightSensor[Entity <: DynamicEntity, Env <: Environment](
    * @return
    *   a monadic effect containing the light intensity sensed by the sensor.
    */
-  override def sense[F[_]: Sync](entity: Entity, env: Env): F[Data] =
-    Sync[F].pure:
+  override def sense[F[_]: Monad](entity: Entity, env: Env): F[Data] =
+    Monad[F].pure:
       val o = origin(entity)
       env.lightField.sampleAtWorld(o)(using ScaleFactor.default)
 
@@ -178,7 +191,7 @@ object Sensor:
      * @return
      *   a vector of sensor readings.
      */
-    def senseAll[F[_]: Sync](env: Environment): F[SensorReadings] =
+    def senseAll[F[_]: Monad](env: Environment): F[SensorReadings] =
       r.sensors.traverse: sensor =>
         sensor.sense(r, env).map(reading => SensorReading(sensor, reading))
 end Sensor

@@ -14,6 +14,10 @@ import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.utils.SimulationDefaults.UI
 import io.github.srs.view.components.simulation.{ ControlsPanel, RobotPanel, SimulationCanvas }
 import io.github.srs.view.state.SimulationViewState
+import io.github.srs.model.environment.Environment
+import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
+import cats.Id
+import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings.prettyPrint
 
 /**
  * Trait defining the interface for the simulation view. Handles UI initialization, rendering, and cleanup.
@@ -261,7 +265,8 @@ object SimulationView:
       val info = for
         selectedId <- robotPanel.selectedId
         robot <- currentState.robots.find(_.id.toString == selectedId)
-      yield formatRobotInfo(robot)
+        environment <- currentState.environment
+      yield formatRobotInfo(robot, environment)
 
       robotPanel.setInfo(info.getOrElse(UI.SimulationViewConstants.DefaultRobotInfo))
 
@@ -273,12 +278,15 @@ object SimulationView:
      * @return
      *   Formatted string with robot details
      */
-    private def formatRobotInfo(robot: Robot): String =
+    private def formatRobotInfo(robot: Robot, environment: Environment): String =
+      val readings = robot.senseAll[Id](environment)
       s"""Robot ID: ${robot.id.toString.take(UI.SimulationViewConstants.IdDisplayLength)}...
          |Position: (${s"%.${UI.SimulationViewConstants.PositionDecimals}f"
           .format(robot.position.x)}, ${s"%.${UI.SimulationViewConstants.PositionDecimals}f".format(robot.position.y)})
          |Orientation: ${s"%.${UI.SimulationViewConstants.OrientationDecimals}f"
-          .format(robot.orientation.degrees)}°""".stripMargin
+          .format(robot.orientation.degrees)}°
+         |Sensors:
+         |  ${readings.prettyPrint.mkString("\n  ")}""".stripMargin
   end SimulationViewImpl
 
 end SimulationView

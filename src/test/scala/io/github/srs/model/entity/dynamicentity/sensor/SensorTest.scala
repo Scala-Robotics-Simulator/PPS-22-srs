@@ -3,9 +3,6 @@ package io.github.srs.model.entity.dynamicentity.sensor
 import java.util.UUID
 
 import cats.Monad
-import cats.effect.IO
-import cats.effect.kernel.Sync
-import cats.effect.unsafe.implicits.global
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
 import io.github.srs.model.entity.dynamicentity.actuator.Actuator
 import io.github.srs.model.entity.dynamicentity.behavior.Policy
@@ -15,6 +12,7 @@ import io.github.srs.model.environment.dsl.CreationDSL.*
 import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
+import cats.Id
 
 class SensorTest extends AnyFlatSpec with should.Matchers:
   given CanEqual[Sensor[?, ?], Sensor[?, ?]] = CanEqual.derived
@@ -40,8 +38,8 @@ class SensorTest extends AnyFlatSpec with should.Matchers:
   class DummySensor(override val offset: Orientation) extends Sensor[Dummy, Environment]:
     override type Data = Double
 
-    override def sense[F[_]: Sync](entity: Dummy, env: Environment): F[Double] =
-      Sync[F].pure(42.0) // Dummy implementation for sensing
+    override def sense[F[_]: Monad](entity: Dummy, env: Environment): F[Double] =
+      Monad[F].pure(42.0) // Dummy implementation for sensing
 
   "Sensor" should "have an offset orientation" in:
     val sensor = new DummySensor(offset)
@@ -57,7 +55,7 @@ class SensorTest extends AnyFlatSpec with should.Matchers:
       sensors = Vector(sensor),
     )
     val environment = Environment(10, 10).validate.toOption.value
-    val data = sensor.sense[IO](entity, environment).unsafeRunSync()
+    val data = sensor.sense[Id](entity, environment)
     data should be(42.0)
 
 end SensorTest

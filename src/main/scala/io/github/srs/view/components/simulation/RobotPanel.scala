@@ -3,6 +3,7 @@ package io.github.srs.view.components.simulation
 import java.awt.{ BorderLayout, Dimension }
 import java.util.concurrent.atomic.AtomicReference
 import javax.swing.*
+import javax.swing.text.DefaultCaret
 
 import io.github.srs.utils.SimulationDefaults.UI
 import io.github.srs.view.components.UIUtils
@@ -27,6 +28,9 @@ class RobotPanel extends JPanel(new BorderLayout()):
     robotList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION)
 
     infoArea.setEditable(false)
+    val infoAreaCaret = infoArea.getCaret()
+    infoAreaCaret match
+      case c: DefaultCaret => c.setUpdatePolicy(DefaultCaret.NEVER_UPDATE)
     infoArea.setFont(new java.awt.Font("Monospaced", java.awt.Font.PLAIN, 11))
     infoArea.setBackground(UI.Colors.backgroundLight)
     infoArea.setBorder(
@@ -46,7 +50,7 @@ class RobotPanel extends JPanel(new BorderLayout()):
     val infoPanel = new JPanel(new BorderLayout())
     infoPanel.setBorder(UIUtils.titledBorder("Robot Information"))
     infoPanel.add(new JScrollPane(infoArea), BorderLayout.CENTER)
-    infoPanel.setPreferredSize(new Dimension(250, 150))
+    infoPanel.setPreferredSize(new Dimension(250, 300))
 
     val listScrollPane = new JScrollPane(robotList)
     listScrollPane.setBorder(UIUtils.titledBorder("Active Robots"))
