@@ -14,10 +14,10 @@ import io.github.srs.utils.SimulationDefaults.Illumination
  * Illumination and light field computation engine for grid-based environments.
  *
  * The computational pipeline is as follows:
- *   1. Build an occlusion grid from static and (optionally) dynamic entities.
- *   2. For each light source, compute its individual contribution using a Field-of-View (FOV) engine.
- *   3. Combine all individual light contributions into a final `LightField` by summing them with saturation (capping at
- *      1.0).
+ *   - Build an occlusion grid from static and (optionally) dynamic entities.
+ *   - For each light source, compute its individual contribution using a Field-of-View (FOV) engine.
+ *   - Combine all individual light contributions into a final [[LightField]] by summing them with saturation (capping
+ *     at 1.0).
  */
 object IlluminationLogic:
 
@@ -139,7 +139,7 @@ object IlluminationLogic:
    * Computes the light contribution fields for all lights, potentially in parallel.
    *
    * @return
-   *   A `Vector` where each element is a `Field` representing one light's contribution.
+   *   A `Vector` where each element is a [[Field]] representing one light's contribution.
    */
   private def computeAllLightContributions(
       lights: Vector[StaticEntity.Light],

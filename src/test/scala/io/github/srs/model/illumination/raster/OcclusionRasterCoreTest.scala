@@ -8,7 +8,7 @@ import io.github.srs.model.illumination.raster.OpacityValue.{ Cleared, Occluded 
 import io.github.srs.model.illumination.raster.{ OcclusionRaster, OcclusionRasterTestBase }
 
 /**
- * Core tests for OcclusionRaster functionality
+ * Core tests for [[OcclusionRaster]] functionality
  */
 final class OcclusionRasterCoreTest extends OcclusionRasterTestBase:
 

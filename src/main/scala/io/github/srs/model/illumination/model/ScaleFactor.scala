@@ -56,7 +56,8 @@ object ScaleFactor:
      *   A tuple (Int, Int) representing the cell coordinates.
      */
     inline def point2DToCellFloor(p: Point2D): (Int, Int) =
-      (math.floor(p._1 * s.toDouble).toInt, math.floor(p._2 * s.toDouble).toInt)
+      val (x, y) = p
+      ((x * s).floor.toInt, (y * s).floor.toInt)
 
   end extension
 

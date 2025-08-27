@@ -2,12 +2,12 @@ package io.github.srs.model.illumination.raster
 
 import io.github.srs.model.entity.Entity
 import io.github.srs.model.environment.ValidEnvironment.ValidEnvironment
-import io.github.srs.model.illumination.model.{Grid, GridDims, ScaleFactor}
+import io.github.srs.model.illumination.model.{ Grid, GridDims, ScaleFactor }
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.OptionValues.*
 import io.github.srs.model.environment.dsl.CreationDSL.*
-import io.github.srs.model.illumination.raster.OpacityValue.{Cleared, Occluded}
+import io.github.srs.model.illumination.raster.OpacityValue.{ Cleared, Occluded }
 
 /**
  * Base trait for OcclusionRaster tests providing common test infrastructure
@@ -37,15 +37,15 @@ trait OcclusionRasterTestBase extends AnyFlatSpec with Matchers:
     else None
 
   /**
-   * Prints the contents of a grid by iterating through its dimensions.
-   * Each row of the grid is printed as a comma-separated string of integer values.
+   * Prints the contents of a grid by iterating through its dimensions. Each row of the grid is printed as a
+   * comma-separated string of integer values.
    *
    * @param grid
-   * The grid of double values to be dumped.
+   *   The grid of double values to be dumped.
    * @param dims
-   * The dimensions of the grid, specifying its width and height in terms of cells.
+   *   The dimensions of the grid, specifying its width and height in terms of cells.
    * @return
-   * Unit. The method produces output by printing the grid to the console.
+   *   Unit. The method produces output by printing the grid to the console.
    */
   def dump(grid: Grid[Double], dims: GridDims): Unit =
     for y <- 0 until dims.heightCells do
