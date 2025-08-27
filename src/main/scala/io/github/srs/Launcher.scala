@@ -9,6 +9,7 @@ import io.github.srs.controller.ControllerModule
 import io.github.srs.controller.ControllerModule.Controller
 import io.github.srs.model.ModelModule.Model
 import io.github.srs.model.SimulationConfig.{ SimulationSpeed, SimulationStatus }
+import io.github.srs.model.dsl.EnvironmentToGridDSL.prettyPrint
 import io.github.srs.model.environment.ValidEnvironment
 import io.github.srs.model.logic.simulationStateLogicsBundle
 import io.github.srs.model.{ ModelModule, SimulationState }
@@ -71,7 +72,7 @@ object CLILauncher extends BaseLauncher with CLIComponent[SimulationState]:
     )
     for
       result <- controller.start(stateCLI)
-      _ <- IO.println(s"Simulation finished. Final state:\n$result")
+      _ <- IO.println(s"Simulation finished. Final state:\n${prettyPrint(result.environment)}")
     yield ()
 
 /**
