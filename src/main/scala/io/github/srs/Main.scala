@@ -21,4 +21,4 @@ import cats.effect.unsafe.implicits.global
       runner.unsafeRunSync()
 
     case None =>
-      sys.exit(1)
+      println("Failed to parse arguments.")
