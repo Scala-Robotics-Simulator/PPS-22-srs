@@ -10,7 +10,6 @@ import io.github.srs.controller.message.RobotProposal
 import io.github.srs.controller.protocol.Event
 import io.github.srs.model.*
 import io.github.srs.model.SimulationConfig.SimulationStatus.{ PAUSED, RUNNING, STOPPED }
-import io.github.srs.model.UpdateLogic.*
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.behavior.BehaviorContext
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
@@ -247,13 +246,20 @@ object ControllerModule:
          */
         private def handleEvent(state: S, event: Event): IO[S] =
           event match
-            case Event.Tick(deltaTime) => context.model.tick(state, deltaTime)
-            case Event.TickSpeed(speed) => context.model.tickSpeed(state, speed)
-            case Event.Random(rng) => context.model.random(state, rng)
-            case Event.Pause => context.model.pause(state)
-            case Event.Resume => context.model.resume(state)
-            case Event.Stop => context.model.stop(state)
-            case Event.RobotActionProposals(proposals) => context.model.handleRobotActionsProposals(state, proposals)
+            case Event.Tick(deltaTime) =>
+              context.model.update(state)(using s => bundle.tickLogic.tick(s, deltaTime))
+            case Event.TickSpeed(speed) =>
+              context.model.update(state)(using s => bundle.tickLogic.tickSpeed(s, speed))
+            case Event.Random(rng) =>
+              context.model.update(state)(using s => bundle.randomLogic.random(s, rng))
+            case Event.Pause =>
+              context.model.update(state)(using s => bundle.pauseLogic.pause(s))
+            case Event.Resume =>
+              context.model.update(state)(using s => bundle.resumeLogic.resume(s))
+            case Event.Stop =>
+              context.model.update(state)(using s => bundle.stopLogic.stop(s))
+            case Event.RobotActionProposals(proposals) =>
+              context.model.update(state)(using s => bundle.robotActionsLogic.handleRobotActionsProposals(s, proposals))
 
       end ControllerImpl
 
