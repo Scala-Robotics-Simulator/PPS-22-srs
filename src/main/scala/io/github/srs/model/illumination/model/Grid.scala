@@ -4,7 +4,7 @@ import scala.collection.immutable.ArraySeq
 import scala.reflect.ClassTag
 
 /**
- * Represents a rectangular 2D grid addressed as grid(x)(y).
+ * Represents a rectangular 2D grid.
  * @param A
  *   The type of elements stored in the grid.
  */
