@@ -82,10 +82,31 @@ final case class SensorReading[S <: Sensor[?, ?], A](sensor: S, value: A)
  */
 type SensorReadings = Vector[SensorReading[? <: Sensor[?, ?], ?]]
 
+/**
+ * A collection of proximity sensor readings. This type is a specialized version of [[SensorReadings]], specifically for
+ * proximity sensors. It is a vector of [[SensorReading]] instances where the sensor is a [[ProximitySensor]] and the
+ * data is of type `Double`.
+ */
+type ProximityReadings = Vector[SensorReading[ProximitySensor[?, ?], ProximitySensor[?, ?]#Data]]
+
+/**
+ * A collection of light sensor readings. This type is a specialized version of [[SensorReadings]], specifically for
+ * light sensors. It is a vector of [[SensorReading]] instances where the sensor is a [[LightSensor]] and the data is of
+ * type `Double`.
+ */
+type LightReadings = Vector[SensorReading[LightSensor[?, ?], LightSensor[?, ?]#Data]]
+
 object SensorReadings:
 
   extension (readings: SensorReadings)
 
+    /**
+     * Pretty prints the sensor readings in a human-readable format. Each reading is formatted based on the type of
+     * sensor
+     *
+     * @return
+     *   a vector of strings representing the pretty-printed sensor readings.
+     */
     def prettyPrint: Vector[String] =
       readings
         .map(r =>
@@ -95,6 +116,31 @@ object SensorReadings:
             case LightSensor(offset) => s"Light (offset: ${offset.degrees}°) -> ${r.value}"
             case other => s"${other.getClass.getSimpleName} -> ${r.value}",
         )
+
+    /**
+     * Filters the sensor readings to include only those from proximity sensors.
+     *
+     * @return
+     *   a vector of sensor readings from proximity sensors.
+     */
+    def proximityReadings: ProximityReadings =
+      readings.collect { case _ @SensorReading(s: ProximitySensor[?, ?], v: Double) =>
+        SensorReading(s, v)
+      }
+
+    /**
+     * Filters the sensor readings to include only those from light sensors.
+     *
+     * @return
+     *   a vector of sensor readings from light sensors.
+     */
+    def lightReadings: LightReadings =
+      readings.collect { case _ @SensorReading(s: LightSensor[?, ?], v: Double) =>
+        SensorReading(s, v)
+      }
+  end extension
+
+end SensorReadings
 
 /**
  * A proximity sensor that can sense the distance to other entities in the environment. It calculates the distance to
