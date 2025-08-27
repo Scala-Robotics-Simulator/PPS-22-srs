@@ -22,7 +22,7 @@ import io.github.srs.utils.SimulationDefaults.Illumination.Occlusion
 object OcclusionRaster:
 
   /**
-   * Rasterize static occluders (obstacles and boundaries) to an occlusion grid.
+   * Rasterize static occludes obstacles to an occlusion grid.
    *
    * @param env
    *   The [[ValidEnvironment]] containing all entities
@@ -34,7 +34,6 @@ object OcclusionRaster:
   def rasterizeStatics(env: ValidEnvironment, dims: GridDims)(using ScaleFactor): Grid[Double] =
     val statics = env.entities.iterator.collect:
       case ob: StaticEntity.Obstacle => ob
-      case bo: StaticEntity.Boundary => bo
     rasterizeEntities(statics, dims)
 
   /**
