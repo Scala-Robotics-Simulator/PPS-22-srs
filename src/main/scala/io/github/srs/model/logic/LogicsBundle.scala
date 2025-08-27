@@ -13,20 +13,20 @@ import io.github.srs.model.logic.RobotActionsLogic.given
  *   the type of the state.
  */
 trait LogicsBundle[S <: State]:
-  def tick: TickLogic[S]
-  def random: RandomLogic[S]
-  def pause: PauseLogic[S]
-  def resume: ResumeLogic[S]
-  def stop: StopLogic[S]
-  def robotActions: RobotActionsLogic[S]
+  def tickLogic: TickLogic[S]
+  def randomLogic: RandomLogic[S]
+  def pauseLogic: PauseLogic[S]
+  def resumeLogic: ResumeLogic[S]
+  def stopLogic: StopLogic[S]
+  def robotActionsLogic: RobotActionsLogic[S]
 
 /**
  * Companion object for [[LogicsBundle]] containing given instances.
  */
 given simulationStateLogicsBundle: LogicsBundle[SimulationState] with
-  val tick: TickLogic[SimulationState] = summon[TickLogic[SimulationState]]
-  val random: RandomLogic[SimulationState] = summon[RandomLogic[SimulationState]]
-  val pause: PauseLogic[SimulationState] = summon[PauseLogic[SimulationState]]
-  val resume: ResumeLogic[SimulationState] = summon[ResumeLogic[SimulationState]]
-  val stop: StopLogic[SimulationState] = summon[StopLogic[SimulationState]]
-  val robotActions: RobotActionsLogic[SimulationState] = summon[RobotActionsLogic[SimulationState]]
+  val tickLogic: TickLogic[SimulationState] = summon[TickLogic[SimulationState]]
+  val randomLogic: RandomLogic[SimulationState] = summon[RandomLogic[SimulationState]]
+  val pauseLogic: PauseLogic[SimulationState] = summon[PauseLogic[SimulationState]]
+  val resumeLogic: ResumeLogic[SimulationState] = summon[ResumeLogic[SimulationState]]
+  val stopLogic: StopLogic[SimulationState] = summon[StopLogic[SimulationState]]
+  val robotActionsLogic: RobotActionsLogic[SimulationState] = summon[RobotActionsLogic[SimulationState]]
