@@ -2,7 +2,7 @@ package io.github.srs.model.entity.dynamicentity.behavior
 
 import cats.Monad
 import cats.data.Kleisli
-import io.github.srs.model.entity.dynamicentity.action.{Action, MovementActionFactory, NoAction}
+import io.github.srs.model.entity.dynamicentity.action.{ Action, MovementActionFactory, NoAction }
 import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior
 import io.github.srs.model.entity.dynamicentity.behavior.Policy.*
 import io.github.srs.utils.SimulationDefaults.DynamicEntity
