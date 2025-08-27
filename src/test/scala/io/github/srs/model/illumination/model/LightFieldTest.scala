@@ -16,7 +16,6 @@ final class LightFieldTest extends AnyFlatSpec with Matchers:
     /** Dimensions and values for the light field tests */
     def mk(dims: GridDims, values: ArraySeq[Double]): LightField = LightField(dims, values)
 
-    // Test 1 (SF=1)
     val W1 = 2
     val H1 = 2
     val Data1: ArraySeq[Double] = ArraySeq(0.0, 1.0, 0.5, 0.75)
@@ -24,7 +23,6 @@ final class LightFieldTest extends AnyFlatSpec with Matchers:
     val Expected1 = 0.40625
     val SF1: ScaleFactor = ScaleFactor.validate(1).toOption.value
 
-    // Test 2 (SF=2)
     val W2 = 4
     val H2 = 4
 
@@ -35,7 +33,6 @@ final class LightFieldTest extends AnyFlatSpec with Matchers:
     }
     val SF2: ScaleFactor = ScaleFactor.validate(2).toOption.value
 
-    // Test 3 (out-of-bounds)
     val W3 = 2
     val H3 = 2
     val Fill = 0.7
