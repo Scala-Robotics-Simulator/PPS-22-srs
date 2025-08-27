@@ -37,11 +37,11 @@ final case class LightField private (dims: GridDims, data: ArraySeq[Double]) der
    * Performs bilinear interpolation to compute a value at the given grid coordinates.
    *
    * @param gridX
-   * The x-coordinate in the grid where interpolation is to be performed.
+   *   The x-coordinate in the grid where interpolation is to be performed.
    * @param gridY
-   * The y-coordinate in the grid where interpolation is to be performed.
+   *   The y-coordinate in the grid where interpolation is to be performed.
    * @return
-   * The interpolated value at the specified grid coordinates.
+   *   The interpolated value at the specified grid coordinates.
    */
   private def bilinearInterpolate(gridX: Double, gridY: Double): Double =
     val xBase = gridX.floor.toInt

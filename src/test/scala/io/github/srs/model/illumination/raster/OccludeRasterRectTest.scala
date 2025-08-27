@@ -46,7 +46,6 @@ final class OccludeRasterRectTest extends OcclusionRasterTestBase:
     val (centerX, centerY) = worldToCell(2.5, 2.5)
     cellAt(grid, centerX, centerY) shouldBe Some(Cleared)
 
-
   it should "handle 90-degree rotations correctly" in:
     val obstacle = StaticEntity.Obstacle(
       pos = Point2D(2.5, 2.5),
@@ -107,14 +106,14 @@ final class OccludeRasterRectTest extends OcclusionRasterTestBase:
       pos = Point2D(2.5, 1.0),
       orient = Orientation(0.0),
       width = 2.0,
-      height = 0.1
+      height = 0.1,
     )
 
     val tallObstacle = StaticEntity.Obstacle(
       pos = Point2D(1.0, 2.5),
       orient = Orientation(0.0),
       width = 0.1,
-      height = 2.0
+      height = 2.0,
     )
 
     val env = createTestEnvironment(Set(wideObstacle, tallObstacle))

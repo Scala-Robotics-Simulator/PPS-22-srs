@@ -1,8 +1,8 @@
 package io.github.srs.model.illumination.raster
 
-import io.github.srs.model.entity.{Orientation, Point2D, ShapeType}
+import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.entity.dynamicentity.Robot
-import io.github.srs.model.illumination.raster.OpacityValue.{Cleared, Occluded}
+import io.github.srs.model.illumination.raster.OpacityValue.{ Cleared, Occluded }
 
 /**
  * Tests specifically for circular entities (robots) and their occlusion behavior
@@ -13,7 +13,7 @@ final class OcclusionRasterCircleTest extends OcclusionRasterTestBase:
     val robot = Robot(
       position = Point2D(2.5, 2.5),
       shape = ShapeType.Circle(0.16),
-      orientation = Orientation(0)
+      orientation = Orientation(0),
     )
 
     val env = createTestEnvironment(Set(robot))
@@ -37,7 +37,7 @@ final class OcclusionRasterCircleTest extends OcclusionRasterTestBase:
     val tinyRobot = Robot(
       position = Point2D(3.0, 3.0),
       shape = ShapeType.Circle(0.03),
-      orientation = Orientation(0)
+      orientation = Orientation(0),
     )
 
     val env = createTestEnvironment(Set(tinyRobot))
@@ -54,7 +54,7 @@ final class OcclusionRasterCircleTest extends OcclusionRasterTestBase:
     val largeRobot = Robot(
       position = Point2D(2.5, 2.5),
       shape = ShapeType.Circle(0.3),
-      orientation = Orientation(0)
+      orientation = Orientation(0),
     )
 
     val env = createTestEnvironment(Set(largeRobot))
@@ -67,11 +67,11 @@ final class OcclusionRasterCircleTest extends OcclusionRasterTestBase:
     for
       dx <- -3 to 3
       dy <- -3 to 3
-      if math.sqrt(dx*dx + dy*dy) <= 3
+      if math.sqrt(dx * dx + dy * dy) <= 3
     do
       cellAt(grid, centerX + dx, centerY + dy) match
         case Some(value) =>
-          if math.sqrt(dx*dx + dy*dy) <= 2.5 then
+          if math.sqrt(dx * dx + dy * dy) <= 2.5 then
             val _ = value shouldBe Occluded
         case None => // Outside grid bounds, ignore
 
@@ -79,7 +79,7 @@ final class OcclusionRasterCircleTest extends OcclusionRasterTestBase:
     val robot = Robot(
       position = Point2D(2.0, 2.0),
       shape = ShapeType.Circle(0.1),
-      orientation = Orientation(0)
+      orientation = Orientation(0),
     )
 
     val env = createTestEnvironment(Set(robot))
@@ -97,13 +97,13 @@ final class OcclusionRasterCircleTest extends OcclusionRasterTestBase:
     val robot1 = Robot(
       position = Point2D(1.5, 1.5),
       shape = ShapeType.Circle(0.1),
-      orientation = Orientation(0)
+      orientation = Orientation(0),
     )
 
     val robot2 = Robot(
       position = Point2D(3.5, 3.5),
       shape = ShapeType.Circle(0.1),
-      orientation = Orientation(0)
+      orientation = Orientation(0),
     )
 
     val env = createTestEnvironment(Set(robot1, robot2))
@@ -124,7 +124,7 @@ final class OcclusionRasterCircleTest extends OcclusionRasterTestBase:
     val edgeRobot = Robot(
       position = Point2D(0.15, 2.5),
       shape = ShapeType.Circle(0.1),
-      orientation = Orientation(0)
+      orientation = Orientation(0),
     )
 
     val env = createTestEnvironment(Set(edgeRobot))
@@ -141,13 +141,13 @@ final class OcclusionRasterCircleTest extends OcclusionRasterTestBase:
     val smallRobot = Robot(
       position = Point2D(1.5, 1.5),
       shape = ShapeType.Circle(0.05),
-      orientation = Orientation(0)
+      orientation = Orientation(0),
     )
 
     val largeRobot = Robot(
       position = Point2D(3.5, 3.5),
       shape = ShapeType.Circle(0.08),
-      orientation = Orientation(0)
+      orientation = Orientation(0),
     )
 
     val env = createTestEnvironment(Set(smallRobot, largeRobot))
