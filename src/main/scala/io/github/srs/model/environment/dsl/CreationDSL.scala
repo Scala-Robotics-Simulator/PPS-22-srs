@@ -1,11 +1,9 @@
 package io.github.srs.model.environment.dsl
 
 import cats.syntax.all.*
-import cats.effect.IO
 import io.github.srs.model.entity.Entity
 import io.github.srs.model.entity.staticentity.StaticEntity.Boundary
 import io.github.srs.model.environment.{ Environment, ValidEnvironment }
-import io.github.srs.model.illumination.LightMap
 import io.github.srs.model.validation.Validation
 import io.github.srs.model.validation.Validation.{ bounded, noCollisions, withinBounds }
 import io.github.srs.model.entity.dynamicentity.Robot
@@ -29,7 +27,6 @@ object CreationDSL:
    * Provides an extension method for the Environment class to allow for a more fluent DSL.
    */
   extension (env: Environment)
-
 
     /**
      * Sets the width of the environment.
@@ -57,9 +54,6 @@ object CreationDSL:
      */
     def withDefaultLighting: Environment =
       env.copy(_lightMap = Some(LightMapConfigs.baseLightMap))
-
-    def withCustomLightMap(lightMap: LightMap[IO]): Environment =
-      env.copy(_lightMap = Some(lightMap))
 
     /**
      * Sets the height of the environment.
@@ -119,7 +113,6 @@ object CreationDSL:
         entities <- withinBounds("entities", entities, width, height)
         entities <- noCollisions("entities", entities ++ boundaries)
         _ <- robots.toList.traverse_(validateRobot(_))
-      yield ValidEnvironment.from(Environment(width, height, entities))
       yield ValidEnvironment.from(env.copy(entities = entities))
   end extension
 end CreationDSL
