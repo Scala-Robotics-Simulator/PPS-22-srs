@@ -2,9 +2,11 @@ package io.github.srs.model.entity.dynamicentity.behavior
 
 import cats.Monad
 import cats.data.Kleisli
+import io.github.srs.model.entity.Orientation
 import io.github.srs.model.entity.dynamicentity.action.{ Action, MovementActionFactory, NoAction }
 import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior
 import io.github.srs.model.entity.dynamicentity.behavior.Policy.*
+import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, SensorReading, SensorReadings }
 import io.github.srs.utils.SimulationDefaults.DynamicEntity
 import io.github.srs.utils.random.RNG
 
@@ -15,6 +17,7 @@ import io.github.srs.utils.random.RNG
 enum Policy(val name: String) derives CanEqual:
   case AlwaysForward extends Policy("AlwaysForward")
   case RandomWalk extends Policy("RandomWalk")
+  case ObstacleAvoidance extends Policy("ObstacleAvoidance")
 
   /**
    * Compute the next [[Action]] and the advanced RNG.
@@ -28,6 +31,7 @@ enum Policy(val name: String) derives CanEqual:
     this match
       case AlwaysForward => alwaysForwardBehavior.run(input)
       case RandomWalk => randomWalkBehavior.run(input)
+      case ObstacleAvoidance => obstacleAvoidanceBehavior.run(input)
 
   /**
    * String representation of the policy.
@@ -56,6 +60,14 @@ object Policy:
 
   def fromString(s: String): Option[Policy] =
     values.find(_.name == s)
+
+  private def getProximityReading(readings: SensorReadings): Vector[(Double, Orientation)] =
+    val proximityReadings: Vector[(Double, Orientation)] =
+      readings.flatMap:
+        case SensorReading(ps: ProximitySensor[?, ?], value: Double) =>
+          Some(value -> ps.offset)
+        case _ => None
+    proximityReadings
 
   /**
    * always move forward.
@@ -86,6 +98,37 @@ object Policy:
       val action =
         MovementActionFactory.customMove[F](w1, w2).getOrElse(NoAction[F]())
       (action, r2)
+    }
+
+  private def obstacleAvoidanceBehavior[F[_]: Monad]: Decision[F] =
+    Kleisli { ctx =>
+      val proximityReadings = getProximityReading(ctx.sensorReadings)
+
+      if proximityReadings.isEmpty then (MovementActionFactory.moveForward[F], ctx.rng)
+      else
+        val (closestDist, closestOffset) = proximityReadings.foldLeft((Double.MaxValue, Orientation(0.0))):
+          case ((minDist, minOffset), (dist, offset)) =>
+            if dist < minDist then (dist, offset) else (minDist, minOffset)
+
+        val threshold = 0.6
+        val safeMin = 0.3
+        val action =
+          if closestDist < threshold then
+            println(s"Closest obstacle at distance $closestDist with offset ${closestOffset.degrees}°")
+            if closestOffset.degrees != 90.0 &&
+              closestOffset.degrees != 135.0 &&
+              closestOffset.degrees != 180.0 &&
+              closestOffset.degrees != 225.0 &&
+              closestOffset.degrees != 270.0 &&
+              closestDist < safeMin
+            then MovementActionFactory.moveBackward[F]
+            else
+              val turn = if closestOffset.degrees >= 0 && closestOffset.degrees <= 180 then -0.9 else 0.9
+              MovementActionFactory.customMove[F](0.5, turn).getOrElse(NoAction[F]())
+          else MovementActionFactory.moveForward[F]
+
+        (action, ctx.rng)
+      end if
     }
 
 end Policy
