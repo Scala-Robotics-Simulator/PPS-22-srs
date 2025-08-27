@@ -221,7 +221,7 @@ object ControllerModule:
             adjustedTickSpeed = if timeToNextTick > 0 then timeToNextTick else 0L
             sleepTime = FiniteDuration(adjustedTickSpeed, MILLISECONDS)
             _ <- IO.sleep(sleepTime)
-            tick <- handleEvent(state, Event.Tick(tickSpeed))
+            tick <- handleEvent(state, Event.Tick(state.dt))
           yield tick
 
         /**
