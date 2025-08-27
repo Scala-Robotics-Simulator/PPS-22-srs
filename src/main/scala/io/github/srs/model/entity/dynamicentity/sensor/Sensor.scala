@@ -52,7 +52,7 @@ trait Sensor[-Entity <: DynamicEntity, -Env <: Environment]:
 
   private[sensor] def direction(entity: Entity): Point2D =
     val globalOrientation = entity.orientation.toRadians + offset.toRadians
-    (math.cos(globalOrientation), -math.sin(globalOrientation))
+    (math.cos(globalOrientation), math.sin(globalOrientation))
 
   private[sensor] def origin(entity: Entity): Point2D =
     import Point2D.*

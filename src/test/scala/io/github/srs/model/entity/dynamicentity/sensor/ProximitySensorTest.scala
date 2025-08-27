@@ -23,24 +23,24 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
 
   val offset: Orientation = Orientation(0.0)
   val range: Double = 5.0
-  val sensor: ProximitySensor[DynamicEntity, Environment] = ProximitySensor(offset, range)
+  val sens0Off: ProximitySensor[DynamicEntity, Environment] = ProximitySensor(offset, range)
 
-  val pointingDownSensor: ProximitySensor[DynamicEntity, Environment] = createSensor(270)
-  val pointingBackwardSensor: ProximitySensor[DynamicEntity, Environment] = createSensor(180)
-  val pointingLeftSensor: ProximitySensor[DynamicEntity, Environment] = createSensor(90)
+  val sens90Off: ProximitySensor[DynamicEntity, Environment] = createSensor(90)
+  val sens180Off: ProximitySensor[DynamicEntity, Environment] = createSensor(180)
+  val sens270Off: ProximitySensor[DynamicEntity, Environment] = createSensor(270)
 
   // Diagonal sensors
-  val pointingNorthEastSensor: ProximitySensor[DynamicEntity, Environment] = createSensor(45)
-  val pointingSouthEastSensor: ProximitySensor[DynamicEntity, Environment] = createSensor(315)
-  val pointingSouthWestSensor: ProximitySensor[DynamicEntity, Environment] = createSensor(225)
-  val pointingNorthWestSensor: ProximitySensor[DynamicEntity, Environment] = createSensor(135)
+  val sens45Off: ProximitySensor[DynamicEntity, Environment] = createSensor(45)
+  val sens135Off: ProximitySensor[DynamicEntity, Environment] = createSensor(135)
+  val sens225Off: ProximitySensor[DynamicEntity, Environment] = createSensor(225)
+  val sens315Off: ProximitySensor[DynamicEntity, Environment] = createSensor(315)
 
   val robot: Robot = Robot(
     position = Point2D(6.0, 6.0),
     shape = ShapeType.Circle(0.5),
     orientation = Orientation(0.0),
     actuators = Seq.empty[Actuator[Robot]],
-    sensors = Vector(sensor, pointingDownSensor, pointingBackwardSensor, pointingLeftSensor),
+    sensors = Vector(sens0Off, sens90Off, sens180Off, sens270Off),
   ).validate.toOption.value
 
   private def createSensor(orientationDegrees: Double): ProximitySensor[DynamicEntity, Environment] =
@@ -86,68 +86,68 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
 
   it should "be able to sense an obstacle in front" in:
     val obstacle = createObstacle(position = Point2D(7.001, 6.0))
-    val reading = getSensorReading(sensor, Set(obstacle))
+    val reading = getSensorReading(sens0Off, Set(obstacle))
     reading should be < 0.01
 
   it should "not sense an obstacle that is a bit lower" in:
     val obstacle = createObstacle(position = Point2D(7.5, 6.5), height = .99)
-    val reading = getSensorReading(sensor, Set(obstacle))
+    val reading = getSensorReading(sens0Off, Set(obstacle))
     reading should be(1.0)
 
   it should "not sense an obstacle that is a bit higher" in:
     val obstacle = createObstacle(position = Point2D(7.5, 5.5), height = .99)
-    val reading = getSensorReading(sensor, Set(obstacle))
+    val reading = getSensorReading(sens0Off, Set(obstacle))
     reading should be(1.0)
 
   it should "sense an obstacle that is very narrow" in:
     val obstacle = createObstacle(position = Point2D(7.5, 6.0), width = 0.01)
     val environment = createEnvironment(Set(robot, obstacle))
-    val sensorReading = sensor.sense[Id](robot, environment)
+    val sensorReading = sens0Off.sense[Id](robot, environment)
     sensorReading should be < 1.0 // Should detect the narrow obstacle
 
   it should "not sense an obstacle positioned slightly to the side" in:
     val obstacle = createObstacle(position = Point2D(7.5, 5.49), width = 0.5)
-    val reading = getSensorReading(sensor, Set(obstacle))
+    val reading = getSensorReading(sens0Off, Set(obstacle))
     reading should be(1.0)
 
   it should "sense an obstacle at the exact edge of sensor range" in:
     val obstacle = createObstacle(position = Point2D(11.99, 6.0))
-    val reading = getSensorReading(sensor, Set(obstacle))
+    val reading = getSensorReading(sens0Off, Set(obstacle))
     reading should be > 0.9
 
   it should "not sense an obstacle just outside sensor range" in:
     val obstacle = createObstacle(position = Point2D(12.01, 6.0))
-    val reading = getSensorReading(sensor, Set(obstacle))
+    val reading = getSensorReading(sens0Off, Set(obstacle))
     reading should be(1.0)
 
   it should "not sense an obstacle outside its range" in:
     val farObstacle = createObstacle(position = Point2D(12.0, 6.0))
-    val reading = getSensorReading(sensor, Set(farObstacle))
+    val reading = getSensorReading(sens0Off, Set(farObstacle))
     reading should be(1.0)
 
   it should "be able to sense a robot in front" in:
     val otherRobot = createRobot(position = Point2D(7.001, 6.0))
-    val reading = getSensorReading(sensor, Set(otherRobot))
+    val reading = getSensorReading(sens0Off, Set(otherRobot))
     reading should be < 0.01
 
   it should "not sense a robot outside its range" in:
     val farRobot = createRobot(position = Point2D(12.0, 6.0))
-    val reading = getSensorReading(sensor, Set(farRobot))
+    val reading = getSensorReading(sens0Off, Set(farRobot))
     reading should be(1.0)
 
   it should "not sense a robot that is positioned slightly above" in:
     val robotAbove = createRobot(position = Point2D(7.5, 5.49))
-    val reading = getSensorReading(sensor, Set(robotAbove))
+    val reading = getSensorReading(sens0Off, Set(robotAbove))
     reading should be(1.0)
 
   it should "not sense a robot that is positioned slightly below" in:
     val robotBelow = createRobot(position = Point2D(7.5, 6.51))
-    val reading = getSensorReading(sensor, Set(robotBelow))
+    val reading = getSensorReading(sens0Off, Set(robotBelow))
     reading should be(1.0)
 
   it should "sense a robot at the exact edge of vertical alignment" in:
     val robotAtEdge = createRobot(position = Point2D(7.5, 6.0))
-    val reading = getSensorReading(sensor, Set(robotAtEdge))
+    val reading = getSensorReading(sens0Off, Set(robotAtEdge))
     reading should be(0.1)
 
   it should "sense a very small robot in front" in:
@@ -158,86 +158,86 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
       actuators = Seq.empty[Actuator[Robot]],
       sensors = Vector.empty[Sensor[Robot, Environment]],
     ).validate.toOption.value
-    val reading = getSensorReading(sensor, Set(smallRobot))
+    val reading = getSensorReading(sens0Off, Set(smallRobot))
     reading should be < 0.2 // Should detect the small robot close
 
   it should "sense a robot at the maximum range boundary" in:
     val robotAtMaxRange = createRobot(position = Point2D(11.99, 6.0))
-    val reading = getSensorReading(sensor, Set(robotAtMaxRange))
+    val reading = getSensorReading(sens0Off, Set(robotAtMaxRange))
     reading should be > 0.99 // Should detect the robot at the edge of range
 
   it should "sense an obstacle directly below" in:
     val obstacleBelow = createObstacle(position = Point2D(6.0, 7.01))
-    val reading = getSensorReading(pointingDownSensor, Set(obstacleBelow))
+    val reading = getSensorReading(sens90Off, Set(obstacleBelow))
     reading should be < 0.01 // Should detect the obstacle directly below
 
   it should "not sense an obstacle below outside its range" in:
     val farObstacleBelow = createObstacle(position = Point2D(6.0, 12.0))
-    val reading = getSensorReading(pointingDownSensor, Set(farObstacleBelow))
+    val reading = getSensorReading(sens90Off, Set(farObstacleBelow))
     reading should be(1.0)
 
   it should "be able to sense a robot directly below" in:
     val robotBelow = createRobot(position = Point2D(6.0, 7.01))
-    val reading = getSensorReading(pointingDownSensor, Set(robotBelow))
+    val reading = getSensorReading(sens90Off, Set(robotBelow))
     reading should be < 0.01
 
   it should "not sense a robot below outside its range" in:
     val farRobotBelow = createRobot(position = Point2D(6.0, 12.0))
-    val reading = getSensorReading(pointingDownSensor, Set(farRobotBelow))
+    val reading = getSensorReading(sens90Off, Set(farRobotBelow))
     reading should be(1.0)
 
   it should "not sense an obstacle positioned slightly to the left relative to the downward sensor" in:
     val obstacleLeft = createObstacle(position = Point2D(6.51, 7.5), width = 0.5)
-    val reading = getSensorReading(pointingDownSensor, Set(obstacleLeft))
+    val reading = getSensorReading(sens90Off, Set(obstacleLeft))
     reading should be(1.0)
 
   it should "sense an obstacle at the exact horizontal alignment below" in:
     val obstacleAligned = createObstacle(position = Point2D(6.0, 7.0), height = 0.5)
-    val reading = getSensorReading(pointingDownSensor, Set(obstacleAligned))
+    val reading = getSensorReading(sens90Off, Set(obstacleAligned))
     reading should be < 0.1 // Should detect the obstacle directly below
 
   it should "sense a very thin obstacle below" in:
     val thinObstacle = createObstacle(position = Point2D(6.0, 7.01), width = 0.1)
-    val reading = getSensorReading(pointingDownSensor, Set(thinObstacle))
+    val reading = getSensorReading(sens90Off, Set(thinObstacle))
     reading should be < 0.01 // Should detect the thin obstacle below
 
   it should "not sense an obstacle above outside the left sensor's range" in:
     val farObstacleAbove = createObstacle(position = Point2D(6.0, 0.1), height = 0.1)
-    val reading = getSensorReading(pointingLeftSensor, Set(farObstacleAbove))
+    val reading = getSensorReading(sens270Off, Set(farObstacleAbove))
     reading should be(1.0)
 
   it should "not sense a robot above outside the left sensor's range" in:
     val farRobotAbove = createRobot(position = Point2D(6.0, 0.3), radius = 0.19)
-    val reading = getSensorReading(pointingLeftSensor, Set(farRobotAbove))
+    val reading = getSensorReading(sens270Off, Set(farRobotAbove))
     reading should be(1.0)
 
   // Edge case tests for multiple entities
   it should "sense the closest obstacle when multiple obstacles are present" in:
     val closeObstacle = createObstacle(position = Point2D(7.01, 6.0))
     val farObstacle = createObstacle(position = Point2D(8.5, 6.0))
-    val reading = getSensorReading(sensor, Set(closeObstacle, farObstacle))
+    val reading = getSensorReading(sens0Off, Set(closeObstacle, farObstacle))
     reading should be < 0.01 // Should detect the closer obstacle
 
   it should "not sense anything when obstacles are positioned outside sensor path" in:
     val obstacleAbove = createObstacle(position = Point2D(7.5, 5.0))
     val obstacleBelow = createObstacle(position = Point2D(7.5, 7.0))
-    val reading = getSensorReading(sensor, Set(obstacleAbove, obstacleBelow))
+    val reading = getSensorReading(sens0Off, Set(obstacleAbove, obstacleBelow))
     reading should be(1.0)
 
   it should "sense mixed entities (robot and obstacle) with robot being closer" in:
     val closeRobot = createRobot(position = Point2D(7.001, 6.0))
     val farObstacle = createObstacle(position = Point2D(8.5, 6.0))
-    val reading = getSensorReading(sensor, Set(closeRobot, farObstacle))
+    val reading = getSensorReading(sens0Off, Set(closeRobot, farObstacle))
     reading should be < 0.01
 
   it should "sense mixed entities (robot and obstacle) with obstacle being closer" in:
     val closeObstacle = createObstacle(position = Point2D(7.01, 6.0))
     val farRobot = createRobot(position = Point2D(8.5, 6.0))
-    val reading = getSensorReading(sensor, Set(closeObstacle, farRobot))
+    val reading = getSensorReading(sens0Off, Set(closeObstacle, farRobot))
     reading should be < 0.01
 
   it should "handle empty environment correctly" in:
-    val reading = getSensorReading(sensor, Set.empty)
+    val reading = getSensorReading(sens0Off, Set.empty)
     reading should be(1.0)
 
   // Diagonal sensor tests
@@ -245,24 +245,24 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
     val obstacleNE =
       createObstacle(position = Point2D(7.0, 5.25), height = 0.5) // Positioned along NE diagonal from sensor
     val environment = createEnvironment(Set(robot, obstacleNE))
-    val sensorReading = pointingNorthEastSensor.sense[Id](robot, environment)
+    val sensorReading = sens315Off.sense[Id](robot, environment)
     sensorReading should be < 0.05 // Should detect obstacle very close
 
   it should "not sense an obstacle outside northeast sensor range" in:
     val farObstacleNE = createObstacle(position = Point2D(10.5, 1.5))
-    val reading = getSensorReading(pointingNorthEastSensor, Set(farObstacleNE))
+    val reading = getSensorReading(sens315Off, Set(farObstacleNE))
     reading should be(1.0)
 
   it should "sense an obstacle in the southeast diagonal" in:
     val obstacleSE =
       createObstacle(position = Point2D(7.0, 6.75), height = 0.5) // Positioned along SE diagonal from sensor
     val environment = createEnvironment(Set(robot, obstacleSE))
-    val sensorReading = pointingSouthEastSensor.sense[Id](robot, environment)
+    val sensorReading = sens45Off.sense[Id](robot, environment)
     sensorReading should be < 0.05 // Should detect obstacle (return value less than 1.0)
 
   it should "not sense an obstacle outside southeast sensor range" in:
     val farObstacleSE = createObstacle(position = Point2D(10.5, 10.5))
-    val reading = getSensorReading(pointingSouthEastSensor, Set(farObstacleSE))
+    val reading = getSensorReading(sens45Off, Set(farObstacleSE))
     reading should be(1.0)
 
   // Tests with different robot orientations
@@ -272,7 +272,7 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
     val envWithObstacle = createEnvironment(Set(rotatedRobot, obstacleNorth))
 
     // Forward sensor (offset 0) should now point north due to 90-degree rotation
-    val forwardSensorReading = sensor.sense[Id](rotatedRobot, envWithObstacle)
+    val forwardSensorReading = sens180Off.sense[Id](rotatedRobot, envWithObstacle)
     forwardSensorReading should be < 0.01 // Should detect obstacle to the north
 
   it should "sense correctly when robot is rotated 180 degrees" in:
@@ -281,7 +281,7 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
     val envWithObstacles = createEnvironment(Set(rotatedRobot, obstacleInFront))
 
     // Forward sensor should now point backward due to 180-degree rotation
-    val forwardSensorReading = sensor.sense[Id](rotatedRobot, envWithObstacles)
+    val forwardSensorReading = sens0Off.sense[Id](rotatedRobot, envWithObstacles)
     forwardSensorReading should be < 0.01 // Should detect obstacle that's now "in front"
 
   it should "sense correctly when robot is rotated 270 degrees" in:
@@ -290,7 +290,7 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
     val envWithObstacle = createEnvironment(Set(rotatedRobot, obstacleSouth))
 
     // Forward sensor should now point south due to 270-degree rotation
-    val forwardSensorReading = sensor.sense[Id](rotatedRobot, envWithObstacle)
+    val forwardSensorReading = sens180Off.sense[Id](rotatedRobot, envWithObstacle)
     forwardSensorReading should be < 0.01 // Should detect obstacle to the south
 
   it should "sense correctly when obstacle is rotated 90 degrees" in:
@@ -300,7 +300,7 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
 
     // If the obstacle is vertical, the forward sensor should detect it
     // since it is now aligned with the robot's forward direction
-    val forwardSensorReading = sensor.sense[Id](robot, envWithRotatedObstacle)
+    val forwardSensorReading = sens0Off.sense[Id](robot, envWithRotatedObstacle)
     forwardSensorReading should be < 0.01 // Should detect the rotated obstacle
 
   it should "sense correctly when obstacle is rotated 180 degrees" in:
@@ -309,7 +309,7 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
     val envWithRotatedObstacle = createEnvironment(Set(robot, rotatedObstacle))
 
     // Forward sensor should still detect the obstacle
-    val forwardSensorReading = sensor.sense[Id](robot, envWithRotatedObstacle)
+    val forwardSensorReading = sens0Off.sense[Id](robot, envWithRotatedObstacle)
     forwardSensorReading should be < 0.01 // Should detect the rotated obstacle
 
   it should "sense correctly when obstacle is rotated 270 degrees" in:
@@ -318,7 +318,7 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
     val envWithRotatedObstacle = createEnvironment(Set(robot, rotatedObstacle))
 
     // Forward sensor should now point south due to 270-degree rotation
-    val forwardSensorReading = sensor.sense[Id](robot, envWithRotatedObstacle)
+    val forwardSensorReading = sens0Off.sense[Id](robot, envWithRotatedObstacle)
     forwardSensorReading should be < 0.01 // Should detect the rotated obstacle
 
   it should "sense an obstacle rotated by 45 degrees" in:
@@ -327,18 +327,18 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
     val envWithRotatedObstacle = createEnvironment(Set(robot, rotatedObstacle))
 
     // Forward sensor should now point northeast due to 45-degree rotation
-    val forwardSensorReading = pointingNorthEastSensor.sense[Id](robot, envWithRotatedObstacle)
+    val forwardSensorReading = sens315Off.sense[Id](robot, envWithRotatedObstacle)
     forwardSensorReading should be < 0.1 // Should detect obstacle in the northeast direction
 
   it should "sense an obstacle rotated by 45 degrees at the edge of its range" in:
     val farRotatedObstacle = createObstacle(position = Point2D(10, 2), orientation = Orientation(45))
-    val reading = getSensorReading(pointingNorthEastSensor, Set(farRotatedObstacle))
+    val reading = getSensorReading(sens315Off, Set(farRotatedObstacle))
     val _ = reading should be > 0.9
     reading should be < 1.0 // Should detect very close to range boundary
 
   it should "not sense an obstacle rotated by 45 degrees outside its range" in:
     val farRotatedObstacle = createObstacle(position = Point2D(10.5, 1.5), orientation = Orientation(45))
-    val reading = getSensorReading(pointingNorthEastSensor, Set(farRotatedObstacle))
+    val reading = getSensorReading(sens315Off, Set(farRotatedObstacle))
     reading should be(1.0) // Should not detect obstacle outside range
 
   it should "sense correctly when robot is rotated 45 degrees" in:
@@ -347,7 +347,7 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
     val envWithObstacle = createEnvironment(Set(rotatedRobot, obstacleDiagonal))
 
     // Forward sensor should now point northeast due to 45-degree rotation
-    val forwardSensorReading = sensor.sense[Id](rotatedRobot, envWithObstacle)
+    val forwardSensorReading = sens270Off.sense[Id](rotatedRobot, envWithObstacle)
     forwardSensorReading should be < 0.05 // Should detect obstacle in the northeast direction
 
   it should "handle multiple obstacles at different angles with rotated robot" in:
@@ -369,10 +369,10 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
 
     // With 90-degree rotation: forward points north, backward points south,
     // left points west, down points east
-    val forwardReading = sensor.sense[Id](rotatedRobot, envWithObstacles)
-    val backwardReading = pointingBackwardSensor.sense[Id](rotatedRobot, envWithObstacles)
-    val leftReading = pointingLeftSensor.sense[Id](rotatedRobot, envWithObstacles)
-    val downReading = pointingDownSensor.sense[Id](rotatedRobot, envWithObstacles)
+    val forwardReading = sens0Off.sense[Id](rotatedRobot, envWithObstacles)
+    val backwardReading = sens180Off.sense[Id](rotatedRobot, envWithObstacles)
+    val leftReading = sens270Off.sense[Id](rotatedRobot, envWithObstacles)
+    val downReading = sens90Off.sense[Id](rotatedRobot, envWithObstacles)
 
     // All sensors should detect obstacles
     Seq(forwardReading, backwardReading, leftReading, downReading).forall(_ < 0.01) should be(true)
@@ -380,13 +380,13 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
   // Additional precision and boundary edge cases
   it should "handle floating point precision at range boundaries" in:
     val precisionObstacle = createObstacle(position = Point2D(11.9900001, 6.0))
-    val reading = getSensorReading(sensor, Set(precisionObstacle))
+    val reading = getSensorReading(sens0Off, Set(precisionObstacle))
     val _ = reading should be > 0.99
     reading should be < 1.0 // Should detect very close to range boundary
 
   it should "not sense obstacles at exactly distance + range boundary" in:
     val boundaryObstacle = createObstacle(position = Point2D(12.0000001, 6.0))
-    val reading = getSensorReading(sensor, Set(boundaryObstacle))
+    val reading = getSensorReading(sens0Off, Set(boundaryObstacle))
     reading should be(1.0)
 
   it should "handle very small robots at edge of detection" in:
@@ -397,23 +397,23 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
       actuators = Seq.empty[Actuator[Robot]],
       sensors = Vector.empty[Sensor[Robot, Environment]],
     ).validate.toOption.value
-    val reading = getSensorReading(sensor, Set(tinyRobot))
+    val reading = getSensorReading(sens0Off, Set(tinyRobot))
     reading should be > 0.99
 
   it should "handle obstacles with extreme aspect ratios" in:
     val tallThinObstacle = createObstacle(position = Point2D(7.5, 6.0), width = 0.001, height = 10.0)
     val environment = createEnvironment(Set(robot, tallThinObstacle))
-    val sensorReading = sensor.sense[Id](robot, environment)
+    val sensorReading = sens0Off.sense[Id](robot, environment)
     sensorReading should be < 1.0 // Should detect very thin obstacle
 
   it should "sense environment boundaries correctly" in:
     val robot = createRobot(Point2D(1, 1), Orientation(0.0))
     val environment = createEnvironment(Set(robot), width = 2, height = 2)
     val sensorReadings = Seq(
-      sensor.sense[Id](robot, environment),
-      pointingDownSensor.sense[Id](robot, environment),
-      pointingBackwardSensor.sense[Id](robot, environment),
-      pointingLeftSensor.sense[Id](robot, environment),
+      sens0Off.sense[Id](robot, environment),
+      sens90Off.sense[Id](robot, environment),
+      sens180Off.sense[Id](robot, environment),
+      sens270Off.sense[Id](robot, environment),
     )
     sensorReadings.forall(_ == 0.1) should be(true) // Should detect boundaries
 
@@ -421,10 +421,10 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
     val rotatedRobot = createRobot(Point2D(1, 1), Orientation(90))
     val environment = createEnvironment(Set(rotatedRobot), width = 2, height = 2)
     val sensorReadings = Seq(
-      sensor.sense[Id](rotatedRobot, environment),
-      pointingDownSensor.sense[Id](rotatedRobot, environment),
-      pointingBackwardSensor.sense[Id](rotatedRobot, environment),
-      pointingLeftSensor.sense[Id](rotatedRobot, environment),
+      sens0Off.sense[Id](rotatedRobot, environment),
+      sens90Off.sense[Id](rotatedRobot, environment),
+      sens180Off.sense[Id](rotatedRobot, environment),
+      sens270Off.sense[Id](rotatedRobot, environment),
     )
     sensorReadings.forall(_ == 0.1) should be(true) // Should detect boundaries
 
@@ -432,10 +432,10 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
     val rotatedRobot = createRobot(Point2D(1, 1), Orientation(45))
     val environment = createEnvironment(Set(rotatedRobot), width = 2, height = 2)
     val sensorReadings = Seq(
-      pointingNorthEastSensor.sense[Id](rotatedRobot, environment),
-      pointingSouthEastSensor.sense[Id](rotatedRobot, environment),
-      pointingSouthWestSensor.sense[Id](rotatedRobot, environment),
-      pointingNorthWestSensor.sense[Id](rotatedRobot, environment),
+      sens315Off.sense[Id](rotatedRobot, environment),
+      sens45Off.sense[Id](rotatedRobot, environment),
+      sens135Off.sense[Id](rotatedRobot, environment),
+      sens225Off.sense[Id](rotatedRobot, environment),
     )
     sensorReadings.forall(_ == 0.1) should be(true) // Should detect boundaries
 
@@ -443,12 +443,12 @@ class ProximitySensorTest extends AnyFlatSpec with Matchers:
     val edgeRobot = createRobot(Point2D(5.6, 5.6), Orientation(0.0))
     val environment = createEnvironment(Set(edgeRobot), width = 11, height = 11)
     val closeEnoughSensors = Seq(
-      sensor.sense[Id](edgeRobot, environment),
-      pointingDownSensor.sense[Id](edgeRobot, environment),
+      sens0Off.sense[Id](edgeRobot, environment),
+      sens90Off.sense[Id](edgeRobot, environment),
     )
     val notCloseEnoughSensors = Seq(
-      pointingBackwardSensor.sense[Id](edgeRobot, environment),
-      pointingLeftSensor.sense[Id](edgeRobot, environment),
+      sens180Off.sense[Id](edgeRobot, environment),
+      sens270Off.sense[Id](edgeRobot, environment),
     )
     val _ =
       closeEnoughSensors.forall(reading => reading > 0.9 && reading < 1) should be(true) // Should detect boundaries
