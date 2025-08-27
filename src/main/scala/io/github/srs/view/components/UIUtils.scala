@@ -15,7 +15,7 @@ object UIUtils:
   def titledBorder(title: String, spacing: Int = UI.Spacing.innerPadding): javax.swing.border.Border =
     val titledBorder = BorderFactory.createTitledBorder(
       BorderFactory.createLineBorder(UI.Colors.border),
-      title.toUpperCase(Locale.ITALIAN),
+      title.toUpperCase(Locale.getDefault()),
       TitledBorder.LEFT,
       TitledBorder.TOP,
     )
