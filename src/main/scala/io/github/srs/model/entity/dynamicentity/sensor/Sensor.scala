@@ -92,7 +92,8 @@ object SensorReadings:
           r.sensor match
             case ProximitySensor(offset, range) =>
               s"Proximity (offset: ${offset.degrees}°, range: $range m) -> ${r.value}"
-            case LightSensor(offset) => s"Light (offset: ${offset.degrees}°) -> ${r.value}",
+            case LightSensor(offset) => s"Light (offset: ${offset.degrees}°) -> ${r.value}"
+            case other => s"${other.getClass.getSimpleName} -> ${r.value}",
         )
 
 /**
