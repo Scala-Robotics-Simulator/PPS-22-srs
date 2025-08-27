@@ -10,7 +10,7 @@ import io.github.srs.model.illumination.model.{ Grid, GridDims, ScaleFactor }
 import io.github.srs.utils.SimulationDefaults.Illumination.Occlusion
 
 /**
- * Occlusion rasterization for 2D entities.
+ * Provide occlusion rasterization for [[Entity]] shapes.
  *
  * Turns circles / rectangles into a discrete grid used for light blocking. Cells contain 0.0 (Cleared) or 1.0
  * (Occluded).
@@ -22,7 +22,7 @@ import io.github.srs.utils.SimulationDefaults.Illumination.Occlusion
 object OcclusionRaster:
 
   /**
-   * Rasterize static occluders (obstacles + boundaries) to a occlusion grid.
+   * Rasterize static occluders (obstacles and boundaries) to an occlusion grid.
    *
    * @param env
    *   The [[ValidEnvironment]] containing all entities
@@ -93,7 +93,7 @@ object OcclusionRaster:
     }
 
   /**
-   * Circle rasterization via scanlines:
+   * Circle rasterization via scan-lines:
    *
    * For each row intersecting the circle, compute span [minX, maxX] and fill. This is cache-friendly and avoids
    * per-cell distance checks.
@@ -107,7 +107,7 @@ object OcclusionRaster:
    * @param s
    *   The scale factor for coordinate conversion
    * @return
-   *   An iterator of linear indices of occluded cells
+   *   A linear indices iterator of occluded cells
    */
   private def rasterizeCircle(
       center: Point2D,
@@ -142,7 +142,7 @@ object OcclusionRaster:
   /**
    * Rectangle rasterization dispatcher.
    *
-   * Decides between axis-aligned and rotated rectangle algorithms based on orientation angle.
+   * Decides between axis-aligned and rotated rectangle algorithms based on an orientation angle.
    *
    * @param center
    *   The rectangle's center position
@@ -215,7 +215,7 @@ object OcclusionRaster:
    * Rotated rectangle rasterization via inverse rotation transform:
    *
    *   1. compute tight world-space AABB analytically,
-   *   2. iterate its cells, inverse-rotate cell centers, and inside-test in local space.
+   *   2. Iterate its cells, inverse-rotate cell centers, and inside-test in local space.
    *
    * @param center
    *   The rectangle's center position
@@ -255,7 +255,7 @@ object OcclusionRaster:
     for
       x <- (gridMinX to gridMaxX).iterator
       y <- (gridMinY to gridMaxY).iterator
-      // Convert cell center back to world-space
+      // Convert a cell center back to world-space
       worldX = (x.toDouble + 0.5) * invS
       worldY = (y.toDouble + 0.5) * invS
       // Translate before rotating
