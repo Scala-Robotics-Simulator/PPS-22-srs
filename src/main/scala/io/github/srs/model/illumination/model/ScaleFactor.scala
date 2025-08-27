@@ -5,12 +5,12 @@ import io.github.srs.model.validation.Validation
 import io.github.srs.model.validation.Validation.bounded
 
 /**
- * Represents a scale factor (in cells per meter) used to convert world coordinates
+ * Represents a scale factor (in cells per meter) used to convert world coordinates.
  */
 opaque type ScaleFactor = Int
 
 /**
- * Companion object providing utility methods and extensions for working with scale factors.
+ * Companion object providing utility methods and extensions for working with [[ScaleFactor]].
  */
 object ScaleFactor:
 
@@ -48,7 +48,7 @@ object ScaleFactor:
     inline def radiusToCells(m: Double): Int = math.ceil(m * s.toDouble).toInt
 
     /**
-     * Converts a point in world coordinates to the corresponding floored cell coordinates.
+     * Converts a point in world coordinate to the corresponding floored cell coordinates.
      *
      * @param p
      *   The point in world coordinates.
@@ -63,7 +63,7 @@ object ScaleFactor:
   /**
    * Implicit conversion from [[ScaleFactor]] to `Int`.
    */
-  given sfToInt: Conversion[ScaleFactor, Int] with
+  given Conversion[ScaleFactor, Int] with
     inline def apply(s: ScaleFactor): Int = s
 
   /**
