@@ -168,7 +168,7 @@ final case class LightSensor[Entity <: DynamicEntity, Env <: Environment](
   override def sense[F[_]: Monad](entity: Entity, env: Env): F[Data] =
     Monad[F].pure:
       val o = origin(entity)
-      env.lightField.sampleAtWorld(o)(using ScaleFactor.default)
+      env.lightField.illuminationAt(o)(using ScaleFactor.default)
 
 end LightSensor
 
