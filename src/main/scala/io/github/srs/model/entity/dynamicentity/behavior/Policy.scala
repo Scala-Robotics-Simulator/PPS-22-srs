@@ -1,90 +1,91 @@
 package io.github.srs.model.entity.dynamicentity.behavior
 
 import cats.Monad
-import io.github.srs.model.entity.dynamicentity.action.{ MovementActionFactory, NoAction }
-import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.{ always, Condition }
-import io.github.srs.model.entity.dynamicentity.behavior.dsl.BehaviorDsl.*
-import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, SensorReading }
+import cats.data.Kleisli
+import io.github.srs.model.entity.dynamicentity.action.{ Action, MovementActionFactory, NoAction }
 import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior
-import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings
-import io.github.srs.model.entity.dynamicentity.action.Action
-import cats.effect.IO
+import io.github.srs.model.entity.dynamicentity.behavior.Policy.*
+import io.github.srs.utils.SimulationDefaults.DynamicEntity
+import io.github.srs.utils.random.RNG
 
 /**
- * Policy defines the behavior of a dynamic entity based on sensor readings.
- *
- * @param behavior
- *   The behavior to be executed based on sensor readings.
+ * A [[Policy]] selects the next [[Action]] purely, based only on the provided [[BehaviorContext]] and returns the next
+ * RNG alongside the action.
  */
-enum Policy(name: String, behavior: Behavior[SensorReadings, Action[IO]]):
-  case Simple extends Policy("Simple", Policy.simple[IO])
-  case AlwaysForward extends Policy("AlwaysForward", Policy.alwaysForward[IO])
+enum Policy(val name: String) derives CanEqual:
+  case AlwaysForward extends Policy("AlwaysForward")
+  case RandomWalk extends Policy("RandomWalk")
 
   /**
-   * Executes the behavior defined by this policy using the provided sensor readings.
+   * Compute the next [[Action]] and the advanced RNG.
    *
-   * @param readings
-   *   The sensor readings to be used for executing the behavior.
+   * @param input
+   *   behavior input containing the current RNG (and other context)
    * @return
-   *   An action that results from executing the behavior with the given sensor readings.
+   *   (selected action, next RNG)
    */
-  def run(readings: SensorReadings): Action[IO] =
-    behavior.run(readings)
+  def run[F[_]: Monad](input: BehaviorContext): (Action[F], RNG) =
+    this match
+      case AlwaysForward => alwaysForwardBehavior.run(input)
+      case RandomWalk => randomWalkBehavior.run(input)
 
+  /**
+   * String representation of the policy.
+   * @return
+   *   name of the policy
+   */
   override def toString: String = name
+
+end Policy
 
 /**
  * Ready-made behaviors.
  *
- * The selection step is **pure**: a [[Behavior]] is `Kleisli[Id, I, A]`. Side effects happen only when an [[Action]] is
- * executed.
+ * These can be used directly or as building blocks for more complex behaviors.
  */
 object Policy:
 
   /**
-   * Build a condition that checks whether the "front" proximity reading (≈ 0° offset) is below a given threshold.
-   *
-   * @param th
-   *   distance threshold (normalized reading)
+   * Type alias for a decision behavior that produces an action and the next RNG.
+   * @param F
+   *   the effect type
    * @return
-   *   a [[Condition]] over [[SensorReadings]] that holds when front < `th`
+   *   a behavior that produces an [[Action]] and the next [[RNG]]
    */
-  private def frontCloserThan(th: Double): Condition[SensorReadings] =
-    rs =>
-      rs.collectFirst {
-        case SensorReading(ps: ProximitySensor[?, ?], v: Double) if math.abs(ps.offset.degrees - 0.0) <= 1e-3 => v
-      }.exists(_ < th)
+  private type Decision[F[_]] = Behavior[BehaviorContext, (Action[F], RNG)]
+
+  def fromString(s: String): Option[Policy] =
+    values.find(_.name == s)
 
   /**
-   * “Avoid obstacle, otherwise move forward” — pure decision returning an action.
-   *
-   * Semantics:
-   *   - if the front proximity is `< 0.3` → turn right
-   *   - else → move forward
-   *   - if no rule fires → fallback to `NoAction`
-   *
+   * always move forward.
    * @tparam F
-   *   effect type of the produced [[Action]]
+   *   the effect type
    * @return
-   *   a total [[Behavior]] from [[SensorReadings]] to [[Action]][F]
+   *   a decision that always produces a move forward [[Action]] and same [[RNG]]
    */
-  def simple[F[_]: Monad]: Behavior[SensorReadings, Action[F]] =
-    (
-      frontCloserThan(0.3) ==> MovementActionFactory.turnRight[F] |
-        always ==> MovementActionFactory.moveForward[F]
-    ).orElse(NoAction[F]())
+  private def alwaysForwardBehavior[F[_]]: Decision[F] =
+    Kleisli { ctx =>
+      (MovementActionFactory.moveForward[F], ctx.rng)
+    }
 
   /**
-   * “Always move forward” — pure decision returning an action.
-   *
-   * Semantics:
-   *   - always move forward
+   * Random walk: random left/right wheel speeds in [-1.0, 1.0].
    *
    * @tparam F
-   *   effect type of the produced [[Action]]
+   *   the effect type
    * @return
-   *   a total [[Behavior]] from [[SensorReadings]] to [[Action]][F]
+   *   a decision that produces a random movement [[Action]] and the next [[RNG]]
    */
-  def alwaysForward[F[_]: Monad]: Behavior[SensorReadings, Action[F]] =
-    (always ==> MovementActionFactory.moveForward[F]).orElse(NoAction[F]())
+  private def randomWalkBehavior[F[_]: Monad]: Decision[F] =
+    Kleisli { ctx =>
+      import io.github.srs.utils.random.RandomDSL.*
+      val range = DynamicEntity.minSpeed to DynamicEntity.maxSpeed
+      val (w1, r1) = ctx.rng generate range.includeMax
+      val (w2, r2) = r1 generate range.includeMax
+      val action =
+        MovementActionFactory.customMove[F](w1, w2).getOrElse(NoAction[F]())
+      (action, r2)
+    }
+
 end Policy

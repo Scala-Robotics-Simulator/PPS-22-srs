@@ -3,15 +3,13 @@ package io.github.srs.model.entity.dynamicentity.behavior
 import cats.data.Kleisli
 import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.{ Behavior, Condition, PartialBehavior }
 import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should.Matchers.*
 import io.github.srs.model.entity.dynamicentity.behavior.dsl.BehaviorDsl.*
+import org.scalatest.matchers.should.Matchers
 
 /**
  * Unit tests for the Behavior DSL builders (`==>`, `|`, `default`).
- *
- * Each single assertion lives in its own `it` block to avoid the “unused value of type Assertion” compiler warning.
  */
-final class BehaviorDslTest extends AnyFlatSpec:
+final class BehaviorDslTest extends AnyFlatSpec with Matchers:
 
   private object C:
     val isEven: Condition[Int] = _ % 2 == 0

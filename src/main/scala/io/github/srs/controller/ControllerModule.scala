@@ -12,10 +12,11 @@ import io.github.srs.model.*
 import io.github.srs.model.SimulationConfig.SimulationStatus.{ PAUSED, RUNNING, STOPPED }
 import io.github.srs.model.UpdateLogic.*
 import io.github.srs.model.entity.dynamicentity.Robot
+import io.github.srs.model.entity.dynamicentity.behavior.BehaviorContext
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
 import io.github.srs.model.logic.*
-import io.github.srs.utils.SimulationDefaults.debugMode
 import io.github.srs.utils.EqualityGivenInstances.given_CanEqual_Event_Event
+import io.github.srs.utils.SimulationDefaults.debugMode
 
 /**
  * Module that defines the controller logic for the Scala Robotics Simulator.
@@ -188,7 +189,9 @@ object ControllerModule:
             proposals <- state.environment.entities.collect { case robot: Robot => robot }.toList.parTraverse { robot =>
               for
                 sensorReadings <- robot.senseAll[IO](state.environment)
-                action = robot.behavior.run(sensorReadings)
+                ctx = BehaviorContext(sensorReadings, state.simulationRNG)
+                (action, rng) = robot.behavior.run[IO](ctx)
+                _ <- queue.offer(Event.Random(rng))
               yield RobotProposal(robot, action)
             }
             _ <- queue.offer(Event.RobotActionProposals(proposals))
