@@ -6,7 +6,7 @@ import io.github.srs.model.entity.Orientation
 import io.github.srs.model.entity.dynamicentity.action.{ Action, MovementActionFactory, NoAction }
 import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior
 import io.github.srs.model.entity.dynamicentity.behavior.Policy.*
-import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, SensorReading, SensorReadings }
+import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings.*
 import io.github.srs.utils.SimulationDefaults.DynamicEntity
 import io.github.srs.utils.random.RNG
 
@@ -61,14 +61,6 @@ object Policy:
   def fromString(s: String): Option[Policy] =
     values.find(_.name == s)
 
-  private def getProximityReading(readings: SensorReadings): Vector[(Double, Orientation)] =
-    val proximityReadings: Vector[(Double, Orientation)] =
-      readings.flatMap:
-        case SensorReading(ps: ProximitySensor[?, ?], value: Double) =>
-          Some(value -> ps.offset)
-        case _ => None
-    proximityReadings
-
   /**
    * always move forward.
    * @tparam F
@@ -102,7 +94,7 @@ object Policy:
 
   private def obstacleAvoidanceBehavior[F[_]: Monad]: Decision[F] =
     Kleisli { ctx =>
-      val proximityReadings = getProximityReading(ctx.sensorReadings)
+      val proximityReadings = ctx.sensorReadings.proximityReadings.map(r => r.value -> r.sensor.offset)
 
       if proximityReadings.isEmpty then (MovementActionFactory.moveForward[F], ctx.rng)
       else
