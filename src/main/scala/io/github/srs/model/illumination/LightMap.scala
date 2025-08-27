@@ -1,82 +1,63 @@
 package io.github.srs.model.illumination
 
-import scala.collection.immutable.ListMap
-
 import cats.effect.Sync
-import cats.effect.kernel.Ref
-import io.github.srs.model.environment.Environment
+import io.github.srs.model.environment.ValidEnvironment
 import io.github.srs.model.illumination.engine.FovEngine
 import io.github.srs.model.illumination.model.{ LightField, ScaleFactor }
-import io.github.srs.model.illumination.utils.StaticSignature
 
+/**
+ * Light map for computing illumination fields.
+ *
+ * @tparam F
+ *   Effect type for computations (e.g., IO)
+ */
 trait LightMap[F[_]]:
   /**
-   * Compute the final light field, optionally includes dynamic occluders.
+   * Compute the [[LightField]] for the given environment.
    *
    * @param env
-   *   The environment containing entities and obstacles.
+   *   The [[ValidEnvironment]] containing entities and lights
    * @param includeDynamic
-   *   Whether to include dynamic entities in the computation.
+   *   Whether to include dynamic entities in the computation
    * @return
-   *   The computed light field wrapped in the effect type `F`.
+   *   An effectful computation yielding the computed [[LightField]]
    */
-  def computeField(env: Environment, includeDynamic: Boolean): F[LightField]
+  def computeField(env: ValidEnvironment, includeDynamic: Boolean): F[LightField]
 
+/**
+ * Companion object for creating instances of [[LightMap]].
+ */
 object LightMap:
 
   /**
-   * Create a stateless [[LightMap]] facade that computes from the current environment
+   * Create a new [[LightMap]] instance.
    *
-   * @param fov
-   *   The Field of View (FoV) engine used for light propagation.
    * @param scale
-   *   The scale factor for the grid.
+   *   The scale factor for the light map
+   * @param fov
+   *   The field-of-view engine to use for computations
    * @tparam F
-   *   The effect type (e.g., IO, Task) used for computations.
+   *   Effect type for computations (e.g., IO)
    * @return
-   *   A new [[LightMap]] instance wrapped in the effect type `F`.
+   *   An effectful computation yielding a new [[LightMap]] instance
    */
-  def create[F[_]](fov: FovEngine, scale: ScaleFactor)(using F: Sync[F]): F[LightMap[F]] =
-    F.pure[LightMap[F]]((env: Environment, includeDynamic: Boolean) =>
-      F.delay {
-        val prepared = Illumination.prepareStatics(env, scale)
-        Illumination.field(env, prepared, fov, includeDynamic)
-      },
-    )
+  def create[F[_]: Sync](scale: ScaleFactor, fov: FovEngine): F[LightMap[F]] =
+    Sync[F].pure(new LightMapImpl(scale, fov))
 
   /**
-   * Create a stateful [[LightMap]] facade that caches static precomputation results
+   * Implementation of the [[LightMap]] trait that computes illumination fields based on a given scale factor and
+   * Field-of-View (FoV) engine.
    *
-   * @param fov
-   *   The Field of View (FoV) engine used for light propagation.
    * @param scale
-   *   The scale factor for the grid.
-   * @param maxEntries
-   *   Maximum number of cached entries to keep (default is 256).
+   *   The scale factor used to map world coordinates to grid coordinates.
+   * @param fov
+   *   The Field-of-View engine responsible for performing light propagation and visibility computations.
    * @tparam F
-   *   The effect type (e.g., IO, Task) used for computations.
-   * @return
-   *   A new [[LightMap]] instance wrapped in the effect type `F`.
+   *   The effect type supporting synchronization primitives (e.g., IO).
    */
-  def cached[F[_]](fov: FovEngine, scale: ScaleFactor, maxEntries: Int = 256)(using F: Sync[F]): F[LightMap[F]] =
-    F.flatMap(Ref.of[F, ListMap[Int, Illumination.Prepared]](ListMap.empty)) { ref =>
+  private class LightMapImpl[F[_]: Sync](scale: ScaleFactor, fov: FovEngine) extends LightMap[F]:
 
-      def getOrBuild(env: Environment): F[Illumination.Prepared] =
-        F.flatMap(F.delay(StaticSignature.of(env, scale))) { sig =>
-          F.flatMap(ref.get) { m =>
-            m.get(sig) match
-              case Some(p) => F.pure(p)
-              case None =>
-                val p = Illumination.prepareStatics(env, scale)
-                val updated = (m + (sig -> p)).takeRight(maxEntries)
-                F.map(ref.set(updated))(_ => p)
-          }
-        }
-
-      F.pure[LightMap[F]] { (env: Environment, includeDynamic: Boolean) =>
-        F.flatMap(getOrBuild(env)) { p =>
-          F.delay(Illumination.field(env, p, fov, includeDynamic))
-        }
-      }
-    }
+    def computeField(env: ValidEnvironment, includeDynamic: Boolean): F[LightField] =
+      Sync[F].delay:
+        IlluminationLogic.computeLightField(scale)(fov)(includeDynamic)(env)
 end LightMap
