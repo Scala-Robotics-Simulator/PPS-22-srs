@@ -222,8 +222,8 @@ object SimulationDefaults:
     object Sensor:
 
       object ProximitySensor:
-        val defaultOffset: Double = 0.0
-        val defaultRange: Double = 5.0
+        val DefaultOffset: Double = 0.0
+        val DefaultRange: Double = 5.0
 
     object Robot:
       import SimulationDefaults.DynamicEntity.Robot.defaultShape.radius
