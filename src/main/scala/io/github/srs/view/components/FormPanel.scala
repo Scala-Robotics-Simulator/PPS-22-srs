@@ -7,7 +7,7 @@ import javax.swing.*
  * Represents the type of input fields in the form.
  */
 sealed trait InputType
-final case class TextField(columns: Int = 10) extends InputType
+final case class TextField(columns: Int = 10, default: String = "") extends InputType
 final case class ComboBox(options: Seq[String]) extends InputType
 final case class CheckBox(default: Boolean = false) extends InputType
 
@@ -24,7 +24,10 @@ class FormPanel(title: String, fields: Seq[FieldSpec]) extends JPanel(new GridBa
 
   private val inputs: Map[String, JComponent] = fields.map { spec =>
     val comp: JComponent = spec.inputType match
-      case TextField(cols) => new JTextField(cols)
+      case TextField(cols, default) =>
+        val f = new JTextField(cols)
+        f.setText(default)
+        f
       case ComboBox(opts) => new JComboBox[String](opts.toArray)
       case CheckBox(defaultVal) => new JCheckBox("", defaultVal)
     spec.key -> comp
