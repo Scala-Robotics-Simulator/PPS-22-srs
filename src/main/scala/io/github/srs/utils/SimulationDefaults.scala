@@ -236,7 +236,7 @@ object SimulationDefaults:
       val defaultOrientation: Orientation = Orientation(0.0)
       val defaultActuators: Seq[Actuator[Robot]] = Seq.empty
       val defaultSensors: Vector[Sensor[Robot, Environment]] = Vector.empty
-      val MinRadius: Double = 0.1
+      val MinRadius: Double = 0.01
       val MaxRadius: Double = 0.5
 
       val selectionStroke: Float = 3f
