@@ -28,6 +28,26 @@ object SimulationDefaults:
       val FullRotation: Double = 90.0
       val AlmostZero: Double = 1e-6
 
+  object Behaviors:
+
+    object ObstacleAvoidance:
+      val SafeDist: Double = 0.85
+      val CriticalDist: Double = 0.35
+      val MinForward: Double = 0.20
+      val PivotSpeedFactor: Double = 0.80
+      val ResultantEps: Double = 1e-9
+      val SideDeltaEps: Double = 1e-3
+      val FallbackLeftDeg: Double = 90.0
+
+    object RandomWalk:
+      val MinForwardFactor: Double = 0.35
+      val MaxForwardExtra: Double = 0.35
+      val MinTurnOfBase: Double = 0.35
+      val MaxTurnOfBase: Double = 1.15
+      val TurnExponent: Double = 1.2
+      val PivotBoostProb: Double = 0.20
+      val PivotBoostAbs: Double = 0.15
+
   object UI:
 
     object SimulationViewConstants:
@@ -204,8 +224,8 @@ object SimulationDefaults:
 
   object DynamicEntity:
     val zeroSpeed: Double = 0.0
-    val minSpeed: Double = -1.0
-    val maxSpeed: Double = 1.0
+    val MinSpeed: Double = -1.0
+    val MaxSpeed: Double = 1.0
     val halfSpeed: Double = 0.5
 
     object Actuator:
