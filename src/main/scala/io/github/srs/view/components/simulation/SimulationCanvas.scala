@@ -26,8 +26,9 @@ import cats.Id
  * Canvas component responsible for rendering the simulation environment. Supports static layer caching for improved
  * performance.
  *
- * @param alwaysRefresh
- *   If true, the static layer is recreated on every paint
+ * @param insideConfiguration
+ *   If true, the static layer is recreated on every paint and robot sensor lines are not drawn (for configuration
+ *   preview)
  */
 class SimulationCanvas(private val insideConfiguration: Boolean = false) extends JPanel:
 
@@ -49,7 +50,7 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
 
   private val state = new AtomicReference(SimulationViewState())
   private val robotShape = new Ellipse2D.Double()
-  private val gridStroke = new BasicStroke(gridStrokeWidth)
+  private val gridStroke = new BasicStroke(GridStrokeWidth)
 
   /**
    * Updates the canvas with new environment data.
@@ -200,16 +201,16 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
    */
   private def drawLabels(g2: Graphics2D, env: Environment, vp: Viewport): Unit =
     g2.setColor(Color.DARK_GRAY)
-    val bottom = vp.offsetY + vp.height - labelBottomOffset
+    val bottom = vp.offsetY + vp.height - LabelBottomOffset
 
     val step = adaptiveLabelStep(vp.scale)
 
     (0 to env.width by step).foreach { x =>
-      g2.drawString(x.toString, vp.offsetX + (x * vp.scale).toInt + labelXOffset, bottom)
+      g2.drawString(x.toString, vp.offsetX + (x * vp.scale).toInt + LabelXOffset, bottom)
     }
     (0 to env.height by step).foreach { y =>
       val py = vp.offsetY + (y * vp.scale).toInt
-      g2.drawString(y.toString, vp.offsetX + labelXOffset, Math.min(bottom, py + labelYOffset))
+      g2.drawString(y.toString, vp.offsetX + LabelXOffset, Math.min(bottom, py + LabelYOffset))
     }
 
   /**
@@ -221,7 +222,7 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
    *   Step size for label spacing
    */
   private def adaptiveLabelStep(scale: Double): Int =
-    val raw = labelDesiredPx / scale
+    val raw = LabelDesiredPx / scale
     val steps = List(1, 2, 5)
     LazyList
       .iterate(1)(_ * 10)
@@ -296,7 +297,7 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
     g2.fillRect(x, y, width, height)
 
     g2.setColor(Colors.obstacleBorder)
-    g2.setStroke(new BasicStroke(Strokes.obstacleStroke))
+    g2.setStroke(new BasicStroke(Strokes.ObstacleStroke))
     g2.drawRect(x, y, width, height)
 
     g2.setTransform(savedTransform)
@@ -320,7 +321,7 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
 
     val cx = (vp.offsetX + pos.x * vp.scale).toInt
     val cy = (vp.offsetY + pos.y * vp.scale).toInt
-    val size = Math.max(minLightSize, (4 * radius * vp.scale).toInt)
+    val size = Math.max(MinLightSize, (4 * radius * vp.scale).toInt)
     val x = cx - size / 2
     val y = cy - size / 2
 
@@ -334,7 +335,7 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
     g2.setPaint(paint)
     g2.fill(new Ellipse2D.Double(x, y, size, size))
     g2.setColor(Color.ORANGE)
-    g2.setStroke(new BasicStroke(lightStroke))
+    g2.setStroke(new BasicStroke(LightStroke))
     g2.drawOval(x, y, size, size)
 
   end drawLight
@@ -393,7 +394,7 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
    *   True if this robot is currently selected
    */
   private def drawRobotBody(g2: Graphics2D, robot: Robot, radius: Double, vp: Viewport, isSelected: Boolean): Unit =
-    import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.{ normalStroke, selectionStroke }
+    import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.{ NormalStroke, SelectionStroke }
     import io.github.srs.utils.SimulationDefaults.UI.{ Colors, Strokes }
 
     val x = vp.offsetX + (robot.position.x - radius) * vp.scale
@@ -418,11 +419,11 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
     g2.fill(robotShape)
 
     g2.setColor(Colors.robotShadow)
-    g2.setStroke(new BasicStroke(Strokes.robotShadowStroke))
+    g2.setStroke(new BasicStroke(Strokes.RobotShadowStroke))
     g2.draw(robotShape)
 
     g2.setColor(colors._3)
-    val strokeWidth = if isSelected then selectionStroke else normalStroke
+    val strokeWidth = if isSelected then SelectionStroke else NormalStroke
     g2.setStroke(new BasicStroke(strokeWidth))
     g2.draw(robotShape)
 
@@ -446,8 +447,8 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
     val cx = (vp.offsetX + robot.position.x * vp.scale).toInt
     val cy = (vp.offsetY + robot.position.y * vp.scale).toInt
     val angle = robot.orientation.toRadians
-    val length = radius * arrowLengthFactor * vp.scale
-    val width = math.max(minArrowWidth.toDouble, radius * vp.scale * arrowWidthFactor)
+    val length = radius * ArrowLengthFactor * vp.scale
+    val width = math.max(MinArrowWidth.toDouble, radius * vp.scale * ArrowWidthFactor)
 
     val arrow = createArrowPolygon(cx, cy, angle, length, width)
     g2.setColor(Color.BLACK)

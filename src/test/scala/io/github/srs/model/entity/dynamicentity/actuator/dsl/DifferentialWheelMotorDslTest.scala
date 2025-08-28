@@ -13,10 +13,10 @@ class DifferentialWheelMotorDslTest extends AnyFlatSpec with Matchers:
 
   "DifferentialWheelMotor DSL" should "create a differential wheel motor with default wheels" in:
     val motor = differentialWheelMotor
-    val _ = motor.left.speed shouldBe DifferentialWheelMotor.Wheel.defaultSpeed
-    val _ = motor.right.speed shouldBe DifferentialWheelMotor.Wheel.defaultSpeed
-    val _ = motor.left.shape shouldBe DifferentialWheelMotor.Wheel.defaultShape
-    motor.right.shape shouldBe DifferentialWheelMotor.Wheel.defaultShape
+    val _ = motor.left.speed shouldBe DifferentialWheelMotor.Wheel.DefaultSpeed
+    val _ = motor.right.speed shouldBe DifferentialWheelMotor.Wheel.DefaultSpeed
+    val _ = motor.left.shape shouldBe DifferentialWheelMotor.Wheel.DefaultShape
+    motor.right.shape shouldBe DifferentialWheelMotor.Wheel.DefaultShape
 
   it should "set the speed of both wheels using ws" in:
     val speed = 5.0
@@ -28,13 +28,13 @@ class DifferentialWheelMotorDslTest extends AnyFlatSpec with Matchers:
     val speed = 3.0
     val motor = differentialWheelMotor.withLeftSpeed(speed)
     val _ = motor.left.speed shouldBe speed
-    motor.right.speed shouldBe DifferentialWheelMotor.Wheel.defaultSpeed
+    motor.right.speed shouldBe DifferentialWheelMotor.Wheel.DefaultSpeed
 
   it should "set the speed of the right wheel using withRightSpeed" in:
     val speed = 4.0
     val motor = differentialWheelMotor.withRightSpeed(speed)
     val _ = motor.right.speed shouldBe speed
-    motor.left.speed shouldBe DifferentialWheelMotor.Wheel.defaultSpeed
+    motor.left.speed shouldBe DifferentialWheelMotor.Wheel.DefaultSpeed
 
   it should "validate a valid differential wheel motor" in:
     val motor = differentialWheelMotor.ws(1.0)

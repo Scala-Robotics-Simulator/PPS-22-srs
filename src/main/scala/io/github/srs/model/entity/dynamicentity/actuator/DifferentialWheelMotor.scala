@@ -11,7 +11,7 @@ import io.github.srs.model.entity.Point2D.*
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.action.{ Action, ActionAlg }
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
-import io.github.srs.utils.SimulationDefaults.DynamicEntity.Actuator.DifferentialWheelMotor.defaultWheel
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.Actuator.DifferentialWheelMotor.DefaultWheel
 import io.github.srs.model.entity.dynamicentity.action.SequenceAction
 
 /**
@@ -48,7 +48,7 @@ object DifferentialWheelMotor:
    * @return
    *   a new instance of [[DifferentialWheelMotor]].
    */
-  def apply(left: Wheel = defaultWheel, right: Wheel = defaultWheel): DifferentialWheelMotor =
+  def apply(left: Wheel = DefaultWheel, right: Wheel = DefaultWheel): DifferentialWheelMotor =
     DifferentialWheelMotorImpl(left, right)
 
   /**

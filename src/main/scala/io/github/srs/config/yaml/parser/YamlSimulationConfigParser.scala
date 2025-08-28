@@ -42,8 +42,8 @@ object YamlSimulationConfigParser:
         case Left(err) => Left[Seq[ConfigError], Map[String, Any]](Seq(ConfigError.ParsingError(err.getMessage)))
         case Right(map) => Right[Seq[ConfigError], Map[String, Any]](map)
 
-      simMap <- root.getOptionalSubMap(SimulationFields.self)
-      envMap <- root.getOptionalSubMap(EnvironmentFields.self)
+      simMap <- root.getOptionalSubMap(SimulationFields.Self)
+      envMap <- root.getOptionalSubMap(EnvironmentFields.Self)
 
       sim <- parseSimulation(simMap)
       env <- parseEnvironment(envMap)
@@ -61,8 +61,8 @@ object YamlSimulationConfigParser:
       case None => Right[Seq[ConfigError], Simulation](Simulation.simulation)
       case Some(m) =>
         for
-          duration <- getOptional[Long](SimulationFields.duration, m)
-          seed <- getOptional[Long](SimulationFields.seed, m)
+          duration <- getOptional[Long](SimulationFields.Duration, m)
+          seed <- getOptional[Long](SimulationFields.Seed, m)
         yield Simulation.simulation
           |> (sim => duration.fold(sim)(sim.withDuration))
           |> (sim => seed.fold(sim)(sim.withSeed))
@@ -79,9 +79,9 @@ object YamlSimulationConfigParser:
       case None => Right[Seq[ConfigError], Environment](environment)
       case Some(m) =>
         for
-          width <- getOptional[Int](EnvironmentFields.width, m)
-          height <- getOptional[Int](EnvironmentFields.height, m)
-          entities <- m.parseSequence(EnvironmentFields.entities, parseEntity)
+          width <- getOptional[Int](EnvironmentFields.Width, m)
+          height <- getOptional[Int](EnvironmentFields.Height, m)
+          entities <- m.parseSequence(EnvironmentFields.Entities, parseEntity)
         yield Environment()
           |> (env => width.fold(env)(env.withWidth))
           |> (env => height.fold(env)(env.withHeight))
@@ -99,9 +99,9 @@ object YamlSimulationConfigParser:
    */
   private def parseEntity(map: Map[String, Any]): ConfigResult[Entity] =
     map.headOption match
-      case Some((ObstacleFields.self, v: Map[String, Any] @unchecked)) => parseObstacle(v)
-      case Some((LightFields.self, v: Map[String, Any] @unchecked)) => parseLight(v)
-      case Some((RobotFields.self, v: Map[String, Any] @unchecked)) => YamlSimulationConfigParser.parseRobot(v)
+      case Some((ObstacleFields.Self, v: Map[String, Any] @unchecked)) => parseObstacle(v)
+      case Some((LightFields.Self, v: Map[String, Any] @unchecked)) => parseLight(v)
+      case Some((RobotFields.Self, v: Map[String, Any] @unchecked)) => YamlSimulationConfigParser.parseRobot(v)
       case Some((key, _)) => Left[Seq[ConfigError], Entity](Seq(ConfigError.ParsingError(s"Unknown entity type: $key")))
       case None => Left[Seq[ConfigError], Entity](Seq(ConfigError.ParsingError("Empty entity map")))
 
@@ -122,15 +122,15 @@ object YamlSimulationConfigParser:
    */
   private def parseRobot(map: Map[String, Any]): ConfigResult[Entity] =
     for
-      id <- getOptional[UUID](EntityFields.id, map)
-      pos <- get[List[Double]](EntityFields.position, map)
+      id <- getOptional[UUID](EntityFields.Id, map)
+      pos <- get[List[Double]](EntityFields.Position, map)
       position <- parsePosition(pos)
-      orient <- getOptional[Double](EntityFields.orientation, map)
-      radius <- getOptional[Double](RobotFields.radius, map)
-      speed <- getOptional[Double](RobotFields.speed, map)
-      prox <- getOptional[Boolean](RobotFields.withProximitySensors, map)
-      light <- getOptional[Boolean](RobotFields.withLightSensors, map)
-      behavior <- getOptional[Policy](RobotFields.behavior, map)
+      orient <- getOptional[Double](EntityFields.Orientation, map)
+      radius <- getOptional[Double](RobotFields.Radius, map)
+      speed <- getOptional[Double](RobotFields.Speed, map)
+      prox <- getOptional[Boolean](RobotFields.WithProximitySensors, map)
+      light <- getOptional[Boolean](RobotFields.WithLightSensors, map)
+      behavior <- getOptional[Policy](RobotFields.Behavior, map)
     yield Robot().at(position)
       |> (r => id.fold(r)(r.withId))
       |> (r => orient.fold(r)(o => r.withOrientation(Orientation(o))))
@@ -149,12 +149,12 @@ object YamlSimulationConfigParser:
    */
   private def parseObstacle(map: Map[String, Any]): ConfigResult[Entity] =
     for
-      id <- getOptional[UUID](EntityFields.id, map)
-      pos <- get[List[Double]](EntityFields.position, map)
+      id <- getOptional[UUID](EntityFields.Id, map)
+      pos <- get[List[Double]](EntityFields.Position, map)
       position <- parsePosition(pos)
-      orientation <- getOptional[Double](EntityFields.orientation, map)
-      width <- getOptional[Double](ObstacleFields.width, map)
-      height <- getOptional[Double](ObstacleFields.height, map)
+      orientation <- getOptional[Double](EntityFields.Orientation, map)
+      width <- getOptional[Double](ObstacleFields.Width, map)
+      height <- getOptional[Double](ObstacleFields.Height, map)
     yield obstacle.at(position)
       |> (obs => id.fold(obs)(obs.withId))
       |> (obs => orientation.fold(obs)(o => obs.withOrientation(Orientation(o))))
@@ -170,14 +170,14 @@ object YamlSimulationConfigParser:
    */
   private def parseLight(map: Map[String, Any]): ConfigResult[Entity] =
     for
-      id <- getOptional[UUID](EntityFields.id, map)
-      pos <- get[List[Double]](EntityFields.position, map)
+      id <- getOptional[UUID](EntityFields.Id, map)
+      pos <- get[List[Double]](EntityFields.Position, map)
       position <- parsePosition(pos)
-      orientation <- getOptional[Double](EntityFields.orientation, map)
-      radius <- getOptional[Double](LightFields.radius, map)
-      illumination <- get[Double](LightFields.illuminationRadius, map)
-      intensity <- getOptional[Double](LightFields.intensity, map)
-      attenuation <- getOptional[Double](LightFields.attenuation, map)
+      orientation <- getOptional[Double](EntityFields.Orientation, map)
+      radius <- getOptional[Double](LightFields.Radius, map)
+      illumination <- get[Double](LightFields.IlluminationRadius, map)
+      intensity <- getOptional[Double](LightFields.Intensity, map)
+      attenuation <- getOptional[Double](LightFields.Attenuation, map)
     yield light.at(position).withIlluminationRadius(illumination)
       |> (l => id.fold(l)(l.withId))
       |> (l => orientation.fold(l)(o => l.withOrientation(Orientation(o))))

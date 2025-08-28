@@ -29,13 +29,13 @@ object Entity:
     case e: DynamicEntity =>
       e match
         case r: Robot =>
-          Json.obj(RobotFields.self -> r.asJson)
+          Json.obj(RobotFields.Self -> r.asJson)
     case e: StaticEntity =>
       e match
         case o: StaticEntity.Obstacle =>
-          Json.obj(ObstacleFields.self -> o.asJson)
+          Json.obj(ObstacleFields.Self -> o.asJson)
         case l: StaticEntity.Light =>
-          Json.obj(LightFields.self -> l.asJson)
+          Json.obj(LightFields.Self -> l.asJson)
         case _: StaticEntity.Boundary =>
           Json.obj() // Boundary entities are not serialized
 end Entity

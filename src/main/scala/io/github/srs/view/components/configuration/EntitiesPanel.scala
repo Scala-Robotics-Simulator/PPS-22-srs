@@ -11,8 +11,8 @@ import io.github.srs.config.yaml.parser.collection.CustomSeq.sequence
 import io.github.srs.model.entity.staticentity.StaticEntity
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor
-import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.stdProximitySensors
-import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.stdLightSensors
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.StdProximitySensors
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.StdLightSensors
 import io.github.srs.model.entity.ShapeType
 import io.github.srs.utils.SimulationDefaults.Fields.Entity as EntityFields
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.DynamicEntity.Robot as RobotFields
@@ -94,48 +94,48 @@ class EntitiesPanel(fieldSpecsByType: Map[String, Seq[FieldSpec]]) extends JPane
     entities.foreach(e =>
       e match
         case robot: Robot =>
-          val row = new EntityRow(RobotFields.self.capitalize, fieldSpecsByType, removeEntityRow)
+          val row = new EntityRow(RobotFields.Self.capitalize, fieldSpecsByType, removeEntityRow)
           entityListPanel.add(row)
           val robotMap = Map(
-            EntityFields.x -> robot.position.x.toString,
-            EntityFields.y -> robot.position.y.toString,
-            EntityFields.orientation -> robot.orientation.degrees.toString,
-            RobotFields.radius -> robot.shape.radius.toString,
-            RobotFields.speed -> robot.actuators.collectFirst { case dwt: DifferentialWheelMotor =>
+            EntityFields.X -> robot.position.x.toString,
+            EntityFields.Y -> robot.position.y.toString,
+            EntityFields.Orientation -> robot.orientation.degrees.toString,
+            RobotFields.Radius -> robot.shape.radius.toString,
+            RobotFields.Speed -> robot.actuators.collectFirst { case dwt: DifferentialWheelMotor =>
               dwt.left.speed.toString
             }.getOrElse(""),
-            RobotFields.withProximitySensors -> stdProximitySensors.forall(robot.sensors.contains),
-            RobotFields.withLightSensors -> stdLightSensors.forall(robot.sensors.contains),
-            RobotFields.behavior -> robot.behavior.toString(),
+            RobotFields.WithProximitySensors -> StdProximitySensors.forall(robot.sensors.contains),
+            RobotFields.WithLightSensors -> StdLightSensors.forall(robot.sensors.contains),
+            RobotFields.Behavior -> robot.behavior.toString(),
           )
           row.setValues(robotMap)
         case obs: StaticEntity.Obstacle =>
-          val row = new EntityRow(ObstacleFields.self.capitalize, fieldSpecsByType, removeEntityRow)
+          val row = new EntityRow(ObstacleFields.Self.capitalize, fieldSpecsByType, removeEntityRow)
           entityListPanel.add(row)
           val shapeMap: Map[String, String | Boolean] = obs.shape match
             case ShapeType.Circle(_) => Map.empty[String, String | Boolean]
             case ShapeType.Rectangle(width, height) =>
               Map(
-                ObstacleFields.width -> width.toString,
-                ObstacleFields.height -> height.toString,
+                ObstacleFields.Width -> width.toString,
+                ObstacleFields.Height -> height.toString,
               )
           val obstacleMap = Map(
-            EntityFields.x -> obs.position.x.toString,
-            EntityFields.y -> obs.position.y.toString,
-            EntityFields.orientation -> obs.orientation.degrees.toString,
+            EntityFields.X -> obs.position.x.toString,
+            EntityFields.Y -> obs.position.y.toString,
+            EntityFields.Orientation -> obs.orientation.degrees.toString,
           ) ++ shapeMap
           row.setValues(obstacleMap)
         case light: StaticEntity.Light =>
-          val row = new EntityRow(LightFields.self.capitalize, fieldSpecsByType, removeEntityRow)
+          val row = new EntityRow(LightFields.Self.capitalize, fieldSpecsByType, removeEntityRow)
           entityListPanel.add(row)
           val lightMap = Map(
-            EntityFields.x -> light.position.x.toString,
-            EntityFields.y -> light.position.y.toString,
-            EntityFields.orientation -> light.orientation.degrees.toString,
-            LightFields.radius -> light.radius.toString,
-            LightFields.illuminationRadius -> light.illuminationRadius.toString,
-            LightFields.intensity -> light.intensity.toString,
-            LightFields.attenuation -> light.attenuation.toString,
+            EntityFields.X -> light.position.x.toString,
+            EntityFields.Y -> light.position.y.toString,
+            EntityFields.Orientation -> light.orientation.degrees.toString,
+            LightFields.Radius -> light.radius.toString,
+            LightFields.IlluminationRadius -> light.illuminationRadius.toString,
+            LightFields.Intensity -> light.intensity.toString,
+            LightFields.Attenuation -> light.attenuation.toString,
           )
           row.setValues(lightMap)
       end match

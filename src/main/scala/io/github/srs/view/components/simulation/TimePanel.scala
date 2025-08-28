@@ -42,7 +42,7 @@ class TimePanel extends JPanel:
     }
 
     List(elapsedValue, remainingValue).foreach { value =>
-      value.setFont(new Font("Monospaced", Font.PLAIN, UI.Fonts.fontSize))
+      value.setFont(new Font("Monospaced", Font.PLAIN, UI.Fonts.FontSize))
       value.setBackground(UI.Colors.backgroundLight)
     }
 

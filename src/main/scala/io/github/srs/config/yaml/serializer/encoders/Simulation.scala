@@ -19,10 +19,10 @@ object Simulation:
     Json
       .obj()
       .deepMerge(
-        simulation.duration.map(SimulationFields.duration -> _.asJson).toList.toMap.asJson,
+        simulation.duration.map(SimulationFields.Duration -> _.asJson).toList.toMap.asJson,
       )
       .deepMerge(
-        simulation.seed.map(SimulationFields.seed -> _.asJson).toList.toMap.asJson,
+        simulation.seed.map(SimulationFields.Seed -> _.asJson).toList.toMap.asJson,
       )
 
 export Simulation.given

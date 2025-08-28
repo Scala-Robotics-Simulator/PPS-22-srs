@@ -23,12 +23,12 @@ import io.github.srs.model.entity.dynamicentity.behavior.Policy
  */
 final case class Robot(
     override val id: UUID = UUID.randomUUID(),
-    override val position: Point2D = defaultPosition,
-    override val shape: ShapeType.Circle = defaultShape,
-    override val orientation: Orientation = defaultOrientation,
-    override val actuators: Seq[Actuator[Robot]] = defaultActuators,
-    override val sensors: Vector[Sensor[Robot, Environment]] = defaultSensors,
-    override val behavior: Policy = defaultPolicy,
+    override val position: Point2D = DefaultPosition,
+    override val shape: ShapeType.Circle = DefaultShape,
+    override val orientation: Orientation = DefaultOrientation,
+    override val actuators: Seq[Actuator[Robot]] = DefaultActuators,
+    override val sensors: Vector[Sensor[Robot, Environment]] = DefaultSensors,
+    override val behavior: Policy = DefaultPolicy,
 ) extends DynamicEntity:
 
   given CanEqual[Policy, Policy] = CanEqual.derived

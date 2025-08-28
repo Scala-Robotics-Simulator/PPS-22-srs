@@ -11,10 +11,10 @@ class ObstacleDslTest extends AnyFlatSpec with Matchers:
   "Obstacle DSL" should "create an obstacle with default properties" in:
     import io.github.srs.utils.SimulationDefaults.StaticEntity.Obstacle.*
     val entity = obstacle
-    val _ = entity.pos shouldBe defaultPosition
-    val _ = entity.width shouldBe defaultWidth
-    val _ = entity.height shouldBe defaultHeight
-    entity.orient shouldBe defaultOrientation
+    val _ = entity.pos shouldBe DefaultPosition
+    val _ = entity.width shouldBe DefaultWidth
+    val _ = entity.height shouldBe DefaultHeight
+    entity.orient shouldBe DefaultOrientation
 
   it should "set the position of the obstacle" in:
     val pos = (5.0, 5.0)

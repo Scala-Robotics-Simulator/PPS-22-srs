@@ -53,7 +53,7 @@ object CreationDSL:
      * Use simple lighting without caching
      */
     def withDefaultLighting: Environment =
-      env.copy(_lightMap = Some(LightMapConfigs.baseLightMap))
+      env.copy(_lightMap = Some(LightMapConfigs.BaseLightMap))
 
     /**
      * Sets the height of the environment.
@@ -107,9 +107,9 @@ object CreationDSL:
       val robots = env.entities.collect:
         case r: Robot => r
       for
-        width <- bounded("width", env.width, minWidth, maxWidth, includeMax = true)
-        height <- bounded("height", env.height, minHeight, maxHeight, includeMax = true)
-        _ <- bounded("entities", env.entities.size, 0, maxEntities, includeMax = true)
+        width <- bounded("width", env.width, MinWidth, MaxWidth, includeMax = true)
+        height <- bounded("height", env.height, MinHeight, MaxHeight, includeMax = true)
+        _ <- bounded("entities", env.entities.size, 0, MaxEntities, includeMax = true)
         entities <- withinBounds("entities", entities, width, height)
         entities <- noCollisions("entities", entities ++ boundaries)
         _ <- robots.toList.traverse_(validateRobot)

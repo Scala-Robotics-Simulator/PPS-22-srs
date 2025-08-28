@@ -40,11 +40,11 @@ class RobotDslTest extends AnyFlatSpec with Matchers:
   "Robot DSL" should "create a robot with default properties" in:
     import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.*
     val entity = robot
-    val _ = entity.position shouldBe defaultPosition
-    val _ = entity.shape shouldBe defaultShape
-    val _ = entity.orientation shouldBe defaultOrientation
-    val _ = entity.actuators shouldBe defaultActuators
-    entity.sensors shouldBe defaultSensors
+    val _ = entity.position shouldBe DefaultPosition
+    val _ = entity.shape shouldBe DefaultShape
+    val _ = entity.orientation shouldBe DefaultOrientation
+    val _ = entity.actuators shouldBe DefaultActuators
+    entity.sensors shouldBe DefaultSensors
 
   it should "set the position of the robot" in:
     val pos = Point2D(5.0, 5.0)

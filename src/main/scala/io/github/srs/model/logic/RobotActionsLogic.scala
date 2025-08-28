@@ -13,8 +13,8 @@ import io.github.srs.model.environment.ValidEnvironment.ValidEnvironment
 import io.github.srs.model.environment.dsl.CreationDSL.validate
 import io.github.srs.model.{ ModelModule, SimulationState }
 import io.github.srs.utils.EqualityGivenInstances.given
-import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.defaultMaxRetries
-import io.github.srs.utils.SimulationDefaults.{ binarySearchDurationThreshold, debugMode }
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.DefaultMaxRetries
+import io.github.srs.utils.SimulationDefaults.{ BinarySearchDurationThreshold, DebugMode }
 
 /**
  * Logic for handling robot actions proposals.
@@ -70,7 +70,7 @@ object RobotActionsLogic:
           robot: Robot,
           action: Action[IO],
           maxDt: FiniteDuration,
-          maxAttempts: Int = defaultMaxRetries,
+          maxAttempts: Int = DefaultMaxRetries,
       ): IO[Robot] =
 
         /**
@@ -87,7 +87,7 @@ object RobotActionsLogic:
          *   an [[IO]] effect that produces the best valid robot found.
          */
         def binarySearch(low: FiniteDuration, high: FiniteDuration, best: Option[Robot], attempts: Int): IO[Robot] =
-          if attempts >= maxAttempts || (high - low) <= binarySearchDurationThreshold then
+          if attempts >= maxAttempts || (high - low) <= BinarySearchDurationThreshold then
             IO.pure(best.getOrElse(robot))
           else
             val mid = low + (high - low) / 2
@@ -140,7 +140,7 @@ object RobotActionsLogic:
           val candidate = applyAllMoves(s.environment, moves)
           candidate.validate match
             case Right(validEnv) =>
-              if debugMode then
+              if DebugMode then
                 moves.foreach { case (_, newR) =>
                   println(s"[${newR.position._1}, ${newR.position._2}],")
                 }

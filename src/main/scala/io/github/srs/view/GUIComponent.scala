@@ -42,7 +42,6 @@ trait GUIComponent[S <: ModelModule.State] extends Component[S]:
     import io.github.srs.model.SimulationConfig.SimulationSpeed
     import io.github.srs.utils.SimulationDefaults.{ Frame, Layout }
 
-    type RobotId = String
     private type SpeedLabel = String
 
     private val frame = new JFrame("Scala Robotics Simulator")
@@ -83,7 +82,7 @@ trait GUIComponent[S <: ModelModule.State] extends Component[S]:
     private def setupUI(): Unit =
       import io.github.srs.view.components.{ applyDefaultAndPreferSize, centerFrame }
 
-      canvas.setBorder(BorderFactory.createLineBorder(java.awt.Color.BLACK, Frame.canvasBorder))
+      canvas.setBorder(BorderFactory.createLineBorder(java.awt.Color.BLACK, Frame.CanvasBorder))
       frame.applyDefaultAndPreferSize()
       frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
 
@@ -92,8 +91,8 @@ trait GUIComponent[S <: ModelModule.State] extends Component[S]:
         canvas,
         createSidePanel(),
       )
-      splitPane.setResizeWeight(Layout.splitPaneWeight)
-      splitPane.setDividerLocation(Layout.splitPaneLocation)
+      splitPane.setResizeWeight(Layout.SplitPaneWeight)
+      splitPane.setDividerLocation(Layout.SplitPaneLocation)
 
       frame.add(splitPane, BorderLayout.CENTER)
       frame.pack()

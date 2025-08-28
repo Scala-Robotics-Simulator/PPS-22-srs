@@ -17,7 +17,7 @@ import io.github.srs.model.entity.{ Orientation, Point2D }
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.environment.dsl.CreationDSL.*
 import io.github.srs.utils.SimulationDefaults
-import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.{ stdLightSensors, stdProximitySensors }
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.{ StdLightSensors, StdProximitySensors }
 import org.scalatest.OptionValues.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -104,7 +104,7 @@ class YamlManagerTest extends AnyFlatSpec with Matchers:
                         val _ = d.right.speed should be(1.0)
                       case _ => fail("Expected a DifferentialWheelMotor actuator")
                   case None => fail("Expected at least one actuator")
-                robot.sensors should be(SimulationDefaults.DynamicEntity.Robot.stdProximitySensors)
+                robot.sensors should be(SimulationDefaults.DynamicEntity.Robot.StdProximitySensors)
               case _ => fail("Expected a Robot entity")
           case _ => fail("Expected a Robot entity")
     end match
@@ -146,9 +146,9 @@ class YamlManagerTest extends AnyFlatSpec with Matchers:
     loadedConfig shouldBe config
 
   it should "convert a SimulationConfig with custom environment to YAML" in:
-    val obstacleId = SimulationDefaults.StaticEntity.Obstacle.defaultId
-    val lightId = SimulationDefaults.StaticEntity.Light.defaultId
-    val robotId = SimulationDefaults.DynamicEntity.Robot.defaultId
+    val obstacleId = SimulationDefaults.StaticEntity.Obstacle.DefaultId
+    val lightId = SimulationDefaults.StaticEntity.Light.DefaultId
+    val robotId = SimulationDefaults.DynamicEntity.Robot.DefaultId
     val orientation = Orientation(0.0)
     val l =
       light withId lightId at (
@@ -158,7 +158,7 @@ class YamlManagerTest extends AnyFlatSpec with Matchers:
     val o = obstacle withId obstacleId at (2.0, 2.0) withWidth 1.0 withHeight 1.0 withOrientation orientation
     val r = robot withId robotId at (4.0, 4.0) withOrientation orientation withSpeed 1.0 withShape Circle(
       0.5,
-    ) withSpeed 2.0 withSensors (stdProximitySensors ++ stdLightSensors)
+    ) withSpeed 2.0 withSensors (StdProximitySensors ++ StdLightSensors)
 
     val env = environment containing l and o and r
 

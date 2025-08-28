@@ -11,12 +11,12 @@ class LightDslTest extends AnyFlatSpec with Matchers:
   "Light DSL" should "create a light with default properties" in:
     import io.github.srs.utils.SimulationDefaults.StaticEntity.Light.*
     val entity = light
-    val _ = entity.pos shouldBe defaultPosition
-    val _ = entity.orient shouldBe defaultOrientation
-    val _ = entity.radius shouldBe defaultRadius
-    val _ = entity.illuminationRadius shouldBe defaultIlluminationRadius
-    val _ = entity.intensity shouldBe defaultIntensity
-    entity.attenuation shouldBe defaultAttenuation
+    val _ = entity.pos shouldBe DefaultPosition
+    val _ = entity.orient shouldBe DefaultOrientation
+    val _ = entity.radius shouldBe DefaultRadius
+    val _ = entity.illuminationRadius shouldBe DefaultIlluminationRadius
+    val _ = entity.intensity shouldBe DefaultIntensity
+    entity.attenuation shouldBe DefaultAttenuation
 
   it should "set the position of the light" in:
     val pos = (5.0, 5.0)
