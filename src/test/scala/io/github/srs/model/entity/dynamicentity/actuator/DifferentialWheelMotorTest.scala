@@ -17,7 +17,7 @@ class DifferentialWheelMotorTest extends AnyFlatSpec with Matchers:
 
   val deltaTime: FiniteDuration = FiniteDuration(100, MILLISECONDS)
   val wheelRadius: Double = 0.5
-  val shape: ShapeType.Circle = ShapeType.Circle(1.0)
+  val shape: ShapeType.Circle = ShapeType.Circle(0.5)
   val initialPosition: Point2D = Point2D(3.0, 1.0)
   val initialOrientation: Orientation = Orientation(0.0)
 
@@ -41,7 +41,7 @@ class DifferentialWheelMotorTest extends AnyFlatSpec with Matchers:
     movedRobot.position shouldBe expectedMovement._1
 
   it should "update its orientation based on the wheel speeds" in:
-    val leftSpeed: Double = -0.5
+    val leftSpeed: Double = 0.5
     val rightSpeed: Double = 1.0
     val wheelMotor: DifferentialWheelMotor = DifferentialWheelMotor(
       Wheel(leftSpeed, ShapeType.Circle(wheelRadius)),
