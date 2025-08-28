@@ -242,7 +242,7 @@ object SimulationDefaults:
 
       object ProximitySensor:
         val DefaultOffset: Double = 0.0
-        val DefaultRange: Double = 1.5
+        val DefaultRange: Double = 1.0
 
     object Robot:
 
@@ -250,7 +250,7 @@ object SimulationDefaults:
 
       val defaultId: UUID = UUID.fromString("00000000-0000-0000-0000-000000000002")
       val defaultPosition: Point2D = (0.0, 0.0)
-      val defaultShape: ShapeType.Circle = ShapeType.Circle(0.5)
+      val defaultShape: ShapeType.Circle = ShapeType.Circle(0.25)
       val defaultOrientation: Orientation = Orientation(0.0)
       val defaultActuators: Seq[Actuator[Robot]] = Seq.empty
       val defaultSensors: Vector[Sensor[Robot, Environment]] = Vector.empty

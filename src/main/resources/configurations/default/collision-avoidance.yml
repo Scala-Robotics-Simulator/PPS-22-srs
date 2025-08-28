@@ -19,6 +19,6 @@ environment:
       withLightSensors: true
       orientation: 90.0
       position: [3.0, 1.0]
-      radius: 0.5
+      radius: 0.25
       withProximitySensors: true
       behavior: ObstacleAvoidance

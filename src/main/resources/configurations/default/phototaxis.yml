@@ -17,7 +17,7 @@ environment:
   - robot:
       position: [3, 1]
       orientation: 90.0
-      radius: 0.5
+      radius: 0.25
       speed: 1.0
       withProximitySensors: true
       withLightSensors: true
@@ -26,7 +26,7 @@ environment:
   - robot:
       position: [1, 7]
       orientation: 270.0
-      radius: 0.5
+      radius: 0.25
       speed: 1.0
       withProximitySensors: true
       withLightSensors: true
