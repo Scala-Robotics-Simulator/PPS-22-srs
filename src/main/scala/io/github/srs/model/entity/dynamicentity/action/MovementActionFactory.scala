@@ -25,8 +25,8 @@ object MovementActionFactory:
    */
   infix def customMove[F[_]](left: Double, right: Double): Validation[MovementAction[F]] =
     for
-      _ <- Validation.bounded("left", left, minSpeed, maxSpeed, includeMax = true)
-      _ <- Validation.bounded("right", right, minSpeed, maxSpeed, includeMax = true)
+      _ <- Validation.bounded("left", left, MinSpeed, MaxSpeed, includeMax = true)
+      _ <- Validation.bounded("right", right, MinSpeed, MaxSpeed, includeMax = true)
     yield MovementAction(left, right)
 
   /**
@@ -36,7 +36,7 @@ object MovementActionFactory:
    * @return
    *   the [[MovementAction]] representing the forward movement.
    */
-  infix def moveForward[F[_]]: MovementAction[F] = MovementAction(maxSpeed, maxSpeed)
+  infix def moveForward[F[_]]: MovementAction[F] = MovementAction(MaxSpeed, MaxSpeed)
 
   /**
    * Moves the robot backward by applying a negative speed to both wheels.
@@ -45,7 +45,7 @@ object MovementActionFactory:
    * @return
    *   the [[MovementAction]] representing the backward movement.
    */
-  infix def moveBackward[F[_]]: MovementAction[F] = MovementAction(-maxSpeed, -maxSpeed)
+  infix def moveBackward[F[_]]: MovementAction[F] = MovementAction(-MaxSpeed, -MaxSpeed)
 
   /**
    * Turns the robot left by applying a positive speed to the left wheel and a negative speed to the right wheel.
