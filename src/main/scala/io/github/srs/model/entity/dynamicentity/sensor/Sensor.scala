@@ -1,7 +1,6 @@
 package io.github.srs.model.entity.dynamicentity.sensor
 
 import cats.syntax.all.*
-import io.github.srs.model.PositiveDouble
 import io.github.srs.model.entity.dynamicentity.{ DynamicEntity, Robot }
 import io.github.srs.model.entity.{ Orientation, Point2D }
 import io.github.srs.model.environment.Environment
@@ -11,6 +10,7 @@ import io.github.srs.utils.SimulationDefaults.DynamicEntity.Sensor.ProximitySens
 import io.github.srs.model.illumination.model.ScaleFactor
 import cats.Monad
 import io.github.srs.model.entity.ShapeType
+import io.github.srs.utils.types.PositiveDouble
 
 /**
  * Represents the range of a sensor.
@@ -102,8 +102,6 @@ object SensorReadings:
  * (closest) and 1.0 (farthest).
  * @param offset
  *   the offset orientation of the sensor relative to the entity's orientation.
- * @param distance
- *   the distance from the center of the entity to the sensor.
  * @param range
  *   the range of the sensor, which defines how far it can sense.
  * @tparam Entity
@@ -113,7 +111,7 @@ object SensorReadings:
  */
 final case class ProximitySensor[Entity <: DynamicEntity, Env <: Environment](
     override val offset: Orientation = Orientation(ProximitySensorDefaults.defaultOffset),
-    val range: Range = ProximitySensorDefaults.defaultRange,
+    range: Range = ProximitySensorDefaults.defaultRange,
 ) extends Sensor[Entity, Env]:
 
   override type Data = Double
@@ -140,10 +138,6 @@ end ProximitySensor
  * A light sensor that senses the light intensity in the environment.
  * @param offset
  *   the offset orientation of the sensor relative to the entity's orientation.
- * @param distance
- *   the distance from the center of the entity to the sensor.
- * @param range
- *   the range of the sensor, which defines how far it can sense.
  * @tparam Entity
  *   the type of dynamic entity that the sensor can act upon.
  * @tparam Env
