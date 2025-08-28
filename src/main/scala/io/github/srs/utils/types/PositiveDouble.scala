@@ -22,7 +22,7 @@ object PositiveDouble:
      *   [[Right]] if the instance is valid, or a [[Left]] with an error message if invalid.
      */
     def validate: Validation[PositiveDouble] =
-      import io.github.srs.model.validation.Validation.{notInfinite, notNaN, positive}
+      import io.github.srs.model.validation.Validation.{ notInfinite, notNaN, positive }
       for
         value <- notNaN("value", pd)
         value <- notInfinite("value", value)

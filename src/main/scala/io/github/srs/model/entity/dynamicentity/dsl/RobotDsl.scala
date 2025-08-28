@@ -4,7 +4,8 @@ import java.util.UUID
 
 import cats.syntax.all.*
 import io.github.srs.model.entity.dynamicentity.Robot
-import io.github.srs.model.entity.dynamicentity.actuator.dsl.ActuatorDsl.*
+import io.github.srs.model.entity.dynamicentity.actuator.dsl.ActuatorDsl.validateActuator
+import io.github.srs.model.entity.dynamicentity.sensor.dsl.SensorDsl.validateSensor
 import io.github.srs.model.entity.dynamicentity.actuator.dsl.DifferentialWheelMotorDsl.{ differentialWheelMotor, ws }
 import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, DifferentialWheelMotor }
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor
@@ -189,6 +190,7 @@ object RobotDsl:
         _ <- notNaN("degrees", robot.orientation.degrees)
         _ <- validateCountOfType[DifferentialWheelMotor]("actuators", robot.actuators, 0, 1)
         _ <- robot.actuators.traverse_(validateActuator)
+        _ <- robot.sensors.traverse_(validateSensor)
       yield robot
   end extension
 end RobotDsl

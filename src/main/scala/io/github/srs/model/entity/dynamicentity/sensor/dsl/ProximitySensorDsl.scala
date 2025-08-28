@@ -4,8 +4,15 @@ import io.github.srs.model.entity.Orientation
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
 import io.github.srs.model.entity.dynamicentity.sensor.ProximitySensor
 import io.github.srs.model.environment.Environment
+import io.github.srs.model.validation.Validation
+import io.github.srs.utils.types.PositiveDouble
 
 object ProximitySensorDsl:
+
+  def validateProximitySensor(
+      sensor: ProximitySensor[DynamicEntity, Environment],
+  ): Validation[ProximitySensor[DynamicEntity, Environment]] =
+    sensor.validate
 
   /** Creates a new ProximitySensor with default properties. */
   def proximitySensor: ProximitySensor[DynamicEntity, Environment] = ProximitySensor()
@@ -32,5 +39,12 @@ object ProximitySensorDsl:
      */
     infix def withOffset(offset: Orientation): ProximitySensor[DynamicEntity, Environment] =
       sensor.copy(offset = offset)
+
+    /**
+     * Validates the properties of a sensor.
+     */
+    def validate: Validation[ProximitySensor[DynamicEntity, Environment]] =
+      for _ <- PositiveDouble(sensor.range).validate
+      yield sensor
   end extension
 end ProximitySensorDsl
