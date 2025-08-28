@@ -140,6 +140,7 @@ object GridDSL:
      */
     infix def ||(next: Cell): EnvironmentBuilder =
       EnvironmentBuilder(env.cells :+ Vector(next))
+  end extension
 
 end GridDSL
 
