@@ -28,10 +28,10 @@ class RobotDslTest extends AnyFlatSpec with Matchers:
   val wheelRadius: Double = 0.5
 
   val wheelMotor: DifferentialWheelMotor =
-    DifferentialWheelMotor(Wheel(1.0, ShapeType.Circle(wheelRadius)), Wheel(2.0, ShapeType.Circle(wheelRadius)))
+    DifferentialWheelMotor(Wheel(1.0, ShapeType.Circle(wheelRadius)), Wheel(1.0, ShapeType.Circle(wheelRadius)))
 
   val wheelMotor2: DifferentialWheelMotor =
-    DifferentialWheelMotor(Wheel(3.0, ShapeType.Circle(wheelRadius)), Wheel(4.0, ShapeType.Circle(wheelRadius)))
+    DifferentialWheelMotor(Wheel(0.5, ShapeType.Circle(wheelRadius)), Wheel(0.2, ShapeType.Circle(wheelRadius)))
 
   val sensor: Sensor[Robot, Environment] = ProximitySensor(Orientation(0.0), 3.0)
 

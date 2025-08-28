@@ -37,7 +37,7 @@ class DifferentialWheelMotorDslTest extends AnyFlatSpec with Matchers:
     motor.left.speed shouldBe DifferentialWheelMotor.Wheel.defaultSpeed
 
   it should "validate a valid differential wheel motor" in:
-    val motor = differentialWheelMotor.ws(2.0)
+    val motor = differentialWheelMotor.ws(1.0)
     val validation = validateDifferentialWheelMotor(motor)
     validation.isRight shouldBe true
 

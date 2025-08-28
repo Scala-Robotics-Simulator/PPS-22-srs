@@ -28,6 +28,25 @@ object SimulationDefaults:
       val FullRotation: Double = 90.0
       val AlmostZero: Double = 1e-6
 
+  object Behaviors:
+
+    object ObstacleAvoidance:
+      val CruiseSpeed: Double = 0.35
+      val WarnSpeed: Double = 0.15
+      val WarnTurnSpeed: Double = 0.55
+      val BackBoost: Double = 0.20
+      val SafeDist: Double = 0.5
+      val CriticalDist: Double = 0.35
+
+    object RandomWalk:
+      val MinForwardFactor: Double = 0.35
+      val MaxForwardExtra: Double = 0.35
+      val MinTurnOfBase: Double = 0.35
+      val MaxTurnOfBase: Double = 1.15
+      val TurnExponent: Double = 1.2
+      val PivotBoostProb: Double = 0.20
+      val PivotBoostAbs: Double = 0.15
+
   object UI:
 
     object SimulationViewConstants:
@@ -204,8 +223,8 @@ object SimulationDefaults:
 
   object DynamicEntity:
     val zeroSpeed: Double = 0.0
-    val minSpeed: Double = -1.0
-    val maxSpeed: Double = 1.0
+    val MinSpeed: Double = -1.0
+    val MaxSpeed: Double = 1.0
     val halfSpeed: Double = 0.5
 
     object Actuator:
@@ -216,23 +235,22 @@ object SimulationDefaults:
         object Wheel:
           val defaultSpeed: Double = 1.0
           val defaultShape: ShapeType.Circle = ShapeType.Circle(0.1)
-          val MinSpeed: Double = 0.0
-          val MaxSpeed: Double = 5.0
+          val MinSpeed: Double = -1.0
+          val MaxSpeed: Double = 1.0
 
     object Sensor:
 
       object ProximitySensor:
         val DefaultOffset: Double = 0.0
-        val DefaultRange: Double = 5.0
+        val DefaultRange: Double = 1.0
 
     object Robot:
-      import SimulationDefaults.DynamicEntity.Robot.defaultShape.radius
 
       val defaultMaxRetries = 10
 
       val defaultId: UUID = UUID.fromString("00000000-0000-0000-0000-000000000002")
       val defaultPosition: Point2D = (0.0, 0.0)
-      val defaultShape: ShapeType.Circle = ShapeType.Circle(0.5)
+      val defaultShape: ShapeType.Circle = ShapeType.Circle(0.25)
       val defaultOrientation: Orientation = Orientation(0.0)
       val defaultActuators: Seq[Actuator[Robot]] = Seq.empty
       val defaultSensors: Vector[Sensor[Robot, Environment]] = Vector.empty
@@ -246,14 +264,14 @@ object SimulationDefaults:
       val minArrowWidth: Float = 2f
 
       val stdProximitySensors: Vector[Sensor[Robot, Environment]] = Vector(
-        ProximitySensor(Orientation(0.0), radius),
-        ProximitySensor(Orientation(45.0), radius),
-        ProximitySensor(Orientation(90.0), radius),
-        ProximitySensor(Orientation(135.0), radius),
-        ProximitySensor(Orientation(180.0), radius),
-        ProximitySensor(Orientation(225.0), radius),
-        ProximitySensor(Orientation(270.0), radius),
-        ProximitySensor(Orientation(315.0), radius),
+        ProximitySensor(Orientation(0.0)),
+        ProximitySensor(Orientation(45.0)),
+        ProximitySensor(Orientation(90.0)),
+        ProximitySensor(Orientation(135.0)),
+        ProximitySensor(Orientation(180.0)),
+        ProximitySensor(Orientation(225.0)),
+        ProximitySensor(Orientation(270.0)),
+        ProximitySensor(Orientation(315.0)),
       )
 
       val stdLightSensors: Vector[Sensor[Robot, Environment]] = Vector(

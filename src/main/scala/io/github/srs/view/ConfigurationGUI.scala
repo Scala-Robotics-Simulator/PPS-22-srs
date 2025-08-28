@@ -84,7 +84,7 @@ object ConfigurationGUI:
       onValidationError = showValidationErrors,
     )
 
-    private val fieldCanvas = new SimulationCanvas(alwaysRefresh = true)
+    private val fieldCanvas = new SimulationCanvas(insideConfiguration = true)
 
     private def refreshCanvas(env: Environment): IO[Unit] =
       IO:
