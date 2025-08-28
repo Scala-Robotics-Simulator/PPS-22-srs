@@ -4,6 +4,7 @@ import cats.effect.IO
 import cats.effect.std.Queue
 import io.github.srs.controller.protocol.Event
 import io.github.srs.model.ModelModule
+import io.github.srs.model.dsl.EnvironmentToGridDSL.prettyPrint
 import io.github.srs.view.ViewModule.{ Component, Requirements, View }
 
 /**
@@ -42,7 +43,14 @@ trait CLIComponent[S <: ModelModule.State] extends Component[S]:
      * @inheritdoc
      */
     override def close(): IO[Unit] =
-      for _ <- IO.println("Exiting the Scala Robotics Simulator CLI. Goodbye!")
+      for _ <- IO.println("Exiting the Scala Robotics Simulator CLI.")
+      yield ()
+
+    /**
+     * @inheritdoc
+     */
+    override def timeElapsed(state: S): IO[Unit] =
+      for _ <- IO.println(s"Simulation finished. Resulting state:\n${prettyPrint(state.environment)}")
       yield ()
   end CLIViewImpl
 end CLIComponent

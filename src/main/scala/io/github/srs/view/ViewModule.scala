@@ -43,6 +43,15 @@ object ViewModule:
      */
     def close(): IO[Unit]
 
+    /**
+     * Handles the event when a certain amount of time has elapsed in the simulation.
+     * @param state
+     *   the resulting state after time has elapsed.
+     * @return
+     *   an [[IO]] task that completes when the time elapsed event is handled.
+     */
+    def timeElapsed(state: S): IO[Unit]
+
   end View
 
   /**

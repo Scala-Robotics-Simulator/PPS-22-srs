@@ -2,9 +2,9 @@ package io.github.srs.model.logic
 
 import scala.concurrent.duration.FiniteDuration
 
-import io.github.srs.model.SimulationConfig.SimulationSpeed
-import io.github.srs.model.{ ModelModule, SimulationState }
 import cats.effect.IO
+import io.github.srs.model.SimulationConfig.{ SimulationSpeed, SimulationStatus }
+import io.github.srs.model.{ ModelModule, SimulationState }
 
 /**
  * Logic for handling simulation time updates.
@@ -43,9 +43,15 @@ object TimeLogic:
 
   given TickLogic[SimulationState] with
 
-    def tick(s: SimulationState, delta: FiniteDuration): IO[SimulationState] =
+    def tick(s: SimulationState, delta: FiniteDuration): IO[SimulationState] = IO.pure:
       val updatedElapsed = s.elapsedTime + delta
-      IO.pure(s.copy(elapsedTime = updatedElapsed))
 
-    def tickSpeed(s: SimulationState, speed: SimulationSpeed): IO[SimulationState] =
-      IO.pure(s.copy(simulationSpeed = speed))
+      val isElapsedTimeReached: Boolean = s.simulationTime.exists(max => s.elapsedTime >= max)
+
+      s.copy(
+        elapsedTime = updatedElapsed,
+        simulationStatus = if isElapsedTimeReached then SimulationStatus.ELAPSED_TIME else s.simulationStatus,
+      )
+
+    def tickSpeed(s: SimulationState, speed: SimulationSpeed): IO[SimulationState] = IO.pure:
+      s.copy(simulationSpeed = speed)

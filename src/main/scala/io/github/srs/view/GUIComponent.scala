@@ -77,6 +77,13 @@ trait GUIComponent[S <: ModelModule.State] extends Component[S]:
     override def close(): IO[Unit] = IO(frame.dispose())
 
     /**
+     * @inheritdoc
+     */
+    override def timeElapsed(state: S): IO[Unit] = IO:
+      controls.startStopButton.setEnabled(false)
+      controls.pauseResumeButton.setEnabled(false)
+
+    /**
      * Sets up the main UI layout with split pane configuration.
      */
     private def setupUI(): Unit =

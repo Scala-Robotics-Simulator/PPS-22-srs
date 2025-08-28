@@ -9,7 +9,7 @@ import cats.syntax.all.*
 import io.github.srs.controller.message.RobotProposal
 import io.github.srs.controller.protocol.Event
 import io.github.srs.model.*
-import io.github.srs.model.SimulationConfig.SimulationStatus.{ PAUSED, RUNNING, STOPPED }
+import io.github.srs.model.SimulationConfig.SimulationStatus.*
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.behavior.BehaviorContext
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
@@ -123,9 +123,9 @@ object ControllerModule:
               events <- queue.tryTakeN(Some(50))
               newState <- handleEvents(state, events)
               _ <- context.view.render(newState)
-              result <-
-                if stopCondition(newState) then IO.pure(newState)
-                else
+              result <- handleStopCondition(newState) match
+                case Some(io) => io
+                case None =>
                   for
                     nextState <- nextStep(newState, startTime)
                     endTime <- Clock[IO].realTime.map(_.toMillis)
@@ -138,28 +138,14 @@ object ControllerModule:
 
         end simulationLoop
 
-        /**
-         * Checks if the simulation should stop based on the current state.
-         * @param state
-         *   the current state of the simulation.
-         * @return
-         *   a boolean indicating whether the simulation should stop.
-         */
-        private def stopCondition(state: S): Boolean =
-          state.simulationStatus == STOPPED ||
-            elapsedTimeReached(state.simulationTime, state.elapsedTime)
-
-        /**
-         * Checks if the elapsed time has reached the maximum simulation time.
-         * @param simulationTime
-         *   the maximum simulation time, if defined.
-         * @param elapsedTime
-         *   the elapsed time since the simulation started.
-         * @return
-         *   a boolean indicating whether the elapsed time has reached the maximum simulation time.
-         */
-        private def elapsedTimeReached(simulationTime: Option[FiniteDuration], elapsedTime: FiniteDuration): Boolean =
-          simulationTime.exists(max => elapsedTime >= max)
+        private def handleStopCondition(state: S): Option[IO[S]] =
+          state.simulationStatus match
+            case STOPPED =>
+              Some(context.view.close() *> IO.pure(state))
+            case ELAPSED_TIME =>
+              Some(context.view.timeElapsed(state) *> IO.pure(state))
+            case _ =>
+              None
 
         /**
          * Processes the next step in the simulation based on the current state and start time.
@@ -178,7 +164,7 @@ object ControllerModule:
             case PAUSED =>
               IO.sleep(50.millis).as(state)
 
-            case STOPPED =>
+            case _ =>
               IO.pure(state)
 
         /**
