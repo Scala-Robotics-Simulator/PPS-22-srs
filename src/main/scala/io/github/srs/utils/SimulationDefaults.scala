@@ -35,7 +35,7 @@ object SimulationDefaults:
       val WarnSpeed: Double = 0.15
       val WarnTurnSpeed: Double = 0.55
       val BackBoost: Double = 0.20
-      val SafeDist: Double = 0.85
+      val SafeDist: Double = 0.5
       val CriticalDist: Double = 0.35
 
     object RandomWalk:
@@ -240,10 +240,9 @@ object SimulationDefaults:
 
       object ProximitySensor:
         val defaultOffset: Double = 0.0
-        val defaultRange: Double = 5.0
+        val defaultRange: Double = 1.5
 
     object Robot:
-      import SimulationDefaults.DynamicEntity.Robot.defaultShape.radius
 
       val defaultMaxRetries = 10
 
@@ -261,14 +260,14 @@ object SimulationDefaults:
       val minArrowWidth: Float = 2f
 
       val stdProximitySensors: Vector[Sensor[Robot, Environment]] = Vector(
-        ProximitySensor(Orientation(0.0), radius),
-        ProximitySensor(Orientation(45.0), radius),
-        ProximitySensor(Orientation(90.0), radius),
-        ProximitySensor(Orientation(135.0), radius),
-        ProximitySensor(Orientation(180.0), radius),
-        ProximitySensor(Orientation(225.0), radius),
-        ProximitySensor(Orientation(270.0), radius),
-        ProximitySensor(Orientation(315.0), radius),
+        ProximitySensor(Orientation(0.0)),
+        ProximitySensor(Orientation(45.0)),
+        ProximitySensor(Orientation(90.0)),
+        ProximitySensor(Orientation(135.0)),
+        ProximitySensor(Orientation(180.0)),
+        ProximitySensor(Orientation(225.0)),
+        ProximitySensor(Orientation(270.0)),
+        ProximitySensor(Orientation(315.0)),
       )
 
       val stdLightSensors: Vector[Sensor[Robot, Environment]] = Vector(

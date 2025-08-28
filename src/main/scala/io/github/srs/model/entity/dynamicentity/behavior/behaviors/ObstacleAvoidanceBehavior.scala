@@ -7,6 +7,7 @@ import io.github.srs.model.entity.dynamicentity.sensor.ProximityReadings
 import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings.*
 import io.github.srs.utils.SimulationDefaults.Behaviors.ObstacleAvoidance.*
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.{ MaxSpeed, MinSpeed }
+import io.github.srs.utils.SimulationDefaults.Behaviors.ObstacleAvoidance.CriticalDist
 
 /**
  * A [[Behavior]] that avoid obstacles using proximity sensor readings.
@@ -32,8 +33,9 @@ object ObstacleAvoidanceBehavior:
       val readings = ctx.sensorReadings.proximityReadings
 
       // Front region: ±60°
-      val frontLeft = minIn(readings)(deg => deg > 0.0 && deg <= 60.0)
-      val frontRight = minIn(readings)(deg => deg < 0.0 && deg >= -60.0)
+      val front = minIn(readings)(deg => math.abs(deg) <= 10)
+      val frontLeft = minIn(readings)(deg => deg > 0.0 && deg <= 100.0)
+      val frontRight = minIn(readings)(deg => deg < 0.0 && deg >= -100.0)
       val minFront = math.min(frontLeft, frontRight)
 
       val phase =
@@ -45,14 +47,17 @@ object ObstacleAvoidanceBehavior:
       val (avgLeft, avgRight) = hemisphereAverages(readings)
       val turnSign = if avgLeft > avgRight then MaxSpeed else if avgLeft < avgRight then MinSpeed else MaxSpeed
 
-      val (l, r) = phase match
-        case Phase.Free => (CruiseSpeed, CruiseSpeed)
-        case Phase.Warn =>
-          if turnSign > 0.0 then (WarnSpeed - WarnTurnSpeed, WarnSpeed + WarnTurnSpeed)
-          else (WarnSpeed + WarnTurnSpeed, WarnSpeed - WarnTurnSpeed)
-        case Phase.Blocked =>
-          if turnSign > 0.0 then (-BackBoost, BackBoost)
-          else (BackBoost, -BackBoost)
+      val (l, r) =
+        if front < CriticalDist then (-1.0, -0.1)
+        else
+          phase match
+            case Phase.Free => (CruiseSpeed, CruiseSpeed)
+            case Phase.Warn =>
+              if turnSign > 0.0 then (WarnSpeed - WarnTurnSpeed, WarnSpeed + WarnTurnSpeed)
+              else (WarnSpeed + WarnTurnSpeed, WarnSpeed - WarnTurnSpeed)
+            case Phase.Blocked =>
+              if turnSign > 0.0 then (-BackBoost, BackBoost)
+              else (BackBoost, -BackBoost)
 
       (wheels[F](l, r), ctx.rng)
     }
