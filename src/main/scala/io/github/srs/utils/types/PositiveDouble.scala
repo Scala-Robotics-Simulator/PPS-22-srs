@@ -1,4 +1,4 @@
-package io.github.srs.model
+package io.github.srs.utils.types
 
 import io.github.srs.model.validation.Validation
 

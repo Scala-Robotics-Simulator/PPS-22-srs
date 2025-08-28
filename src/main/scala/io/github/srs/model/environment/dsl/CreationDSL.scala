@@ -112,7 +112,7 @@ object CreationDSL:
         _ <- bounded("entities", env.entities.size, 0, maxEntities, includeMax = true)
         entities <- withinBounds("entities", entities, width, height)
         entities <- noCollisions("entities", entities ++ boundaries)
-        _ <- robots.toList.traverse_(validateRobot(_))
+        _ <- robots.toList.traverse_(validateRobot)
       yield ValidEnvironment.from(env.copy(entities = entities))
   end extension
 end CreationDSL

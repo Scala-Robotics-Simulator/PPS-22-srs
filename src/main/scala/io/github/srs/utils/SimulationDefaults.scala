@@ -235,12 +235,14 @@ object SimulationDefaults:
         object Wheel:
           val defaultSpeed: Double = 1.0
           val defaultShape: ShapeType.Circle = ShapeType.Circle(0.1)
+          val MinSpeed: Double = 0.0
+          val MaxSpeed: Double = 5.0
 
     object Sensor:
 
       object ProximitySensor:
-        val defaultOffset: Double = 0.0
-        val defaultRange: Double = 1.5
+        val DefaultOffset: Double = 0.0
+        val DefaultRange: Double = 1.5
 
     object Robot:
 
@@ -252,6 +254,8 @@ object SimulationDefaults:
       val defaultOrientation: Orientation = Orientation(0.0)
       val defaultActuators: Seq[Actuator[Robot]] = Seq.empty
       val defaultSensors: Vector[Sensor[Robot, Environment]] = Vector.empty
+      val MinRadius: Double = 0.01
+      val MaxRadius: Double = 0.5
 
       val selectionStroke: Float = 3f
       val normalStroke: Float = 1f
