@@ -36,7 +36,8 @@ ricevuta.
 Si noti che lo stato è immutabile: ogni aggiornamento produce una nuova istanza di `State`, mantenendo
 l’integrità e la coerenza dei dati.
 
-Il trait `Provider[S]` espone un’istanza concreta del `Model` agli altri moduli, permettendo l’iniezione delle dipendenze secondo il `Cake Pattern`.
+Il trait `Provider[S]` espone un’istanza concreta del `Model` agli altri moduli, permettendo l’iniezione delle
+dipendenze secondo il **Cake Pattern**.
 
 Il trait `Component[S]` fornisce l’implementazione concreta del `Model`.
 
@@ -66,9 +67,7 @@ Contiene l’oggetto `Controller`, che fornisce un’implementazione concreta de
 
 Il trait `Interface[S]` combina `Provider` e `Component`, fungendo da interfaccia unificata del modulo.
 
-### Implementazione del Controller
-
-#### Avvio della simulazione
+### Avvio della simulazione
 
 Il metodo `start` inizializza la simulazione creando una coda di eventi e avviando il ciclo di simulazione:
 
@@ -77,7 +76,7 @@ Il metodo `start` inizializza la simulazione creando una coda di eventi e avvian
 - esegue i comportamenti dei robot con `runBehavior`, che raccoglie in parallelo le proposte di azione dei robot;
 - infine, avvia il ciclo principale chiamando `simulationLoop` passando lo stato iniziale e la coda degli eventi.
 
-#### Ciclo di simulazione
+### Ciclo di simulazione
 
 Il metodo `simulationLoop` implementa una funzione ricorsiva che:
 
@@ -93,7 +92,7 @@ Il metodo `simulationLoop` implementa una funzione ricorsiva che:
   - altri stati: restituisce lo stato corrente senza modifiche;
 - ripete ricorsivamente il loop.
 
-#### Gestione degli eventi
+### Gestione degli eventi
 
 La gestione degli eventi è stata resa più modulare:
 
@@ -123,7 +122,7 @@ In questo modo:
 Questo consente al `Controller` di continuare il ciclo della simulazione con lo stato corretto, senza occuparsi
 direttamente delle regole di aggiornamento o dei dettagli della business logic.
 
-#### Esecuzione dei comportamenti dei robot
+### Esecuzione dei comportamenti dei robot
 
 Il metodo `runBehavior` seleziona tutte le entità di tipo `Robot` presenti nell’ambiente.
 
@@ -137,3 +136,66 @@ Per ciascun robot:
 
 Questo approccio permette di calcolare i comportamenti in parallelo, riducendo i tempi di elaborazione e mantenendo
 l’aggiornamento dello stato coerente.
+
+## ViewModule
+
+Il trait `View[S]` definisce l’interfaccia della view, parametrizzata sul tipo di stato `S` che estende
+`ModelModule.State`. La view espone quattro operazioni principali:
+
+- `init(queue: Queue[IO, Event]): IO[Unit]`: inizializza la view e collega la coda degli eventi del controller, in modo
+  che la view possa ricevere e reagire agli eventi;
+- `render(state: S): IO[Unit]`: aggiorna la visualizzazione in base allo stato corrente della simulazione, mostrando i
+  cambiamenti dell'ambiente e delle entità;
+- `close(): IO[Unit]`: chiude la view;
+- `timeElapsed(state: S): IO[Unit]`: gestisce le azioni da eseguire quando il tempo massimo della simulazione è
+  raggiunto.
+
+Queste operazioni sono tutte implementate come effetti `IO`, consentendo di gestire in modo sicuro e non bloccante
+l’aggiornamento della `UI` e la sincronizzazione con il ciclo di simulazione.
+
+Il trait `Provider[S]` espone un’istanza concreta della `View` agli altri moduli, permettendo l’iniezione delle
+dipendenze secondo il **Cake Pattern**.
+
+Il trait `Component[S]` definisce l’implementazione concreta della view tramite il metodo `makeView()`, che viene
+richiamato
+dall’object `View` per creare nuove istanze.
+
+Il trait `Interface[S]` combina `Provider` e `Component`, fornendo un’interfaccia unica per l’uso del modulo `View`
+all’interno
+della simulazione.
+
+### CLIComponent
+
+Il trait `CLIComponent[S]` estende `ViewModule.Component[S]` e fornisce un’implementazione concreta della view
+utilizzando un’interfaccia a linea di comando (CLI).
+
+Per scelta progettuale, il metodo `render` non stampa lo stato della simulazione ad ogni step. La visualizzazione avviene
+invece solo quando il tempo massimo della simulazione è raggiunto, tramite il metodo `timeElapsed`.
+
+In questa fase finale, la view mostra in console l’ultimo stato della simulazione, rappresentando l’ambiente in modo
+testuale con le entità e le loro posizioni in un formato semplificato.
+
+
+:::info Esempio di ambiente testuale
+La simulazione mostra le entità presenti in una griglia testuale.
+
+Ogni simbolo rappresenta un tipo di entità (robot: `R`, ostacolo: `X`, luce: `**`, cella vuota: `--`).
+
+```text
+-- | -- | -- | -- | -- | -- | -- | -- | -- | -- ||
+-- | -- | -- | R  | -- | -- | -- | -- | -- | -- ||
+-- | -- | ** | -- | -- | -- | -- | -- | -- | -- ||
+-- | -- | -- | -- | -- | -- | -- | -- | -- | -- ||
+-- | -- | -- | -- | -- | -- | -- | -- | X  | -- ||
+-- | -- | -- | -- | -- | X  | -- | -- | -- | -- ||
+-- | R  | -- | -- | -- | -- | -- | -- | -- | -- ||
+-- | -- | -- | -- | -- | -- | -- | -- | -- | -- ||
+-- | -- | -- | -- | -- | -- | -- | -- | ** | -- ||
+-- | -- | -- | -- | -- | -- | -- | -- | -- | --
+```
+:::
+
+### GUIComponent
+
+Il trait `GUIComponent[S]` estende `ViewModule.Component[S]` e fornisce un’implementazione concreta della view
+utilizzando un’interfaccia grafica (GUI) basata su Swing.
