@@ -8,6 +8,7 @@ object SimulationConfig:
     case RUNNING
     case PAUSED
     case STOPPED
+    case ELAPSED_TIME
 
   enum SimulationSpeed derives CanEqual:
     case SLOW
