@@ -166,10 +166,10 @@ object RobotDsl:
       robot.withActuators(updatedActuators)
 
     def withProximitySensors: Robot =
-      robot.withSensors(stdProximitySensors)
+      robot.withSensors(StdProximitySensors)
 
     def withLightSensors: Robot =
-      robot.withSensors(stdLightSensors)
+      robot.withSensors(StdLightSensors)
 
     infix def withBehavior(behavior: Policy): Robot =
       robot.copy(behavior = behavior)

@@ -27,10 +27,10 @@ enum StaticEntity(val position: Point2D, val orientation: Orientation) extends E
    */
   case Obstacle(
       id: UUID = UUID.randomUUID(),
-      pos: Point2D = Defaults.Obstacle.defaultPosition,
-      orient: Orientation = Defaults.Obstacle.defaultOrientation,
-      width: Double = Defaults.Obstacle.defaultWidth,
-      height: Double = Defaults.Obstacle.defaultHeight,
+      pos: Point2D = Defaults.Obstacle.DefaultPosition,
+      orient: Orientation = Defaults.Obstacle.DefaultOrientation,
+      width: Double = Defaults.Obstacle.DefaultWidth,
+      height: Double = Defaults.Obstacle.DefaultHeight,
   ) extends StaticEntity(pos, orient)
 
   /**
@@ -51,12 +51,12 @@ enum StaticEntity(val position: Point2D, val orientation: Orientation) extends E
    */
   case Light(
       id: UUID = UUID.randomUUID(),
-      pos: Point2D = Defaults.Light.defaultPosition,
-      orient: Orientation = Defaults.Light.defaultOrientation,
-      radius: Double = SimulationDefaults.StaticEntity.Light.defaultRadius,
-      illuminationRadius: Double = SimulationDefaults.StaticEntity.Light.defaultIlluminationRadius,
-      intensity: Double = SimulationDefaults.StaticEntity.Light.defaultIntensity,
-      attenuation: Double = SimulationDefaults.StaticEntity.Light.defaultAttenuation,
+      pos: Point2D = Defaults.Light.DefaultPosition,
+      orient: Orientation = Defaults.Light.DefaultOrientation,
+      radius: Double = SimulationDefaults.StaticEntity.Light.DefaultRadius,
+      illuminationRadius: Double = SimulationDefaults.StaticEntity.Light.DefaultIlluminationRadius,
+      intensity: Double = SimulationDefaults.StaticEntity.Light.DefaultIntensity,
+      attenuation: Double = SimulationDefaults.StaticEntity.Light.DefaultAttenuation,
   ) extends StaticEntity(pos, orient)
 
   /**
@@ -72,10 +72,10 @@ enum StaticEntity(val position: Point2D, val orientation: Orientation) extends E
    */
   case Boundary(
       id: UUID = UUID.randomUUID(),
-      pos: Point2D = Defaults.Boundary.defaultPosition,
-      orient: Orientation = Defaults.Boundary.defaultOrientation,
-      width: Double = Defaults.Boundary.defaultWidth,
-      height: Double = Defaults.Boundary.defaultHeight,
+      pos: Point2D = Defaults.Boundary.DefaultPosition,
+      orient: Orientation = Defaults.Boundary.DefaultOrientation,
+      width: Double = Defaults.Boundary.DefaultWidth,
+      height: Double = Defaults.Boundary.DefaultHeight,
   ) extends StaticEntity(pos, orient)
 
   /**

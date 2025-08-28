@@ -20,8 +20,8 @@ import io.github.srs.view.components.*
 import io.github.srs.view.components.configuration.*
 import io.github.srs.view.components.simulation.SimulationCanvas
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.*
-import io.github.srs.utils.SimulationDefaults.DynamicEntity.Actuator.DifferentialWheelMotor.Wheel.defaultSpeed
-import io.github.srs.utils.SimulationDefaults.StaticEntity.Obstacle.{ defaultHeight, defaultWidth }
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.Actuator.DifferentialWheelMotor.Wheel.DefaultSpeed
+import io.github.srs.utils.SimulationDefaults.StaticEntity.Obstacle.{ DefaultHeight, DefaultWidth }
 import io.github.srs.utils.SimulationDefaults.StaticEntity.Light
 
 /**
@@ -42,47 +42,43 @@ object ConfigurationGUI:
     private val frame = new JFrame("Scala Robotics Simulator - Configuration")
 
     private val baseFieldSpec = Seq(
-      FieldSpec(Entity.x, "X position", TextField(3, default = defaultPosition.x.toString)),
-      FieldSpec(Entity.y, "Y position", TextField(3, default = defaultPosition.y.toString)),
+      FieldSpec(Entity.X, "X position", TextField(3, default = DefaultPosition.x.toString)),
+      FieldSpec(Entity.Y, "Y position", TextField(3, default = DefaultPosition.y.toString)),
       FieldSpec(
-        Entity.orientation,
+        Entity.Orientation,
         "Orientation (degrees)",
-        TextField(3, default = defaultOrientation.degrees.toString),
+        TextField(3, default = DefaultOrientation.degrees.toString),
       ),
     )
 
     private val entityFieldSpecs: Map[String, Seq[FieldSpec]] = Map(
-      RobotFields.self.capitalize -> (baseFieldSpec ++ Seq(
-        FieldSpec(RobotFields.radius, "Radius (meters)", TextField(2, default = defaultShape.radius.toString)),
-        FieldSpec(RobotFields.speed, "Speed", TextField(3, default = defaultSpeed.toString)),
-        FieldSpec(RobotFields.withProximitySensors, "With proximity sensors", CheckBox(true)),
-        FieldSpec(RobotFields.withLightSensors, "With light sensors", CheckBox(true)),
-        FieldSpec(RobotFields.behavior, "Behavior", ComboBox(Policy.values.toSeq.map(_.toString))),
+      RobotFields.Self.capitalize -> (baseFieldSpec ++ Seq(
+        FieldSpec(RobotFields.Radius, "Radius (meters)", TextField(2, default = DefaultShape.radius.toString)),
+        FieldSpec(RobotFields.Speed, "Speed", TextField(3, default = DefaultSpeed.toString)),
+        FieldSpec(RobotFields.WithProximitySensors, "With proximity sensors", CheckBox(true)),
+        FieldSpec(RobotFields.WithLightSensors, "With light sensors", CheckBox(true)),
+        FieldSpec(RobotFields.Behavior, "Behavior", ComboBox(Policy.values.toSeq.map(_.toString))),
       )),
-      ObstacleFields.self.capitalize -> (baseFieldSpec ++ Seq(
-        FieldSpec(ObstacleFields.width, "Width", TextField(8, default = defaultWidth.toString)),
-        FieldSpec(ObstacleFields.height, "Height", TextField(5, default = defaultHeight.toString)),
+      ObstacleFields.Self.capitalize -> (baseFieldSpec ++ Seq(
+        FieldSpec(ObstacleFields.Width, "Width", TextField(8, default = DefaultWidth.toString)),
+        FieldSpec(ObstacleFields.Height, "Height", TextField(5, default = DefaultHeight.toString)),
       )),
-      LightFields.self.capitalize -> (baseFieldSpec ++ Seq(
-        FieldSpec(LightFields.radius, "Radius (meters)", TextField(3, default = Light.defaultRadius.toString)),
+      LightFields.Self.capitalize -> (baseFieldSpec ++ Seq(
+        FieldSpec(LightFields.Radius, "Radius (meters)", TextField(3, default = Light.DefaultRadius.toString)),
         FieldSpec(
-          LightFields.illuminationRadius,
+          LightFields.IlluminationRadius,
           "Illumination radius",
-          TextField(3, default = Light.defaultIlluminationRadius.toString),
+          TextField(3, default = Light.DefaultIlluminationRadius.toString),
         ),
-        FieldSpec(LightFields.intensity, "Intensity", TextField(3, Light.defaultIntensity.toString)),
-        FieldSpec(LightFields.attenuation, "Attenuation", TextField(3, Light.defaultAttenuation.toString)),
+        FieldSpec(LightFields.Intensity, "Intensity", TextField(3, Light.DefaultIntensity.toString)),
+        FieldSpec(LightFields.Attenuation, "Attenuation", TextField(3, Light.DefaultAttenuation.toString)),
       )),
     )
 
     // Component panels with callbacks
-    private val simulationPanel = new SimulationSettingsPanel(
-      onValidationError = showValidationErrors,
-    )
+    private val simulationPanel = new SimulationSettingsPanel
 
-    private val environmentPanel = new EnvironmentSettingsPanel(
-      onValidationError = showValidationErrors,
-    )
+    private val environmentPanel = new EnvironmentSettingsPanel
 
     private val fieldCanvas = new SimulationCanvas(insideConfiguration = true)
 

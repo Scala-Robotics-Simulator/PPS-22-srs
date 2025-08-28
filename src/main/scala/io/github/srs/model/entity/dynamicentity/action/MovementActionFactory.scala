@@ -54,7 +54,7 @@ object MovementActionFactory:
    * @return
    *   the [[MovementAction]] representing the left turn.
    */
-  infix def turnLeft[F[_]]: MovementAction[F] = MovementAction(halfSpeed, -halfSpeed)
+  infix def turnLeft[F[_]]: MovementAction[F] = MovementAction(HalfSpeed, -HalfSpeed)
 
   /**
    * Turns the robot right by applying a negative speed to the left wheel and a positive speed to the right wheel.
@@ -63,7 +63,7 @@ object MovementActionFactory:
    * @return
    *   the [[MovementAction]] representing the right turn.
    */
-  infix def turnRight[F[_]]: MovementAction[F] = MovementAction(-halfSpeed, halfSpeed)
+  infix def turnRight[F[_]]: MovementAction[F] = MovementAction(-HalfSpeed, HalfSpeed)
 
   /**
    * Stops the robot by applying zero speed to both wheels.
@@ -72,7 +72,7 @@ object MovementActionFactory:
    * @return
    *   the [[MovementAction]] representing the stop action.
    */
-  infix def stop[F[_]]: MovementAction[F] = MovementAction(zeroSpeed, zeroSpeed)
+  infix def stop[F[_]]: MovementAction[F] = MovementAction(ZeroSpeed, ZeroSpeed)
 end MovementActionFactory
 
 export io.github.srs.model.entity.dynamicentity.action.SequenceAction.thenDo

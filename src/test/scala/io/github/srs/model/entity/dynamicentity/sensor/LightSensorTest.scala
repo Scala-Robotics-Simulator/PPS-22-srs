@@ -9,7 +9,7 @@ import io.github.srs.model.entity.dynamicentity.{ DynamicEntity, Robot }
 import io.github.srs.model.entity.staticentity.StaticEntity.Light
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.environment.dsl.CreationDSL.*
-import io.github.srs.utils.SimulationDefaults.StaticEntity.Light.{ defaultOrientation, defaultRadius }
+import io.github.srs.utils.SimulationDefaults.StaticEntity.Light.{ DefaultOrientation, DefaultRadius }
 import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.compatible.Assertion
 import org.scalatest.flatspec.AnyFlatSpec
@@ -52,8 +52,8 @@ class LightSensorTest extends AnyFlatSpec with Matchers:
   ): Light =
     Light(
       pos = position,
-      orient = defaultOrientation,
-      radius = defaultRadius,
+      orient = DefaultOrientation,
+      radius = DefaultRadius,
       illuminationRadius = illuminationRadius,
       intensity = intensity,
       attenuation = attenuation,

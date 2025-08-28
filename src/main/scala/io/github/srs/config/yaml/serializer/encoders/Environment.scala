@@ -22,8 +22,8 @@ object Environment:
    */
   given Encoder[Environment] = (environment: Environment) =>
     val baseFields = List(
-      EnvironmentFields.width -> environment.width.asJson,
-      EnvironmentFields.height -> environment.height.asJson,
+      EnvironmentFields.Width -> environment.width.asJson,
+      EnvironmentFields.Height -> environment.height.asJson,
     )
     val entitiesFields = environment.entities.filterNot {
       case Boundary(_, _, _, _, _) =>
@@ -33,7 +33,7 @@ object Environment:
     if environment.entities.isEmpty then Json.obj(baseFields*)
     else
       Json.obj(
-        baseFields ++ List(EnvironmentFields.entities -> entitiesFields)*,
+        baseFields ++ List(EnvironmentFields.Entities -> entitiesFields)*,
       )
 end Environment
 

@@ -12,7 +12,7 @@ import io.github.srs.utils.SimulationDefaults.{ Frame, UI }
  */
 object UIUtils:
 
-  def titledBorder(title: String, spacing: Int = UI.Spacing.innerPadding): javax.swing.border.Border =
+  def titledBorder(title: String, spacing: Int = UI.Spacing.InnerPadding): javax.swing.border.Border =
     val titledBorder = BorderFactory.createTitledBorder(
       BorderFactory.createLineBorder(UI.Colors.border),
       title.toUpperCase(Locale.getDefault()),
@@ -24,7 +24,7 @@ object UIUtils:
     val newFont = new Font(
       currentFont.getFamily,
       currentFont.getStyle,
-      UI.Fonts.titleSize,
+      UI.Fonts.TitleSize,
     )
     titledBorder.setTitleFont(newFont)
 
@@ -35,7 +35,7 @@ object UIUtils:
 
   end titledBorder
 
-  def paddedBorder(padding: Int = UI.Spacing.standardPadding): javax.swing.border.Border =
+  def paddedBorder(padding: Int = UI.Spacing.StandardPadding): javax.swing.border.Border =
     BorderFactory.createEmptyBorder(padding, padding, padding, padding)
 
 end UIUtils
@@ -56,5 +56,5 @@ extension (frame: javax.swing.JFrame)
    * Applies default and preferred size to the frame.
    */
   def applyDefaultAndPreferSize(): Unit =
-    frame.setMinimumSize(new Dimension(Frame.minWidth, Frame.minHeight))
-    frame.setPreferredSize(new Dimension(Frame.prefWidth, Frame.prefHeight))
+    frame.setMinimumSize(new Dimension(Frame.MinWidth, Frame.MinHeight))
+    frame.setPreferredSize(new Dimension(Frame.PrefWidth, Frame.PrefHeight))

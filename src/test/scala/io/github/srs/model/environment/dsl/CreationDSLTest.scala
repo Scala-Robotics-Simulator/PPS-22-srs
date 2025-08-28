@@ -11,8 +11,8 @@ class CreationDSLTest extends AnyFlatSpec with Matchers:
   "CreationDSL" should "create an environment with default values" in:
     import io.github.srs.utils.SimulationDefaults.Environment.*
     val env = environment
-    val _ = env.width shouldBe defaultWidth
-    val _ = env.height shouldBe defaultHeight
+    val _ = env.width shouldBe DefaultWidth
+    val _ = env.height shouldBe DefaultHeight
     env.entities shouldBe empty
 
   it should "allow setting width" in:

@@ -79,7 +79,7 @@ class EntityRow(
   add(new JSeparator(SwingConstants.HORIZONTAL), BorderLayout.SOUTH)
 
   typeCombo.addActionListener(_ =>
-    typeCombo.getSelectedItem() match
+    typeCombo.getSelectedItem match
       case selected: String => cardLayout.show(propertiesContainer, selected)
       case _ => (),
   )
@@ -103,9 +103,9 @@ class EntityRow(
 
   def getEntity: ConfigResult[Entity] =
     getEntityType.toLowerCase(Locale.ENGLISH) match
-      case RobotFields.self => parseRobot()
-      case ObstacleFields.self => parseObstacle()
-      case LightFields.self => parseLight()
+      case RobotFields.Self => parseRobot()
+      case ObstacleFields.Self => parseObstacle()
+      case LightFields.Self => parseLight()
 
   def setValues(values: Map[String, String | Boolean]): Unit =
     getCurrentPropertiesPanel.setValues(values)
@@ -114,14 +114,14 @@ class EntityRow(
     import Decoder.{ get, given }
     val map = getCurrentPropertiesPanel.getValues
     for
-      x <- get[Double](EntityFields.x, map)
-      y <- get[Double](EntityFields.y, map)
-      orientation <- get[Double](EntityFields.orientation, map)
-      radius <- get[Double](RobotFields.radius, map)
-      speed <- get[Double](RobotFields.speed, map)
-      prox <- get[Boolean](RobotFields.withProximitySensors, map)
-      light <- get[Boolean](RobotFields.withLightSensors, map)
-      behavior <- get[Policy](RobotFields.behavior, map)
+      x <- get[Double](EntityFields.X, map)
+      y <- get[Double](EntityFields.Y, map)
+      orientation <- get[Double](EntityFields.Orientation, map)
+      radius <- get[Double](RobotFields.Radius, map)
+      speed <- get[Double](RobotFields.Speed, map)
+      prox <- get[Boolean](RobotFields.WithProximitySensors, map)
+      light <- get[Boolean](RobotFields.WithLightSensors, map)
+      behavior <- get[Policy](RobotFields.Behavior, map)
     yield robot
       .at((x, y))
       .withOrientation(Orientation(orientation))
@@ -137,29 +137,29 @@ class EntityRow(
     import Decoder.{ get, given }
     val map = getCurrentPropertiesPanel.getValues
     for
-      x <- get[Double](EntityFields.x, map)
-      y <- get[Double](EntityFields.y, map)
-      orientation <- get[Double](EntityFields.orientation, map)
-      width <- get[Double](ObstacleFields.width, map)
-      height <- get[Double](ObstacleFields.height, map)
+      x <- get[Double](EntityFields.X, map)
+      y <- get[Double](EntityFields.Y, map)
+      orientation <- get[Double](EntityFields.Orientation, map)
+      width <- get[Double](ObstacleFields.Width, map)
+      height <- get[Double](ObstacleFields.Height, map)
     yield obstacle at (x, y) withOrientation Orientation(orientation) withWidth width withHeight height
 
   private def parseLight(): ConfigResult[StaticEntity.Light] =
     import Decoder.{ get, given }
     val map = getCurrentPropertiesPanel.getValues
     for
-      x <- get[Double](EntityFields.x, map)
-      y <- get[Double](EntityFields.y, map)
-      orientation <- get[Double](EntityFields.orientation, map)
-      radius <- get[Double](LightFields.radius, map)
-      illumintation <- get[Double](LightFields.illuminationRadius, map)
-      intensity <- get[Double](LightFields.intensity, map)
-      attenuation <- get[Double](LightFields.attenuation, map)
+      x <- get[Double](EntityFields.X, map)
+      y <- get[Double](EntityFields.Y, map)
+      orientation <- get[Double](EntityFields.Orientation, map)
+      radius <- get[Double](LightFields.Radius, map)
+      illumination <- get[Double](LightFields.IlluminationRadius, map)
+      intensity <- get[Double](LightFields.Intensity, map)
+      attenuation <- get[Double](LightFields.Attenuation, map)
     yield light
       .at(x, y)
       .withOrientation(Orientation(orientation))
       .withRadius(radius)
-      .withIlluminationRadius(illumintation)
+      .withIlluminationRadius(illumination)
       .withIntensity(intensity)
       .withAttenuation(attenuation)
 end EntityRow

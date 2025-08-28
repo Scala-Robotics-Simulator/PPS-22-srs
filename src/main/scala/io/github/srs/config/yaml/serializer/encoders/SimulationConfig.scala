@@ -22,12 +22,12 @@ object SimulationConfig:
   given Encoder[SimulationConfig[Environment]] =
     (config: SimulationConfig[Environment]) =>
       val baseFields = List(
-        EnvironmentFields.self -> config.environment.asJson,
+        EnvironmentFields.Self -> config.environment.asJson,
       )
 
       val simulationFields =
         if config.simulation.duration.isDefined || config.simulation.seed.isDefined then
-          List(SimulationFields.self -> config.simulation.asJson)
+          List(SimulationFields.Self -> config.simulation.asJson)
         else List.empty[(String, Json)]
 
       Json.obj(simulationFields ++ baseFields*)

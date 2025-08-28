@@ -56,13 +56,13 @@ end EnvironmentParameters
  * Represents an environment with a specific width, height, and a set of entities.
  */
 final case class Environment(
-    override val width: Int = defaultWidth,
-    override val height: Int = defaultHeight,
-    override val entities: Set[Entity] = defaultEntities,
+    override val width: Int = DefaultWidth,
+    override val height: Int = DefaultHeight,
+    override val entities: Set[Entity] = DefaultEntities,
     private[environment] val _lightMap: Option[LightMap[IO]] = None,
 ) extends EnvironmentParameters:
 
-  private val lightMap: LightMap[IO] = _lightMap.getOrElse(LightMapConfigs.baseLightMap)
+  private val lightMap: LightMap[IO] = _lightMap.getOrElse(LightMapConfigs.BaseLightMap)
 
   lazy val lightField: LightField =
     lightMap.computeField(ValidEnvironment.from(this), includeDynamic = true).unsafeRunSync()
