@@ -31,13 +31,12 @@ object SimulationDefaults:
   object Behaviors:
 
     object ObstacleAvoidance:
+      val CruiseSpeed: Double = 0.35
+      val WarnSpeed: Double = 0.15
+      val WarnTurnSpeed: Double = 0.55
+      val BackBoost: Double = 0.20
       val SafeDist: Double = 0.85
       val CriticalDist: Double = 0.35
-      val MinForward: Double = 0.20
-      val PivotSpeedFactor: Double = 0.80
-      val ResultantEps: Double = 1e-9
-      val SideDeltaEps: Double = 1e-3
-      val FallbackLeftDeg: Double = 90.0
 
     object RandomWalk:
       val MinForwardFactor: Double = 0.35
