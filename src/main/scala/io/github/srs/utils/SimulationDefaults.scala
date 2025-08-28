@@ -235,8 +235,8 @@ object SimulationDefaults:
         object Wheel:
           val defaultSpeed: Double = 1.0
           val defaultShape: ShapeType.Circle = ShapeType.Circle(0.1)
-          val MinSpeed: Double = 0.0
-          val MaxSpeed: Double = 5.0
+          val MinSpeed: Double = -1.0
+          val MaxSpeed: Double = 1.0
 
     object Sensor:
 

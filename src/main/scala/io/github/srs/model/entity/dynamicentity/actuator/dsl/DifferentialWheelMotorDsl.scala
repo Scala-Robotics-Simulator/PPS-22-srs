@@ -81,8 +81,8 @@ object DifferentialWheelMotorDsl:
      */
     def validate: Validation[DifferentialWheelMotor] =
       for
-        _ <- bounded("left speed", motor.left.speed, MinSpeed, MaxSpeed)
-        _ <- bounded("right speed", motor.right.speed, MinSpeed, MaxSpeed)
+        _ <- bounded("left speed", motor.left.speed, MinSpeed, MaxSpeed, includeMax = true)
+        _ <- bounded("right speed", motor.right.speed, MinSpeed, MaxSpeed, includeMax = true)
       yield motor
   end extension
 end DifferentialWheelMotorDsl
