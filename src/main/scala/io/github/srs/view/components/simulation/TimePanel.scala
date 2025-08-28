@@ -69,7 +69,7 @@ class TimePanel extends JPanel:
         case Some(maxTime) =>
           val remaining = maxTime - elapsed
           if remaining.toMillis > 0 then remainingValue.setText(formatTime(remaining))
-          else remainingValue.setText("00:00:00")
+          else remainingValue.setText("00:00:00:00")
         case None =>
           remainingValue.setText("∞")
     }
@@ -79,8 +79,8 @@ class TimePanel extends JPanel:
    */
   def reset(): Unit =
     SwingUtilities.invokeLater { () =>
-      elapsedValue.setText("00:00:00")
-      remainingValue.setText("--:--:--")
+      elapsedValue.setText("00:00:00:00")
+      remainingValue.setText("--:--:--:--")
     }
 
 end TimePanel
