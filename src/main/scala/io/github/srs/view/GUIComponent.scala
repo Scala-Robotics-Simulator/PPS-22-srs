@@ -4,6 +4,7 @@ import java.awt.BorderLayout
 import java.util.concurrent.atomic.AtomicReference
 import javax.swing.*
 
+import cats.Id
 import cats.effect.IO
 import cats.effect.std.Queue
 import cats.effect.unsafe.implicits.global
@@ -11,10 +12,13 @@ import io.github.srs.controller.protocol.Event
 import io.github.srs.model.ModelModule
 import io.github.srs.model.entity.Point2D.*
 import io.github.srs.model.entity.dynamicentity.Robot
+import io.github.srs.model.environment.Environment
 import io.github.srs.utils.SimulationDefaults.UI
 import io.github.srs.view.ViewModule.{ Component, Requirements, View }
-import io.github.srs.view.components.simulation.{ ControlsPanel, RobotPanel, SimulationCanvas }
+import io.github.srs.view.components.simulation.*
 import io.github.srs.view.state.SimulationViewState
+import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
+import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings.prettyPrint
 
 /**
  * GUI component trait that defines the interface for creating a GUI view.
@@ -35,8 +39,8 @@ trait GUIComponent[S <: ModelModule.State] extends Component[S]:
    */
   private class SimulationView extends View[S]:
 
-    import io.github.srs.utils.SimulationDefaults.{ Frame, Layout }
     import io.github.srs.model.SimulationConfig.SimulationSpeed
+    import io.github.srs.utils.SimulationDefaults.{ Frame, Layout }
 
     type RobotId = String
     private type SpeedLabel = String
@@ -44,6 +48,7 @@ trait GUIComponent[S <: ModelModule.State] extends Component[S]:
     private val frame = new JFrame("Scala Robotics Simulator")
     private val canvas = new SimulationCanvas
     private val robotPanel = new RobotPanel
+    private val timePanel = new TimePanel
     private val controls = new ControlsPanel
     private val viewState = new AtomicReference(SimulationViewState())
 
@@ -63,6 +68,7 @@ trait GUIComponent[S <: ModelModule.State] extends Component[S]:
       SwingUtilities.invokeLater(() =>
         robotPanel.setRobotIds(newState.robots.map(_.id.toString))
         canvas.update(state.environment, robotPanel.selectedId)
+        timePanel.updateTimes(state.elapsedTime, state.simulationTime)
         updateRobotInfo(),
       )
 
@@ -75,7 +81,7 @@ trait GUIComponent[S <: ModelModule.State] extends Component[S]:
      * Sets up the main UI layout with split pane configuration.
      */
     private def setupUI(): Unit =
-      import io.github.srs.view.components.{ centerFrame, applyDefaultAndPreferSize }
+      import io.github.srs.view.components.{ applyDefaultAndPreferSize, centerFrame }
 
       canvas.setBorder(BorderFactory.createLineBorder(java.awt.Color.BLACK, Frame.canvasBorder))
       frame.applyDefaultAndPreferSize()
@@ -101,7 +107,12 @@ trait GUIComponent[S <: ModelModule.State] extends Component[S]:
      */
     private def createSidePanel(): JPanel =
       val panel = new JPanel(new BorderLayout())
-      panel.add(robotPanel, BorderLayout.CENTER)
+
+      val infoContainer = new JPanel(new BorderLayout())
+      infoContainer.add(robotPanel, BorderLayout.CENTER)
+      infoContainer.add(timePanel, BorderLayout.SOUTH)
+
+      panel.add(infoContainer, BorderLayout.CENTER)
       panel.add(controls, BorderLayout.SOUTH)
       panel
 
@@ -232,7 +243,8 @@ trait GUIComponent[S <: ModelModule.State] extends Component[S]:
       val info = for
         selectedId <- robotPanel.selectedId
         robot <- currentState.robots.find(_.id.toString == selectedId)
-      yield formatRobotInfo(robot)
+        environment <- currentState.environment
+      yield formatRobotInfo(robot, environment)
 
       robotPanel.setInfo(info.getOrElse(UI.SimulationViewConstants.DefaultRobotInfo))
 
@@ -244,11 +256,14 @@ trait GUIComponent[S <: ModelModule.State] extends Component[S]:
      * @return
      *   Formatted string with robot details
      */
-    private def formatRobotInfo(robot: Robot): String =
+    private def formatRobotInfo(robot: Robot, environment: Environment): String =
+      val readings = robot.senseAll[Id](environment)
       s"""Robot ID: ${robot.id.toString.take(UI.SimulationViewConstants.IdDisplayLength)}...
          |Position: (${s"%.${UI.SimulationViewConstants.PositionDecimals}f"
           .format(robot.position.x)}, ${s"%.${UI.SimulationViewConstants.PositionDecimals}f".format(robot.position.y)})
          |Orientation: ${s"%.${UI.SimulationViewConstants.OrientationDecimals}f"
-          .format(robot.orientation.degrees)}°""".stripMargin
+          .format(robot.orientation.degrees)}°
+         |Sensors:
+         |  ${readings.prettyPrint.mkString("\n  ")}""".stripMargin
   end SimulationView
 end GUIComponent
