@@ -13,7 +13,7 @@ import cats.effect.unsafe.implicits.global
 
       val runner = for
         cfg <- configurationView.init()
-        state = mkInitialState(cfg)
+        state = mkInitialState(cfg, parsed.headless)
         _ <- configurationView.close()
         _ <- launcher.runMVC(state)
       yield ()
