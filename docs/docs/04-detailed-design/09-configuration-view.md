@@ -1,6 +1,10 @@
+---
+sidebar_position: 9
+---
+
 # Configuration view
 
-Il simulatore può essere configurato in due modalità, tramite file `YAML`, come descritto nella sezione [Configuration](./05-configuration.md), oppure tramite interfaccia grafica.
+Il simulatore può essere configurato in due modalità, tramite file `YAML`, come descritto nella sezione [Configuration](06-configuration.md), oppure tramite interfaccia grafica.
 
 La **configuration view** è l’interfaccia grafica che permette di modificare i parametri del simulatore in modo interattivo, senza dover modificare manualmente il file `YAML`.
 

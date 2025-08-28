@@ -1,3 +1,7 @@
+---
+sidebar_position: 7
+---
+
 # Behavior
 
 Il package `behavior` è il **motore decisionale**: a partire da un input `I` (nel nostro caso le letture dei sensori)
@@ -12,7 +16,7 @@ all’effetto.
 
 ## Panoramica e concetti
 
-- **Condition[I]** → predicato su `I` (applicato ai `SensorReadings`: vedi [Sensori](./04-entity.md#sensori)).
+- **Condition[I]** → predicato su `I` (applicato ai `SensorReadings`: vedi [Sensori](05-entity.md#sensori)).
 - **Rule** (*parziale*): `Rule[F, I, A] = Kleisli[F, I, Option[A]]`: se la condizione non è soddisfatta ⇒ `None`.
 - **Behavior** (*totale*): `Behavior[F, I, A] = Kleisli[F, I, A]`: si ottiene componendo più `Rule` e chiudendo con
   `default(...)`.
@@ -53,7 +57,7 @@ Tutto vive in `io.github.srs.model.entity.dynamicentity.behavior`.
 1. Il robot legge i sensori: `r.senseAll[F](env): F[SensorReadings]`.
 2. Il **Behavior** elabora quelle letture e produce un’`Action[F]`.
 3. L’azione viene eseguita via `ActionAlg[F, Robot]` e applicata dagli attuatori (
-   vedi [Attuatori](./04-entity.md#attuatori)).
+   vedi [Attuatori](05-entity.md#attuatori)).
 
 ## Esempio (DSL)
 
