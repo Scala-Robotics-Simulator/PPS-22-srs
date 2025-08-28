@@ -50,7 +50,7 @@ trait CLIComponent[S <: ModelModule.State] extends Component[S]:
      * @inheritdoc
      */
     override def timeElapsed(state: S): IO[Unit] =
-      for _ <- IO.println(s"Simulation finished. Resulting state:\n${prettyPrint(state.environment)}")
+      for _ <- IO.println(s"Simulation finished. Resulting environment:\n${prettyPrint(state.environment)}")
       yield ()
   end CLIViewImpl
 end CLIComponent
