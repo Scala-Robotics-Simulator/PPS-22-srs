@@ -4,14 +4,47 @@ sidebar_position: 2
 
 # MVC e Simulation Core
 
-![Simulation Loop](../../static/img/04-detailed-design/simulation-loop.png)
+## ModelModule
+
+### Definizione dello stato
+
+Il trait `State` definisce la struttura dello stato della simulazione, che include i seguenti campi:
+
+- `simulationTime`: tempo totale previsto per la simulazione (opzionale per consentire simulazioni infinite);
+- `elapsedTime`: tempo già trascorso dall’inizio della simulazione;
+- `dt`: delta time della simulazione, cioè l’intervallo temporale usato per ogni step;
+- `simulationSpeed`: velocità corrente della simulazione (`SimulationSpeed`);
+- `simulationRNG`: generatore di numeri casuali (`RNG`) usato per introdurre elementi stocastici;
+- `simulationStatus`: stato corrente della simulazione (`RUNNING`, `PAUSED`, `STOPPED`, `ELAPSED_TIME`);
+- `environment`: rappresenta l’ambiente della simulazione, contenente le entità validate (`ValidEnvironment`).
+
+### Logica di aggiornamento dello stato
+
+Il trait `Model[S]` è parametrizzato sul tipo di stato `S`, che deve estendere `State`.
+Esso definisce l’interfaccia per aggiornare lo stato della simulazione in modo funzionale e sicuro.
+
+Il metodo `update(s: S)(using f: S => IO[S]): IO[S]` accetta:
+
+- lo stato corrente `s`;
+- una funzione di aggiornamento `f` (chiamata updateLogic), che trasforma lo stato in modo asincrono restituendo un
+  nuovo stato incapsulato in `IO`.
+
+L’uso della keyword `using` permette di passare la logica di aggiornamento implicitamente, in questo modo, il `Model`
+non ha bisogno di sapere quali eventi o logiche hanno causato l’aggiornamento; si limita ad applicare la funzione
+ricevuta.
+
+Si noti che lo stato è immutabile: ogni aggiornamento produce una nuova istanza di `State`, mantenendo
+l’integrità e la coerenza dei dati.
+
+Il trait `Provider[S]` espone un’istanza concreta del `Model` agli altri moduli, permettendo l’iniezione delle dipendenze secondo il `Cake Pattern`.
+
+Il trait `Component[S]` fornisce l’implementazione concreta del `Model`.
+
+`ModelImpl` implementa `update` semplicemente delegando l’aggiornamento alla funzione passata tramite `using`, rendendo l’applicazione della logica di trasformazione completamente modulare e riutilizzabile.
+
+L’`Interface[S]` combina `Provider` e `Component`, fungendo da interfaccia unificata del modulo.
 
 ## ControllerModule
-
-Il `ControllerModule` è strutturato secondo il `Cake Pattern`, integrandosi con:
-
-- il `ModelModule`, che gestisce l'aggiornamento dello stato della simulazione;
-- il `ViewModule`, che si occupa della visualizzazione e dell’interazione con l’utente.
 
 Il trait `Controller[S]` è parametrizzata sul tipo di stato `S`, che deve estendere `ModelModule.State`.
 Esso espone due metodi:
@@ -33,9 +66,9 @@ Contiene l’oggetto `Controller`, che fornisce un’implementazione concreta de
 
 Il trait `Interface[S]` combina `Provider` e `Component`, fungendo da interfaccia unificata del modulo.
 
-## Implementazione del Controller
+### Implementazione del Controller
 
-### Avvio della simulazione
+#### Avvio della simulazione
 
 Il metodo `start` inizializza la simulazione creando una coda di eventi e avviando il ciclo di simulazione:
 
@@ -44,30 +77,35 @@ Il metodo `start` inizializza la simulazione creando una coda di eventi e avvian
 - esegue i comportamenti dei robot con `runBehavior`, che raccoglie in parallelo le proposte di azione dei robot;
 - infine, avvia il ciclo principale chiamando `simulationLoop` passando lo stato iniziale e la coda degli eventi.
 
-### Ciclo di simulazione
+#### Ciclo di simulazione
 
 Il metodo `simulationLoop` implementa una funzione ricorsiva che:
 
 - esegue i comportamenti dei robot se lo stato è `RUNNING`
 - recupera ed elabora gli eventi dalla coda (`handleEvents`)
 - aggiorna la vista con lo stato corrente (`context.view.render`)
-- verifica la condizione di stop:
-    - stato `STOPPED`
-    - tempo massimo di simulazione raggiunto
-- se la simulazione non è terminata:
-    - esegue `nextStep` in base allo stato (`RUNNING`, `PAUSED`, `STOPPED`)
-    - ripete ricorsivamente il loop.
+- verifica la condizione di stop tramite `handleStopCondition`, che gestisce lo stato di terminazione della simulazione:
+  - `STOPPED`: chiusura della view;
+  - `ELAPSED_TIME`: passa alla view lo stato finale;
+- se la simulazione non è terminata, esegue `nextStep` in base allo stato:
+  - `RUNNING`: esegue `tickEvents`, calcolando il tempo trascorso e regolando il tick in modo preciso;
+  - `PAUSED`: sospende il ciclo per un breve intervallo (`50 ms`);
+  - altri stati: restituisce lo stato corrente senza modifiche;
+- ripete ricorsivamente il loop.
 
-### Gestione degli eventi
+#### Gestione degli eventi
 
-Il metodo `handleEvents` recupera tutti gli eventi dalla coda e li elabora in sequenza.
+La gestione degli eventi è stata resa più modulare:
+
+- `handleEvents`: processa una sequenza di eventi in ordine, applicando ciascun evento allo stato corrente;
+- `handleEvent`: gestisce un singolo evento, aggiornando lo stato tramite le logiche definite nel `LogicsBundle`.
 
 Gli eventi (`Event`) comprendono:
 
 - `Tick`: avanzamento temporale della simulazione;
 - `TickSpeed`: modifica della velocità dei tick;
 - `Random`: aggiornamento del generatore casuale;
-- `Pause` / `Resume` / `Stop`: controllo dello stato della simulazione (pausa, ripresa, stop);
+- `Pause` / `Resume` / `Stop`: controllo dello stato della simulazione;
 - `RobotActionProposals`: gestione delle proposte di azione (`RobotProposal`) dei robot a ogni tick.
 
 Ogni evento nel `Controller` viene trasformato in un aggiornamento dello stato tramite le logiche definite nel
@@ -85,14 +123,17 @@ In questo modo:
 Questo consente al `Controller` di continuare il ciclo della simulazione con lo stato corretto, senza occuparsi
 direttamente delle regole di aggiornamento o dei dettagli della business logic.
 
-### Esecuzione dei comportamenti dei robot
+#### Esecuzione dei comportamenti dei robot
 
 Il metodo `runBehavior` seleziona tutte le entità di tipo `Robot` presenti nell’ambiente.
 
-Per ogni robot:
+Per ciascun robot:
 
 - legge i sensori (`senseAll`);
 - costruisce un `BehaviorContext` e calcola l’azione da compiere tramite la logica del robot (`robot.behavior.run`);
 - aggiorna il generatore casuale della simulazione (`Event.Random`);
 - crea una proposta di azione (`RobotProposal`);
-- al termine, inserisce in coda un evento `RobotActionProposals` contenente tutte le proposte di azione raccolte.
+- alla fine, inserisce in coda un evento `RobotActionProposals` contenente tutte le proposte di azione raccolte.
+
+Questo approccio permette di calcolare i comportamenti in parallelo, riducendo i tempi di elaborazione e mantenendo
+l’aggiornamento dello stato coerente.
