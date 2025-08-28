@@ -9,7 +9,6 @@ import io.github.srs.controller.ControllerModule
 import io.github.srs.controller.ControllerModule.Controller
 import io.github.srs.model.ModelModule.Model
 import io.github.srs.model.SimulationConfig.{ SimulationSpeed, SimulationStatus }
-import io.github.srs.model.dsl.EnvironmentToGridDSL.prettyPrint
 import io.github.srs.model.environment.ValidEnvironment
 import io.github.srs.model.logic.simulationStateLogicsBundle
 import io.github.srs.model.{ ModelModule, SimulationState }
@@ -40,7 +39,9 @@ trait BaseLauncher
    * @return
    *   an IO effect that runs the simulation.
    */
-  def runMVC(state: SimulationState): IO[Unit]
+  def runMVC(state: SimulationState): IO[Unit] =
+    for _ <- controller.start(state)
+    yield ()
 
 /**
  * Launcher object for the GUI version of the Scala Robotics Simulator.
@@ -48,32 +49,11 @@ trait BaseLauncher
 object GUILauncher extends BaseLauncher with GUIComponent[SimulationState]:
   override val view: View[SimulationState] = View()
 
-  /**
-   * @inheritdoc
-   */
-  override def runMVC(state: SimulationState): IO[Unit] =
-    for _ <- controller.start(state)
-    yield ()
-
 /**
  * Launcher object for the CLI version of the Scala Robotics Simulator.
  */
 object CLILauncher extends BaseLauncher with CLIComponent[SimulationState]:
   override val view: View[SimulationState] = View()
-
-  /**
-   * @inheritdoc
-   */
-  override def runMVC(state: SimulationState): IO[Unit] =
-
-    val stateCLI = state.copy(
-      simulationSpeed = SimulationSpeed.SUPERFAST,
-      simulationStatus = SimulationStatus.RUNNING,
-    )
-    for
-      result <- controller.start(stateCLI)
-      _ <- IO.println(s"Simulation finished. Final state:\n${prettyPrint(result.environment)}")
-    yield ()
 
 /**
  * Creates the initial state of the simulation based on the provided configuration.
@@ -83,11 +63,14 @@ object CLILauncher extends BaseLauncher with CLIComponent[SimulationState]:
  * @return
  *   the initial state of the simulation
  */
-def mkInitialState(cfg: SimulationConfig[ValidEnvironment]): SimulationState =
+def mkInitialState(cfg: SimulationConfig[ValidEnvironment], headless: Boolean): SimulationState =
+  val speed = if headless then SimulationSpeed.SUPERFAST else SimulationSpeed.NORMAL
+  val status = if headless then SimulationStatus.RUNNING else SimulationStatus.PAUSED
+  val rng = SimpleRNG(cfg.simulation.seed.getOrElse(42))
   SimulationState(
     simulationTime = cfg.simulation.duration.map(FiniteDuration(_, MILLISECONDS)),
-    simulationSpeed = SimulationSpeed.NORMAL,
-    simulationRNG = SimpleRNG(cfg.simulation.seed.getOrElse(42)),
-    simulationStatus = SimulationStatus.PAUSED,
+    simulationSpeed = speed,
+    simulationRNG = rng,
+    simulationStatus = status,
     environment = cfg.environment,
   )
