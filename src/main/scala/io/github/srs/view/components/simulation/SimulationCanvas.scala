@@ -17,6 +17,10 @@ import io.github.srs.model.environment.Environment
 import io.github.srs.utils.SimulationDefaults
 import io.github.srs.utils.SimulationDefaults.Canvas.*
 import io.github.srs.view.state.SimulationViewState
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.Sensor.ProximitySensor.DefaultRange
+import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
+import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings.proximityReadings
+import cats.Id
 
 /**
  * Canvas component responsible for rendering the simulation environment. Supports static layer caching for improved
@@ -25,7 +29,7 @@ import io.github.srs.view.state.SimulationViewState
  * @param alwaysRefresh
  *   If true, the static layer is recreated on every paint
  */
-class SimulationCanvas(private val alwaysRefresh: Boolean = false) extends JPanel:
+class SimulationCanvas(private val insideConfiguration: Boolean = false) extends JPanel:
 
   /**
    * Viewport configuration for world-to-screen transformation.
@@ -134,7 +138,7 @@ class SimulationCanvas(private val alwaysRefresh: Boolean = false) extends JPane
    */
   private def ensureStaticLayer(env: Environment): Unit =
     val size = (env.width, env.height, getWidth, getHeight)
-    if alwaysRefresh || state.get.needsStaticLayerUpdate(size) then
+    if insideConfiguration || state.get.needsStaticLayerUpdate(size) then
       val img = createStaticLayerImage(env)
       state.updateAndGet(_.withStaticLayer(img, size)): Unit
 
@@ -347,7 +351,7 @@ class SimulationCanvas(private val alwaysRefresh: Boolean = false) extends JPane
     import io.github.srs.model.environment.robots
     val vp = viewport(env)
     val currentState = state.get
-    env.robots.foreach(drawRobot(g2, _, vp, currentState.selectedRobotId))
+    env.robots.foreach(drawRobot(g2, _, env, vp, currentState.selectedRobotId))
 
   /**
    * Draws a single robot with body and direction indicator.
@@ -361,12 +365,18 @@ class SimulationCanvas(private val alwaysRefresh: Boolean = false) extends JPane
    * @param selectedId
    *   Optional ID of the selected robot
    */
-  private def drawRobot(g2: Graphics2D, robot: Robot, vp: Viewport, selectedId: Option[String]): Unit =
+  private def drawRobot(
+      g2: Graphics2D,
+      robot: Robot,
+      env: Environment,
+      vp: Viewport,
+      selectedId: Option[String],
+  ): Unit =
     robot.shape match
       case ShapeType.Circle(radius) =>
         val isSelected = selectedId.contains(robot.id.toString)
         drawRobotBody(g2, robot, radius, vp, isSelected)
-        drawRobotDirection(g2, robot, radius, vp)
+        drawRobotDirection(g2, robot, radius, env, vp)
 
   /**
    * Draws the robot's circular body with gradient and border.
@@ -430,7 +440,7 @@ class SimulationCanvas(private val alwaysRefresh: Boolean = false) extends JPane
    * @param vp
    *   Viewport configuration
    */
-  private def drawRobotDirection(g2: Graphics2D, robot: Robot, radius: Double, vp: Viewport): Unit =
+  private def drawRobotDirection(g2: Graphics2D, robot: Robot, radius: Double, env: Environment, vp: Viewport): Unit =
     import SimulationDefaults.DynamicEntity.Robot.*
 
     val cx = (vp.offsetX + robot.position.x * vp.scale).toInt
@@ -442,6 +452,41 @@ class SimulationCanvas(private val alwaysRefresh: Boolean = false) extends JPane
     val arrow = createArrowPolygon(cx, cy, angle, length, width)
     g2.setColor(Color.BLACK)
     g2.fillPolygon(arrow)
+    if !insideConfiguration then drawSensorLines(g2, robot, radius, env, vp)
+
+  private def drawSensorLines(g2: Graphics2D, robot: Robot, radius: Double, env: Environment, vp: Viewport): Unit =
+    val cx = (vp.offsetX + robot.position.x * vp.scale).toInt
+    val cy = (vp.offsetY + robot.position.y * vp.scale).toInt
+    val scaledRadius = radius * vp.scale
+
+    val readings = robot.senseAll[Id](env).proximityReadings
+
+    // Assuming robot has a collection of sensors with orientations
+    readings.foreach { reading =>
+      val sensor = reading.sensor
+      val value = reading.value
+      val sensorAngle = sensor.offset.toRadians + robot.orientation.toRadians
+
+      // Calculate start point (on robot border)
+      val startX = cx + (scaledRadius * math.cos(sensorAngle)).toInt
+      val startY = cy + (scaledRadius * math.sin(sensorAngle)).toInt
+
+      // Calculate end point (sensor range)
+      val sensorLength = DefaultRange * vp.scale // Assuming sensors have a range property
+      val endX = startX + (sensorLength * math.cos(sensorAngle) * value).toInt
+      val endY = startY + (sensorLength * math.sin(sensorAngle) * value).toInt
+
+      // Draw sensor line
+      g2.setColor(Color.BLUE) // Or any color you prefer for sensors
+      g2.setStroke(new BasicStroke(1.0f)) // Thin line for sensors
+      g2.drawLine(startX, startY, endX, endY)
+
+      // Optional: Draw a small circle at the end to show sensor detection point
+      val dotSize = 3
+      g2.fillOval(endX - dotSize / 2, endY - dotSize / 2, dotSize, dotSize)
+    }
+
+  end drawSensorLines
 
   /**
    * Creates a triangular polygon representing an arrow.
