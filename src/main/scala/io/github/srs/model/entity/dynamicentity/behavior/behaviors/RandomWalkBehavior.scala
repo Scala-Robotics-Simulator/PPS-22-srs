@@ -2,10 +2,10 @@ package io.github.srs.model.entity.dynamicentity.behavior.behaviors
 
 import cats.Monad
 import cats.data.Kleisli
-import io.github.srs.model.entity.dynamicentity.action.{MovementActionFactory, NoAction}
+import io.github.srs.model.entity.dynamicentity.action.{ MovementActionFactory, NoAction }
 import io.github.srs.model.entity.dynamicentity.behavior.behaviors.BehaviorCommon.*
 import io.github.srs.utils.SimulationDefaults.Behaviors.RandomWalk.*
-import io.github.srs.utils.SimulationDefaults.DynamicEntity.{MaxSpeed, MinSpeed}
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.{ MaxSpeed, MinSpeed }
 
 /**
  * A [[Behavior]] that makes the entity perform a random walk.

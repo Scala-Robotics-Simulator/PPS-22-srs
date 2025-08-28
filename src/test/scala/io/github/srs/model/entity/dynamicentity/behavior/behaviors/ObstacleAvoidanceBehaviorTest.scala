@@ -3,13 +3,13 @@ package io.github.srs.model.entity.dynamicentity.behavior.behaviors
 import cats.Id
 import io.github.srs.model.entity.Orientation
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
-import io.github.srs.model.entity.dynamicentity.action.{Action, MovementAction}
+import io.github.srs.model.entity.dynamicentity.action.{ Action, MovementAction }
 import io.github.srs.model.entity.dynamicentity.behavior.BehaviorContext
-import io.github.srs.model.entity.dynamicentity.sensor.{ProximitySensor, SensorReading, SensorReadings}
+import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, SensorReading, SensorReadings }
 import io.github.srs.model.environment.Environment
 import io.github.srs.utils.SimulationDefaults.Behaviors.ObstacleAvoidance.*
-import io.github.srs.utils.SimulationDefaults.DynamicEntity.{MaxSpeed, MinSpeed}
-import io.github.srs.utils.random.{RNG, SimpleRNG}
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.{ MaxSpeed, MinSpeed }
+import io.github.srs.utils.random.{ RNG, SimpleRNG }
 import org.scalatest.Inside.inside
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -19,7 +19,7 @@ import org.scalatest.matchers.should.Matchers
  */
 final class ObstacleAvoidanceBehaviorTest extends AnyFlatSpec with Matchers:
 
-    /** Helper to create a proximity sensor reading. */
+  /** Helper to create a proximity sensor reading. */
   private def createProxReading(deg: Double, v: Double) =
     SensorReading(ProximitySensor[DynamicEntity, Environment](Orientation(deg), 1.0), v)
 
@@ -29,7 +29,12 @@ final class ObstacleAvoidanceBehaviorTest extends AnyFlatSpec with Matchers:
 
   "ObstacleAvoidanceBehavior" should "go forward when there are no obstacles" in:
     val readings: SensorReadings =
-      Vector(createProxReading(0, 1.0), createProxReading(90, 1.0), createProxReading(180, 1.0), createProxReading(270, 1.0))
+      Vector(
+        createProxReading(0, 1.0),
+        createProxReading(90, 1.0),
+        createProxReading(180, 1.0),
+        createProxReading(270, 1.0),
+      )
 
     val (action, _) =
       ObstacleAvoidanceBehavior.decision[Id].run(BehaviorContext(readings, SimpleRNG(0)))

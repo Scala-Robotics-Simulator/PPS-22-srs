@@ -6,7 +6,7 @@ import io.github.srs.model.entity.dynamicentity.behavior.behaviors.BehaviorCommo
 import io.github.srs.model.entity.dynamicentity.sensor.ProximityReadings
 import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings.*
 import io.github.srs.utils.SimulationDefaults.Behaviors.ObstacleAvoidance.*
-import io.github.srs.utils.SimulationDefaults.DynamicEntity.{MaxSpeed, MinSpeed}
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.{ MaxSpeed, MinSpeed }
 
 /**
  * A [[Behavior]] that avoid obstacles using proximity sensor readings.

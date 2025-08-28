@@ -1,10 +1,10 @@
 package io.github.srs.model.entity.dynamicentity.behavior.behaviors
 
 import cats.Monad
-import io.github.srs.model.entity.dynamicentity.action.{Action, MovementActionFactory, NoAction}
+import io.github.srs.model.entity.dynamicentity.action.{ Action, MovementActionFactory, NoAction }
 import io.github.srs.model.entity.dynamicentity.behavior.BehaviorContext
 import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior
-import io.github.srs.utils.SimulationDefaults.DynamicEntity.{MaxSpeed, MinSpeed}
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.{ MaxSpeed, MinSpeed }
 import io.github.srs.utils.random.RNG
 
 /**
