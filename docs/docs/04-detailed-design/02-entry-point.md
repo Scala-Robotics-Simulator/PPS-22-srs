@@ -6,27 +6,39 @@ sidebar_position: 2
 
 ## Main
 
-L’applicazione è avviata dal metodo `main`. Questo metodo funge da entry point, leggendo gli argomenti della riga di
-comando tramite `ArgParser` e selezionando il launcher appropriato:
+L’applicazione si avvia dal metodo `main`, che rappresenta il punto d’ingresso del programma.
+Gli argomenti della riga di comando vengono interpretati da `ArgParser`, in modo da determinare la modalità di
+esecuzione:
 
-- `CLILauncher` per la modalità a linea di comando (`--headless`);
-- `GUILauncher` per la modalità grafica.
+- **CLI** (`CLILauncher`) se è attivata l’opzione `--headless`;
+- **GUI** (`GUILauncher`) altrimenti.
 
-Il `Launcher` scelto inizializza la view corrispondente (`ConfigurationCLI` o `ConfigurationGUI`), crea lo stato
-iniziale della simulazione tramite `mkInitialState`, chiude la configurazione e avvia l’architettura MVC chiamando
-`runMVC`.
+Una volta scelto il launcher, viene inizializzata la vista corrispondente (`ConfigurationCLI` o `ConfigurationGUI`),
+costruito lo stato iniziale della simulazione con `mkInitialState`, e avviata l’architettura MVC attraverso `runMVC`.
 
 ## Launcher
 
-Sia `CLILauncher` che `GUILauncher` estendono `BaseLauncher`, che combina i moduli `Model`, `View` e `Controller`,
-costruendo il cuore della simulazione e gestendo il ciclo principale di esecuzione.
+I due launcher, `CLILauncher` e `GUILauncher`, condividono la stessa struttura di base definita da `BaseLauncher`.
+Questo trait integra i tre moduli fondamentali — `Model`, `View` e `Controller` — e fornisce il meccanismo per avviare
+la
+simulazione.
+
+Il ciclo principale è gestito dal `Controller`, richiamato dal metodo `controller.start(state)`, mentre il launcher si
+limita a collegare i componenti dell’architettura MVC e ad avviarne l’esecuzione nella modalità scelta (CLI o GUI).
 
 ## ArgParser e AppArgs
 
-`ArgParser` gestisce l’analisi degli argomenti passati da linea di comando all'avvio dell’applicazione. 
-Utilizza la libreria **scopt** per definire le opzioni disponibili e generare automaticamente messaggi di help e versione.
+`ArgParser` gestisce l’analisi degli argomenti passati da linea di comando all'avvio dell’applicazione.
+Viene utilizzata la libreria [**scopt**](https://github.com/scopt/scopt) per definire le opzioni disponibili.
 
-Le principali opzioni supportate includono:
+Scopt fornisce una DSL dichiarativa che permette di definire con semplicità:
+
+- opzioni obbligatorie o facoltative, con relativi tipi;
+- valori di default;
+- messaggi di aiuto e documentazione;
+- versioning e validazione degli argomenti.
+
+In questa applicazione, le principali opzioni supportate sono:
 
 - `--headless`: avvia la simulazione in modalità CLI senza interfaccia grafica;
 - `--path <file>`: specifica il percorso del file di configurazione YAML;
@@ -35,4 +47,12 @@ Le principali opzioni supportate includono:
 - `--help`: mostra le istruzioni disponibili;
 - `--version`: mostra la versione dell’applicazione.
 
-Il metodo `parse(args: Seq[String])` restituisce un oggetto `AppArgs` con i valori forniti dall’utente, oppure `None` se la lettura degli argomenti fallisce.
+Il risultato del parsing è la struttura `AppArgs` che raccoglie in modo tipizzato tutti i parametri forniti dall’utente.
+Se la lettura degli argomenti fallisce, il metodo `parse(args: Seq[String])` restituisce `None`, stampando un messaggio
+di errore.
+
+## Configuration View
+
+### ConfigurationCLI
+
+### ConfigurationGUI
