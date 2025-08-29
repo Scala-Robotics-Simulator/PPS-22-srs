@@ -13,6 +13,9 @@ const config = {
   title: "PPS-22-srs",
   tagline: "A robotics simulator written in scala.",
   favicon: "img/favicon.ico",
+  markdown: {
+    mermaid: true,
+  },
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
@@ -32,6 +35,9 @@ const config = {
 
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
+
+  // Add the Mermaid plugin
+  themes: ['@docusaurus/theme-mermaid'],
 
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you
