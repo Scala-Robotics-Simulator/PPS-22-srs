@@ -5,6 +5,15 @@ import scala.annotation.tailrec
 import io.github.srs.model.entity.ShapeType.Rectangle
 import io.github.srs.model.entity.{ Orientation, ShapeType }
 import io.github.srs.utils.collision.Collision.isColliding
+import io.github.srs.model.validation.Validation
+import io.github.srs.model.validation.DomainError
+import io.github.srs.model.entity.staticentity.StaticEntity
+import io.github.srs.model.entity.dynamicentity.DynamicEntity
+import io.github.srs.model.entity.dynamicentity.Robot
+import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.validate
+import io.github.srs.model.entity.staticentity.dsl.ObstacleDsl.validate
+import io.github.srs.model.entity.staticentity.dsl.LightDsl.validate
+import io.github.srs.model.entity.staticentity.dsl.BoundaryDsl.validate
 
 /**
  * Represents a generic entity in a two-dimensional space.
@@ -47,6 +56,26 @@ trait Entity:
 end Entity
 
 object Entity:
+
+  /**
+   * Validates an entity to ensure it meets the domain constraints.
+   *
+   * @param e
+   *   the entity to validate.
+   * @return
+   *   [[Right]] if the entity is valid, or [[Left]] with a validation error.
+   */
+  def validateEntity(e: Entity): Validation[Entity] =
+    e match
+      case se: StaticEntity =>
+        se match
+          case o: StaticEntity.Obstacle => o.validate
+          case l: StaticEntity.Light => l.validate
+          case b: StaticEntity.Boundary => b.validate
+      case de: DynamicEntity =>
+        de match
+          case r: Robot => r.validate
+          case de => Right[DomainError, DynamicEntity](de)
 
   extension (e: Entity)
 
