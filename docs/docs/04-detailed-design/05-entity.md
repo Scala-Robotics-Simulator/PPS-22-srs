@@ -152,32 +152,45 @@ Vedere la sezione [Action](./07-action.md) per i dettagli sull’algebra delle a
 
 ![Actuator](../../static/img/04-detailed-design/actuator.png)
 
-Un Actuator è un componente in grado di modificare lo stato di un'entità dinamica (`DynamicEntity`). Il _trait_
-`Actuator[E]`
-definisce un’interfaccia generica per tutti gli attuatori, attraverso il metodo `act(entity: E): Validation[E]`, che
-applica un cambiamento all'entità specificata, restituendo una nuova istanza validata.
+Un attuatore è un componente in grado di modificare lo stato di un’entità dinamica (`DynamicEntity`). Il _trait_ `Actuator[E]`
+definisce l’interfaccia generica, tramite il metodo `act(dt, entity)`, che aggiorna l’entità dopo un intervallo temporale
+`dt`, restituendone una nuova istanza in un contesto monadico `F[_]`.
 
 ### Attuatori di movimento
 
-Gli attuatori di movimento `WheelMotor` sono un tipo specifico di attuatori progettati per modificare la posizione e
-l'orientamento
-di un'entità dinamica nello spazio simulato. Questi attuatori sono implementati come sottotipi di `Actuator[Robot]`,
-consentendo loro di agire specificamente su istanze del trait `Robot`.
+Gli attuatori di movimento sono modellati tramite i motori differenziali (`DifferentialWheelMotor`), costituiti da due
+ruote (`Wheel`) – sinistra e destra – dotate di velocità lineare (`speed`) e una forma circolare (`ShapeType.Circle`).
+Il movimento del robot viene calcolato con un modello cinematico differenziale (`DifferentialKinematics`), in cui:
 
-Un `WheelMotor` è costituito da due ruote (`Wheel`) – sinistra e destra – ognuna dotata
-di una velocità lineare (`speed`) e una forma circolare (`ShapeType.Circle`).
+- **Velocità lineare** (media delle velocità delle due ruote; ottenute moltiplicando la velocità (`speed`) per il raggio della ruota (`radius`)):
 
-L'implementazione `DifferentialWheelMotor` utilizza un modello fisico di tipo differenziale, in cui il movimento viene
-calcolato in base alla velocità delle due ruote e alla distanza tra esse (assunta pari al diametro del robot). In
-particolare:
+$$
+v = \frac{v_{\text{left}} + v_{\text{right}}}{2}
+$$
 
-- la velocità lineare del robot è la media delle velocità delle due ruote
-- la velocità angolare è proporzionale alla differenza di velocità tra le ruote
-- la nuova posizione e orientazione vengono calcolate utilizzando le equazioni cinematiche del moto in un piano.
+- **Velocità angolare** (proporzionale alla differenza tra le velocità delle ruote divisa per la distanza tra le ruote; si assume che la distanza tra le ruote sia pari al diametro del robot):
 
-Questa logica è incapsulata nel metodo `act(robot: Robot): Validation[Robot]`, che restituisce una nuova istanza del
-robot
-con posizione e orientamento aggiornati.
+$$
+\omega = \frac{v_{\text{right}} - v_{\text{left}}}{d_{\text{wheel}}}
+$$
+
+- **Nuova posizione e orientazione del robot** integrando le equazioni del moto su un intervallo di tempo `dt`:
+
+$$
+x' = x + v \cdot \cos(\theta) \cdot dt
+$$
+
+$$
+y' = y + v \cdot \sin(\theta) \cdot dt
+$$
+
+$$
+\theta' = \theta + \omega \cdot dt
+$$
+
+
+Questa logica, incapsulata nel metodo `act`, consente di aggiornare lo stato del robot in modo funzionale e validato,
+rendendo il comportamento dell’attuatore modulare ed estendibile.
 
 ## Sensori
 

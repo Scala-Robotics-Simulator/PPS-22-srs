@@ -15,5 +15,9 @@
   "scripts": {
     "lint-format": "sbt \"scalafixAll ; scalafmtAll\"",
     "clean": "sbt \"clean ; reload ; clean\""
+  },
+  "dependencies": {
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0"
   }
 }
