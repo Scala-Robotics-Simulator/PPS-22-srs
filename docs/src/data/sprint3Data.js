@@ -110,7 +110,7 @@ export const sprint3Data = [
     {
         backlogItem: "Come utente voglio monitorare i dettagli dei singoli robot in tempo reale, per studiarne il comportamento",
         id: "23.1",
-        task: "Semplificazione e adattamento della logica dei comportamenti",
+        task: "Implementazione pannello di dettaglio del robot selezionato",
         volontario: "Cohen",
         stima: 1,
         effettivo: 1,
