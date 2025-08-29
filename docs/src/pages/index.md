@@ -25,8 +25,8 @@ java -jar PPS-22-srs.jar
 
 ## Documentation
 
-The documentation is available at [PPS-22-srs doc](https://scala-robotics-simulator.github.io/PPS-22-srs/docs/category/1-processo-di-sviluppo).
+The documentation is available at [PPS-22-srs doc](https://scala-robotics-simulator.github.io/PPS-22-srs/).
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/Scala-Robotics-Simulator/PPS-22-srs/blob/main/LICENSE) file for details.

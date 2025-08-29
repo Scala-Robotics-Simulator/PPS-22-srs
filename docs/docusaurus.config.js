@@ -126,15 +126,6 @@ const config = {
         style: "dark",
         links: [
           {
-            title: "Docs",
-            items: [
-              {
-                label: "Documentazione PPS-22-srs",
-                to: "/docs/intro",
-              },
-            ],
-          },
-          {
             title: "More",
             items: [
               {

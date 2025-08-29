@@ -29,4 +29,4 @@ The documentation is available at [PPS-22-srs doc](https://scala-robotics-simula
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/Scala-Robotics-Simulator/PPS-22-srs/blob/main/LICENSE) file for details.
