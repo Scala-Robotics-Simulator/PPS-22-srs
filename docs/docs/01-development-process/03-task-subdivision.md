@@ -16,13 +16,13 @@ Vengono utilizzate le label di Trello per categorizzare i task in base alla loro
 - **Medium**: Per i task che sono importanti ma non urgenti, possono essere completati dopo i task ad alta priorità.
 - **Low**: Per i task che possono essere completati se c'è tempo disponibile, ma non sono essenziali per il completamento dello sprint.
 - **Bug**: Per i task che riguardano la correzione di errori o problemi riscontrati nel software.
-- **C.I.**: Per i task che riguardano lo sviluppo di nuove funzionalità o miglioramenti del prodotto.
+- **C.I.**: Per i task che riguardano la continuous integration e il deployment del software.
 - **Docs**: Per i task che riguardano la scrittura o l'aggiornamento della documentazione del progetto.
 - **Feature**: Per i task che riguardano lo sviluppo di nuove funzionalità del prodotto.
 - **Test**: Per i task che riguardano test manuali e verifiche della qualità del software.
 - **Research**: Per i task che riguardano la ricerca e l'analisi di nuove tecnologie o metodologie da applicare al progetto.
 - **Architecture**: Per i task che riguardano la progettazione e l'architettura del software, inclusi miglioramenti strutturali o di design.
 
-Inoltre, per la stima della durata dei task si è sfruttato il Power-Up "Activity Timer", che consente di tenere traccia del tempo impiegato per completare ciascun task. La stima della durata dei task è stata effettuata in modo collaborativo durante lo Sprint Planning, ogni membro del team ha espresso la propria opinione sulla durata stimata di ciascun task, e si è raggiunto un consenso su una stima finale. Questa stima è stata poi utilizzata per pianificare il lavoro dello sprint e monitorare i progressi. Le stime sono state effettuate in ore, scelgiendo un valore della successione di Fibonacci (0.5, 1, 2, 3, 5, 8, 13, ...) per rappresentare la complessità e la durata dei task. Questo approccio ha permesso al team di avere una visione chiara del carico di lavoro e di pianificare le attività in modo più efficace.
+Inoltre, per la stima della durata dei task si è sfruttato il Power-Up "Activity Timer", che consente di tenere traccia del tempo impiegato per completare ciascun task. La stima della durata dei task è stata effettuata in modo collaborativo durante lo Sprint Planning, ogni membro del team ha espresso la propria opinione sulla durata stimata di ciascun task, e si è raggiunto un consenso su una stima finale. Questa stima è stata poi utilizzata per pianificare il lavoro dello sprint e monitorare i progressi. Le stime sono state effettuate in ore, ogni membro del team esprime un valore che ritiene rappresentativo della complessità e durata dei task. Non viene effettuata la media dei valori, ma i membri del team si confrontano per raggiungere un accordo. Questo approccio ha permesso al team di avere una visione chiara del carico di lavoro e di pianificare le attività in modo più efficace.
 
 Nel caso in cui un task venga stimato di durata superiore a 13 ore, viene suddiviso in task più piccoli, in modo da facilitare la gestione e il monitoraggio del progresso.
