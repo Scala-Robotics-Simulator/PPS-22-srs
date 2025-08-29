@@ -15,6 +15,7 @@ import io.github.srs.model.validation.Validation
 import io.github.srs.model.validation.Validation.*
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.*
 import io.github.srs.model.entity.dynamicentity.behavior.Policy
+import io.github.srs.utils.SimulationDefaults.Fields.Entity.DynamicEntity.Robot.Self
 
 /**
  * The DSL for creating and configuring a Robot entity.
@@ -182,13 +183,13 @@ object RobotDsl:
     def validate: Validation[Robot] =
       import Point2D.*
       for
-        x <- notNaN("x", robot.position.x)
-        _ <- notInfinite("x", x)
-        y <- notNaN("y", robot.position.y)
-        _ <- notInfinite("y", y)
-        _ <- bounded("radius", robot.shape.radius, MinRadius, MaxRadius, includeMax = true)
-        _ <- notNaN("degrees", robot.orientation.degrees)
-        _ <- validateCountOfType[DifferentialWheelMotor]("actuators", robot.actuators, 0, 1)
+        x <- notNaN(s"$Self x", robot.position.x)
+        _ <- notInfinite(s"$Self x", x)
+        y <- notNaN(s"$Self y", robot.position.y)
+        _ <- notInfinite(s"$Self y", y)
+        _ <- bounded(s"$Self radius", robot.shape.radius, MinRadius, MaxRadius, includeMax = true)
+        _ <- notNaN(s"$Self degrees", robot.orientation.degrees)
+        _ <- validateCountOfType[DifferentialWheelMotor](s"$Self actuators", robot.actuators, 0, 1)
         _ <- robot.actuators.traverse_(validateActuator)
         _ <- robot.sensors.traverse_(validateSensor)
       yield robot

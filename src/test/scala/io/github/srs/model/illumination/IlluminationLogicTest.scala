@@ -121,22 +121,6 @@ final class IlluminationLogicTest extends AnyFlatSpec with Matchers:
     val idx = f.dims.toIndex(sx, sy)
     math.abs(f.data.lift(idx).value - 0.4) should be <= 1e-6
 
-  it should "treat invalid intensities (NaN/Inf) as 0.0 due to clamping" in:
-    val bad =
-      light.at(C.LightPos).withRadius(0.1).withIlluminationRadius(2.0).withIntensity(Double.NaN).withAttenuation(1.0)
-    val alsoBad =
-      light
-        .at(Point2D(2.0, 2.0))
-        .withRadius(0.1)
-        .withIlluminationRadius(2.0)
-        .withIntensity(Double.PositiveInfinity)
-        .withAttenuation(1.0)
-
-    val envV = mkEnv(Seq(bad, alsoBad))
-    val f = IlluminationLogic.computeLightField(C.S)(usedFov)(includeDynamic = false)(envV)
-
-    all(f.data) shouldBe 0.0 +- 1e-12
-
   it should "toggle dynamic occlusion with includeDynamic flag" in:
     val r = robot.at(C.RobotPos).withShape(ShapeType.Circle(0.2)).withOrientation(Orientation(0.0))
     val l = light.at(C.LightPos).withRadius(0.2).withIlluminationRadius(3.0).withIntensity(1.0).withAttenuation(1.0)

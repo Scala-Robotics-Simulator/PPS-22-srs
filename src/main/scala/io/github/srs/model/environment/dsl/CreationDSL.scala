@@ -9,6 +9,7 @@ import io.github.srs.model.validation.Validation.{ bounded, noCollisions, within
 import io.github.srs.utils.SimulationDefaults.Environment.*
 import io.github.srs.model.entity.Entity.validateEntity
 import io.github.srs.utils.SimulationDefaults.LightMapConfigs
+import io.github.srs.utils.SimulationDefaults.Fields.Environment.Self
 
 /**
  * The DSL for creating an environment in the simulation.
@@ -104,11 +105,11 @@ object CreationDSL:
         case _ => false
       val boundaries = Boundary.createBoundaries(env.width, env.height)
       for
-        width <- bounded("width", env.width, MinWidth, MaxWidth, includeMax = true)
-        height <- bounded("height", env.height, MinHeight, MaxHeight, includeMax = true)
-        _ <- bounded("entities", env.entities.size, 0, MaxEntities, includeMax = true)
-        entities <- withinBounds("entities", entities, width, height)
-        entities <- noCollisions("entities", entities ++ boundaries)
+        width <- bounded(s"$Self width", env.width, MinWidth, MaxWidth, includeMax = true)
+        height <- bounded(s"$Self height", env.height, MinHeight, MaxHeight, includeMax = true)
+        _ <- bounded(s"$Self entities", env.entities.size, 0, MaxEntities, includeMax = true)
+        entities <- withinBounds(s"$Self entities", entities, width, height)
+        entities <- noCollisions(s"$Self entities", entities ++ boundaries)
         _ <- entities.toList.traverse_(validateEntity)
       yield ValidEnvironment.from(env.copy(entities = entities))
   end extension

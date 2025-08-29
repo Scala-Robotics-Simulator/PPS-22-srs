@@ -7,6 +7,7 @@ import org.scalatest.Inside.inside
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
+import io.github.srs.utils.SimulationDefaults.Fields.Entity.DynamicEntity.Robot.Self
 
 class RobotValidationTest extends AnyFlatSpec with Matchers:
 
@@ -15,17 +16,17 @@ class RobotValidationTest extends AnyFlatSpec with Matchers:
 
   it should "not support having multiple WheelMotor Actuators" in:
     inside((robot containing wheelMotor and wheelMotor).validate):
-      case Left(DomainError.InvalidCount("actuators", 2, 0, 1)) => succeed
+      case Left(DomainError.InvalidCount(s"$Self actuators", 2, 0, 1)) => succeed
 
   it should "not support having NaN position" in:
     inside((robot at Point2D(Double.NaN, 0.0)).validate):
-      case Left(DomainError.NotANumber("x", value)) => assert(value.isNaN)
+      case Left(DomainError.NotANumber(s"$Self x", value)) => assert(value.isNaN)
 
   it should "not support having Infinite position" in:
     inside((robot at Point2D(0.0, Double.PositiveInfinity)).validate):
-      case Left(DomainError.Infinite("y", value)) => assert(value.isInfinite)
+      case Left(DomainError.Infinite(s"$Self y", value)) => assert(value.isInfinite)
 
   it should "not support having NaN orientation" in:
     inside((robot withOrientation Orientation(Double.NaN)).validate):
-      case Left(DomainError.NotANumber("degrees", value)) => assert(value.isNaN)
+      case Left(DomainError.NotANumber(s"$Self degrees", value)) => assert(value.isNaN)
 end RobotValidationTest

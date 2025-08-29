@@ -76,6 +76,7 @@ object Entity:
         de match
           case r: Robot => r.validate
           case de => Right[DomainError, DynamicEntity](de)
+      case _ => Right[DomainError, Entity](e)
 
   extension (e: Entity)
 
