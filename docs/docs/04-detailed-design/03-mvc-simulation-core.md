@@ -15,7 +15,7 @@ Il trait `State` definisce la struttura dello stato della simulazione, che inclu
 - `dt`: delta time della simulazione, cioè l’intervallo temporale usato per ogni step;
 - `simulationSpeed`: velocità corrente della simulazione;
 - `simulationRNG`: generatore di numeri casuali (`RNG`) usato per introdurre elementi stocastici nei comportamenti dei 
-robot. Vedere la sezione [Generatore di numeri casuali](./09-random-number-generator.md) per maggiori dettagli;
+robot. Vedere la sezione [Generatore di numeri casuali](10-random-number-generator.md) per maggiori dettagli;
 - `simulationStatus`: stato corrente della simulazione;
 - `environment`: rappresenta l’ambiente della simulazione, contenente le entità validate (`ValidEnvironment`). Vedere la sezione [Environment](./04-environment.md) per maggiori dettagli.
 

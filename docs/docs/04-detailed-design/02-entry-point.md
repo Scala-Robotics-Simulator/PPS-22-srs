@@ -83,7 +83,7 @@ Se la validazione dell’ambiente fallisce, viene segnalato un errore con il mes
 Eseguendo il simulatore senza indicare `--headless`, viene mostrata inizialmente l'interfaccia grafica di configurazione.
 
 Il simulatore può essere configurato in due modalità, tramite file `YAML`, come descritto nella sezione
-[Configuration](06-configuration.md), oppure tramite interfaccia grafica.
+[Configuration](08-configuration.md), oppure tramite interfaccia grafica.
 
 La **configuration gui** è l’interfaccia grafica che permette di modificare i parametri del simulatore in modo
 interattivo, senza dover modificare manualmente il file `YAML`.
