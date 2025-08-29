@@ -15,9 +15,13 @@ Il trait `State` definisce la struttura dello stato della simulazione, che inclu
 - `dt`: delta time della simulazione, cioè l’intervallo temporale usato per ogni step;
 - `simulationSpeed`: velocità corrente della simulazione;
 - `simulationRNG`: generatore di numeri casuali (`RNG`) usato per introdurre elementi stocastici nei comportamenti dei 
-robot. Vedere la sezione [Generatore di numeri casuali](10-random-number-generator.md) per maggiori dettagli;
+robot;
 - `simulationStatus`: stato corrente della simulazione;
-- `environment`: rappresenta l’ambiente della simulazione, contenente le entità validate (`ValidEnvironment`). Vedere la sezione [Environment](./04-environment.md) per maggiori dettagli.
+- `environment`: rappresenta l’ambiente della simulazione, contenente le entità validate (`ValidEnvironment`).
+
+:::info note
+Vedere la sezione [Generatore di numeri casuali](10-random-number-generator.md), [Environment](./04-environment.md) per maggiori dettagli.
+:::
 
 #### SimulationSpeed
 
@@ -220,7 +224,7 @@ In questa fase finale, la view mostra in console l’ultimo stato della simulazi
 testuale con le entità e le loro posizioni in un formato semplificato.
 
 
-:::info Esempio di ambiente testuale
+:::tip Esempio di ambiente testuale
 La simulazione mostra le entità presenti in una griglia testuale.
 
 Ogni simbolo rappresenta un tipo di entità (robot: `R`, ostacolo: `X`, luce: `**`, cella vuota: `--`).

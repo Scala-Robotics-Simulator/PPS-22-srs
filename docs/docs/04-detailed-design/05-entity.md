@@ -125,14 +125,28 @@ posizionata **all'interno** dell'ambiente.
 
 ![Robot](../../static/img/04-detailed-design/robot.png)
 
-Il _trait_ `Robot` estende `DynamicEntity` e rappresenta un'entità mobile autonoma nello spazio bidimensionale, in grado
-di interagire con l’ambiente circostante tramite sensori e attuatori. Ogni robot ha una forma circolare
-(`ShapeType.Circle`) e possiede un insieme di attuatori (`Seq[Actuator[Robot]]`) e una _suite_ di sensori (
-`SensorSuite`).
+Il _case class_ `Robot` estende `DynamicEntity` e rappresenta un’entità autonoma in grado di muoversi e interagire con
+l’ambiente circostante nello spazio bidimensionale. Ogni robot è caratterizzato da un identificativo univoco (`UUID`), 
+una posizione e un’orientazione nello spazio, nonché da una forma geometrica circolare (`ShapeType.Circle`).
 
-Il _companion object_ fornisce un metodo `apply` per la creazione sicura di istanze tramite un sistema di validazione (
-`Validation`), assicurandosi che i parametri forniti siano coerenti e privi di valori non validi (ad esempio NaN o
-infiniti).
+Il robot è dotato di un insieme di attuatori (`Seq[Actuator[Robot]]`) e di una collezione di sensori 
+(`Vector[Sensor[Robot, Environment]]`), che gli permettono di percepire e raccogliere informazioni sull’ambiente. 
+Inoltre, possiede una strategia comportamentale (`Policy`) che definisce la logica decisionale del 
+robot in base ai dati forniti dai sensori.
+
+Nel _companion object_ `Robot` viene inoltre fornita l’implementazione del _given_ `ActionAlg[IO, Robot]`, ovvero 
+l’interprete dell’algebra delle azioni in un contesto di effetto `IO`.
+
+In particolare, l’implementazione del metodo `moveWheels` aggiorna lo stato degli attuatori di tipo 
+`DifferentialWheelMotor`, applicando nuove velocità alle ruote sinistra e destra, e restituendo un nuovo stato del 
+robot incapsulato in `IO`.
+
+Grazie a questa architettura e all’uso del pattern **Tagless Final** (introdotto nella modellazione delle azioni),
+il robot può eseguire azioni in modo astratto e indipendente dal contesto, garantendo modularità ed estensibilità.
+
+:::info note
+Vedere la sezione [Action](./07-action.md) per i dettagli sull’algebra delle azioni e il pattern **Tagless Final**.
+:::
 
 ## Attuatori
 
