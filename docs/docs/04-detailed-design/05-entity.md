@@ -121,24 +121,30 @@ posizionata **all'interno** dell'ambiente.
 
 ## Boundary
 
+L'ultima tipologia di entità statiche sono i **boundary** (`StaticEntity.Boundary`), che rappresentano i confini dell'ambiente di simulazione. Questi elementi sono fondamentali per definire i limiti entro cui le entità possono muoversi e interagire.
+Sono simili agli **ostacoli**, ma con la differenza che hanno larghezza o altezza pari a zero.
+La loro similarità agli ostacoli implica che anche i boundary partecipano alle collisioni e possono influenzare il comportamento delle entità dinamiche.
+Sono infine percepibili dai sensori di prossimità.
+Vengono creati automaticamente durante la fase di validazione dell'ambiente, in modo tale che l'utente non debba preoccuparsi di definirli esplicitamente.
+
 ## Robot
 
 ![Robot](../../static/img/04-detailed-design/robot.png)
 
 Il _case class_ `Robot` estende `DynamicEntity` e rappresenta un’entità autonoma in grado di muoversi e interagire con
-l’ambiente circostante nello spazio bidimensionale. Ogni robot è caratterizzato da un identificativo univoco (`UUID`), 
+l’ambiente circostante nello spazio bidimensionale. Ogni robot è caratterizzato da un identificativo univoco (`UUID`),
 una posizione e un’orientazione nello spazio, nonché da una forma geometrica circolare (`ShapeType.Circle`).
 
-Il robot è dotato di un insieme di attuatori (`Seq[Actuator[Robot]]`) e di una collezione di sensori 
-(`Vector[Sensor[Robot, Environment]]`), che gli permettono di percepire e raccogliere informazioni sull’ambiente. 
-Inoltre, possiede una strategia comportamentale (`Policy`) che definisce la logica decisionale del 
+Il robot è dotato di un insieme di attuatori (`Seq[Actuator[Robot]]`) e di una collezione di sensori
+(`Vector[Sensor[Robot, Environment]]`), che gli permettono di percepire e raccogliere informazioni sull’ambiente.
+Inoltre, possiede una strategia comportamentale (`Policy`) che definisce la logica decisionale del
 robot in base ai dati forniti dai sensori.
 
-Nel _companion object_ `Robot` viene inoltre fornita l’implementazione del _given_ `ActionAlg[IO, Robot]`, ovvero 
+Nel _companion object_ `Robot` viene inoltre fornita l’implementazione del _given_ `ActionAlg[IO, Robot]`, ovvero
 l’interprete dell’algebra delle azioni in un contesto di effetto `IO`.
 
-In particolare, l’implementazione del metodo `moveWheels` aggiorna lo stato degli attuatori di tipo 
-`DifferentialWheelMotor`, applicando nuove velocità alle ruote sinistra e destra, e restituendo un nuovo stato del 
+In particolare, l’implementazione del metodo `moveWheels` aggiorna lo stato degli attuatori di tipo
+`DifferentialWheelMotor`, applicando nuove velocità alle ruote sinistra e destra, e restituendo un nuovo stato del
 robot incapsulato in `IO`.
 
 Grazie a questa architettura e all’uso del pattern **Tagless Final** (introdotto nella modellazione delle azioni),
@@ -198,7 +204,7 @@ rendendo il comportamento dell’attuatore modulare ed estendibile.
 
 I sensori sono componenti che permettono a un'entità dinamica di percepire l'ambiente circostante. Il _trait_
 `Sensor[Entity, Environment]` definisce un'interfaccia generica per i sensori.
-I sensori sono parametrizzati su due tipi:
+I sensori sono parametrizzati su tre tipi:
 
 - `Entity`: il tipo di entità che il sensore può percepire, sottotipo di `DynamicEntity` (ad esempio, `Robot`).
 - `Environment`: il tipo di ambiente in cui il sensore opera, sottotipo di `Environment` (ad esempio, `Environment`
@@ -209,7 +215,7 @@ Inoltre i sensori contengono un campo `offset` che rappresenta la posizione del 
 
 Infine un metodo `sense[F[_]](entity: Entity, env: Environment): F[Data]` che permette di ottenere i dati di rilevamento
 dal sensore.
-Il tipo `F[_]` è un tipo di effetto generico (come `IO`, `Task`, etc.) che permette:
+Il tipo `F[_]` è un tipo di effetto generico (come `IO`, `Id`, `Task`, etc.) che permette:
 
 - Astrazione rispetto al tipo di effetto utilizzato per l'esecuzione.
 - Composizione funzionale con altre operazioni monadiche.
