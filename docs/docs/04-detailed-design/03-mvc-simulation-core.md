@@ -13,10 +13,29 @@ Il trait `State` definisce la struttura dello stato della simulazione, che inclu
 - `simulationTime`: tempo totale previsto per la simulazione (opzionale per consentire simulazioni infinite);
 - `elapsedTime`: tempo già trascorso dall’inizio della simulazione;
 - `dt`: delta time della simulazione, cioè l’intervallo temporale usato per ogni step;
-- `simulationSpeed`: velocità corrente della simulazione (`SimulationSpeed`);
-- `simulationRNG`: generatore di numeri casuali (`RNG`) usato per introdurre elementi stocastici;
-- `simulationStatus`: stato corrente della simulazione (`RUNNING`, `PAUSED`, `STOPPED`, `ELAPSED_TIME`);
-- `environment`: rappresenta l’ambiente della simulazione, contenente le entità validate (`ValidEnvironment`).
+- `simulationSpeed`: velocità corrente della simulazione;
+- `simulationRNG`: generatore di numeri casuali (`RNG`) usato per introdurre elementi stocastici nei comportamenti dei 
+robot. Vedere la sezione [Generatore di numeri casuali](./09-random-number-generator.md) per maggiori dettagli;
+- `simulationStatus`: stato corrente della simulazione;
+- `environment`: rappresenta l’ambiente della simulazione, contenente le entità validate (`ValidEnvironment`). Vedere la sezione [Environment](./04-environment.md) per maggiori dettagli.
+
+#### SimulationSpeed
+
+`SimulationSpeed` è una enum che definisce le possibili velocità della simulazione:
+
+- `SLOW`: velocità ridotta (200 ms per tick);
+- `NORMAL`: velocità standard (100 ms per tick);
+- `FAST`: velocità aumentata (10 ms per tick);
+- `SUPERFAST`: velocità massima (0 ms per tick). Questa modalità viene utilizzata in esecuzione `headless` per far 
+girare la simulazione il più rapidamente possibile.
+
+#### SimulationStatus
+`SimulationStatus` è una enum che rappresenta i possibili stati della simulazione:
+- `RUNNING`: la simulazione è in esecuzione;
+- `PAUSED`: la simulazione è in pausa;
+- `STOPPED`: la simulazione è stata fermata manualmente;
+- `ELAPSED_TIME`: la simulazione ha raggiunto il tempo massimo previsto.
+
 
 ### Logica di aggiornamento dello stato
 
@@ -121,6 +140,31 @@ In questo modo:
 
 Questo consente al `Controller` di continuare il ciclo della simulazione con lo stato corretto, senza occuparsi
 direttamente delle regole di aggiornamento o dei dettagli della business logic.
+
+#### LogicsBundle
+
+Il `LogicsBundle` raccoglie le funzioni che definiscono come lo stato della simulazione viene aggiornato in risposta a
+diversi eventi.
+Ogni funzione prende lo stato corrente e, se necessario, parametri aggiuntivi, restituendo un nuovo stato aggiornato.
+Le funzioni incluse sono:
+
+- `tick`: aggiorna lo stato della simulazione avanzando il tempo trascorso e, se necessario, modificando lo stato in
+  base al tempo massimo raggiunto;
+- `tickSpeed`: modifica la velocità della simulazione;
+- `random`: aggiorna il generatore di numeri casuali nello stato;
+- `pause`: mette la simulazione in pausa aggiornando lo stato;
+- `resume`: riprende la simulazione aggiornando lo stato;
+- `stop`: ferma la simulazione aggiornando lo stato;
+- `robotActions`: gestisce le proposte di azione dei robot (`RobotProposal`) e aggiorna lo stato della simulazione
+  (`SimulationState`) di conseguenza.
+
+  Per ciascuna proposta:
+  - viene applicata l’azione del robot all’ambiente usando un approccio di **ricerca binaria** per
+    trovare la massima durata di movimento sicura, evitando collisioni con altri oggetti o robot;
+  - i movimenti di tutti i robot vengono calcolati in parallelo usando `parTraverse`;
+  - i robot aggiornati sostituiscono quelli originali nell’ambiente simulato, mantenendo la
+    validità dell’ambiente tramite la funzione di `validate`;
+  - se la validazione fallisce, lo stato dell’ambiente non viene modificato.
 
 ### Esecuzione dei comportamenti dei robot
 
