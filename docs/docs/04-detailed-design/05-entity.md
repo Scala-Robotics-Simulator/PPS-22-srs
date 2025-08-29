@@ -165,23 +165,6 @@ Questa logica è incapsulata nel metodo `act(robot: Robot): Validation[Robot]`, 
 robot
 con posizione e orientamento aggiornati.
 
-### Azioni
-
-L’enumerazione `Action` definisce un insieme predefinito di comandi che il robot può eseguire, come:
-
-- `MoveForward`: muove il robot in avanti
-- `MoveBackward`: muove il robot all'indietro
-- `TurnLeft`: ruota il robot verso sinistra
-- `TurnRight`: ruota il robot verso destra
-- `Stop`: arresta il movimento del robot.
-
-Ogni `Action` è caratterizzata da una coppia di velocità da applicare rispettivamente alla ruota sinistra e destra.
-Un’estensione dell’enumerazione consente di applicare direttamente un’azione al robot (`applyTo(robot: Robot): Robot`),
-modificando la configurazione dei `WheelMotor` e aggiornando così lo stato del robot.
-
-L’estensione `move` disponibile su `Robot` permette poi di calcolare l'effetto dell’attuatore aggiornato, producendo il
-movimento vero e proprio del robot nello spazio simulato.
-
 ## Sensori
 
 ![Sensor](../../static/img/04-detailed-design/sensor.png)
