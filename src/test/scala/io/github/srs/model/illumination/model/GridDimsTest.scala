@@ -2,7 +2,7 @@ package io.github.srs.model.illumination.model
 
 import scala.language.postfixOps
 
-import io.github.srs.model.environment.Environment
+import io.github.srs.model.environment.ValidEnvironment.ValidEnvironment
 import io.github.srs.model.environment.dsl.CreationDSL.*
 import io.github.srs.model.illumination.model.{ GridDims, ScaleFactor }
 import org.scalatest.OptionValues.*
@@ -17,7 +17,7 @@ final class GridDimsTest extends AnyFlatSpec with Matchers:
   private object C:
 
     /** Creates an environment with specified width and height, inserting boundaries */
-    def envWithBoundaries(w: Int, h: Int): Environment =
+    def envWithBoundaries(w: Int, h: Int): ValidEnvironment =
       (environment withWidth w withHeight h).validate.toOption.value
 
     val S1: ScaleFactor = ScaleFactor.validate(1).toOption.value

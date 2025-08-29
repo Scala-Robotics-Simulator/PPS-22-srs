@@ -2,14 +2,17 @@ package io.github.srs.model.entity.dynamicentity.dsl
 
 import java.util.UUID
 
+import cats.syntax.all.*
 import io.github.srs.model.entity.dynamicentity.Robot
+import io.github.srs.model.entity.dynamicentity.actuator.dsl.ActuatorDsl.validateActuator
+import io.github.srs.model.entity.dynamicentity.sensor.dsl.SensorDsl.validateSensor
 import io.github.srs.model.entity.dynamicentity.actuator.dsl.DifferentialWheelMotorDsl.{ differentialWheelMotor, ws }
 import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, DifferentialWheelMotor }
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.validation.Validation
-import io.github.srs.model.validation.Validation.{ notInfinite, notNaN, validateCountOfType }
+import io.github.srs.model.validation.Validation.*
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.*
 import io.github.srs.model.entity.dynamicentity.behavior.Policy
 
@@ -26,6 +29,15 @@ import io.github.srs.model.entity.dynamicentity.behavior.Policy
  *   }}}
  */
 object RobotDsl:
+
+  /**
+   * Validates a Robot entity to ensure it meets the domain constraints.
+   * @param r
+   *   the Robot entity to validate.
+   * @return
+   *   [[Right]] if the robot is valid, or [[Left]] with a validation
+   */
+  def validateRobot(r: Robot): Validation[Robot] = r.validate
 
   /** Creates a new Robot with default properties. */
   def robot: Robot = Robot()
@@ -154,10 +166,10 @@ object RobotDsl:
       robot.withActuators(updatedActuators)
 
     def withProximitySensors: Robot =
-      robot.withSensors(stdProximitySensors)
+      robot.withSensors(StdProximitySensors)
 
     def withLightSensors: Robot =
-      robot.withSensors(stdLightSensors)
+      robot.withSensors(StdLightSensors)
 
     infix def withBehavior(behavior: Policy): Robot =
       robot.copy(behavior = behavior)
@@ -174,8 +186,11 @@ object RobotDsl:
         _ <- notInfinite("x", x)
         y <- notNaN("y", robot.position.y)
         _ <- notInfinite("y", y)
+        _ <- bounded("radius", robot.shape.radius, MinRadius, MaxRadius, includeMax = true)
         _ <- notNaN("degrees", robot.orientation.degrees)
         _ <- validateCountOfType[DifferentialWheelMotor]("actuators", robot.actuators, 0, 1)
+        _ <- robot.actuators.traverse_(validateActuator)
+        _ <- robot.sensors.traverse_(validateSensor)
       yield robot
   end extension
 end RobotDsl

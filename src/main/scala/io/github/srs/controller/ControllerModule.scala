@@ -9,14 +9,13 @@ import cats.syntax.all.*
 import io.github.srs.controller.message.RobotProposal
 import io.github.srs.controller.protocol.Event
 import io.github.srs.model.*
-import io.github.srs.model.SimulationConfig.SimulationStatus.{ PAUSED, RUNNING, STOPPED }
-import io.github.srs.model.UpdateLogic.*
+import io.github.srs.model.SimulationConfig.SimulationStatus.*
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.behavior.BehaviorContext
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
 import io.github.srs.model.logic.*
 import io.github.srs.utils.EqualityGivenInstances.given_CanEqual_Event_Event
-import io.github.srs.utils.SimulationDefaults.debugMode
+import io.github.srs.utils.SimulationDefaults.DebugMode
 
 /**
  * Module that defines the controller logic for the Scala Robotics Simulator.
@@ -36,7 +35,7 @@ object ControllerModule:
      * @param initialState
      *   the initial state of the simulation.
      */
-    def start(initialState: S): IO[Unit]
+    def start(initialState: S): IO[S]
 
     /**
      * Runs the simulation loop, processing events from the queue and updating the state.
@@ -48,7 +47,7 @@ object ControllerModule:
      * @return
      *   an [[IO]] task that completes when the simulation loop ends.
      */
-    def simulationLoop(s: S, queue: Queue[IO, Event]): IO[Unit]
+    def simulationLoop(s: S, queue: Queue[IO, Event]): IO[S]
 
   end Controller
 
@@ -99,13 +98,13 @@ object ControllerModule:
          * @return
          *   an [[IO]] task that completes when the controller is started.
          */
-        override def start(initialState: S): IO[Unit] =
+        override def start(initialState: S): IO[S] =
           for
             queueSim <- Queue.unbounded[IO, Event]
             _ <- context.view.init(queueSim)
             _ <- runBehavior(queueSim, initialState)
-            _ <- simulationLoop(initialState, queueSim)
-          yield ()
+            result <- simulationLoop(initialState, queueSim)
+          yield result
 
         /**
          * Runs the simulation loop, processing events from the queue and updating the state.
@@ -116,44 +115,37 @@ object ControllerModule:
          * @return
          *   an [[IO]] task that completes when the simulation loop ends.
          */
-        override def simulationLoop(s: S, queue: Queue[IO, Event]): IO[Unit] =
-          def loop(state: S): IO[Unit] =
+        override def simulationLoop(s: S, queue: Queue[IO, Event]): IO[S] =
+          def loop(state: S): IO[S] =
             for
               startTime <- Clock[IO].realTime.map(_.toMillis)
               _ <- runBehavior(queue, state).whenA(state.simulationStatus == RUNNING)
               events <- queue.tryTakeN(Some(50))
               newState <- handleEvents(state, events)
               _ <- context.view.render(newState)
-              nextState <- nextStep(newState, startTime)
-              endTime <- Clock[IO].realTime.map(_.toMillis)
-              _ <- if debugMode then IO.println(s"Simulation loop took ${endTime - startTime} ms") else IO.unit
-              _ <- if stopCondition(nextState) then IO.unit else loop(nextState)
-            yield ()
+              result <- handleStopCondition(newState) match
+                case Some(io) => io
+                case None =>
+                  for
+                    nextState <- nextStep(newState, startTime)
+                    endTime <- Clock[IO].realTime.map(_.toMillis)
+                    _ <- if DebugMode then IO.println(s"Simulation loop took ${endTime - startTime} ms") else IO.unit
+                    res <- loop(nextState)
+                  yield res
+            yield result
 
           loop(s)
 
-        /**
-         * Checks if the simulation should stop based on the current state.
-         * @param state
-         *   the current state of the simulation.
-         * @return
-         *   a boolean indicating whether the simulation should stop.
-         */
-        private def stopCondition(state: S): Boolean =
-          state.simulationStatus == STOPPED ||
-            elapsedTimeReached(state.simulationTime, state.elapsedTime)
+        end simulationLoop
 
-        /**
-         * Checks if the elapsed time has reached the maximum simulation time.
-         * @param simulationTime
-         *   the maximum simulation time, if defined.
-         * @param elapsedTime
-         *   the elapsed time since the simulation started.
-         * @return
-         *   a boolean indicating whether the elapsed time has reached the maximum simulation time.
-         */
-        private def elapsedTimeReached(simulationTime: Option[FiniteDuration], elapsedTime: FiniteDuration): Boolean =
-          simulationTime.exists(max => elapsedTime >= max)
+        private def handleStopCondition(state: S): Option[IO[S]] =
+          state.simulationStatus match
+            case STOPPED =>
+              Some(context.view.close() *> IO.pure(state))
+            case ELAPSED_TIME =>
+              Some(context.view.timeElapsed(state) *> IO.pure(state))
+            case _ =>
+              None
 
         /**
          * Processes the next step in the simulation based on the current state and start time.
@@ -172,7 +164,7 @@ object ControllerModule:
             case PAUSED =>
               IO.sleep(50.millis).as(state)
 
-            case STOPPED =>
+            case _ =>
               IO.pure(state)
 
         /**
@@ -215,7 +207,7 @@ object ControllerModule:
             adjustedTickSpeed = if timeToNextTick > 0 then timeToNextTick else 0L
             sleepTime = FiniteDuration(adjustedTickSpeed, MILLISECONDS)
             _ <- IO.sleep(sleepTime)
-            tick <- handleEvent(state, Event.Tick(tickSpeed))
+            tick <- handleEvent(state, Event.Tick(state.dt))
           yield tick
 
         /**
@@ -247,13 +239,20 @@ object ControllerModule:
          */
         private def handleEvent(state: S, event: Event): IO[S] =
           event match
-            case Event.Tick(deltaTime) => context.model.tick(state, deltaTime)
-            case Event.TickSpeed(speed) => context.model.tickSpeed(state, speed)
-            case Event.Random(rng) => context.model.random(state, rng)
-            case Event.Pause => context.model.pause(state)
-            case Event.Resume => context.model.resume(state)
-            case Event.Stop => context.model.stop(state)
-            case Event.RobotActionProposals(proposals) => context.model.handleRobotActionsProposals(state, proposals)
+            case Event.Tick(deltaTime) =>
+              context.model.update(state)(using s => bundle.tickLogic.tick(s, deltaTime))
+            case Event.TickSpeed(speed) =>
+              context.model.update(state)(using s => bundle.tickLogic.tickSpeed(s, speed))
+            case Event.Random(rng) =>
+              context.model.update(state)(using s => bundle.randomLogic.random(s, rng))
+            case Event.Pause =>
+              context.model.update(state)(using s => bundle.pauseLogic.pause(s))
+            case Event.Resume =>
+              context.model.update(state)(using s => bundle.resumeLogic.resume(s))
+            case Event.Stop =>
+              context.model.update(state)(using s => bundle.stopLogic.stop(s))
+            case Event.RobotActionProposals(proposals) =>
+              context.model.update(state)(using s => bundle.robotActionsLogic.handleRobotActionsProposals(s, proposals))
 
       end ControllerImpl
 

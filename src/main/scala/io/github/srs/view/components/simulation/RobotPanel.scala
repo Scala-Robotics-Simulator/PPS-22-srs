@@ -3,6 +3,7 @@ package io.github.srs.view.components.simulation
 import java.awt.{ BorderLayout, Dimension }
 import java.util.concurrent.atomic.AtomicReference
 import javax.swing.*
+import javax.swing.text.DefaultCaret
 
 import io.github.srs.utils.SimulationDefaults.UI
 import io.github.srs.view.components.UIUtils
@@ -17,16 +18,18 @@ class RobotPanel extends JPanel(new BorderLayout()):
   private val infoArea = new JTextArea(8, 25)
   private val currentIds = new AtomicReference[List[String]](Nil)
 
-  initComponents()
-  setupLayout()
+  initLayout()
 
   /**
    * Initializes the visual components with their properties.
    */
-  private def initComponents(): Unit =
+  private def initLayout(): Unit =
     robotList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION)
 
     infoArea.setEditable(false)
+    val infoAreaCaret = infoArea.getCaret()
+    infoAreaCaret match
+      case c: DefaultCaret => c.setUpdatePolicy(DefaultCaret.NEVER_UPDATE)
     infoArea.setFont(new java.awt.Font("Monospaced", java.awt.Font.PLAIN, 11))
     infoArea.setBackground(UI.Colors.backgroundLight)
     infoArea.setBorder(
@@ -36,17 +39,13 @@ class RobotPanel extends JPanel(new BorderLayout()):
       ),
     )
 
-  /**
-   * Sets up the panel layout with info area at top and robot list below.
-   */
-  private def setupLayout(): Unit =
     setBackground(UI.Colors.backgroundMedium)
     setBorder(UIUtils.paddedBorder())
 
     val infoPanel = new JPanel(new BorderLayout())
     infoPanel.setBorder(UIUtils.titledBorder("Robot Information"))
     infoPanel.add(new JScrollPane(infoArea), BorderLayout.CENTER)
-    infoPanel.setPreferredSize(new Dimension(250, 150))
+    infoPanel.setPreferredSize(new Dimension(250, 300))
 
     val listScrollPane = new JScrollPane(robotList)
     listScrollPane.setBorder(UIUtils.titledBorder("Active Robots"))
@@ -54,6 +53,8 @@ class RobotPanel extends JPanel(new BorderLayout()):
 
     add(infoPanel, BorderLayout.NORTH)
     add(listScrollPane, BorderLayout.CENTER)
+
+  end initLayout
 
   /**
    * Updates the list of robot IDs, preserving selection when possible.

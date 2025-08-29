@@ -54,6 +54,7 @@ lazy val root = project
       "-feature",
       "-language:strictEquality",
       "-language:implicitConversions",
+      "-deprecation",
     ),
     coverageEnabled := true,
     semanticdbEnabled := true,
@@ -87,7 +88,15 @@ lazy val root = project
     libraryDependencies ++= scalaTestBundle,
     libraryDependencies ++= catsBundle,
     libraryDependencies ++= yamlBundle,
+    libraryDependencies += parallelCollections,
     libraryDependencies += scalaTestJUnit5,
     libraryDependencies += squidLib,
     libraryDependencies += fs2Io,
+    libraryDependencies += scopt,
+  )
+
+Compile / packageBin / packageOptions +=
+  Package.ManifestAttributes(
+    "Implementation-Title" -> name.value,
+    "Implementation-Version" -> version.value
   )

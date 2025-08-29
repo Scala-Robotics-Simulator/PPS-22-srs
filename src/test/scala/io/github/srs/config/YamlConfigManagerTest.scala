@@ -18,7 +18,7 @@ import io.github.srs.utils.SimulationDefaults
 import org.scalatest.OptionValues.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.{ stdLightSensors, stdProximitySensors }
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.{ StdLightSensors, StdProximitySensors }
 import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior
 import io.github.srs.model.entity.dynamicentity.behavior.Policy
 import io.github.srs.model.environment.Environment
@@ -46,14 +46,14 @@ class YamlConfigManagerTest extends AnyFlatSpec with Matchers:
     val _ = config.environment.entities.exists(e =>
       e.position == Point2D(3, 1) && (e match
         case Robot(_, _, _, _, _, sensors, behavior) =>
-          sensors == stdProximitySensors ++ stdLightSensors &&
+          sensors == StdProximitySensors ++ StdLightSensors &&
           behavior == Policy.AlwaysForward),
     ) should be(true)
 
   "YamlConfigManager" should "save the configuration correctly" in:
-    val obstacleId = SimulationDefaults.StaticEntity.Obstacle.defaultId
-    val lightId = SimulationDefaults.StaticEntity.Light.defaultId
-    val robotId = SimulationDefaults.DynamicEntity.Robot.defaultId
+    val obstacleId = SimulationDefaults.StaticEntity.Obstacle.DefaultId
+    val lightId = SimulationDefaults.StaticEntity.Light.DefaultId
+    val robotId = SimulationDefaults.DynamicEntity.Robot.DefaultId
     val orientation = Orientation(0.0)
     val l =
       light withId lightId at (
@@ -63,7 +63,7 @@ class YamlConfigManagerTest extends AnyFlatSpec with Matchers:
     val o = obstacle withId obstacleId at (2.0, 2.0) withWidth 1.0 withHeight 1.0 withOrientation orientation
     val r = robot withId robotId at (4.0, 4.0) withOrientation orientation withSpeed 1.0 withShape Circle(
       0.5,
-    ) withSpeed 2.0 withSensors (stdProximitySensors ++ stdLightSensors)
+    ) withSpeed 2.0 withSensors (StdProximitySensors ++ StdLightSensors)
 
     val env = environment containing l and o and r
 

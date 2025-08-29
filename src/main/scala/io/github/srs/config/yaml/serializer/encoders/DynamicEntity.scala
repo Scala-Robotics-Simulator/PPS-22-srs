@@ -7,8 +7,8 @@ import io.circe.{ Encoder, Json }
 import io.github.srs.config.yaml.serializer.encoders.given
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor
-import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.stdProximitySensors
-import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.stdLightSensors
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.StdProximitySensors
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.StdLightSensors
 import io.github.srs.utils.SimulationDefaults.Fields.Entity as EntityFields
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.DynamicEntity.Robot as RobotFields
 
@@ -34,26 +34,26 @@ object DynamicEntity:
         )
       case _ => ()
 
-    val withProximitySensors = stdProximitySensors.forall(robot.sensors.contains)
-    val withLightSensors = stdLightSensors.forall(robot.sensors.contains)
+    val withProximitySensors = StdProximitySensors.forall(robot.sensors.contains)
+    val withLightSensors = StdLightSensors.forall(robot.sensors.contains)
 
-    if robot.sensors.diff(stdProximitySensors ++ stdLightSensors).sizeIs > 0 then
+    if robot.sensors.diff(StdProximitySensors ++ StdLightSensors).sizeIs > 0 then
       println(
         "WARNING: encoding robot with custom sensors, those will be lost during the serialization",
       )
 
     Json
       .obj(
-        EntityFields.id -> robot.id.asJson,
-        EntityFields.position -> robot.position.asJson,
-        RobotFields.radius -> robot.shape.radius.asJson,
-        EntityFields.orientation -> robot.orientation.degrees.asJson,
-        RobotFields.withProximitySensors -> withProximitySensors.asJson,
-        RobotFields.withLightSensors -> withLightSensors.asJson,
-        RobotFields.behavior -> robot.behavior.toString().asJson,
+        EntityFields.Id -> robot.id.asJson,
+        EntityFields.Position -> robot.position.asJson,
+        RobotFields.Radius -> robot.shape.radius.asJson,
+        EntityFields.Orientation -> robot.orientation.degrees.asJson,
+        RobotFields.WithProximitySensors -> withProximitySensors.asJson,
+        RobotFields.WithLightSensors -> withLightSensors.asJson,
+        RobotFields.Behavior -> robot.behavior.toString().asJson,
       )
       .deepMerge(
-        speeds.map(RobotFields.speed -> _._1.asJson).toList.toMap.asJson,
+        speeds.map(RobotFields.Speed -> _._1.asJson).toList.toMap.asJson,
       )
 
 end DynamicEntity

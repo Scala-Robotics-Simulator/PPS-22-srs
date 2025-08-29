@@ -1,11 +1,14 @@
 package io.github.srs.model.environment
 
+import cats.effect.IO
 import io.github.srs.model.entity.Entity
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.utils.SimulationDefaults.Environment.*
 import io.github.srs.model.illumination.model.LightField
-import io.github.srs.utils.SimulationDefaults
 import cats.effect.unsafe.implicits.global
+import io.github.srs.model.entity.staticentity.StaticEntity.Light
+import io.github.srs.model.illumination.LightMap
+import io.github.srs.utils.SimulationDefaults.LightMapConfigs
 
 /**
  * Represents the environment in which entities exist.
@@ -14,6 +17,7 @@ import cats.effect.unsafe.implicits.global
  * entities within it.
  */
 trait EnvironmentParameters:
+
   /**
    * The width of the environment.
    *
@@ -52,13 +56,16 @@ end EnvironmentParameters
  * Represents an environment with a specific width, height, and a set of entities.
  */
 final case class Environment(
-    override val width: Int = defaultWidth,
-    override val height: Int = defaultHeight,
-    override val entities: Set[Entity] = defaultEntities,
+    override val width: Int = DefaultWidth,
+    override val height: Int = DefaultHeight,
+    override val entities: Set[Entity] = DefaultEntities,
+    private[environment] val _lightMap: Option[LightMap[IO]] = None,
 ) extends EnvironmentParameters:
 
+  private val lightMap: LightMap[IO] = _lightMap.getOrElse(LightMapConfigs.BaseLightMap)
+
   lazy val lightField: LightField =
-    SimulationDefaults.lightMap.computeField(this, includeDynamic = true).unsafeRunSync()
+    lightMap.computeField(ValidEnvironment.from(this), includeDynamic = true).unsafeRunSync()
 
 object ValidEnvironment:
   opaque type ValidEnvironment <: EnvironmentParameters = Environment
@@ -78,3 +85,10 @@ extension (env: Environment)
    *   A set of robots
    */
   def robots: List[Robot] = env.entities.collect { case r: Robot => r }.toList
+
+  /**
+   * A list of light entities in the environment.
+   * @return
+   *   A set of lights
+   */
+  def lights: List[Light] = env.entities.collect { case l: Light => l }.toList

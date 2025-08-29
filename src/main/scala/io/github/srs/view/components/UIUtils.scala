@@ -1,8 +1,9 @@
 package io.github.srs.view.components
 
-import java.awt.{ Dimension, Toolkit }
+import java.awt.{ Dimension, Font, Toolkit }
 import javax.swing.BorderFactory
 import javax.swing.border.TitledBorder
+import java.util.Locale
 
 import io.github.srs.utils.SimulationDefaults.{ Frame, UI }
 
@@ -11,23 +12,30 @@ import io.github.srs.utils.SimulationDefaults.{ Frame, UI }
  */
 object UIUtils:
 
-  def titledBorder(title: String): javax.swing.border.Border =
-    BorderFactory.createCompoundBorder(
-      BorderFactory.createTitledBorder(
-        BorderFactory.createLineBorder(UI.Colors.border),
-        title,
-        TitledBorder.LEFT,
-        TitledBorder.TOP,
-      ),
-      BorderFactory.createEmptyBorder(
-        UI.Spacing.innerPadding,
-        UI.Spacing.innerPadding,
-        UI.Spacing.innerPadding,
-        UI.Spacing.innerPadding,
-      ),
+  def titledBorder(title: String, spacing: Int = UI.Spacing.InnerPadding): javax.swing.border.Border =
+    val titledBorder = BorderFactory.createTitledBorder(
+      BorderFactory.createLineBorder(UI.Colors.border),
+      title.toUpperCase(Locale.getDefault()),
+      TitledBorder.LEFT,
+      TitledBorder.TOP,
     )
 
-  def paddedBorder(padding: Int = UI.Spacing.standardPadding): javax.swing.border.Border =
+    val currentFont = titledBorder.getTitleFont
+    val newFont = new Font(
+      currentFont.getFamily,
+      currentFont.getStyle,
+      UI.Fonts.TitleSize,
+    )
+    titledBorder.setTitleFont(newFont)
+
+    BorderFactory.createCompoundBorder(
+      titledBorder,
+      BorderFactory.createEmptyBorder(spacing, spacing, spacing, spacing),
+    )
+
+  end titledBorder
+
+  def paddedBorder(padding: Int = UI.Spacing.StandardPadding): javax.swing.border.Border =
     BorderFactory.createEmptyBorder(padding, padding, padding, padding)
 
 end UIUtils
@@ -48,5 +56,5 @@ extension (frame: javax.swing.JFrame)
    * Applies default and preferred size to the frame.
    */
   def applyDefaultAndPreferSize(): Unit =
-    frame.setMinimumSize(new Dimension(Frame.minWidth, Frame.minHeight))
-    frame.setPreferredSize(new Dimension(Frame.prefWidth, Frame.prefHeight))
+    frame.setMinimumSize(new Dimension(Frame.MinWidth, Frame.MinHeight))
+    frame.setPreferredSize(new Dimension(Frame.PrefWidth, Frame.PrefHeight))

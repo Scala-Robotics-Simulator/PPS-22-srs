@@ -36,6 +36,24 @@ object ViewModule:
      */
     def render(state: S): IO[Unit]
 
+    /**
+     * Closes the view and releases any resources.
+     * @return
+     *   an [[IO]] task that completes when the view is closed.
+     */
+    def close(): IO[Unit]
+
+    /**
+     * Handles the event when a certain amount of time has elapsed in the simulation.
+     * @param state
+     *   the resulting state after time has elapsed.
+     * @return
+     *   an [[IO]] task that completes when the time elapsed event is handled.
+     */
+    def timeElapsed(state: S): IO[Unit]
+
+  end View
+
   /**
    * Provider trait that defines the interface for providing a view.
    * @tparam S
@@ -59,32 +77,23 @@ object ViewModule:
   trait Component[S <: ModelModule.State]:
     context: Requirements[S] =>
 
+    /**
+     * Factory method to create a new instance of the view.
+     */
     object View:
       /**
-       * Creates a view instance.
-       *
+       * Creates a new instance of the view.
        * @return
-       *   a [[View]] instance.
+       *   the newly created view instance.
        */
-      def apply(): View[S] = new ViewImpl
+      def apply(): View[S] = makeView()
 
-      /**
-       * Private view implementation that uses a simple GUI.
-       */
-      private class ViewImpl extends View[S]:
-        private val gui = SimulationView[S]()
-
-        /**
-         * @inheritdoc
-         */
-        override def init(queue: Queue[IO, Event]): IO[Unit] = gui.init(queue)
-
-        /**
-         * @inheritdoc
-         */
-        override def render(state: S): IO[Unit] = gui.render(state)
-
-    end View
+    /**
+     * Creates a new instance of the view.
+     * @return
+     *   the newly created view instance.
+     */
+    protected def makeView(): View[S]
 
   end Component
 

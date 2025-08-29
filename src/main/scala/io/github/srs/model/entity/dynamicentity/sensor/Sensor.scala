@@ -1,16 +1,13 @@
 package io.github.srs.model.entity.dynamicentity.sensor
 
+import cats.Monad
 import cats.syntax.all.*
-import io.github.srs.model.PositiveDouble
 import io.github.srs.model.entity.dynamicentity.{ DynamicEntity, Robot }
-import io.github.srs.model.entity.{ Orientation, Point2D }
+import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.environment.Environment
-import io.github.srs.model.validation.Validation
+import io.github.srs.model.illumination.model.ScaleFactor
 import io.github.srs.utils.Ray.intersectRay
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Sensor.ProximitySensor as ProximitySensorDefaults
-import io.github.srs.model.illumination.model.ScaleFactor
-import cats.effect.kernel.Sync
-import io.github.srs.model.entity.ShapeType
 
 /**
  * Represents the range of a sensor.
@@ -19,6 +16,7 @@ type Range = Double
 
 /**
  * Represents a sensor that can sense the environment for a dynamic entity.
+ *
  * @tparam Entity
  *   the type of dynamic entity that the sensor can act upon.
  * @tparam Env
@@ -32,6 +30,7 @@ trait Sensor[-Entity <: DynamicEntity, -Env <: Environment]:
 
   /**
    * The offset orientation of the sensor relative to the entity's orientation.
+   *
    * @return
    *   the orientation offset of the sensor.
    */
@@ -39,6 +38,7 @@ trait Sensor[-Entity <: DynamicEntity, -Env <: Environment]:
 
   /**
    * Senses the environment for the given entity and returns the data collected by the sensor.
+   *
    * @param entity
    *   the dynamic entity that the sensor is attached to.
    * @param env
@@ -48,11 +48,11 @@ trait Sensor[-Entity <: DynamicEntity, -Env <: Environment]:
    * @return
    *   a monadic effect containing the data sensed by the sensor.
    */
-  def sense[F[_]: Sync](entity: Entity, env: Env): F[Data]
+  def sense[F[_]: Monad](entity: Entity, env: Env): F[Data]
 
   private[sensor] def direction(entity: Entity): Point2D =
     val globalOrientation = entity.orientation.toRadians + offset.toRadians
-    (math.cos(globalOrientation), -math.sin(globalOrientation))
+    (math.cos(globalOrientation), math.sin(globalOrientation))
 
   private[sensor] def origin(entity: Entity): Point2D =
     import Point2D.*
@@ -65,6 +65,7 @@ end Sensor
 
 /**
  * Represents a reading from a sensor. This case class encapsulates the sensor and the value it has sensed.
+ *
  * @param sensor
  *   the sensor that has taken the reading.
  * @param value
@@ -83,13 +84,72 @@ final case class SensorReading[S <: Sensor[?, ?], A](sensor: S, value: A)
 type SensorReadings = Vector[SensorReading[? <: Sensor[?, ?], ?]]
 
 /**
+ * A collection of proximity sensor readings. This type is a specialized version of [[SensorReadings]], specifically for
+ * proximity sensors. It is a vector of [[SensorReading]] instances where the sensor is a [[ProximitySensor]] and the
+ * data is of type `Double`.
+ */
+type ProximityReadings = Vector[SensorReading[ProximitySensor[?, ?], ProximitySensor[?, ?]#Data]]
+
+/**
+ * A collection of light sensor readings. This type is a specialized version of [[SensorReadings]], specifically for
+ * light sensors. It is a vector of [[SensorReading]] instances where the sensor is a [[LightSensor]] and the data is of
+ * type `Double`.
+ */
+type LightReadings = Vector[SensorReading[LightSensor[?, ?], LightSensor[?, ?]#Data]]
+
+object SensorReadings:
+
+  extension (readings: SensorReadings)
+
+    /**
+     * Pretty prints the sensor readings in a human-readable format. Each reading is formatted based on the type of
+     * sensor
+     *
+     * @return
+     *   a vector of strings representing the pretty-printed sensor readings.
+     */
+    def prettyPrint: Vector[String] =
+      readings
+        .map(r =>
+          r.sensor match
+            case ProximitySensor(offset, range) =>
+              s"Proximity (offset: ${offset.degrees}°, range: $range m) -> ${r.value}"
+            case LightSensor(offset) => s"Light (offset: ${offset.degrees}°) -> ${r.value}"
+            case other => s"${other.getClass.getSimpleName} -> ${r.value}",
+        )
+
+    /**
+     * Filters the sensor readings to include only those from proximity sensors.
+     *
+     * @return
+     *   a vector of sensor readings from proximity sensors.
+     */
+    def proximityReadings: ProximityReadings =
+      readings.collect { case _ @SensorReading(s: ProximitySensor[?, ?], v: Double) =>
+        SensorReading(s, v)
+      }
+
+    /**
+     * Filters the sensor readings to include only those from light sensors.
+     *
+     * @return
+     *   a vector of sensor readings from light sensors.
+     */
+    def lightReadings: LightReadings =
+      readings.collect { case _ @SensorReading(s: LightSensor[?, ?], v: Double) =>
+        SensorReading(s, v)
+      }
+  end extension
+
+end SensorReadings
+
+/**
  * A proximity sensor that can sense the distance to other entities in the environment. It calculates the distance to
  * the nearest entity within its range and returns a normalized value. The value is normalized to a range between 0.0
  * (closest) and 1.0 (farthest).
+ *
  * @param offset
  *   the offset orientation of the sensor relative to the entity's orientation.
- * @param distance
- *   the distance from the center of the entity to the sensor.
  * @param range
  *   the range of the sensor, which defines how far it can sense.
  * @tparam Entity
@@ -98,8 +158,8 @@ type SensorReadings = Vector[SensorReading[? <: Sensor[?, ?], ?]]
  *   the type of environment in which the sensor operates.
  */
 final case class ProximitySensor[Entity <: DynamicEntity, Env <: Environment](
-    override val offset: Orientation = Orientation(ProximitySensorDefaults.defaultOffset),
-    val range: Range = ProximitySensorDefaults.defaultRange,
+    override val offset: Orientation = Orientation(ProximitySensorDefaults.DefaultOffset),
+    range: Range = ProximitySensorDefaults.DefaultRange,
 ) extends Sensor[Entity, Env]:
 
   override type Data = Double
@@ -108,8 +168,8 @@ final case class ProximitySensor[Entity <: DynamicEntity, Env <: Environment](
     import Point2D.*
     origin(entity) + direction(entity) * range
 
-  override def sense[F[_]: Sync](entity: Entity, env: Env): F[Data] =
-    Sync[F].pure:
+  override def sense[F[_]: Monad](entity: Entity, env: Env): F[Data] =
+    Monad[F].pure:
       val o = origin(entity)
       val end = rayEnd(entity)
 
@@ -124,19 +184,16 @@ end ProximitySensor
 
 /**
  * A light sensor that senses the light intensity in the environment.
+ *
  * @param offset
  *   the offset orientation of the sensor relative to the entity's orientation.
- * @param distance
- *   the distance from the center of the entity to the sensor.
- * @param range
- *   the range of the sensor, which defines how far it can sense.
  * @tparam Entity
  *   the type of dynamic entity that the sensor can act upon.
  * @tparam Env
  *   the type of environment in which the sensor operates.
  */
 final case class LightSensor[Entity <: DynamicEntity, Env <: Environment](
-    offset: Orientation = Orientation(ProximitySensorDefaults.defaultOffset),
+    offset: Orientation = Orientation(ProximitySensorDefaults.DefaultOffset),
 ) extends Sensor[Entity, Env]:
 
   override type Data = Double
@@ -144,6 +201,7 @@ final case class LightSensor[Entity <: DynamicEntity, Env <: Environment](
   /**
    * Senses the light intensity at the position of the sensor in the environment. It uses a cached light map to compute
    * the field of light and samples it at the sensor's position.
+   *
    * @param entity
    *   the dynamic entity that the sensor is attached to.
    * @param env
@@ -151,34 +209,25 @@ final case class LightSensor[Entity <: DynamicEntity, Env <: Environment](
    * @return
    *   a monadic effect containing the light intensity sensed by the sensor.
    */
-  override def sense[F[_]: Sync](entity: Entity, env: Env): F[Data] =
-    Sync[F].pure:
+  override def sense[F[_]: Monad](entity: Entity, env: Env): F[Data] =
+    Monad[F].pure:
       val o = origin(entity)
-      env.lightField.sampleAtWorld(o)(using ScaleFactor.default)
+      env.lightField.illuminationAt(o)(using ScaleFactor.default)
 
 end LightSensor
 
 object Sensor:
 
-  extension [E <: DynamicEntity, Env <: Environment](s: ProximitySensor[E, Env])
-
-    /**
-     * Validates the properties of a sensor.
-     */
-    def validate: Validation[ProximitySensor[E, Env]] =
-      for _ <- PositiveDouble(s.range).validate
-      yield s
-
   extension (r: Robot)
 
     /**
      * Senses all sensors of the robot in the given environment.
+     *
      * @param env
      *   the environment in which to sense.
      * @return
      *   a vector of sensor readings.
      */
-    def senseAll[F[_]: Sync](env: Environment): F[SensorReadings] =
+    def senseAll[F[_]: Monad](env: Environment): F[SensorReadings] =
       r.sensors.traverse: sensor =>
         sensor.sense(r, env).map(reading => SensorReading(sensor, reading))
-end Sensor

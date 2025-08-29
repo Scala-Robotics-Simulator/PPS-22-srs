@@ -17,10 +17,10 @@ class ControlsPanel extends JPanel:
   import UI.{ Colors, Dimensions, Icons }
 
   /** Button for starting and stopping the simulation */
-  val startStopButton: JButton = createActionButton("Start", Icons.play)
+  val startStopButton: JButton = createActionButton("Start", Icons.Play)
 
   /** Button for pausing and resuming the simulation */
-  val pauseResumeButton: JButton = createActionButton("Pause", Icons.pause)
+  val pauseResumeButton: JButton = createActionButton("Pause", Icons.Pause)
 
   private val (slowButton, normalButton, fastButton) = createSpeedControls()
 
@@ -47,12 +47,12 @@ class ControlsPanel extends JPanel:
    */
   def updateButtonText(isRunning: Boolean, isPaused: Boolean): Unit =
     startStopButton.setText(
-      if isRunning then s"${Icons.stop} Stop"
-      else s"${Icons.play} Start",
+      if isRunning then s"${Icons.Stop} Stop"
+      else s"${Icons.Play} Start",
     )
     pauseResumeButton.setText(
-      if isPaused then s"${Icons.play} Resume"
-      else s"${Icons.pause} Pause",
+      if isPaused then s"${Icons.Play} Resume"
+      else s"${Icons.Pause} Pause",
     )
 
   /**
@@ -148,7 +148,7 @@ class ControlsPanel extends JPanel:
     button.setFocusPainted(false)
     button.setBorder(new LineBorder(Color.GRAY, 1, true))
     button.setBackground(Color.WHITE)
-    button.setPreferredSize(new Dimension(Dimensions.buttonWidth, Dimensions.buttonHeight))
+    button.setPreferredSize(new Dimension(Dimensions.ButtonWidth, Dimensions.ButtonHeight))
     button.setMargin(new Insets(5, 10, 5, 10))
     button.setOpaque(true)
     button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR))

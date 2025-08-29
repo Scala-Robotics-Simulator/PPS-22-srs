@@ -1,6 +1,7 @@
 package io.github.srs
 
 import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
+import scala.language.postfixOps
 
 import cats.effect.IO
 import io.github.srs.config.SimulationConfig
@@ -12,24 +13,47 @@ import io.github.srs.model.environment.ValidEnvironment
 import io.github.srs.model.logic.simulationStateLogicsBundle
 import io.github.srs.model.{ ModelModule, SimulationState }
 import io.github.srs.utils.random.SimpleRNG
-import io.github.srs.view.ViewModule
 import io.github.srs.view.ViewModule.View
+import io.github.srs.view.{ CLIComponent, GUIComponent, ViewModule }
 
 /**
- * Launcher object that initializes the simulation.
+ * Base trait for launching the Scala Robotics Simulator application.
+ *
+ * It sets up the Model-View-Controller (MVC) architecture and provides a method to run the simulation.
+ *
+ * The specific view implementation (GUI or CLI) is provided by the extending objects.
  */
-object Launcher
+trait BaseLauncher
     extends ModelModule.Interface[SimulationState]
-    with ViewModule.Interface[SimulationState]
-    with ControllerModule.Interface[SimulationState]:
+    with ControllerModule.Interface[SimulationState]
+    with ViewModule.Interface[SimulationState]:
 
   val model: Model[SimulationState] = Model()
-  val view: View[SimulationState] = View()
   val controller: Controller[SimulationState] = Controller()
+  val view: View[SimulationState]
 
+  /**
+   * Runs the MVC components with the given initial simulation state.
+   * @param state
+   *   the initial state of the simulation.
+   * @return
+   *   an IO effect that runs the simulation.
+   */
   def runMVC(state: SimulationState): IO[Unit] =
     for _ <- controller.start(state)
     yield ()
+
+/**
+ * Launcher object for the GUI version of the Scala Robotics Simulator.
+ */
+object GUILauncher extends BaseLauncher with GUIComponent[SimulationState]:
+  override val view: View[SimulationState] = View()
+
+/**
+ * Launcher object for the CLI version of the Scala Robotics Simulator.
+ */
+object CLILauncher extends BaseLauncher with CLIComponent[SimulationState]:
+  override val view: View[SimulationState] = View()
 
 /**
  * Creates the initial state of the simulation based on the provided configuration.
@@ -39,11 +63,14 @@ object Launcher
  * @return
  *   the initial state of the simulation
  */
-def mkInitialState(cfg: SimulationConfig[ValidEnvironment]): SimulationState =
+def mkInitialState(cfg: SimulationConfig[ValidEnvironment], headless: Boolean): SimulationState =
+  val speed = if headless then SimulationSpeed.SUPERFAST else SimulationSpeed.NORMAL
+  val status = if headless then SimulationStatus.RUNNING else SimulationStatus.PAUSED
+  val rng = SimpleRNG(cfg.simulation.seed.getOrElse(42))
   SimulationState(
     simulationTime = cfg.simulation.duration.map(FiniteDuration(_, MILLISECONDS)),
-    simulationSpeed = SimulationSpeed.NORMAL,
-    simulationRNG = SimpleRNG(cfg.simulation.seed.getOrElse(42)),
-    simulationStatus = SimulationStatus.PAUSED,
+    simulationSpeed = speed,
+    simulationRNG = rng,
+    simulationStatus = status,
     environment = cfg.environment,
   )

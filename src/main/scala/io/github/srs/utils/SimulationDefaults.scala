@@ -19,6 +19,34 @@ import io.github.srs.model.illumination.model.ScaleFactor
 
 object SimulationDefaults:
 
+  object Illumination:
+
+    val GridThreshold = 10_000
+    val LightThreshold = 2
+
+    object Occlusion:
+      val FullRotation: Double = 90.0
+      val AlmostZero: Double = 1e-6
+
+  object Behaviors:
+
+    object ObstacleAvoidance:
+      val CruiseSpeed: Double = 0.35
+      val WarnSpeed: Double = 0.15
+      val WarnTurnSpeed: Double = 0.55
+      val BackBoost: Double = 0.20
+      val SafeDist: Double = 0.5
+      val CriticalDist: Double = 0.35
+
+    object RandomWalk:
+      val MinForwardFactor: Double = 0.35
+      val MaxForwardExtra: Double = 0.35
+      val MinTurnOfBase: Double = 0.35
+      val MaxTurnOfBase: Double = 1.15
+      val TurnExponent: Double = 1.2
+      val PivotBoostProb: Double = 0.20
+      val PivotBoostAbs: Double = 0.15
+
   object UI:
 
     object SimulationViewConstants:
@@ -50,134 +78,203 @@ object SimulationDefaults:
       def lightEdge: Color = rgba(255, 140, 0, 80)
       def buttonHover: Color = rgb(230, 230, 230)
       def buttonPressed: Color = rgb(220, 235, 250)
+      def timeDisplay: Color = rgb(50, 50, 50)
 
     end Colors
 
     object Fonts:
-      val family = "Arial"
-      val titleSize = 12
+      val FontSize = 12
+      val TitleSize = 12
 
     object Spacing:
-      val standardPadding = 10
-      val innerPadding = 5
-      val componentGap = 10
+      val StandardPadding = 10
+      val InnerPadding = 5
+      val ComponentGap = 10
 
     object Dimensions:
-      val buttonWidth = 150
-      val buttonHeight = 30
-      val robotListWidth = 250
-      val robotListHeight = 300
-      val infoAreaRows = 6
-      val infoAreaColumns = 25
+      val ButtonWidth = 150
+      val ButtonHeight = 30
+      val RobotListWidth = 250
+      val RobotListHeight = 300
+      val InfoAreaRows = 6
+      val InfoAreaColumns = 25
 
     object Strokes:
-      val obstacleStroke = 1.5f
-      val robotShadowStroke = 3f
+      val ObstacleStroke = 1.5f
+      val RobotShadowStroke = 3f
 
     object Icons:
-      val play = "\u25B6"
-      val stop = "\u23F9"
-      val pause = "\u23F8"
+      val Play = "\u25B6"
+      val Stop = "\u23F9"
+      val Pause = "\u23F8"
   end UI
 
-  val duration: Option[Long] = None
-  val seed: Option[Long] = None
-  val debugMode = true
-  val binarySearchDurationThreshold: FiniteDuration = 1.microseconds
-  val lightMap: LightMap[IO] = LightMap.create[IO](SquidLibFovEngine, ScaleFactor.default).unsafeRunSync()
+  val Duration: Option[Long] = None
+  val Seed: Option[Long] = None
+  val DebugMode = true
+  val BinarySearchDurationThreshold: FiniteDuration = 1.microseconds
+
+  /**
+   * Alternative light map configurations for different use cases
+   */
+  object LightMapConfigs:
+
+    /**
+     * Default light map with caching enabled Uses scale factor 10 for a good balance of performance and precision
+     */
+    lazy val BaseLightMap: LightMap[IO] =
+      LightMap
+        .create[IO](ScaleFactor.default, SquidLibFovEngine)
+        .unsafeRunSync()
+
+    /**
+     * High-precision light map for detailed rendering Uses scale factor 100 for maximum precision.
+     *
+     * @return
+     *   A [[LightMap]] configured for high precision, or the default light map if the scale factor is invalid.
+     */
+    def HPLightMap: LightMap[IO] =
+      ScaleFactor
+        .validate(80)
+        .map { scale =>
+          LightMap
+            .create[IO](scale, SquidLibFovEngine)
+            .unsafeRunSync()
+        }
+        .getOrElse(BaseLightMap)
+
+    /**
+     * Fast light map for real-time simulation Uses scale factor 5 for maximum performance.
+     *
+     * @return
+     *   A [[LightMap]] configured for fast computation, or the default light map if the scale factor is invalid.
+     */
+    def fastLightMap: LightMap[IO] =
+      ScaleFactor
+        .validate(10)
+        .map { scale =>
+          LightMap
+            .create[IO](scale, SquidLibFovEngine)
+            .unsafeRunSync()
+        }
+        .getOrElse(BaseLightMap)
+
+    /**
+     * Custom light map with specific scale factor Curried for better composition.
+     *
+     * @param scaleFactor
+     *   The desired scale factor (cells per meter).
+     * @return
+     *   A [[LightMap]] configured with the specified scale factor, or the default light map if the scale factor is
+     *   invalid.
+     */
+    def withScale(scaleFactor: Int): LightMap[IO] =
+      ScaleFactor
+        .validate(scaleFactor)
+        .map { scale =>
+          LightMap
+            .create[IO](scale, SquidLibFovEngine)
+            .unsafeRunSync()
+        }
+        .getOrElse(BaseLightMap)
+
+  end LightMapConfigs
 
   object SimulationConfig:
-    val maxCount = 10_000
+    val MaxCount = 10_000
 
   object Environment:
-    val defaultWidth: Int = 10
-    val minWidth: Int = 1
-    val maxWidth: Int = 500
+    val DefaultWidth: Int = 10
+    val MinWidth: Int = 1
+    val MaxWidth: Int = 500
 
-    val defaultHeight: Int = 10
-    val minHeight: Int = 1
-    val maxHeight: Int = 500
+    val DefaultHeight: Int = 10
+    val MinHeight: Int = 1
+    val MaxHeight: Int = 500
 
-    val defaultEntities: Set[Entity] = Set.empty
-    val maxEntities: Int = 200
+    val DefaultEntities: Set[Entity] = Set.empty
+    val MaxEntities: Int = 200
 
   object StaticEntity:
 
     object Obstacle:
-      val defaultId: UUID = UUID.fromString("00000000-0000-0000-0000-000000000000")
-      val defaultPosition: Point2D = (0.0, 0.0)
-      val defaultOrientation: Orientation = Orientation(0.0)
-      val defaultWidth: Double = 1.0
-      val defaultHeight: Double = 1.0
+      val DefaultId: UUID = UUID.fromString("00000000-0000-0000-0000-000000000000")
+      val DefaultPosition: Point2D = (0.0, 0.0)
+      val DefaultOrientation: Orientation = Orientation(0.0)
+      val DefaultWidth: Double = 1.0
+      val DefaultHeight: Double = 1.0
 
     object Light:
-      val defaultId: UUID = UUID.fromString("00000000-0000-0000-0000-000000000001")
-      val defaultPosition: Point2D = (0.0, 0.0)
-      val defaultOrientation: Orientation = Orientation(0.0)
-      val defaultRadius: Double = 0.05
-      val defaultIlluminationRadius: Double = 1.0
-      val defaultIntensity: Double = 1.0
-      val defaultAttenuation: Double = 1.0
+      val DefaultId: UUID = UUID.fromString("00000000-0000-0000-0000-000000000001")
+      val DefaultPosition: Point2D = (0.0, 0.0)
+      val DefaultOrientation: Orientation = Orientation(0.0)
+      val DefaultRadius: Double = 0.05
+      val DefaultIlluminationRadius: Double = 1.0
+      val DefaultIntensity: Double = 1.0
+      val DefaultAttenuation: Double = 1.0
 
     object Boundary:
-      val defaultPosition: Point2D = (0.0, 0.0)
-      val defaultOrientation: Orientation = Orientation(0.0)
-      val defaultWidth: Double = 1.0
-      val defaultHeight: Double = 1.0
+      val DefaultPosition: Point2D = (0.0, 0.0)
+      val DefaultOrientation: Orientation = Orientation(0.0)
+      val DefaultWidth: Double = 1.0
+      val DefaultHeight: Double = 1.0
 
   end StaticEntity
 
   object DynamicEntity:
-    val zeroSpeed: Double = 0.0
-    val minSpeed: Double = -1.0
-    val maxSpeed: Double = 1.0
-    val halfSpeed: Double = 0.5
+    val ZeroSpeed: Double = 0.0
+    val MinSpeed: Double = -1.0
+    val MaxSpeed: Double = 1.0
+    val HalfSpeed: Double = 0.5
 
     object Actuator:
 
       object DifferentialWheelMotor:
-        val defaultWheel: ActWheel = ActWheel()
+        val DefaultWheel: ActWheel = ActWheel()
 
         object Wheel:
-          val defaultSpeed: Double = 1.0
-          val defaultShape: ShapeType.Circle = ShapeType.Circle(0.1)
+          val DefaultSpeed: Double = 1.0
+          val DefaultShape: ShapeType.Circle = ShapeType.Circle(0.1)
+          val MinSpeed: Double = -1.0
+          val MaxSpeed: Double = 1.0
 
     object Sensor:
 
       object ProximitySensor:
-        val defaultOffset: Double = 0.0
-        val defaultRange: Double = 5.0
+        val DefaultOffset: Double = 0.0
+        val DefaultRange: Double = 1.0
 
     object Robot:
-      import SimulationDefaults.DynamicEntity.Robot.defaultShape.radius
 
-      val defaultMaxRetries = 10
+      val DefaultMaxRetries = 10
 
-      val defaultId: UUID = UUID.fromString("00000000-0000-0000-0000-000000000002")
-      val defaultPosition: Point2D = (0.0, 0.0)
-      val defaultShape: ShapeType.Circle = ShapeType.Circle(0.5)
-      val defaultOrientation: Orientation = Orientation(0.0)
-      val defaultActuators: Seq[Actuator[Robot]] = Seq.empty
-      val defaultSensors: Vector[Sensor[Robot, Environment]] = Vector.empty
+      val DefaultId: UUID = UUID.fromString("00000000-0000-0000-0000-000000000002")
+      val DefaultPosition: Point2D = (0.0, 0.0)
+      val DefaultShape: ShapeType.Circle = ShapeType.Circle(0.25)
+      val DefaultOrientation: Orientation = Orientation(0.0)
+      val DefaultActuators: Seq[Actuator[Robot]] = Seq.empty
+      val DefaultSensors: Vector[Sensor[Robot, Environment]] = Vector.empty
+      val MinRadius: Double = 0.01
+      val MaxRadius: Double = 0.5
 
-      val selectionStroke: Float = 3f
-      val normalStroke: Float = 1f
-      val arrowLengthFactor: Double = 0.6
-      val arrowWidthFactor: Double = 0.3
-      val minArrowWidth: Float = 2f
+      val SelectionStroke: Float = 3f
+      val NormalStroke: Float = 1f
+      val ArrowLengthFactor: Double = 0.6
+      val ArrowWidthFactor: Double = 0.3
+      val MinArrowWidth: Float = 2f
 
-      val stdProximitySensors: Vector[Sensor[Robot, Environment]] = Vector(
-        ProximitySensor(Orientation(0.0), radius),
-        ProximitySensor(Orientation(45.0), radius),
-        ProximitySensor(Orientation(90.0), radius),
-        ProximitySensor(Orientation(135.0), radius),
-        ProximitySensor(Orientation(180.0), radius),
-        ProximitySensor(Orientation(225.0), radius),
-        ProximitySensor(Orientation(270.0), radius),
-        ProximitySensor(Orientation(315.0), radius),
+      val StdProximitySensors: Vector[Sensor[Robot, Environment]] = Vector(
+        ProximitySensor(Orientation(0.0)),
+        ProximitySensor(Orientation(45.0)),
+        ProximitySensor(Orientation(90.0)),
+        ProximitySensor(Orientation(135.0)),
+        ProximitySensor(Orientation(180.0)),
+        ProximitySensor(Orientation(225.0)),
+        ProximitySensor(Orientation(270.0)),
+        ProximitySensor(Orientation(315.0)),
       )
 
-      val stdLightSensors: Vector[Sensor[Robot, Environment]] = Vector(
+      val StdLightSensors: Vector[Sensor[Robot, Environment]] = Vector(
         LightSensor(Orientation(0.0)),
         LightSensor(Orientation(45.0)),
         LightSensor(Orientation(90.0)),
@@ -187,84 +284,84 @@ object SimulationDefaults:
         LightSensor(Orientation(270.0)),
         LightSensor(Orientation(315.0)),
       )
-      val defaultPolicy: Policy = Policy.AlwaysForward
+      val DefaultPolicy: Policy = Policy.AlwaysForward
     end Robot
   end DynamicEntity
 
   object Fields:
 
     object Simulation:
-      val self: String = "simulation"
-      val duration: String = "duration"
-      val seed: String = "seed"
+      val Self: String = "simulation"
+      val Duration: String = "duration"
+      val Seed: String = "seed"
 
     object Environment:
-      val self: String = "environment"
-      val width: String = "width"
-      val height: String = "height"
-      val entities: String = "entities"
+      val Self: String = "environment"
+      val Width: String = "width"
+      val Height: String = "height"
+      val Entities: String = "entities"
 
     object Entity:
-      val id: String = "id"
-      val position: String = "position"
-      val x: String = "x"
-      val y: String = "y"
-      val orientation: String = "orientation"
+      val Id: String = "id"
+      val Position: String = "position"
+      val X: String = "x"
+      val Y: String = "y"
+      val Orientation: String = "orientation"
 
       object StaticEntity:
 
         object Obstacle:
-          val self: String = "obstacle"
-          val width: String = "width"
-          val height: String = "height"
+          val Self: String = "obstacle"
+          val Width: String = "width"
+          val Height: String = "height"
 
         object Light:
-          val self: String = "light"
-          val radius: String = "radius"
-          val illuminationRadius: String = "illuminationRadius"
-          val intensity: String = "intensity"
-          val attenuation: String = "attenuation"
+          val Self: String = "light"
+          val Radius: String = "radius"
+          val IlluminationRadius: String = "illuminationRadius"
+          val Intensity: String = "intensity"
+          val Attenuation: String = "attenuation"
 
       object DynamicEntity:
 
         object Robot:
-          val self: String = "robot"
-          val radius: String = "radius"
-          val speed: String = "speed"
-          val withProximitySensors: String = "withProximitySensors"
-          val withLightSensors: String = "withLightSensors"
-          val behavior: String = "behavior"
+          val Self: String = "robot"
+          val Radius: String = "radius"
+          val Speed: String = "speed"
+          val WithProximitySensors: String = "withProximitySensors"
+          val WithLightSensors: String = "withLightSensors"
+          val Behavior: String = "behavior"
     end Entity
   end Fields
 
   object Layout:
-    val splitPaneWeight: Double = 0.8
-    val splitPaneLocation: Double = 0.8
+    val SplitPaneWeight: Double = 0.8
+    val SplitPaneLocation: Double = 0.8
 
   object Frame:
-    val minWidth = 800
-    val minHeight = 600
-    val prefWidth = 1200
-    val prefHeight = 720
-    val splitWeight = 0.8
-    val canvasBorder: Int = 2
+    val MinWidth = 800
+    val MinHeight = 600
+    val PrefWidth = 1200
+    val PrefHeight = 720
+    val SplitWeight = 0.8
+    val CanvasBorder: Int = 2
 
   object Canvas:
-    val borderSize = 2
-    val minZoom = 0.2
-    val maxZoom = 5.0
-    val zoomInFactor = 1.2
-    val zoomOutFactor = 0.8
-    val desiredLabelPixels = 40.0
-    val gridStrokeWidth = 1f
-    val labelDesiredPx: Double = 40.0
-    val minLightSize: Int = 12
-    val lightStroke: Float = 2f
-    val labelBottomOffset: Int = 4
-    val labelYOffset: Int = 12
-    val labelXOffset: Int = 2
+    val BorderSize = 2
+    val MinZoom = 0.2
+    val MaxZoom = 5.0
+    val ZoomInFactor = 1.2
+    val ZoomOutFactor = 0.8
+    val DesiredLabelPixels = 40.0
+    val GridStrokeWidth = 1f
+    val LabelDesiredPx: Double = 40.0
+    val MinLightSize: Int = 12
+    val LightStroke: Float = 2f
+    val LabelBottomOffset: Int = 4
+    val LabelYOffset: Int = 12
+    val LabelXOffset: Int = 2
 
   object ControlsPanel:
-    val startStopButtonText: String = "Start/Stop"
+    val StartStopButtonText: String = "Start/Stop"
 
 end SimulationDefaults

@@ -19,11 +19,11 @@ object StaticEntity:
    */
   given Encoder[Obstacle] = (obs: Obstacle) =>
     Json.obj(
-      EntityFields.id -> obs.id.asJson,
-      EntityFields.position -> obs.position.asJson,
-      EntityFields.orientation -> obs.orientation.degrees.asJson,
-      ObstacleFields.width -> obs.width.asJson,
-      ObstacleFields.height -> obs.height.asJson,
+      EntityFields.Id -> obs.id.asJson,
+      EntityFields.Position -> obs.position.asJson,
+      EntityFields.Orientation -> obs.orientation.degrees.asJson,
+      ObstacleFields.Width -> obs.width.asJson,
+      ObstacleFields.Height -> obs.height.asJson,
     )
 
   /**
@@ -33,13 +33,13 @@ object StaticEntity:
    */
   given Encoder[Light] = (light: Light) =>
     Json.obj(
-      EntityFields.id -> light.id.asJson,
-      EntityFields.position -> light.position.asJson,
-      EntityFields.orientation -> light.orientation.degrees.asJson,
-      LightFields.radius -> light.radius.asJson,
-      LightFields.illuminationRadius -> light.illuminationRadius.asJson,
-      LightFields.intensity -> light.intensity.asJson,
-      LightFields.attenuation -> light.attenuation.asJson,
+      EntityFields.Id -> light.id.asJson,
+      EntityFields.Position -> light.position.asJson,
+      EntityFields.Orientation -> light.orientation.degrees.asJson,
+      LightFields.Radius -> light.radius.asJson,
+      LightFields.IlluminationRadius -> light.illuminationRadius.asJson,
+      LightFields.Intensity -> light.intensity.asJson,
+      LightFields.Attenuation -> light.attenuation.asJson,
     )
 end StaticEntity
 

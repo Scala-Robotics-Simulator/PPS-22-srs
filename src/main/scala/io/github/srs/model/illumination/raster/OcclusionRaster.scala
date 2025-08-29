@@ -3,362 +3,311 @@ package io.github.srs.model.illumination.raster
 import scala.collection.immutable.BitSet
 
 import io.github.srs.model.entity.*
-import io.github.srs.model.entity.ShapeType.*
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
 import io.github.srs.model.entity.staticentity.StaticEntity
-import io.github.srs.model.environment.Environment
+import io.github.srs.model.environment.ValidEnvironment.ValidEnvironment
 import io.github.srs.model.illumination.model.{ Grid, GridDims, ScaleFactor }
+import io.github.srs.utils.SimulationDefaults.Illumination.Occlusion
 
 /**
- * Object containing methods for generating occlusion rasters in a grid-based environment.
+ * Provide occlusion rasterization for [[Entity]] shapes.
  *
- * A cell is marked occluded (1.0) iff all four of its corners lie inside (or on) * an entity’s shape, otherwise it is
- * transparent (0.0).
+ * Turns circles / rectangles into a discrete grid used for light blocking. Cells contain 0.0 (Cleared) or 1.0
+ * (Occluded).
+ *
+ *   - Sampling at the center of each cell: (x + 0.5, y + 0.5).
+ *   - Coordinate scaling: world units * [[ScaleFactor]] => grid-space (pixels/cells).
+ *   - All min/max index ranges are **inclusive** and clamped to grid bounds.
  */
 object OcclusionRaster:
 
   /**
-   * Rasterize static occluders (obstacles + boundaries) to a occlusion grid.
+   * Rasterize static occludes obstacles to an occlusion grid.
    *
    * @param env
-   *   The environment containing static entities.
-   * @param s
-   *   The scale factor used to convert world coordinates to grid cell coordinates.
+   *   The [[ValidEnvironment]] containing all entities
+   * @param dims
+   *   The dimensions of the target grid
    * @return
+   *   A grid where each cell contains the occlusion value (0.0 to 1.0)
    */
-  def staticMatrix(env: Environment)(using s: ScaleFactor): Grid[Double] =
-    val dims = GridDims.from(env)(s)
-    toMatrix(staticBitset(env, dims), dims)
+  def rasterizeStatics(env: ValidEnvironment, dims: GridDims)(using ScaleFactor): Grid[Double] =
+    val statics = env.entities.iterator.collect:
+      case ob: StaticEntity.Obstacle => ob
+    rasterizeEntities(statics, dims)
 
   /**
-   * Rasterize dynamic occluders (all dynamic entities) to a occlusion grid.
-   *
+   * Rasterize all dynamic entities.
    * @param env
-   *   The environment containing dynamic entities.
-   * @param s
-   *   The scale factor used to convert world coordinates to grid cell coordinates.
+   *   The [[ValidEnvironment]] containing all entities
+   * @param dims
+   *   The dimensions of the target grid
    * @return
-   *   A 2D array of doubles where 1.0 represents an occluded cell and 0.0 represents a free cell.
+   *   A grid where each cell contains the occlusion value for dynamic entities
    */
-  def dynamicMatrix(env: Environment)(using s: ScaleFactor): Grid[Double] =
-    val dims = GridDims.from(env)(s)
-    toMatrix(dynamicBitset(env, dims), dims)
+  def rasterizeDynamics(env: ValidEnvironment, dims: GridDims)(using ScaleFactor): Grid[Double] =
+    val dynamics = env.entities.iterator.collect { case d: DynamicEntity => d }
+    rasterizeEntities(dynamics, dims)
 
   /**
-   * Rasterize both static and dynamic occluders and combine them.
-   *
-   * @param env
-   *   The environment containing both static and dynamic entities.
-   * @param s
-   *   The scale factor used to convert world coordinates to grid cell coordinates.
-   * @return
-   *   A 2D array of doubles where 1.0 represents an occluded cell and 0.0 represents a free cell.
-   */
-  def combinedMatrix(env: Environment)(using s: ScaleFactor): Grid[Double] =
-    val dims = GridDims.from(env)(s)
-    val bs = staticBitset(env, dims) | dynamicBitset(env, dims)
-    toMatrix(bs, dims)
-
-  /**
-   * Overlays two matrices by taking the maximum value from each corresponding cell.
+   * Combine two occlusion grids (overlaying), keeping the maximum opacity per cell (union of blockers).
    *
    * @param base
-   *   The base matrix.
-   * @param over
-   *   The overlay matrix.
+   *   The base occlusion grid
+   * @param overlay
+   *   The overlay occlusion grid to combine
    * @return
-   *   A new matrix where each cell contains the maximum value from the corresponding cells of the base and overlay
-   *   matrices.
+   *   A new grid with combined occlusion values
    */
-  def overlay(base: Grid[Double], over: Grid[Double]): Grid[Double] =
-    Grid.overlayMax(base, over)
-
-  // ---------- Internals: combinatori FP su BitSet ---------------------------
+  def combine(base: Grid[Double], overlay: Grid[Double]): Grid[Double] =
+    Grid.overlayMax(base, overlay)
 
   /**
-   * Cells fully covered by static entities (obstacles + boundaries) in the environment.
-   *
-   * @param env
-   *   The environment containing static entities.
-   * @param dims
-   *   The dimensions of the grid in cells.
-   * @param s
-   *   The scale factor used to convert world coordinates to grid cell coordinates.
-   * @return
-   *   A BitSet where each bit represents whether a cell is occluded.
-   */
-  private def staticBitset(env: Environment, dims: GridDims)(using s: ScaleFactor): BitSet =
-    val stat: Iterator[Entity] =
-      env.entities.iterator.collect:
-        case o: StaticEntity.Obstacle => o
-        case b: StaticEntity.Boundary => b
-    coveredCells(stat, dims)
-
-  /**
-   * Cells fully covered by dynamic entities in the environment.
-   *
-   * @param env
-   *   The environment containing dynamic entities.
-   * @param dims
-   *   The dimensions of the grid in cells.
-   * @param s
-   *   The scale factor used to convert world coordinates to grid cell coordinates.
-   * @return
-   *   A BitSet where each bit represents whether a cell is occluded.
-   */
-  private def dynamicBitset(env: Environment, dims: GridDims)(using s: ScaleFactor): BitSet =
-    val dyn: Iterator[Entity] = env.entities.iterator.collect { case d: DynamicEntity => d }
-    coveredCells(dyn, dims)
-
-  /**
-   * Determine all cells that are completely covered by each entity's shape.
+   * Rasterize a stream of entities into a set of occluded cell indices, then materialize a Grid using those indices.
    *
    * @param entities
-   *   An iterator of entities to process.
+   *   An iterator of entities to rasterize
    * @param dims
-   *   The dimensions of the grid in cells.
+   *   The target grid dimensions
    * @param s
-   *   The scale factor used to convert world coordinates to grid cell coordinates.
+   *   The scale factor for coordinate conversion
    * @return
-   *   A BitSet where each bit represents whether a cell is fully covered by any entity.
+   *   A 2D array representing the occlusion grid
    */
-  private def coveredCells(entities: Iterator[Entity], dims: GridDims)(using s: ScaleFactor): BitSet =
-    val idx = Indexing(dims.widthCells)
-    val cells: Iterator[Int] =
-      entities.flatMap(e => cellsFullyCoveredBy(e, dims, idx))
-    BitSet.fromSpecific(cells)
+  private def rasterizeEntities(
+      entities: Iterator[Entity],
+      dims: GridDims,
+  )(using s: ScaleFactor): Grid[Double] =
 
-  /**
-   * Enumerate cells whose four corners lie inside (or on) an entity's shape.
-   *
-   * @param e
-   *   The entity to process.
-   * @param dims
-   *   The dimensions of the grid in cells.
-   * @param idx
-   *   The indexing helper for converting coordinates to indices.
-   * @param s
-   *   The scale factor used to convert world coordinates to grid cell coordinates.
-   * @return
-   *   An iterator of cell indices fully covered by the entity.
-   */
-  private def cellsFullyCoveredBy(e: Entity, dims: GridDims, idx: Indexing)(using s: ScaleFactor): Iterator[Int] =
-    val bounds = worldAabbCells(e, dims)
-    if bounds.x0 > bounds.x1 || bounds.y0 > bounds.y1 then Iterator.empty
-    else
-      for
-        y <- Iterator.range(bounds.y0, bounds.y1 + 1)
-        x <- Iterator.range(bounds.x0, bounds.x1 + 1)
-        if cellIsFullyCoveredBy(e, x, y)
-      yield idx.toIndex(x, y)
+    val occluded: BitSet = BitSet.fromSpecific(entities.flatMap { entity =>
+      entity.shape match
+        case ShapeType.Circle(radius) =>
+          rasterizeCircle(entity.position, radius, dims)
+        case ShapeType.Rectangle(width, height) =>
+          rasterizeRectangle(entity.position, width, height, entity.orientation, dims)
+    })
 
-  // ---------- Geometry: cells completely covered by a single entity -----------
-
-  /**
-   * Checks if a cell is fully covered by an entity's shape.
-   *
-   * @param e
-   *   The entity to check.
-   * @param cellX
-   *   The x-coordinate of the cell.
-   * @param cellY
-   *   The y-coordinate of the cell.
-   * @param s
-   *   The scale factor used to convert world coordinates to grid cell coordinates.
-   * @return
-   *   `true` if the cell is fully covered, `false` otherwise.
-   */
-  private def cellIsFullyCoveredBy(e: Entity, cellX: Int, cellY: Int)(using s: ScaleFactor): Boolean =
-    val corners = cellCornersWorld(cellX, cellY)
-    val tol = 1e-12 // stabilize floating-point comparisons
-
-    e.shape match
-      case ShapeType.Circle(r) =>
-        if r <= 0.0 then false
-        else
-          val (cx, cy) = e.position
-          val r2 = r * r
-          corners.forall { case (x, y) => sq(x - cx) + sq(y - cy) <= r2 + tol }
-
-      case ShapeType.Rectangle(w, h) =>
-        if w <= 0.0 || h <= 0.0 then false
-        else
-          val (cx, cy) = e.position
-          val halfW = w / 2.0
-          val halfH = h / 2.0
-          val theta = -e.orientation.toRadians // world→local
-          val cosT = math.cos(theta)
-          val sinT = math.sin(theta)
-
-          inline def toLocal(wx: Double, wy: Double): (Double, Double) =
-            val dx = wx - cx
-            val dy = wy - cy
-            (dx * cosT - dy * sinT, dx * sinT + dy * cosT)
-
-          inline def insideOrOn(lx: Double, ly: Double): Boolean =
-            math.abs(lx) <= halfW + tol && math.abs(ly) <= halfH + tol
-
-          corners.iterator.map(toLocal.tupled).forall(insideOrOn.tupled)
-    end match
-  end cellIsFullyCoveredBy
-
-  // ---------- Helpers: AABB in cell space + world-space cell corners ----------
-
-  /**
-   * Axis-aligned bounding box in cell coordinates that encloses the entity's shape.
-   *
-   * This method computes the axis-aligned bounding box (AABB) of an entity's shape in cell coordinates.
-   *
-   * @param e
-   *   The entity to process.
-   * @param dims
-   *   The dimensions of the grid in cells.
-   * @param s
-   *   The scale factor used to convert world coordinates to grid cell coordinates.
-   * @return
-   *   A [[CellRect]] representing the AABB in cell coordinates.
-   */
-  private def worldAabbCells(e: Entity, dims: GridDims)(using s: ScaleFactor): CellRect =
-    e.shape match
-      case Circle(r) =>
-        val (cx, cy) = e.position
-        toCellRect(cx - r, cy - r, cx + r, cy + r, dims)
-
-      case Rectangle(w, h) =>
-        val (cx, cy) = e.position
-        val halfW = w / 2.0
-        val halfH = h / 2.0
-
-        def rot(wx: Double, wy: Double): (Double, Double) =
-          val dx = wx - cx
-          val dy = wy - cy
-          val c = math.cos(e.orientation.toRadians)
-          val s = math.sin(e.orientation.toRadians)
-          (cx + dx * c - dy * s, cy + dx * s + dy * c)
-
-        val vertices = Array(
-          rot(cx + halfW, cy + halfH),
-          rot(cx + halfW, cy - halfH),
-          rot(cx - halfW, cy + halfH),
-          rot(cx - halfW, cy - halfH),
-        )
-
-        val (minX, minY, maxX, maxY) =
-          vertices.foldLeft(
-            (Double.PositiveInfinity, Double.PositiveInfinity, Double.NegativeInfinity, Double.NegativeInfinity),
-          ) { case ((mnX, mnY, mxX, mxY), (x, y)) =>
-            (math.min(mnX, x), math.min(mnY, y), math.max(mxX, x), math.max(mxY, y))
-          }
-
-        toCellRect(minX, minY, maxX, maxY, dims)
-
-  /**
-   * Convert a world-space rectangle to a clamped cell-space rectangle
-   *
-   * @param minX
-   *   The minimum x-coordinate in world units.
-   * @param minY
-   *   The minimum y-coordinate in world units.
-   * @param maxX
-   *   The maximum x-coordinate in world units.
-   * @param maxY
-   *   The maximum y-coordinate in world units.
-   * @param dims
-   *   The dimensions of the grid in cells.
-   * @param s
-   *   The scale factor used to convert world coordinates to grid cell coordinates.
-   * @return
-   *   A [[CellRect]] representing the rectangle in cell coordinates.
-   */
-  private def toCellRect(minX: Double, minY: Double, maxX: Double, maxY: Double, dims: GridDims)(using
-      s: ScaleFactor,
-  ): CellRect =
-    val k = s.toDouble
-    val x0 = math.max(0, math.floor(minX * k).toInt)
-    val y0 = math.max(0, math.floor(minY * k).toInt)
-    val x1 = math.min(dims.widthCells - 1, math.ceil(maxX * k).toInt - 1)
-    val y1 = math.min(dims.heightCells - 1, math.ceil(maxY * k).toInt - 1)
-    CellRect(x0, y0, x1, y1)
-
-  /**
-   * Computes world-space coordinates of the four corners of a cell
-   *
-   * @param cellX
-   *   The x-coordinate of the cell.
-   * @param cellY
-   *   The y-coordinate of the cell.
-   * @param s
-   *   The scale factor used to convert world coordinates to grid cell coordinates.
-   * @return
-   *   A list of tuples representing the world coordinates of the cell corners.
-   */
-  private def cellCornersWorld(cellX: Int, cellY: Int)(using s: ScaleFactor): List[(Double, Double)] =
-    val k = s.toDouble
-    val x0 = cellX / k
-    val x1 = (cellX + 1) / k
-    val y0 = cellY / k
-    val y1 = (cellY + 1) / k
-    List((x0, y0), (x1, y0), (x1, y1), (x0, y1))
-
-  // ---------- Projection: BitSet → occlusion matrix -------------------------
-
-  /**
-   * Convert a set of occluded cell indices into a occlusion matrix in [0,1]
-   *
-   * @param occluded
-   *   The BitSet representing occluded cells.
-   * @param dims
-   *   The dimensions of the grid in cells.
-   * @return
-   *   A 2D array of doubles where 1.0 represents an occluded cell and 0.0 represents a free cell.
-   */
-  private def toMatrix(occluded: BitSet, dims: GridDims): Grid[Double] =
-    val width = dims.widthCells
-    val height = dims.heightCells
-    Grid.tabulate(width, height) { (x, y) =>
-      if occluded.contains(y * width + x) then 1.0 else 0.0
+    Grid.tabulate(dims.widthCells, dims.heightCells) { (x, y) =>
+      if occluded.contains(dims.toIndex(x, y)) then OpacityValue.Occluded else OpacityValue.Cleared
     }
 
   /**
-   * Represents a rectangle in cell coordinates.
+   * Circle rasterization via scan-lines:
    *
-   * @param x0
-   *   The minimum x-coordinate of the rectangle.
-   * @param y0
-   *   The minimum y-coordinate of the rectangle.
-   * @param x1
-   *   The maximum x-coordinate of the rectangle.
-   * @param y1
-   *   The maximum y-coordinate of the rectangle.
-   */
-  private final case class CellRect(x0: Int, y0: Int, x1: Int, y1: Int)
-
-  /**
-   * Helper class for indexing grid cells.
+   * For each row intersecting the circle, compute span [minX, maxX] and fill. This is cache-friendly and avoids
+   * per-cell distance checks.
    *
-   * @param width
-   *   The width of the grid in cells.
-   */
-  private final case class Indexing(width: Int):
-    /**
-     * Converts 2D cell coordinates to a 1D index.
-     *
-     * @param x
-     *   The x-coordinate of the cell.
-     * @param y
-     *   The y-coordinate of the cell.
-     * @return
-     *   The 1D index of the cell.
-     */
-    @inline def toIndex(x: Int, y: Int): Int = y * width + x
-
-  /**
-   * Squares a double value.
-   *
-   * @param d
-   *   The value to square.
+   * @param center
+   *   The circle's center position in world coordinates
+   * @param radius
+   *   The circle's radius in world units
+   * @param dims
+   *   The grid dimensions
+   * @param s
+   *   The scale factor for coordinate conversion
    * @return
-   *   The squared value.
+   *   A linear indices iterator of occluded cells
    */
-  @inline private def sq(d: Double): Double = d * d
+  private def rasterizeCircle(
+      center: Point2D,
+      radius: Double,
+      dims: GridDims,
+  )(using s: ScaleFactor): Iterator[Int] =
+    // Scale center and radius to grid coordinates
+    val (cx, cy) = center
+    val scaledCenterX = cx * s
+    val scaledCenterY = cy * s
+    val scaledRadius = radius * s
+    val radiusSquared = scaledRadius * scaledRadius
+
+    //  Row range intersecting the circle (inclusive)
+    val (minY, maxY) = clampSpan(scaledCenterY - scaledRadius, scaledCenterY + scaledRadius, dims.heightCells)
+
+    for
+      y <- (minY to maxY).iterator
+      dy = (y.toDouble + 0.5) - scaledCenterY
+      dySquared = dy * dy
+      if dySquared <= radiusSquared
+      dx = math.sqrt(radiusSquared - dySquared)
+      left = math.ceil(scaledCenterX - dx - 0.5).toInt
+      right = math.floor(scaledCenterX + dx - 0.5).toInt
+      minX = math.max(0, left)
+      maxX = math.min(dims.widthCells - 1, right)
+      x <- (minX to maxX).iterator
+    yield dims.toIndex(x, y)
+
+  end rasterizeCircle
+
+  /**
+   * Rectangle rasterization dispatcher.
+   *
+   * Decides between axis-aligned and rotated rectangle algorithms based on an orientation angle.
+   *
+   * @param center
+   *   The rectangle's center position
+   * @param width
+   *   The rectangle's width in world units
+   * @param height
+   *   The rectangle's height in world units
+   * @param orientation
+   *   The rectangle's orientation
+   * @param dims
+   *   The grid dimensions
+   * @param s
+   *   The scale factor for coordinate conversion
+   */
+  private def rasterizeRectangle(
+      center: Point2D,
+      width: Double,
+      height: Double,
+      orientation: Orientation,
+      dims: GridDims,
+  )(using s: ScaleFactor): Iterator[Int] =
+    val deg = orientation.degrees
+
+    if isAxisAlignedAngle(deg) then rasterizeAxisAlignedRect(center, width, height, orientation, dims)
+    else rasterizeRotatedRect(center, width, height, orientation, dims)
+
+  /**
+   * Axis-aligned rectangle: fill the AABB.
+   *
+   * Handle axis-aligned rectangles (0, 90, 180, 270 degrees) with a fast bounding-box fill.
+   *
+   * @param center
+   *   The rectangle's center position
+   * @param width
+   *   The rectangle's width
+   * @param height
+   *   The rectangle's height
+   * @param orientation
+   *   The rectangle's orientation
+   * @param dims
+   *   The grid dimensions
+   * @param s
+   *   The scale factor for coordinate conversion
+   */
+  private def rasterizeAxisAlignedRect(
+      center: Point2D,
+      width: Double,
+      height: Double,
+      orientation: Orientation,
+      dims: GridDims,
+  )(using s: ScaleFactor): Iterator[Int] =
+    val degrees = orientation.degrees
+    val (w, h) = if isPerpendicularAngle(degrees) then (height, width) else (width, height)
+
+    val (cx, cy) = center
+    val halfW = w / 2.0
+    val halfH = h / 2.0
+
+    val (minX, maxX) = clampSpan((cx - halfW) * s, (cx + halfW) * s, dims.widthCells)
+    val (minY, maxY) = clampSpan((cy - halfH) * s, (cy + halfH) * s, dims.heightCells)
+
+    for
+      x <- (minX to maxX).iterator
+      y <- (minY to maxY).iterator
+    yield dims.toIndex(x, y)
+
+  end rasterizeAxisAlignedRect
+
+  /**
+   * Rotated rectangle rasterization via inverse rotation transform:
+   *
+   *   1. compute tight world-space AABB analytically,
+   *   2. Iterate its cells, inverse-rotate cell centers, and inside-test in local space.
+   *
+   * @param center
+   *   The rectangle's center position
+   * @param width
+   *   The rectangle's width
+   * @param height
+   *   The rectangle's height
+   * @param orientation
+   *   The rectangle's orientation
+   * @param dims
+   *   The grid dimensions
+   * @param s
+   *   The scale factor for coordinate conversion
+   */
+  private def rasterizeRotatedRect(
+      center: Point2D,
+      width: Double,
+      height: Double,
+      orientation: Orientation,
+      dims: GridDims,
+  )(using s: ScaleFactor): Iterator[Int] =
+    val angle = orientation.toRadians
+    val cos = math.cos(angle)
+    val sin = math.sin(angle)
+    val halfW = width / 2.0
+    val halfH = height / 2.0
+    val (cx, cy) = center
+
+    // Tight AABB of rotated rect (no corner allocation)
+    val dx = math.abs(halfW * cos) + math.abs(halfH * sin)
+    val dy = math.abs(halfW * sin) + math.abs(halfH * cos)
+
+    val (gridMinX, gridMaxX) = clampSpan((cx - dx) * s, (cx + dx) * s, dims.widthCells)
+    val (gridMinY, gridMaxY) = clampSpan((cy - dy) * s, (cy + dy) * s, dims.heightCells)
+    val invS = 1.0 / s
+
+    for
+      x <- (gridMinX to gridMaxX).iterator
+      y <- (gridMinY to gridMaxY).iterator
+      // Convert a cell center back to world-space
+      worldX = (x.toDouble + 0.5) * invS
+      worldY = (y.toDouble + 0.5) * invS
+      // Translate before rotating
+      dx = worldX - cx
+      dy = worldY - cy
+      localX = dx * cos + worldY * sin
+      localY = -dy * sin + worldY * cos
+      if math.abs(localX) <= halfW && math.abs(localY) <= halfH
+    yield dims.toIndex(x, y)
+
+  end rasterizeRotatedRect
+
+  /**
+   * Check if an angle is a multiple of 90 degrees (90, 270, etc.) within a small tolerance.
+   *
+   * @param degrees
+   *   The angle in degrees
+   * @return
+   *   true if the angle is a multiple of 90 degrees (within tolerance)
+   */
+  private def isPerpendicularAngle(degrees: Double): Boolean =
+    math.abs(degrees % 180 - 90) < Occlusion.AlmostZero
+
+  /**
+   * Check if an angle is axis-aligned (0, 90, 180, 270 degrees) within a small tolerance.
+   *
+   * @param deg
+   *   The angle in degrees
+   * @return
+   *   true if the angle is axis-aligned (within tolerance)
+   */
+  inline private def isAxisAlignedAngle(deg: Double): Boolean =
+    val r = ((deg % Occlusion.FullRotation) + Occlusion.FullRotation) % Occlusion.FullRotation
+    val m = r % 90.0
+    math.min(m, 90.0 - m) < Occlusion.AlmostZero
+
+  /**
+   * Convert a real-valued span [min, max] (grid-space) to an inclusive, clamped integer range of cell indices for a
+   * given grid size.
+   * @param min
+   *   The minimum coordinate (inclusive)
+   * @param max
+   *   The maximum coordinate (inclusive)
+   * @param size
+   *   The size of the grid dimension (width or height)
+   * @return
+   *   A tuple (lo, hi) representing the clamped index range
+   */
+  inline private def clampSpan(min: Double, max: Double, size: Int): (Int, Int) =
+    val a = math.min(min, max)
+    val b = math.max(min, max)
+    val lo = math.max(0, math.floor(a).toInt)
+    val hi = math.min(size - 1, math.ceil(b).toInt)
+    (lo, hi)
+
 end OcclusionRaster

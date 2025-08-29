@@ -10,22 +10,16 @@ import io.github.srs.model.Simulation
 import io.github.srs.model.Simulation.*
 import io.github.srs.utils.chaining.Pipe.given
 import io.github.srs.utils.SimulationDefaults.Fields.Simulation as SimulationFields
-import io.github.srs.config.ConfigError
 
 /**
  * SimulationSettingsPanel handles the simulation-specific configuration settings. It provides a form for configuring
  * simulation duration and seed.
- *
- * @param onValidationError
- *   callback triggered when validation fails
  */
-class SimulationSettingsPanel(
-    onValidationError: Seq[String] => Unit,
-) extends JPanel(new BorderLayout):
+class SimulationSettingsPanel extends JPanel(new BorderLayout):
 
   private val simulationFields = Seq(
-    FieldSpec(SimulationFields.duration, "Duration", io.github.srs.view.components.TextField(10)),
-    FieldSpec(SimulationFields.seed, "Seed", io.github.srs.view.components.TextField(10)),
+    FieldSpec(SimulationFields.Duration, "Duration", io.github.srs.view.components.TextField()),
+    FieldSpec(SimulationFields.Seed, "Seed", io.github.srs.view.components.TextField()),
   )
 
   private val simulationPanel = new FormPanel("Simulation Settings", simulationFields)
@@ -46,8 +40,8 @@ class SimulationSettingsPanel(
     val fieldValues = simulationPanel.getValues
 
     for
-      duration <- getOptional[Long](SimulationFields.duration, fieldValues)
-      seed <- getOptional[Long](SimulationFields.seed, fieldValues)
+      duration <- getOptional[Long](SimulationFields.Duration, fieldValues)
+      seed <- getOptional[Long](SimulationFields.Seed, fieldValues)
     yield simulation
       |> (s => duration.fold(s)(s.withDuration))
       |> (s => seed.fold(s)(s.withSeed))
@@ -60,27 +54,8 @@ class SimulationSettingsPanel(
    */
   def setSimulation(sim: Simulation): Unit =
     val simulationMap = Map(
-      SimulationFields.duration -> sim.duration.map(_.toString).getOrElse(""),
-      SimulationFields.seed -> sim.seed.map(_.toString).getOrElse(""),
+      SimulationFields.Duration -> sim.duration.map(_.toString).getOrElse(""),
+      SimulationFields.Seed -> sim.seed.map(_.toString).getOrElse(""),
     )
     simulationPanel.setValues(simulationMap)
-
-  /**
-   * Validates the current form values and returns whether they are valid.
-   *
-   * @return
-   *   true if values are valid, false otherwise
-   */
-  def validateFields(): Boolean =
-    getSimulation match
-      case Left(errors) =>
-        val errorMessages = errors.map:
-          case ConfigError.MissingField(field) => s"Missing field: $field"
-          case ConfigError.ParsingError(message) => s"Parsing error: $message"
-          case ConfigError.InvalidType(field, expected) =>
-            s"Invalid type for $field: expected $expected"
-        onValidationError(errorMessages)
-        false
-      case Right(_) => true
-
 end SimulationSettingsPanel

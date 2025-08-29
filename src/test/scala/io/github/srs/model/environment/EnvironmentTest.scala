@@ -58,22 +58,22 @@ class EnvironmentTest extends AnyFlatSpec with Matchers:
       case Left(DomainError.OutOfBounds("height", _, _, _)) => succeed
 
   it should "not be created with width exceeding maximum" in:
-    import io.github.srs.utils.SimulationDefaults.Environment.maxWidth
-    inside(Environment(maxWidth + 1, 10).validate):
+    import io.github.srs.utils.SimulationDefaults.Environment.MaxWidth
+    inside(Environment(MaxWidth + 1, 10).validate):
       case Left(DomainError.OutOfBounds("width", _, _, _)) => succeed
 
   it should "not be created with height exceeding maximum" in:
-    import io.github.srs.utils.SimulationDefaults.Environment.maxHeight
-    inside(Environment(10, maxHeight + 1).validate):
+    import io.github.srs.utils.SimulationDefaults.Environment.MaxHeight
+    inside(Environment(10, MaxHeight + 1).validate):
       case Left(DomainError.OutOfBounds("height", _, _, _)) => succeed
 
   it should "not be created with too many entities" in:
-    import io.github.srs.utils.SimulationDefaults.Environment.maxEntities
+    import io.github.srs.utils.SimulationDefaults.Environment.MaxEntities
     inside(
       Environment(
         10,
         10,
-        (1 to maxEntities + 1)
+        (1 to MaxEntities + 1)
           .map(i => createEntity((i.toDouble, i.toDouble), ShapeType.Circle(1.0), Orientation(0.0)))
           .toSet,
       ).validate,

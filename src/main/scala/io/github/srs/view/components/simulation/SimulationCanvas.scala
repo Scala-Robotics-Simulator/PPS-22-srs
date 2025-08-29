@@ -17,15 +17,20 @@ import io.github.srs.model.environment.Environment
 import io.github.srs.utils.SimulationDefaults
 import io.github.srs.utils.SimulationDefaults.Canvas.*
 import io.github.srs.view.state.SimulationViewState
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.Sensor.ProximitySensor.DefaultRange
+import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
+import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings.proximityReadings
+import cats.Id
 
 /**
  * Canvas component responsible for rendering the simulation environment. Supports static layer caching for improved
  * performance.
  *
- * @param alwaysRefresh
- *   If true, the static layer is recreated on every paint
+ * @param insideConfiguration
+ *   If true, the static layer is recreated on every paint and robot sensor lines are not drawn (for configuration
+ *   preview)
  */
-class SimulationCanvas(private val alwaysRefresh: Boolean = false) extends JPanel:
+class SimulationCanvas(private val insideConfiguration: Boolean = false) extends JPanel:
 
   /**
    * Viewport configuration for world-to-screen transformation.
@@ -45,7 +50,7 @@ class SimulationCanvas(private val alwaysRefresh: Boolean = false) extends JPane
 
   private val state = new AtomicReference(SimulationViewState())
   private val robotShape = new Ellipse2D.Double()
-  private val gridStroke = new BasicStroke(gridStrokeWidth)
+  private val gridStroke = new BasicStroke(GridStrokeWidth)
 
   /**
    * Updates the canvas with new environment data.
@@ -134,7 +139,7 @@ class SimulationCanvas(private val alwaysRefresh: Boolean = false) extends JPane
    */
   private def ensureStaticLayer(env: Environment): Unit =
     val size = (env.width, env.height, getWidth, getHeight)
-    if alwaysRefresh || state.get.needsStaticLayerUpdate(size) then
+    if insideConfiguration || state.get.needsStaticLayerUpdate(size) then
       val img = createStaticLayerImage(env)
       state.updateAndGet(_.withStaticLayer(img, size)): Unit
 
@@ -196,16 +201,16 @@ class SimulationCanvas(private val alwaysRefresh: Boolean = false) extends JPane
    */
   private def drawLabels(g2: Graphics2D, env: Environment, vp: Viewport): Unit =
     g2.setColor(Color.DARK_GRAY)
-    val bottom = vp.offsetY + vp.height - labelBottomOffset
+    val bottom = vp.offsetY + vp.height - LabelBottomOffset
 
     val step = adaptiveLabelStep(vp.scale)
 
     (0 to env.width by step).foreach { x =>
-      g2.drawString(x.toString, vp.offsetX + (x * vp.scale).toInt + labelXOffset, bottom)
+      g2.drawString(x.toString, vp.offsetX + (x * vp.scale).toInt + LabelXOffset, bottom)
     }
     (0 to env.height by step).foreach { y =>
       val py = vp.offsetY + (y * vp.scale).toInt
-      g2.drawString(y.toString, vp.offsetX + labelXOffset, Math.min(bottom, py + labelYOffset))
+      g2.drawString(y.toString, vp.offsetX + LabelXOffset, Math.min(bottom, py + LabelYOffset))
     }
 
   /**
@@ -217,7 +222,7 @@ class SimulationCanvas(private val alwaysRefresh: Boolean = false) extends JPane
    *   Step size for label spacing
    */
   private def adaptiveLabelStep(scale: Double): Int =
-    val raw = labelDesiredPx / scale
+    val raw = LabelDesiredPx / scale
     val steps = List(1, 2, 5)
     LazyList
       .iterate(1)(_ * 10)
@@ -292,7 +297,7 @@ class SimulationCanvas(private val alwaysRefresh: Boolean = false) extends JPane
     g2.fillRect(x, y, width, height)
 
     g2.setColor(Colors.obstacleBorder)
-    g2.setStroke(new BasicStroke(Strokes.obstacleStroke))
+    g2.setStroke(new BasicStroke(Strokes.ObstacleStroke))
     g2.drawRect(x, y, width, height)
 
     g2.setTransform(savedTransform)
@@ -316,7 +321,7 @@ class SimulationCanvas(private val alwaysRefresh: Boolean = false) extends JPane
 
     val cx = (vp.offsetX + pos.x * vp.scale).toInt
     val cy = (vp.offsetY + pos.y * vp.scale).toInt
-    val size = Math.max(minLightSize, (4 * radius * vp.scale).toInt)
+    val size = Math.max(MinLightSize, (4 * radius * vp.scale).toInt)
     val x = cx - size / 2
     val y = cy - size / 2
 
@@ -330,7 +335,7 @@ class SimulationCanvas(private val alwaysRefresh: Boolean = false) extends JPane
     g2.setPaint(paint)
     g2.fill(new Ellipse2D.Double(x, y, size, size))
     g2.setColor(Color.ORANGE)
-    g2.setStroke(new BasicStroke(lightStroke))
+    g2.setStroke(new BasicStroke(LightStroke))
     g2.drawOval(x, y, size, size)
 
   end drawLight
@@ -347,7 +352,7 @@ class SimulationCanvas(private val alwaysRefresh: Boolean = false) extends JPane
     import io.github.srs.model.environment.robots
     val vp = viewport(env)
     val currentState = state.get
-    env.robots.foreach(drawRobot(g2, _, vp, currentState.selectedRobotId))
+    env.robots.foreach(drawRobot(g2, _, env, vp, currentState.selectedRobotId))
 
   /**
    * Draws a single robot with body and direction indicator.
@@ -361,12 +366,18 @@ class SimulationCanvas(private val alwaysRefresh: Boolean = false) extends JPane
    * @param selectedId
    *   Optional ID of the selected robot
    */
-  private def drawRobot(g2: Graphics2D, robot: Robot, vp: Viewport, selectedId: Option[String]): Unit =
+  private def drawRobot(
+      g2: Graphics2D,
+      robot: Robot,
+      env: Environment,
+      vp: Viewport,
+      selectedId: Option[String],
+  ): Unit =
     robot.shape match
       case ShapeType.Circle(radius) =>
         val isSelected = selectedId.contains(robot.id.toString)
         drawRobotBody(g2, robot, radius, vp, isSelected)
-        drawRobotDirection(g2, robot, radius, vp)
+        drawRobotDirection(g2, robot, radius, env, vp)
 
   /**
    * Draws the robot's circular body with gradient and border.
@@ -383,7 +394,7 @@ class SimulationCanvas(private val alwaysRefresh: Boolean = false) extends JPane
    *   True if this robot is currently selected
    */
   private def drawRobotBody(g2: Graphics2D, robot: Robot, radius: Double, vp: Viewport, isSelected: Boolean): Unit =
-    import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.{ normalStroke, selectionStroke }
+    import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.{ NormalStroke, SelectionStroke }
     import io.github.srs.utils.SimulationDefaults.UI.{ Colors, Strokes }
 
     val x = vp.offsetX + (robot.position.x - radius) * vp.scale
@@ -408,11 +419,11 @@ class SimulationCanvas(private val alwaysRefresh: Boolean = false) extends JPane
     g2.fill(robotShape)
 
     g2.setColor(Colors.robotShadow)
-    g2.setStroke(new BasicStroke(Strokes.robotShadowStroke))
+    g2.setStroke(new BasicStroke(Strokes.RobotShadowStroke))
     g2.draw(robotShape)
 
     g2.setColor(colors._3)
-    val strokeWidth = if isSelected then selectionStroke else normalStroke
+    val strokeWidth = if isSelected then SelectionStroke else NormalStroke
     g2.setStroke(new BasicStroke(strokeWidth))
     g2.draw(robotShape)
 
@@ -430,18 +441,53 @@ class SimulationCanvas(private val alwaysRefresh: Boolean = false) extends JPane
    * @param vp
    *   Viewport configuration
    */
-  private def drawRobotDirection(g2: Graphics2D, robot: Robot, radius: Double, vp: Viewport): Unit =
+  private def drawRobotDirection(g2: Graphics2D, robot: Robot, radius: Double, env: Environment, vp: Viewport): Unit =
     import SimulationDefaults.DynamicEntity.Robot.*
 
     val cx = (vp.offsetX + robot.position.x * vp.scale).toInt
     val cy = (vp.offsetY + robot.position.y * vp.scale).toInt
     val angle = robot.orientation.toRadians
-    val length = radius * arrowLengthFactor * vp.scale
-    val width = math.max(minArrowWidth.toDouble, radius * vp.scale * arrowWidthFactor)
+    val length = radius * ArrowLengthFactor * vp.scale
+    val width = math.max(MinArrowWidth.toDouble, radius * vp.scale * ArrowWidthFactor)
 
     val arrow = createArrowPolygon(cx, cy, angle, length, width)
     g2.setColor(Color.BLACK)
     g2.fillPolygon(arrow)
+    if !insideConfiguration then drawSensorLines(g2, robot, radius, env, vp)
+
+  private def drawSensorLines(g2: Graphics2D, robot: Robot, radius: Double, env: Environment, vp: Viewport): Unit =
+    val cx = (vp.offsetX + robot.position.x * vp.scale).toInt
+    val cy = (vp.offsetY + robot.position.y * vp.scale).toInt
+    val scaledRadius = radius * vp.scale
+
+    val readings = robot.senseAll[Id](env).proximityReadings
+
+    // Assuming robot has a collection of sensors with orientations
+    readings.foreach { reading =>
+      val sensor = reading.sensor
+      val value = reading.value
+      val sensorAngle = sensor.offset.toRadians + robot.orientation.toRadians
+
+      // Calculate start point (on robot border)
+      val startX = cx + (scaledRadius * math.cos(sensorAngle)).toInt
+      val startY = cy + (scaledRadius * math.sin(sensorAngle)).toInt
+
+      // Calculate end point (sensor range)
+      val sensorLength = DefaultRange * vp.scale // Assuming sensors have a range property
+      val endX = startX + (sensorLength * math.cos(sensorAngle) * value).toInt
+      val endY = startY + (sensorLength * math.sin(sensorAngle) * value).toInt
+
+      // Draw sensor line
+      g2.setColor(Color.BLUE) // Or any color you prefer for sensors
+      g2.setStroke(new BasicStroke(1.0f)) // Thin line for sensors
+      g2.drawLine(startX, startY, endX, endY)
+
+      // Optional: Draw a small circle at the end to show sensor detection point
+      val dotSize = 3
+      g2.fillOval(endX - dotSize / 2, endY - dotSize / 2, dotSize, dotSize)
+    }
+
+  end drawSensorLines
 
   /**
    * Creates a triangular polygon representing an arrow.
