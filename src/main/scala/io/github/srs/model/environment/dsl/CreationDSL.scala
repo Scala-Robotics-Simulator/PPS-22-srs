@@ -6,9 +6,8 @@ import io.github.srs.model.entity.staticentity.StaticEntity.Boundary
 import io.github.srs.model.environment.{ Environment, ValidEnvironment }
 import io.github.srs.model.validation.Validation
 import io.github.srs.model.validation.Validation.{ bounded, noCollisions, withinBounds }
-import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.utils.SimulationDefaults.Environment.*
-import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.validateRobot
+import io.github.srs.model.entity.Entity.validateEntity
 import io.github.srs.utils.SimulationDefaults.LightMapConfigs
 
 /**
@@ -104,15 +103,13 @@ object CreationDSL:
         case _: Boundary => true
         case _ => false
       val boundaries = Boundary.createBoundaries(env.width, env.height)
-      val robots = env.entities.collect:
-        case r: Robot => r
       for
         width <- bounded("width", env.width, MinWidth, MaxWidth, includeMax = true)
         height <- bounded("height", env.height, MinHeight, MaxHeight, includeMax = true)
         _ <- bounded("entities", env.entities.size, 0, MaxEntities, includeMax = true)
         entities <- withinBounds("entities", entities, width, height)
         entities <- noCollisions("entities", entities ++ boundaries)
-        _ <- robots.toList.traverse_(validateRobot)
+        _ <- entities.toList.traverse_(validateEntity)
       yield ValidEnvironment.from(env.copy(entities = entities))
   end extension
 end CreationDSL
