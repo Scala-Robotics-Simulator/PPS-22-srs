@@ -5,7 +5,7 @@ import scala.collection.immutable.BitSet
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
 import io.github.srs.model.entity.staticentity.StaticEntity
-import io.github.srs.model.environment.ValidEnvironment.ValidEnvironment
+import io.github.srs.model.environment.Environment
 import io.github.srs.model.illumination.model.{ Grid, GridDims, ScaleFactor }
 import io.github.srs.utils.SimulationDefaults.Illumination.Occlusion
 
@@ -25,13 +25,13 @@ object OcclusionRaster:
    * Rasterize static occludes obstacles to an occlusion grid.
    *
    * @param env
-   *   The [[ValidEnvironment]] containing all entities
+   *   The [[Environment]] containing all entities
    * @param dims
    *   The dimensions of the target grid
    * @return
    *   A grid where each cell contains the occlusion value (0.0 to 1.0)
    */
-  def rasterizeStatics(env: ValidEnvironment, dims: GridDims)(using ScaleFactor): Grid[Double] =
+  def rasterizeStatics(env: Environment, dims: GridDims)(using ScaleFactor): Grid[Double] =
     val statics = env.entities.iterator.collect:
       case ob: StaticEntity.Obstacle => ob
     rasterizeEntities(statics, dims)
@@ -39,13 +39,13 @@ object OcclusionRaster:
   /**
    * Rasterize all dynamic entities.
    * @param env
-   *   The [[ValidEnvironment]] containing all entities
+   *   The [[Environment]] containing all entities
    * @param dims
    *   The dimensions of the target grid
    * @return
    *   A grid where each cell contains the occlusion value for dynamic entities
    */
-  def rasterizeDynamics(env: ValidEnvironment, dims: GridDims)(using ScaleFactor): Grid[Double] =
+  def rasterizeDynamics(env: Environment, dims: GridDims)(using ScaleFactor): Grid[Double] =
     val dynamics = env.entities.iterator.collect { case d: DynamicEntity => d }
     rasterizeEntities(dynamics, dims)
 
