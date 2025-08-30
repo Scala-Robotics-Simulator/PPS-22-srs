@@ -4,6 +4,7 @@ import scala.language.{ implicitConversions, postfixOps }
 
 import io.github.srs.model.entity.Point2D.*
 import io.github.srs.model.entity.dynamicentity.Robot
+import io.github.srs.model.entity.dynamicentity.behavior.Policy
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 import io.github.srs.model.entity.staticentity.StaticEntity.{ Light, Obstacle }
 import io.github.srs.model.entity.staticentity.dsl.LightDsl.*
@@ -20,7 +21,7 @@ enum Cell:
   case Empty
   case Obstacle
   case Light
-  case Robot
+  case Robot(policy: Policy)
 
   /**
    * Converts the cell to a set of entities at the given position.
@@ -35,7 +36,13 @@ enum Cell:
     case Cell.Empty => Set.empty
     case Cell.Obstacle => Set(obstacle at pos + Point2D(0.5, 0.5) withWidth cellSize withHeight cellSize)
     case Cell.Light => Set(light at pos + Point2D(0.5, 0.5))
-    case Cell.Robot => Set(robot at pos + Point2D(0.5, 0.5) withSpeed 1.0)
+    case Cell.Robot(policy) =>
+      Set(
+        (robot at (pos + Point2D(0.5, 0.5)))
+          .withSpeed(1.0)
+          .withProximitySensors
+          .withBehavior(policy),
+      )
 
 end Cell
 
@@ -66,11 +73,38 @@ object Cell:
   infix def ** : Cell = Cell.Light
 
   /**
-   * Represents a robot cell in the grid.
+   * Represents a robot cell in the grid that always moves forward.
+   *
    * @return
    *   the robot cell.
    */
-  infix def R: Cell = Cell.Robot
+  infix def A: Cell = Cell.Robot(Policy.AlwaysForward)
+
+  /**
+   * Represents a robot cell in the grid that walks randomly.
+   * @return
+   *   the robot cell.
+   */
+  infix def R: Cell = Cell.Robot(Policy.RandomWalk)
+
+  /**
+   * Represents a robot cell in the grid that avoids obstacles.
+   * @return
+   *   the robot cell.
+   */
+  infix def O: Cell = Cell.Robot(Policy.ObstacleAvoidance)
+
+  /**
+   * Returns a symbol representing the given policy.
+   * @param policy
+   *   the policy to represent.
+   * @return
+   *   a string symbol for the policy.
+   */
+  def symbolFor(policy: Policy): String = policy match
+    case Policy.AlwaysForward => "A "
+    case Policy.RandomWalk => "R "
+    case Policy.ObstacleAvoidance => "O "
 
 end Cell
 
@@ -176,7 +210,8 @@ object EnvironmentToGridDSL:
         x >= x0 && x < x0 + w && y >= y0 && y < y0 + h
 
       env.entities.collectFirst {
-        case r: Robot if Math.floor(r.position.x).toInt == x && Math.floor(r.position.y).toInt == y => Cell.Robot
+        case r: Robot if Math.floor(r.position.x).toInt == x && Math.floor(r.position.y).toInt == y =>
+          Cell.Robot(r.behavior)
         case l: Light if Math.floor(l.position.x).toInt == x && Math.floor(l.position.y).toInt == y => Cell.Light
         case o: Obstacle if obstacleCovers(o) => Cell.Obstacle
       }.getOrElse(Cell.Empty)
@@ -200,7 +235,7 @@ object EnvironmentToGridDSL:
 
     envBuilder.cells.map { row =>
       row.map {
-        case Cell.Robot => "R "
+        case Cell.Robot(policy) => Cell.symbolFor(policy)
         case Cell.Light => "**"
         case Cell.Obstacle => "X "
         case Cell.Empty => "--"
