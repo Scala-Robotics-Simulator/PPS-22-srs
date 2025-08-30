@@ -3,7 +3,7 @@ package io.github.srs.model.illumination
 import scala.collection.immutable.ArraySeq
 
 import io.github.srs.model.entity.staticentity.StaticEntity
-import io.github.srs.model.environment.ValidEnvironment.ValidEnvironment
+import io.github.srs.model.environment.Environment
 import io.github.srs.model.environment.lights
 import io.github.srs.model.illumination.engine.FovEngine
 import io.github.srs.model.illumination.model.*
@@ -50,13 +50,11 @@ object IlluminationLogic:
    * @param includeDynamic
    *   A boolean flag to determine whether dynamic entities should be included in the occlusion map.
    * @param env
-   *   The valid environment containing lights and entities.
+   *   The environment containing lights and entities.
    * @return
    *   A [[LightField]] representing the final intensity value for each cell in the grid.
    */
-  def computeLightField(scale: ScaleFactor)(fov: FovEngine)(includeDynamic: Boolean)(
-      env: ValidEnvironment,
-  ): LightField =
+  def computeLightField(scale: ScaleFactor)(fov: FovEngine)(includeDynamic: Boolean)(env: Environment): LightField =
     given ScaleFactor = scale
 
     val dims = GridDims.from(env)(scale)
@@ -82,7 +80,7 @@ object IlluminationLogic:
    *   A `Grid[Double]` representing the occlusion map.
    */
   private def computeOcclusion(
-      env: ValidEnvironment,
+      env: Environment,
       dims: GridDims,
       includeDynamic: Boolean,
   )(using scale: ScaleFactor): Grid[Double] =

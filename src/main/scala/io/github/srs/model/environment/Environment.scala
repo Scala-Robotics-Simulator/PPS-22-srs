@@ -65,7 +65,7 @@ final case class Environment(
   private val lightMap: LightMap[IO] = _lightMap.getOrElse(LightMapConfigs.BaseLightMap)
 
   lazy val lightField: LightField =
-    lightMap.computeField(ValidEnvironment.from(this), includeDynamic = true).unsafeRunSync()
+    lightMap.computeField(this, includeDynamic = true).unsafeRunSync()
 
 object ValidEnvironment:
   opaque type ValidEnvironment <: EnvironmentParameters = Environment

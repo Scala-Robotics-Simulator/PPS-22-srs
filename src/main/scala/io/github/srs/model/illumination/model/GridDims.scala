@@ -1,6 +1,6 @@
 package io.github.srs.model.illumination.model
 
-import io.github.srs.model.environment.ValidEnvironment.ValidEnvironment
+import io.github.srs.model.environment.Environment
 
 /**
  * Grid dimensions for illumination calculations
@@ -46,11 +46,11 @@ object GridDims:
    * Create grid dimensions from environment and scale factor.
    *
    * @param env
-   *   [[ValidEnvironment]] to base dimensions on
+   *   [[Environment]] to base dimensions on
    * @param scale
    *   Scale factor to apply
    */
-  def from(env: ValidEnvironment)(scale: ScaleFactor): GridDims =
+  def from(env: Environment)(scale: ScaleFactor): GridDims =
     GridDims(
       widthCells = math.max(0, env.width * scale),
       heightCells = math.max(0, env.height * scale),
