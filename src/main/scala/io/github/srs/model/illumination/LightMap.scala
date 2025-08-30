@@ -1,7 +1,7 @@
 package io.github.srs.model.illumination
 
 import cats.effect.Sync
-import io.github.srs.model.environment.ValidEnvironment
+import io.github.srs.model.environment.Environment
 import io.github.srs.model.illumination.engine.FovEngine
 import io.github.srs.model.illumination.model.{ LightField, ScaleFactor }
 
@@ -16,13 +16,13 @@ trait LightMap[F[_]]:
    * Compute the [[LightField]] for the given environment.
    *
    * @param env
-   *   The [[ValidEnvironment]] containing entities and lights
+   *   The [[Environment]] containing entities and lights
    * @param includeDynamic
    *   Whether to include dynamic entities in the computation
    * @return
    *   An effectful computation yielding the computed [[LightField]]
    */
-  def computeField(env: ValidEnvironment, includeDynamic: Boolean): F[LightField]
+  def computeField(env: Environment, includeDynamic: Boolean): F[LightField]
 
 /**
  * Companion object for creating instances of [[LightMap]].
@@ -57,7 +57,7 @@ object LightMap:
    */
   private class LightMapImpl[F[_]: Sync](scale: ScaleFactor, fov: FovEngine) extends LightMap[F]:
 
-    def computeField(env: ValidEnvironment, includeDynamic: Boolean): F[LightField] =
+    def computeField(env: Environment, includeDynamic: Boolean): F[LightField] =
       Sync[F].delay:
         IlluminationLogic.computeLightField(scale)(fov)(includeDynamic)(env)
 end LightMap

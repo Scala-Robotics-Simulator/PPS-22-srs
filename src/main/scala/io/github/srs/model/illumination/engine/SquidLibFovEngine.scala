@@ -17,8 +17,8 @@ object SquidLibFovEngine extends FovEngine:
   /**
    * SquidLib-based FoV implementation.
    *
-   * Delegates to `FOV.reuseFOV` using the provided occlusion grid, writing into a reusable buffer, and finally flattens
-   * the matrix in row-major order.
+   * Delegates to [[FOV.reuseFOV]] using the provided occlusion grid, writing into a reusable buffer, and finally
+   * flattens the matrix in row-major order.
    *
    * @param occlusionGrid
    *   A grid of occlusion coefficients in the range [0,1], where:
