@@ -6,6 +6,7 @@ import io.github.srs.model.entity.staticentity.StaticEntity.Obstacle
 import io.github.srs.model.entity.{ Orientation, Point2D }
 import io.github.srs.model.validation.Validation
 import io.github.srs.model.validation.Validation.positive
+import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Obstacle.Self
 
 /**
  * The DSL for creating and configuring obstacles in the simulation.
@@ -76,8 +77,8 @@ object ObstacleDsl:
      */
     infix def validate: Validation[Obstacle] =
       for
-        w <- positive("width", obstacle.width)
-        h <- positive("height", obstacle.height)
+        w <- positive(s"$Self width", obstacle.width)
+        h <- positive(s"$Self height", obstacle.height)
       yield obstacle.copy(width = w, height = h)
   end extension
 end ObstacleDsl

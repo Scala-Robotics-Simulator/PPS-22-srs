@@ -79,9 +79,10 @@ trait GUIComponent[S <: ModelModule.State] extends Component[S]:
     /**
      * @inheritdoc
      */
-    override def timeElapsed(state: S): IO[Unit] = IO:
+    override def timeElapsed(state: S): IO[Unit] =
       controls.startStopButton.setEnabled(false)
       controls.pauseResumeButton.setEnabled(false)
+      IO.never[Unit]
 
     /**
      * Sets up the main UI layout with split pane configuration.

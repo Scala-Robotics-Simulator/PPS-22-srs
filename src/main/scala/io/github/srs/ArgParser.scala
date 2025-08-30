@@ -37,7 +37,7 @@ object ArgParser:
         .text("Total simulation time in milliseconds"),
       opt[Long]("seed")
         .action((seed, c) => c.copy(seed = Some(seed)))
-        .valueName("<seed>")
+        .valueName("<number>")
         .text("Random seed for simulation reproducibility"),
       help("help").text("Print this help message"),
       version("version").text("Show version"),
