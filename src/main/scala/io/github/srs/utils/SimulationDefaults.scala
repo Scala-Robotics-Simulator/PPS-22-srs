@@ -122,7 +122,7 @@ object SimulationDefaults:
 
   val Duration: Option[Long] = None
   val Seed: Option[Long] = None
-  val DebugMode = true
+  val DebugMode = false
   val BinarySearchDurationThreshold: FiniteDuration = 1.microseconds
 
   /**
