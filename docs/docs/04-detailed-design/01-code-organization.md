@@ -8,5 +8,3 @@ La struttura del codice è organizzata in modo da facilitare la comprensione e l
 immagine mostra la struttura delle cartelle:
 
 ![Code Organization](../../static/img/04-detailed-design/code-organization.png)
-
-<!-- TODO -->

@@ -51,12 +51,12 @@ casi d'uso.
   - **[UF-05](./03-functional.md)** - Velocità massima dei robot;
   - **[UF-06](./03-functional.md)** - Gestione del rumore.
 - Gestione entità:
-  - **[UF-07](./03-functional.md)** – Robot (numero, posizione, velocità);
-  - **[UF-08](./03-functional.md)** – Ostacoli (numero, posizione);
+  - **[UF-07](./03-functional.md)** – Robot (numero, posizione, dimensione, orientazione, velocità massima);
+  - **[UF-08](./03-functional.md)** – Ostacoli (numero, posizione, dimensione, orientazione);
   - **[UF-09](./03-functional.md)** – Luci (numero, posizione, intensità).
 - Gestione sensori:
-  - **[UF-10](./03-functional.md)** – Posizione e numero dei sensori di prossimità;
-  - **[UF-11](./03-functional.md)** – Posizione e numero dei foto sensori.
+  - **[UF-10](./03-functional.md)** – Presenza o assenza dei sensori di prossimità;
+  - **[UF-11](./03-functional.md)** – Presenza o assenza dei foto sensori.
 - Gestione configurazione di simulazione:
   - **[UF-12](./03-functional.md)** – Salvataggio;
   - **[UF-13](./03-functional.md)** – Caricamento di file personalizzati;

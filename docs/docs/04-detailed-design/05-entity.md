@@ -1,5 +1,5 @@
 ---
-sidebar_position: 4
+sidebar_position: 5
 ---
 
 # Entity
@@ -121,66 +121,82 @@ posizionata **all'interno** dell'ambiente.
 
 ## Boundary
 
+L'ultima tipologia di entità statiche sono i **boundary** (`StaticEntity.Boundary`), che rappresentano i confini dell'ambiente di simulazione. Questi elementi sono fondamentali per definire i limiti entro cui le entità possono muoversi e interagire.
+Sono simili agli **ostacoli**, ma con la differenza che hanno larghezza o altezza pari a zero.
+La loro similarità agli ostacoli implica che anche i boundary partecipano alle collisioni e possono influenzare il comportamento delle entità dinamiche.
+Sono infine percepibili dai sensori di prossimità.
+Vengono creati automaticamente durante la fase di validazione dell'ambiente, in modo tale che l'utente non debba preoccuparsi di definirli esplicitamente.
+
 ## Robot
 
 ![Robot](../../static/img/04-detailed-design/robot.png)
 
-Il _trait_ `Robot` estende `DynamicEntity` e rappresenta un'entità mobile autonoma nello spazio bidimensionale, in grado
-di interagire con l’ambiente circostante tramite sensori e attuatori. Ogni robot ha una forma circolare
-(`ShapeType.Circle`) e possiede un insieme di attuatori (`Seq[Actuator[Robot]]`) e una _suite_ di sensori (
-`SensorSuite`).
+Il _case class_ `Robot` estende `DynamicEntity` e rappresenta un’entità autonoma in grado di muoversi e interagire con
+l’ambiente circostante nello spazio bidimensionale. Ogni robot è caratterizzato da un identificativo univoco (`UUID`),
+una posizione e un’orientazione nello spazio, nonché da una forma geometrica circolare (`ShapeType.Circle`).
 
-Il _companion object_ fornisce un metodo `apply` per la creazione sicura di istanze tramite un sistema di validazione (
-`Validation`), assicurandosi che i parametri forniti siano coerenti e privi di valori non validi (ad esempio NaN o
-infiniti).
+Il robot è dotato di un insieme di attuatori (`Seq[Actuator[Robot]]`) e di una collezione di sensori
+(`Vector[Sensor[Robot, Environment]]`), che gli permettono di percepire e raccogliere informazioni sull’ambiente.
+Inoltre, possiede una strategia comportamentale (`Policy`) che definisce la logica decisionale del
+robot in base ai dati forniti dai sensori.
+
+Nel _companion object_ `Robot` viene inoltre fornita l’implementazione del _given_ `ActionAlg[IO, Robot]`, ovvero
+l’interprete dell’algebra delle azioni in un contesto di effetto `IO`.
+
+In particolare, l’implementazione del metodo `moveWheels` aggiorna lo stato degli attuatori di tipo
+`DifferentialWheelMotor`, applicando nuove velocità alle ruote sinistra e destra, e restituendo un nuovo stato del
+robot incapsulato in `IO`.
+
+Grazie a questa architettura e all’uso del pattern **Tagless Final** (introdotto nella modellazione delle azioni),
+il robot può eseguire azioni in modo astratto e indipendente dal contesto, garantendo modularità ed estensibilità.
+
+:::info note
+Vedere la sezione [Action](./07-action.md) per i dettagli sull’algebra delle azioni e il pattern **Tagless Final**.
+:::
 
 ## Attuatori
 
 ![Actuator](../../static/img/04-detailed-design/actuator.png)
 
-Un Actuator è un componente in grado di modificare lo stato di un'entità dinamica (`DynamicEntity`). Il _trait_
-`Actuator[E]`
-definisce un’interfaccia generica per tutti gli attuatori, attraverso il metodo `act(entity: E): Validation[E]`, che
-applica un cambiamento all'entità specificata, restituendo una nuova istanza validata.
+Un attuatore è un componente in grado di modificare lo stato di un’entità dinamica (`DynamicEntity`). Il _trait_ `Actuator[E]`
+definisce l’interfaccia generica, tramite il metodo `act(dt, entity)`, che aggiorna l’entità dopo un intervallo temporale
+`dt`, restituendone una nuova istanza in un contesto monadico `F[_]`.
 
 ### Attuatori di movimento
 
-Gli attuatori di movimento `WheelMotor` sono un tipo specifico di attuatori progettati per modificare la posizione e
-l'orientamento
-di un'entità dinamica nello spazio simulato. Questi attuatori sono implementati come sottotipi di `Actuator[Robot]`,
-consentendo loro di agire specificamente su istanze del trait `Robot`.
+Gli attuatori di movimento sono modellati tramite i motori differenziali (`DifferentialWheelMotor`), costituiti da due
+ruote (`Wheel`) – sinistra e destra – dotate di velocità lineare (`speed`) e una forma circolare (`ShapeType.Circle`).
+Il movimento del robot viene calcolato con un modello cinematico differenziale (`DifferentialKinematics`), in cui:
 
-Un `WheelMotor` è costituito da due ruote (`Wheel`) – sinistra e destra – ognuna dotata
-di una velocità lineare (`speed`) e una forma circolare (`ShapeType.Circle`).
+- **Velocità lineare** (media delle velocità delle due ruote; ottenute moltiplicando la velocità (`speed`) per il raggio della ruota (`radius`)):
 
-L'implementazione `DifferentialWheelMotor` utilizza un modello fisico di tipo differenziale, in cui il movimento viene
-calcolato in base alla velocità delle due ruote e alla distanza tra esse (assunta pari al diametro del robot). In
-particolare:
+$$
+v = \frac{v_{\text{left}} + v_{\text{right}}}{2}
+$$
 
-- la velocità lineare del robot è la media delle velocità delle due ruote
-- la velocità angolare è proporzionale alla differenza di velocità tra le ruote
-- la nuova posizione e orientazione vengono calcolate utilizzando le equazioni cinematiche del moto in un piano.
+- **Velocità angolare** (proporzionale alla differenza tra le velocità delle ruote divisa per la distanza tra le ruote; si assume che la distanza tra le ruote sia pari al diametro del robot):
 
-Questa logica è incapsulata nel metodo `act(robot: Robot): Validation[Robot]`, che restituisce una nuova istanza del
-robot
-con posizione e orientamento aggiornati.
+$$
+\omega = \frac{v_{\text{right}} - v_{\text{left}}}{d_{\text{wheel}}}
+$$
 
-### Azioni
+- **Nuova posizione e orientazione del robot** integrando le equazioni del moto su un intervallo di tempo `dt`:
 
-L’enumerazione `Action` definisce un insieme predefinito di comandi che il robot può eseguire, come:
+$$
+x' = x + v \cdot \cos(\theta) \cdot dt
+$$
 
-- `MoveForward`: muove il robot in avanti
-- `MoveBackward`: muove il robot all'indietro
-- `TurnLeft`: ruota il robot verso sinistra
-- `TurnRight`: ruota il robot verso destra
-- `Stop`: arresta il movimento del robot.
+$$
+y' = y + v \cdot \sin(\theta) \cdot dt
+$$
 
-Ogni `Action` è caratterizzata da una coppia di velocità da applicare rispettivamente alla ruota sinistra e destra.
-Un’estensione dell’enumerazione consente di applicare direttamente un’azione al robot (`applyTo(robot: Robot): Robot`),
-modificando la configurazione dei `WheelMotor` e aggiornando così lo stato del robot.
+$$
+\theta' = \theta + \omega \cdot dt
+$$
 
-L’estensione `move` disponibile su `Robot` permette poi di calcolare l'effetto dell’attuatore aggiornato, producendo il
-movimento vero e proprio del robot nello spazio simulato.
+
+Questa logica, incapsulata nel metodo `act`, consente di aggiornare lo stato del robot in modo funzionale e validato,
+rendendo il comportamento dell’attuatore modulare ed estendibile.
 
 ## Sensori
 
@@ -188,7 +204,7 @@ movimento vero e proprio del robot nello spazio simulato.
 
 I sensori sono componenti che permettono a un'entità dinamica di percepire l'ambiente circostante. Il _trait_
 `Sensor[Entity, Environment]` definisce un'interfaccia generica per i sensori.
-I sensori sono parametrizzati su due tipi:
+I sensori sono parametrizzati su tre tipi:
 
 - `Entity`: il tipo di entità che il sensore può percepire, sottotipo di `DynamicEntity` (ad esempio, `Robot`).
 - `Environment`: il tipo di ambiente in cui il sensore opera, sottotipo di `Environment` (ad esempio, `Environment`
@@ -199,7 +215,7 @@ Inoltre i sensori contengono un campo `offset` che rappresenta la posizione del 
 
 Infine un metodo `sense[F[_]](entity: Entity, env: Environment): F[Data]` che permette di ottenere i dati di rilevamento
 dal sensore.
-Il tipo `F[_]` è un tipo di effetto generico (come `IO`, `Task`, etc.) che permette:
+Il tipo `F[_]` è un tipo di effetto generico (come `IO`, `Id`, `Task`, etc.) che permette:
 
 - Astrazione rispetto al tipo di effetto utilizzato per l'esecuzione.
 - Composizione funzionale con altre operazioni monadiche.

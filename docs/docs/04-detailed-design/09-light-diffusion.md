@@ -1,3 +1,7 @@
+---
+sidebar_position: 9
+---
+
 # Light Diffusion
 
 Il sottosistema di **light diffusion** calcola quanta luce (`Lux`) raggiunge ogni cella dell’ambiente, considerando
