@@ -43,7 +43,7 @@ In questo modo è possibile creare un ambiente tramite:
 environment withWidth 10 withHeight 10 containing robot and obstacle and light
 ```
 
-Allo stesso modo, il DSL rende più semplice la gestione della configurazione dell'ambiente, come mostrato nella sezione [Gestione della configurazione](./configuration.md).
+Allo stesso modo, il DSL rende più semplice la gestione della configurazione dell'ambiente, come mostrato nella sezione [Gestione della configurazione](./4-configuration.md).
 
 ## Gestione della validazione
 

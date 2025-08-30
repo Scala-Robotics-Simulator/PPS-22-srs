@@ -14,7 +14,7 @@ Il codice prodotto si concentra principalmente sulle seguenti porzioni del simul
 - [Implementazione dei sensori](./3-sensors.md)
   - Sensori di prossimità
   - Sensori di luce
-- Gestione della configurazione
+- [Gestione della configurazione](./4-configuration.md)
   - Caricamento e salvataggio della configurazione
   - Validazione della configurazione
 - Implementazione della GUI di configurazione
