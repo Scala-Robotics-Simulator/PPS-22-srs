@@ -6,12 +6,12 @@ sidebar_position: 1
 
 Il codice prodotto si concentra principalmente sulle seguenti porzioni del simulatore:
 
-- [Implementazione dell'ambiente di simulazione](./environment.md)
+- [Implementazione dell'ambiente di simulazione](./1-environment.md)
   - Gestione dei boundary
   - Gestione della validazione dell'ambiente e delle entità all'interno
   - Gestione delle collisioni tra entità
-  - Implementazione dei dsl per la creazione dell'ambiente di simulazione e le entità
-- Implementazione dei sensori
+  - [Implementazione dei dsl per la creazione dell'ambiente di simulazione e le entità](./2-dsl.md)
+- [Implementazione dei sensori](./3-sensors.md)
   - Sensori di prossimità
   - Sensori di luce
 - Gestione della configurazione
