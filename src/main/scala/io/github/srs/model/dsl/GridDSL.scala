@@ -26,14 +26,18 @@ enum Cell:
    * Converts the cell to a set of entities at the given position.
    * @param pos
    *   the position where the entity should be placed.
+   * @param cellSize
+   *   the size of the cell (default is 0.999999 to avoid overlaps).
    * @return
    *   a set of entities corresponding to the cell type.
    */
-  def toEntity(pos: Point2D, cellSize: Int = 1): Set[Entity] = this match
+  def toEntity(pos: Point2D, cellSize: Double = 0.999999): Set[Entity] = this match
     case Cell.Empty => Set.empty
-    case Cell.Obstacle => Set(obstacle at pos withWidth cellSize withHeight cellSize)
-    case Cell.Light => Set(light at pos)
-    case Cell.Robot => Set(robot at pos)
+    case Cell.Obstacle => Set(obstacle at pos + Point2D(0.5, 0.5) withWidth cellSize withHeight cellSize)
+    case Cell.Light => Set(light at pos + Point2D(0.5, 0.5))
+    case Cell.Robot => Set(robot at pos + Point2D(0.5, 0.5) withSpeed 1.0)
+
+end Cell
 
 /**
  * Companion object for [[Cell]], providing convenient factory methods and operators.
