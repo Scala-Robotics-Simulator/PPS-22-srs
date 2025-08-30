@@ -45,9 +45,9 @@ class GridDSLTest extends AnyFlatSpec with Matchers:
         -- | R | -- ||
         ** | -- | --
     val expectedEnv = environment withWidth 3 withHeight 3 containing
-      (obstacle at Point2D(1, 0)) and (obstacle at Point2D(2, 0)) and (robot at Point2D(1, 1)) and (light at Point2D(
-        0,
-        2,
-      ))
+      (obstacle at Point2D(1, 0)) and
+      (obstacle at Point2D(2, 0)) and
+      (robot at Point2D(1, 1)) and
+      (light at Point2D(0, 2))
     env shouldEqualExceptIds expectedEnv
 end GridDSLTest
