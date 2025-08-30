@@ -21,20 +21,27 @@ Durante l'esecuzione della funzione `load`, viene effettuato un controllo sulla 
 L'architettura di `ConfigManager` adotta un approccio _funzionale e parametrico_ basato su `F[_]`, rendendo il codice agnostico rispetto all'effetto utilizzato per l'esecuzione (es. `IO`, `SyncIO`, `Task`).
 L'implementazione prevede:
 
-- `ConfigManager[F[_]]`: un'interfaccia che definisce le operazioni di caricamento e salvataggio della configurazione.
-- `YamlConfigManager[F[_]]`: un'implementazione di `ConfigManager` che utilizza il formato YAML per la configurazione.
+- `ConfigManager[F[_]]`: un'interfaccia che definisce le operazioni di caricamento e salvataggio della configurazione (**algebra**).
+- `YamlConfigManager[F[_]]`: un'implementazione di `ConfigManager` che utilizza il formato YAML per la configurazione (**interprete**).
 - Utility di parsing e serializzazione (`YamlManager`, `YamlSimulationConfigParser`, `YamlSimulationConfigSerializer`) che gestiscono la conversione tra oggetti Scala e rappresentazioni YAML.
 - `ConfigError` e `ConfigResult[A]`: tipi per gestire gli errori di configurazione e i risultati delle operazioni di caricamento e salvataggio.
 
 ### Tagless Final Pattern
 
-Il `ConfigManager[F[_]]` segue il _Tagless Final Pattern_: le operazioni sono parametrizzate su un tipo di effetto `F[_]` e vincolate solo alle capacità necessarie, ad esempio `Sync` e `Files` per `YamlConfigManager[F[_]]`.
+Il `ConfigManager[F[_]]` segue il **Tagless Final Pattern**: le operazioni sono parametrizzate su un tipo di effetto `F[_]` e vincolate solo alle capacità necessarie, ad esempio `Sync` e `Files` per `YamlConfigManager[F[_]]`.
 I vincoli di tipo (`Sync` di _cats-effect_ e `Files` di _fs2_) definiscono le capacità richieste — sospendere side-effect e interagire con il file system — senza imporre implementazioni concrete.
+
+A differenza di [Action](./07-action.md), non è stata suddivisa l'algebra dall'interfaccia, ma saranno le diverse implementazioni a fornire le concrete realizzazioni delle operazioni.  
+In questo contesto si distinguono quindi:
+
+- **Algebra**: il trait `ConfigManager`, che definisce le operazioni disponibili senza specificare come debbano essere implementate.
+- **Interpreti**: le varie implementazioni concrete dell’algebra. Ad esempio `YamlConfigManager[F]` interpreta le operazioni leggendo e scrivendo file YAML, mentre in futuro potrebbero esserci interpreti diversi (es. `JsonConfigManager[F]` o un interprete in-memory per i test).
+
 Questo approccio consente di:
 
 - indipendenza dal tipo di effetto specifico utilizzato per l'esecuzione.
 - migliore testabilità tramite interpreti fittizi o mock.
-- separazione netta tra la definizione dell'algebra (`ConfigManager`) e le implementazioni concrete (`YamlConfigManager`).
+- separazione netta tra la definizione dell'algebra (`ConfigManager`) e le implementazioni concrete (**interpreti** come `YamlConfigManager`).
 
 ## Gestione degli Errori
 
