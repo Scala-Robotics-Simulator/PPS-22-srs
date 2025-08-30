@@ -39,9 +39,9 @@ trait BaseLauncher
    * @return
    *   an IO effect that runs the simulation.
    */
-  def runMVC(state: SimulationState): IO[Unit] =
-    for _ <- controller.start(state)
-    yield ()
+  def runMVC(state: SimulationState): IO[SimulationState] =
+    for finalState <- controller.start(state)
+    yield finalState
 
 /**
  * Launcher object for the GUI version of the Scala Robotics Simulator.

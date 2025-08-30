@@ -1,18 +1,18 @@
 package io.github.srs.model.dsl
 
-import scala.language.implicitConversions
-import scala.language.postfixOps
+import scala.language.{ implicitConversions, postfixOps }
 
+import io.github.srs.model.entity.Point2D.*
 import io.github.srs.model.entity.dynamicentity.Robot
+import io.github.srs.model.entity.dynamicentity.behavior.Policy
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
-import io.github.srs.model.entity.staticentity.StaticEntity.{ Boundary, Light, Obstacle }
+import io.github.srs.model.entity.staticentity.StaticEntity.{ Light, Obstacle }
 import io.github.srs.model.entity.staticentity.dsl.LightDsl.*
 import io.github.srs.model.entity.staticentity.dsl.ObstacleDsl.*
 import io.github.srs.model.entity.{ Entity, Point2D }
 import io.github.srs.model.environment.Environment
-import io.github.srs.utils.EqualityGivenInstances.given_CanEqual_Cell_Cell
-import io.github.srs.model.entity.Point2D.*
 import io.github.srs.model.environment.dsl.CreationDSL.*
+import io.github.srs.utils.EqualityGivenInstances.given_CanEqual_Cell_Cell
 
 /**
  * Represents a cell in the grid-based DSL for defining environments.
@@ -21,20 +21,30 @@ enum Cell:
   case Empty
   case Obstacle
   case Light
-  case Robot
+  case Robot(policy: Policy)
 
   /**
    * Converts the cell to a set of entities at the given position.
    * @param pos
    *   the position where the entity should be placed.
+   * @param cellSize
+   *   the size of the cell (default is 0.999999 to avoid overlaps).
    * @return
    *   a set of entities corresponding to the cell type.
    */
-  def toEntity(pos: Point2D): Set[Entity] = this match
+  def toEntity(pos: Point2D, cellSize: Double = 0.999999): Set[Entity] = this match
     case Cell.Empty => Set.empty
-    case Cell.Obstacle => Set(obstacle at pos)
-    case Cell.Light => Set(light at pos)
-    case Cell.Robot => Set(robot at pos)
+    case Cell.Obstacle => Set(obstacle at pos + Point2D(0.5, 0.5) withWidth cellSize withHeight cellSize)
+    case Cell.Light => Set(light at pos + Point2D(0.5, 0.5))
+    case Cell.Robot(policy) =>
+      Set(
+        (robot at (pos + Point2D(0.5, 0.5)))
+          .withSpeed(1.0)
+          .withProximitySensors
+          .withBehavior(policy),
+      )
+
+end Cell
 
 /**
  * Companion object for [[Cell]], providing convenient factory methods and operators.
@@ -63,11 +73,38 @@ object Cell:
   infix def ** : Cell = Cell.Light
 
   /**
-   * Represents a robot cell in the grid.
+   * Represents a robot cell in the grid that always moves forward.
+   *
    * @return
    *   the robot cell.
    */
-  infix def R: Cell = Cell.Robot
+  infix def A: Cell = Cell.Robot(Policy.AlwaysForward)
+
+  /**
+   * Represents a robot cell in the grid that walks randomly.
+   * @return
+   *   the robot cell.
+   */
+  infix def R: Cell = Cell.Robot(Policy.RandomWalk)
+
+  /**
+   * Represents a robot cell in the grid that avoids obstacles.
+   * @return
+   *   the robot cell.
+   */
+  infix def O: Cell = Cell.Robot(Policy.ObstacleAvoidance)
+
+  /**
+   * Returns a symbol representing the given policy.
+   * @param policy
+   *   the policy to represent.
+   * @return
+   *   a string symbol for the policy.
+   */
+  def symbolFor(policy: Policy): String = policy match
+    case Policy.AlwaysForward => "A "
+    case Policy.RandomWalk => "R "
+    case Policy.ObstacleAvoidance => "O "
 
 end Cell
 
@@ -157,24 +194,30 @@ object EnvironmentToGridDSL:
    *   the corresponding environment builder.
    */
   private def fromEnvironment(env: Environment): EnvironmentBuilder =
+
+    def isVertical(angle: Double): Boolean =
+      Math.round(angle) % 180 == 90
+
+    def cellAt(x: Int, y: Int): Cell =
+      def obstacleCovers(o: Obstacle): Boolean =
+        val (wRaw, hRaw) =
+          if isVertical(o.orientation.degrees) then (o.height, o.width)
+          else (o.width, o.height)
+        val w = Math.max(1, Math.ceil(wRaw).toInt)
+        val h = Math.max(1, Math.ceil(hRaw).toInt)
+        val x0 = Math.floor(o.position.x - wRaw / 2).toInt
+        val y0 = Math.floor(o.position.y - hRaw / 2).toInt
+        x >= x0 && x < x0 + w && y >= y0 && y < y0 + h
+
+      env.entities.collectFirst {
+        case r: Robot if Math.floor(r.position.x).toInt == x && Math.floor(r.position.y).toInt == y =>
+          Cell.Robot(r.behavior)
+        case l: Light if Math.floor(l.position.x).toInt == x && Math.floor(l.position.y).toInt == y => Cell.Light
+        case o: Obstacle if obstacleCovers(o) => Cell.Obstacle
+      }.getOrElse(Cell.Empty)
+
     val grid: Vector[Vector[Cell]] =
-      Vector.tabulate(env.height, env.width) { (y, x) =>
-        val pos = Point2D(x, y)
-
-        val maybeCell =
-          env.entities
-            .find(e =>
-              e.position.x.toInt == pos.x &&
-                e.position.y.toInt == pos.y,
-            )
-            .map:
-              case _: Robot => Cell.Robot
-              case _: Light => Cell.Light
-              case _: Obstacle => Cell.Obstacle
-              case _: Boundary => Cell.Empty
-
-        maybeCell.getOrElse(Cell.Empty)
-      }
+      Vector.tabulate(env.height, env.width)((y, x) => cellAt(x, y))
 
     EnvironmentBuilder(grid)
 
@@ -192,7 +235,7 @@ object EnvironmentToGridDSL:
 
     envBuilder.cells.map { row =>
       row.map {
-        case Cell.Robot => "R "
+        case Cell.Robot(policy) => Cell.symbolFor(policy)
         case Cell.Light => "**"
         case Cell.Obstacle => "X "
         case Cell.Empty => "--"
