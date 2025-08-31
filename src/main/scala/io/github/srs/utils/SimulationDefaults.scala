@@ -30,6 +30,11 @@ object SimulationDefaults:
 
   object Behaviors:
 
+    object Phototaxis:
+      val Epsilon: Double = 1e-9
+      val MinForwardBias: Double = 0.4
+      val TurnGain: Double = 1.0
+
     object ObstacleAvoidance:
       val CruiseSpeed: Double = 0.35
       val WarnSpeed: Double = 0.15
@@ -46,6 +51,8 @@ object SimulationDefaults:
       val TurnExponent: Double = 1.2
       val PivotBoostProb: Double = 0.20
       val PivotBoostAbs: Double = 0.15
+
+  end Behaviors
 
   object UI:
 
