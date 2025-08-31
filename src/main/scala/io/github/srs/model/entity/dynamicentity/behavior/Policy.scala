@@ -13,6 +13,8 @@ enum Policy(val name: String) derives CanEqual:
   case AlwaysForward extends Policy("AlwaysForward")
   case RandomWalk extends Policy("RandomWalk")
   case ObstacleAvoidance extends Policy("ObstacleAvoidance")
+  case Phototaxis extends Policy("Phototaxis")
+  case Prioritized extends Policy("Prioritized")
 
   /**
    * Compute the next [[Action]] and the advanced RNG.
@@ -27,6 +29,8 @@ enum Policy(val name: String) derives CanEqual:
       case AlwaysForward => AlwaysForwardBehavior.decision.run(input)
       case RandomWalk => RandomWalkBehavior.decision.run(input)
       case ObstacleAvoidance => ObstacleAvoidanceBehavior.decision.run(input)
+      case Phototaxis => PhototaxisBehavior.decision.run(input)
+      case Prioritized => PrioritizedBehavior.decision.run(input)
 
   /**
    * String representation of the policy.
