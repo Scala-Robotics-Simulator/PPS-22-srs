@@ -30,6 +30,10 @@ object SimulationDefaults:
 
   object Behaviors:
 
+    object Prioritized:
+      val DangerDist: Double = 0.90
+      val LightThreshold: Double = 0.05
+
     object Phototaxis:
       val Epsilon: Double = 1e-9
       val MinForwardBias: Double = 0.4
