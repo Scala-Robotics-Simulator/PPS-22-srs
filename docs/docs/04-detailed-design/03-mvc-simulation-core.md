@@ -128,6 +128,8 @@ La gestione degli eventi è stata resa più modulare:
 - `handleEvents`: processa una sequenza di eventi in ordine, applicando ciascun evento allo stato corrente;
 - `handleEvent`: gestisce un singolo evento, aggiornando lo stato tramite le logiche definite nel `LogicsBundle`.
 
+[Protocollo Event e Message RobotProposal](../../static/img/04-detailed-design/protocol-message.png)
+
 Gli eventi (`Event`) comprendono:
 
 - `Tick`: avanzamento temporale della simulazione;
