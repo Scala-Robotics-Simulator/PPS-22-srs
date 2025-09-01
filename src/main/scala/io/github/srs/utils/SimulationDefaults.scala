@@ -219,7 +219,7 @@ object SimulationDefaults:
       val DefaultId: UUID = UUID.fromString("00000000-0000-0000-0000-000000000001")
       val DefaultPosition: Point2D = (0.0, 0.0)
       val DefaultOrientation: Orientation = Orientation(0.0)
-      val DefaultRadius: Double = 0.2
+      val DefaultRadius: Double = 0.05
       val DefaultIlluminationRadius: Double = 1.0
       val DefaultIntensity: Double = 1.0
       val DefaultAttenuation: Double = 1.0

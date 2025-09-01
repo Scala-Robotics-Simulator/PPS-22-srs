@@ -7,6 +7,7 @@ environment:
   - light:
       position: [2.0, 5.0]
       illuminationRadius: 5.0
+      radius: 0.2
       intensity: 1.0
       attenuation: 1.0
   - robot:

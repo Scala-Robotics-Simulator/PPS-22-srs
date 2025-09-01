@@ -9,6 +9,7 @@ environment:
         position: [10, 5]
         illuminationRadius: 6.0
         intensity: 1.0
+        radius: 0.2
         attenuation: 1.0
     - obstacle:
         position: [6, 5]
