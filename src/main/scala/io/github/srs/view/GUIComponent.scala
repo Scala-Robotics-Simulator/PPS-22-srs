@@ -177,7 +177,6 @@ trait GUIComponent[S <: ModelModule.State] extends Component[S]:
     private def parseSpeed(speed: SpeedLabel): SimulationSpeed = speed match
       case "slow" => SimulationSpeed.SLOW
       case "fast" => SimulationSpeed.FAST
-      case "superfast" => SimulationSpeed.SUPERFAST
       case _ => SimulationSpeed.NORMAL
 
     /**
