@@ -4,6 +4,8 @@ sidebar_position: 7
 
 # Action
 
+![Action](../../static/img/04-detailed-design/action.png)
+
 Per la modellazione della tipologia di azioni che è possibile svolgere dalle entità dinamiche è stato adottato un
 approccio basato sul pattern **Tagless Final**, che consente di definire in maniera astratta e composabile i
 comportamenti applicabili a un’entità senza vincolarsi a una specifica implementazione.
