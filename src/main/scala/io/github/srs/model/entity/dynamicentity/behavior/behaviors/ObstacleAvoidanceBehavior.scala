@@ -10,13 +10,15 @@ import io.github.srs.utils.SimulationDefaults.DynamicEntity.{ MaxSpeed, MinSpeed
 import io.github.srs.utils.SimulationDefaults.Behaviors.ObstacleAvoidance.CriticalDist
 
 /**
- * A [[Behavior]] that avoid obstacles using proximity sensor readings.
+ * A [[io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior]] that avoid obstacles using proximity
+ * sensor readings.
  *
  * The behavior operates in three phases:
  *
- *   - [[Free]]: No obstacles detected, the robot moves forward at cruise speed.
- *   - [[Warn]]: Obstacles detected but not critical, the robot slows down and steers away from the closest obstacle.
- *   - [[Blocked]]: Obstacles detected at a critical distance, the robot performs a pivot turn
+ *   - [[Phase.Free]]: No obstacles detected, the robot moves forward at cruise speed.
+ *   - [[Phase.Warn]]: Obstacles detected but not critical, the robot slows down and steers away from the closest
+ *     obstacle.
+ *   - [[Phase.Blocked]]: Obstacles detected at a critical distance, the robot performs a pivot turn
  */
 object ObstacleAvoidanceBehavior:
 
@@ -26,7 +28,8 @@ object ObstacleAvoidanceBehavior:
    * @tparam F
    *   The effect type.
    * @return
-   *   A [[Decision]] that computes the action based on proximity sensor readings.
+   *   A [[io.github.srs.model.entity.dynamicentity.behavior.behaviors.BehaviorCommon.Decision]] that computes the
+   *   action based on proximity sensor readings.
    */
   def decision[F[_]: Monad]: Decision[F] =
     Kleisli { ctx =>

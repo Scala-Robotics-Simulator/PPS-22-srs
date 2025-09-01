@@ -10,13 +10,14 @@ import io.github.srs.model.illumination.model.{ Grid, GridDims, ScaleFactor }
 import io.github.srs.utils.SimulationDefaults.Illumination.Occlusion
 
 /**
- * Provide occlusion rasterization for [[Entity]] shapes.
+ * Provide occlusion rasterization for [[io.github.srs.model.entity.Entity]] shapes.
  *
  * Turns circles / rectangles into a discrete grid used for light blocking. Cells contain 0.0 (Cleared) or 1.0
  * (Occluded).
  *
  *   - Sampling at the center of each cell: (x + 0.5, y + 0.5).
- *   - Coordinate scaling: world units * [[ScaleFactor]] => grid-space (pixels/cells).
+ *   - Coordinate scaling: world units * [[io.github.srs.model.illumination.model.ScaleFactor]] => grid-space
+ *     (pixels/cells).
  *   - All min/max index ranges are **inclusive** and clamped to grid bounds.
  */
 object OcclusionRaster:
@@ -25,7 +26,7 @@ object OcclusionRaster:
    * Rasterize static occludes obstacles to an occlusion grid.
    *
    * @param env
-   *   The [[Environment]] containing all entities
+   *   The [[io.github.srs.model.environment.Environment]] containing all entities
    * @param dims
    *   The dimensions of the target grid
    * @return
@@ -39,7 +40,7 @@ object OcclusionRaster:
   /**
    * Rasterize all dynamic entities.
    * @param env
-   *   The [[Environment]] containing all entities
+   *   The [[io.github.srs.model.environment.Environment]] containing all entities
    * @param dims
    *   The dimensions of the target grid
    * @return

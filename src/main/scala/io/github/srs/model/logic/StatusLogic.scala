@@ -15,7 +15,8 @@ trait PauseLogic[S <: ModelModule.State]:
    * @param s
    *   the current simulation state.
    * @return
-   *   an [[IO]] effect that produces the updated simulation state with status set to [[SimulationStatus.PAUSED]].
+   *   an [[cats.effect.IO]] effect that produces the updated simulation state with status set to
+   *   [[io.github.srs.model.SimulationConfig.SimulationStatus.PAUSED]].
    */
   def pause(s: S): IO[S]
 
@@ -30,7 +31,8 @@ trait ResumeLogic[S <: ModelModule.State]:
    * @param s
    *   the current simulation state.
    * @return
-   *   an [[IO]] effect that produces the updated simulation state with status set to [[SimulationStatus.RUNNING]].
+   *   an [[cats.effect.IO]] effect that produces the updated simulation state with status set to
+   *   [[io.github.srs.model.SimulationConfig.SimulationStatus.RUNNING]].
    */
   def resume(s: S): IO[S]
 
@@ -45,7 +47,8 @@ trait StopLogic[S <: ModelModule.State]:
    * @param s
    *   the current simulation state.
    * @return
-   *   an [[IO]] effect that produces the updated simulation state with status set to [[SimulationStatus.STOPPED]].
+   *   an [[cats.effect.IO]] effect that produces the updated simulation state with status set to
+   *   [[io.github.srs.model.SimulationConfig.SimulationStatus.STOPPED]].
    */
   def stop(s: S): IO[S]
 

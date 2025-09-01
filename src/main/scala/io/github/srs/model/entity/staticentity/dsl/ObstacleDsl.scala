@@ -16,7 +16,7 @@ object ObstacleDsl:
   /**
    * Creates a new obstacle with default properties.
    * @return
-   *   A new instance of [[Obstacle]] with default values.
+   *   A new instance of [[io.github.srs.model.entity.staticentity.StaticEntity.Obstacle]] with default values.
    */
   def obstacle: Obstacle = Obstacle()
 

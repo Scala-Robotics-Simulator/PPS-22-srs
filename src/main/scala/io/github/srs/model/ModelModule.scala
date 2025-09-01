@@ -63,9 +63,9 @@ object ModelModule:
      * @param s
      *   the current state of the simulation.
      * @param f
-     *   the function that takes the current state and returns a new state wrapped in a [[IO]].
+     *   the function that takes the current state and returns a new state wrapped in a [[cats.effect.IO]].
      * @return
-     *   the updated state wrapped in a [[IO]].
+     *   the updated state wrapped in a [[cats.effect.IO]].
      */
     def update(s: S)(using f: S => IO[S]): IO[S]
 

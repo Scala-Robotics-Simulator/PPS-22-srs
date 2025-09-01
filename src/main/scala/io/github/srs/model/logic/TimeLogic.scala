@@ -19,7 +19,7 @@ trait TickLogic[S <: ModelModule.State]:
    * @param delta
    *   the duration to advance the elapsed time.
    * @return
-   *   an [[IO]] effect that produces the updated simulation state with the new elapsed time.
+   *   an [[cats.effect.IO]] effect that produces the updated simulation state with the new elapsed time.
    */
   def tick(s: S, delta: FiniteDuration): IO[S]
 
@@ -30,7 +30,7 @@ trait TickLogic[S <: ModelModule.State]:
    * @param speed
    *   the new simulation speed to set.
    * @return
-   *   an [[IO]] effect that produces the updated simulation state with the new simulation speed.
+   *   an [[cats.effect.IO]] effect that produces the updated simulation state with the new simulation speed.
    */
   def tickSpeed(s: S, speed: SimulationSpeed): IO[S]
 

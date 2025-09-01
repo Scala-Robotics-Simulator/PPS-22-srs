@@ -14,7 +14,7 @@ object ViewModule:
    * View trait that defines the interface for the view.
    *
    * @tparam S
-   *   the type of the state, which must extend [[ModelModule.State]].
+   *   the type of the state, which must extend [[io.github.srs.model.ModelModule.State]].
    */
   trait View[S <: ModelModule.State]:
 
@@ -23,23 +23,23 @@ object ViewModule:
      * @param queue
      *   the queue that will be used to handle events in the view.
      * @return
-     *   an [[IO]] task that completes when the initialization is done.
+     *   an [[cats.effect.IO]] task that completes when the initialization is done.
      */
-    def init(queue: Queue[IO, Event]): IO[Unit]
+    def init(queue: Queue[cats.effect.IO, Event]): IO[Unit]
 
     /**
      * Renders the view based on the current state.
      * @param state
-     *   the current state of the simulation, which must extend [[ModelModule.State]].
+     *   the current state of the simulation, which must extend [[io.github.srs.model.ModelModule.State]].
      * @return
-     *   the rendering task, which is an [[IO]] that completes when the rendering is done.
+     *   the rendering task, which is an [[cats.effect.IO]] that completes when the rendering is done.
      */
     def render(state: S): IO[Unit]
 
     /**
      * Closes the view and releases any resources.
      * @return
-     *   an [[IO]] task that completes when the view is closed.
+     *   an [[cats.effect.IO]] task that completes when the view is closed.
      */
     def close(): IO[Unit]
 
@@ -48,7 +48,7 @@ object ViewModule:
      * @param state
      *   the resulting state after time has elapsed.
      * @return
-     *   an [[IO]] task that completes when the time elapsed event is handled.
+     *   an [[cats.effect.IO]] task that completes when the time elapsed event is handled.
      */
     def timeElapsed(state: S): IO[Unit]
 
@@ -57,7 +57,7 @@ object ViewModule:
   /**
    * Provider trait that defines the interface for providing a view.
    * @tparam S
-   *   the type of the state, which must extend [[ModelModule.State]].
+   *   the type of the state, which must extend [[io.github.srs.model.ModelModule.State]].
    */
   trait Provider[S <: ModelModule.State]:
     val view: View[S]
@@ -72,7 +72,7 @@ object ViewModule:
    * Component trait that defines the interface for creating a view.
    *
    * @tparam S
-   *   the type of the simulation state, which must extend [[ModelModule.State]].
+   *   the type of the simulation state, which must extend [[io.github.srs.model.ModelModule.State]].
    */
   trait Component[S <: ModelModule.State]:
     context: Requirements[S] =>
@@ -100,7 +100,7 @@ object ViewModule:
   /**
    * Interface trait that combines the provider and component traits for the view module.
    * @tparam S
-   *   the type of the state, which must extend [[ModelModule.State]].
+   *   the type of the state, which must extend [[io.github.srs.model.ModelModule.State]].
    */
   trait Interface[S <: ModelModule.State] extends Provider[S] with Component[S]:
     self: Requirements[S] =>

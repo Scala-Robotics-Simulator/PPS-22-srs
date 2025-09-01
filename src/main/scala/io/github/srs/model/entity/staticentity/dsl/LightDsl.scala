@@ -16,7 +16,7 @@ object LightDsl:
   /**
    * Creates a new light with default properties.
    * @return
-   *   A new instance of [[Light]] with default values.
+   *   A new instance of [[io.github.srs.model.entity.staticentity.StaticEntity.Light]] with default values.
    */
   def light: Light = Light()
 

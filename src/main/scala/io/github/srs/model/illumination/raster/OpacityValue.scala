@@ -8,7 +8,7 @@ package io.github.srs.model.illumination.raster
 opaque type OpacityValue = Double
 
 /**
- * Companion object providing utility methods and extensions for [[OcclusionValue]].
+ * Companion object providing utility methods and extensions for [[OpacityValue]].
  */
 object OpacityValue:
   /**
@@ -23,7 +23,7 @@ object OpacityValue:
 
   extension (v: OpacityValue)
     /**
-     * Gets the underlying double value of this [[OcclusionValue]].
+     * Gets the underlying double value of this [[OpacityValue]].
      *
      * @return
      *   The raw double value
@@ -31,7 +31,7 @@ object OpacityValue:
     def value: Double = v
 
   /**
-   * Implicit conversion from [[OcclusionValue]] to `Double` for integration with math operations.
+   * Implicit conversion from [[OpacityValue]] to `Double` for integration with math operations.
    */
   given Conversion[OpacityValue, Double] with
     inline def apply(v: OpacityValue): Double = v

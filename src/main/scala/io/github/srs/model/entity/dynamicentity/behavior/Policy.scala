@@ -6,8 +6,8 @@ import io.github.srs.model.entity.dynamicentity.behavior.behaviors.*
 import io.github.srs.utils.random.RNG
 
 /**
- * A [[Policy]] selects the next [[Action]] purely, based only on the provided [[BehaviorContext]] and returns the next
- * RNG alongside the action.
+ * A [[Policy]] selects the next [[io.github.srs.model.entity.dynamicentity.action.Action]] purely, based only on the
+ * provided [[BehaviorContext]] and returns the next RNG alongside the action.
  */
 enum Policy(val name: String) derives CanEqual:
   case AlwaysForward extends Policy("AlwaysForward")
@@ -17,7 +17,7 @@ enum Policy(val name: String) derives CanEqual:
   case Prioritized extends Policy("Prioritized")
 
   /**
-   * Compute the next [[Action]] and the advanced RNG.
+   * Compute the next [[io.github.srs.model.entity.dynamicentity.action.Action]] and the advanced RNG.
    *
    * @param input
    *   behavior input containing the current RNG (and other context)

@@ -75,8 +75,8 @@ object DifferentialKinematics:
    * @param theta
    *   the current orientation of the robot in radians.
    * @param dt
-   *   the time interval over which the robot moves. This is a [[FiniteDuration]] representing the time step for the
-   *   movement.
+   *   the time interval over which the robot moves. This is a [[scala.concurrent.duration.FiniteDuration]] representing
+   *   the time step for the movement.
    * @return
    *   a function (v, omega) => (dx, dy, newOrientation) that computes the change in position and the new orientation of
    *   the robot.
