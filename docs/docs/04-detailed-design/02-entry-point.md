@@ -38,7 +38,7 @@ Questi includono, ad esempio:
 
 :::info
 
-I dettagli di implementazione della modalità CLI e degli argomenti della linea di comando sono descritti nella sezione [Command Line Interface](../05-implementation/04-giulia-nardicchia/cli.md).
+I dettagli di implementazione della modalità CLI e degli argomenti della linea di comando sono descritti nella sezione [Command Line Interface](../05-implementation/04-giulia-nardicchia/cli.md) e [GUI](../05-implementation/02-simone-ceredi/5-config-gui.md).
 
 :::
 
@@ -48,38 +48,8 @@ L’interfaccia `ConfigurationView` definisce il comportamento comune delle vist
 
 ![Configuration View UML](../../static/img/04-detailed-design/configuration-view.png)
 
-Chiamando il metodo `init()` si apre l'interfaccia di configurazione e si restituisce la configurazione scelta dall'
-utente.
-Questo processo viene facilitato dall'utilizzo dell'effetto `IO`, in quanto consente di gestire in modo semplice e
-sicuro le operazioni di input/output, garantendo la corretta esecuzione delle azioni richieste dall'utente.
+Chiamando il metodo `init()` si apre l'interfaccia di configurazione e si restituisce la configurazione scelta dall'utente.
+Questo processo viene facilitato dall'utilizzo dell'effetto `IO`, in quanto consente di gestire in modo semplice e sicuro le operazioni di input/output, garantendo la corretta esecuzione delle azioni richieste dall'utente.
+In questo modo il chiamante della funzione può essere certo che il risultato dell'`IO` sarà una configurazione valida del simulatore, con la quale potrà andare ad avviare la simulazione.
 
-### ConfigurationGUI
-
-Eseguendo il simulatore senza indicare `--headless`, viene mostrata inizialmente l'interfaccia grafica di configurazione.
-
-Il simulatore può essere configurato in due modalità, tramite file `YAML`, come descritto nella sezione
-[Configuration](08-configuration.md), oppure tramite interfaccia grafica.
-
-La **configuration gui** è l’interfaccia grafica che permette di modificare i parametri del simulatore in modo
-interattivo, senza dover modificare manualmente il file `YAML`.
-
-Tramite l'interfaccia grafica, è possibile:
-
-- Visualizzare i parametri correnti del simulatore;
-- Modificare i valori dei parametri;
-- Salvare la configurazione in un file `YAML`;
-- Caricare una configurazione da un file `YAML`;
-- Caricare una delle configurazioni predefinite.
-
-#### Componenti
-
-Ogni elemento dell'interfaccia è gestito da una componente, ovvero un `JPanel`, per permettere maggiore modularità e
-riutilizzo del codice.
-I componenti utilizzati sono i seguenti:
-
-- `ConfigurationControlsPanel`: gestisce i controlli per salvare e caricare le configurazioni personalizzate e quelle 
-predefinite.
-- `SimulationSettingsPanel`: gestisce i parametri specifici della simulazione, come la durata e il seed.
-- `EnvironmentSettingsPanel`: gestisce i parametri dell'ambiente, come la dimensione della mappa.
-- `EntitiesPanel`: gestisce le entità presenti nella simulazione, ovvero i robot, le luci e gli ostacoli.
-- `SimulationCanvas`: per ottenere una preview dell'ambiente di simulazione.
+Il metodo `close` è separato da `init` per lasciare libertà all'utilizzatore di gestire la chiusura dell'interfaccia utente in modo indipendente dall'inizializzazione, e non obbligatoriamente quando la configurazione è stata scelta.

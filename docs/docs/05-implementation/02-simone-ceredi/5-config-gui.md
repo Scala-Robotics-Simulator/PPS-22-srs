@@ -4,20 +4,30 @@ sidebar_position: 5
 
 # Implementazione della GUI di configurazione
 
-La GUI di configurazione è stata implementata sulla base del trait `ConfigurationView`.
+Eseguendo il simulatore senza indicare `--headless`, viene mostrata inizialmente l'interfaccia grafica di configurazione.
 
-```scala
-trait ConfigurationView:
-  def init(): IO[SimulationConfig[ValidEnvironment]]
-  def close(): IO[Unit]
-```
+Il simulatore può essere configurato in due modalità, tramite file `YAML`, come descritto nella sezione
+[Configuration](../../04-detailed-design/08-configuration.md), oppure tramite interfaccia grafica.
 
-L'utilizzo di `cats.effect.IO` nel metodo `init`, wrappando `SimulationConfig[ValidEnvironment]`, consente di gestire in modo efficace le interazioni dell'utente con l'interfaccia. Ciò che interessa al chiamante della funzione è che il risultato dell'IO sarà una configurazione valida del simulatore, con la quale potrà andare ad avviare la simulazione.
+La **configuration gui** è l’interfaccia grafica che permette di modificare i parametri del simulatore in modo
+interattivo, senza dover modificare manualmente il file `YAML`.
 
-Il metodo `close` è separato da `init` per lasciare libertà all'utilizzatore di gestire la chiusura dell'interfaccia utente in modo indipendente dall'inizializzazione, e non obbligatoriamente quando la configurazione è stata scelta.
+Tramite l'interfaccia grafica, è possibile:
 
-## ConfigurationGUI
+- Visualizzare i parametri correnti del simulatore;
+- Modificare i valori dei parametri;
+- Salvare la configurazione in un file `YAML`;
+- Caricare una configurazione da un file `YAML`;
+- Caricare una delle configurazioni predefinite.
 
-`ConfigurationGUI` estende da `ConfigurationView` e fornisce un'implementazione concreta dell'interfaccia utente, sfruttando la libreria `Swing`.
+## Componenti
 
-Per modularizzare la gestione dell'interfaccia sono stati creati diversi componenti che vanno a costituire la GUI, e comunicano tramite _callback_.
+Ogni elemento dell'interfaccia è gestito da una componente, ovvero un `JPanel`, per permettere maggiore modularità e
+riutilizzo del codice.
+I componenti utilizzati sono i seguenti:
+
+- `ConfigurationControlsPanel`: gestisce i controlli per salvare e caricare le configurazioni personalizzate e quelle predefinite.
+- `SimulationSettingsPanel`: gestisce i parametri specifici della simulazione, come la durata e il seed.
+- `EnvironmentSettingsPanel`: gestisce i parametri dell'ambiente, come la dimensione della mappa.
+- `EntitiesPanel`: gestisce le entità presenti nella simulazione, ovvero i robot, le luci e gli ostacoli.
+- `SimulationCanvas`: per ottenere una preview dell'ambiente di simulazione.
