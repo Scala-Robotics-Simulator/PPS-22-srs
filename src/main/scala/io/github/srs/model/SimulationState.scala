@@ -57,3 +57,4 @@ object SimulationState:
          | Environment     : ${state.environment}
          |-----------------------
         """.stripMargin
+end SimulationState
