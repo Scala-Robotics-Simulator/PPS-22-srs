@@ -321,7 +321,7 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
 
     val cx = (vp.offsetX + pos.x * vp.scale).toInt
     val cy = (vp.offsetY + pos.y * vp.scale).toInt
-    val size = Math.max(MinLightSize, (4 * radius * vp.scale).toInt)
+    val size = Math.max(1, (2 * radius * vp.scale).toInt)
     val x = cx - size / 2
     val y = cy - size / 2
 
