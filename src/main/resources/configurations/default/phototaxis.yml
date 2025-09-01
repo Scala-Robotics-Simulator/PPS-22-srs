@@ -4,43 +4,43 @@ environment:
   width: 10
   height: 10
   entities:
-  - light:
-      position: [2, 2]
-      illuminationRadius: 5.0
-      intensity: 1.0
-      radius: 0.2
-      attenuation: 1.0
-  - light:
-      position: [8, 8]
-      illuminationRadius: 5.0
-      radius: 0.2
-      intensity: 1.0
-      attenuation: 1.0
-  - robot:
-      position: [3, 1]
-      orientation: 90.0
-      radius: 0.25
-      speed: 1.0
-      withProximitySensors: true
-      withLightSensors: true
-      # TODO: When other behaviors are added correct this
-      # behavior: phototaxis
-  - robot:
-      position: [1, 7]
-      orientation: 270.0
-      radius: 0.25
-      speed: 1.0
-      withProximitySensors: true
-      withLightSensors: true
-      # TODO: When other behaviors are added correct this
-      # behavior: phototaxis
-  - obstacle:
-      position: [8.0, 4.0]
-      orientation: 90.0
-      width: 7.0
-      height: 0.2
-  - obstacle:
-      position: [5.0, 5.0]
-      orientation: 0.0
-      width: 3.0
-      height: 0.5
+    - obstacle:
+        orientation: 90.0
+        position: [ 8.0, 4.0 ]
+        height: 0.2
+        width: 7.0
+    - robot:
+        radius: 0.25
+        withProximitySensors: true
+        withLightSensors: true
+        position: [ 1.0, 7.0 ]
+        orientation: 0.0
+        speed: 1.0
+        behavior: Phototaxis
+    - robot:
+        withLightSensors: true
+        position: [ 3.0, 1.0 ]
+        speed: 1.0
+        behavior: Phototaxis
+        orientation: 0.0
+        radius: 0.25
+        withProximitySensors: true
+    - light:
+        orientation: 0.0
+        illuminationRadius: 5.0
+        radius: 0.2
+        intensity: 1.0
+        attenuation: 1.0
+        position: [ 8.0, 8.0 ]
+    - light:
+        radius: 0.2
+        illuminationRadius: 5.0
+        attenuation: 1.0
+        orientation: 0.0
+        position: [ 2.0, 2.0 ]
+        intensity: 1.0
+    - obstacle:
+        width: 3.0
+        position: [ 5.0, 5.0 ]
+        orientation: 0.0
+        height: 0.5
