@@ -46,13 +46,7 @@ I dettagli di implementazione della modalità CLI e degli argomenti della linea 
 
 L’interfaccia `ConfigurationView` definisce il comportamento comune delle viste di configurazione:
 
-```scala
-trait ConfigurationView:
-
-  def init(): IO[SimulationConfig]
-
-  def close(): IO[Unit]
-```
+![Configuration View UML](../../static/img/04-detailed-design/configuration-view.png)
 
 Chiamando il metodo `init()` si apre l'interfaccia di configurazione e si restituisce la configurazione scelta dall'
 utente.
