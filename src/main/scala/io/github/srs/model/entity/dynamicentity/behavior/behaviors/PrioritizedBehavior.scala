@@ -2,9 +2,15 @@ package io.github.srs.model.entity.dynamicentity.behavior.behaviors
 
 import cats.Monad
 import cats.data.Kleisli
+import io.github.srs.model.entity.dynamicentity.action.Action
+import io.github.srs.model.entity.dynamicentity.behavior.BehaviorContext
+import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.{ Behavior, Condition }
 import io.github.srs.model.entity.dynamicentity.behavior.behaviors.BehaviorCommon.*
 import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings.*
 import io.github.srs.utils.SimulationDefaults.Behaviors
+import io.github.srs.model.entity.dynamicentity.behavior.dsl.BehaviorDsl.*
+
+import io.github.srs.utils.random.RNG
 
 /**
  * A behavior that prioritizes obstacle avoidance, then phototaxis, then random walk.
@@ -14,15 +20,30 @@ import io.github.srs.utils.SimulationDefaults.Behaviors
  */
 object PrioritizedBehavior:
 
+  /**
+   * The decision function for the prioritized behavior.
+   *
+   * @tparam F
+   *   The effect type.
+   * @return
+   *   A [[Decision]] that computes the action based on prioritized conditions.
+   */
   def decision[F[_]: Monad]: Decision[F] =
-    Kleisli { ctx =>
-      val hazard =
-        ctx.sensorReadings.proximityReadings.exists(_.value < Behaviors.Prioritized.DangerDist)
 
-      if hazard then ObstacleAvoidanceBehavior.decision[F].run(ctx)
-      else
-        val hasLight =
-          ctx.sensorReadings.lightReadings.exists(_.value >= Behaviors.Prioritized.LightThreshold)
-        if hasLight then PhototaxisBehavior.decision[F].run(ctx)
-        else RandomWalkBehavior.decision[F].run(ctx)
+    val danger: Condition[BehaviorContext] =
+      ctx => ctx.sensorReadings.proximityReadings.exists(_.value < Behaviors.Prioritized.DangerDist)
+
+    val hasLight: Condition[BehaviorContext] =
+      ctx => ctx.sensorReadings.lightReadings.exists(_.value >= Behaviors.Prioritized.LightThreshold)
+
+    val chooser: Behavior[BehaviorContext, BehaviorContext => (Action[F], RNG)] =
+      (
+        (danger ==> ObstacleAvoidanceBehavior.decision[F].run) |
+          (hasLight ==> PhototaxisBehavior.decision[F].run)
+      ).default(RandomWalkBehavior.decision[F].run)
+
+    Kleisli { ctx =>
+      val runSelected = chooser.run(ctx)
+      runSelected(ctx)
     }
+end PrioritizedBehavior
