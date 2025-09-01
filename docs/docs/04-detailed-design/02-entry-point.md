@@ -4,52 +4,43 @@ sidebar_position: 2
 
 # Entry Point
 
-## Main
+## Avvio dell’applicazione
 
-L’applicazione si avvia dal metodo `main`, che rappresenta il punto d’ingresso del programma.
-Gli argomenti della riga di comando vengono interpretati da `ArgParser`, in modo da determinare la modalità di
-esecuzione:
+L’applicazione si avvia dal punto di ingresso `main`, che interpreta gli argomenti da linea di comando e determina la
+modalità di esecuzione:
 
-- **CLI** (`CLILauncher`) se è attivata l’opzione `--headless`;
-- **GUI** (`GUILauncher`) altrimenti.
+- **CLI**: modalità testuale senza interfaccia grafica;
+- **GUI**: modalità con interfaccia grafica.
 
-Una volta scelto il launcher, viene inizializzata la vista corrispondente (`ConfigurationCLI` o `ConfigurationGUI`),
-costruito lo stato iniziale della simulazione con `mkInitialState`, e avviata l’architettura MVC attraverso `runMVC`.
+In base alla scelta, il `main` inizializza la configurazione della simulazione, costruisce lo stato iniziale e
+seleziona il `launcher` appropriato (CLI o GUI) a cui delegare l’avvio del sistema.
 
-## Launcher
+Il `launcher` rappresenta il ponte tra il `main` e l’architettura MVC:
 
-I due launcher, `CLILauncher` e `GUILauncher`, condividono la stessa struttura di base definita da `BaseLauncher`.
-Questo trait integra i tre moduli fondamentali — `Model`, `View` e `Controller` — e fornisce il meccanismo per avviare
-la
+- fornisce la vista corrispondente alla modalità selezionata;
+- collega `Model`, `View` e `Controller`;
+- avvia la simulazione passando al `Controller` lo stato iniziale.
+
+In questo modo, il `main` si limita a scegliere e configurare, mentre il `launcher` si occupa di predisporre i componenti
+dell’architettura e avviarne l’esecuzione.
+
+### Gestione degli argomenti
+
+All’avvio, gli argomenti della linea di comando vengono analizzati per determinare i parametri di configurazione della
 simulazione.
+Questi includono, ad esempio:
 
-Il ciclo principale è gestito dal `Controller`, richiamato dal metodo `controller.start(state)`, mentre il launcher si
-limita a collegare i componenti dell’architettura MVC e ad avviarne l’esecuzione nella modalità scelta (CLI o GUI).
+- scelta della modalità (CLI o GUI);
+- percorso di un file di configurazione;
+- durata complessiva della simulazione;
+- seed per la riproducibilità;
+- informazioni di help o di versione.
 
-## ArgParser e AppArgs
+:::info
 
-`ArgParser` gestisce l’analisi degli argomenti passati da linea di comando all'avvio dell’applicazione.
-Viene utilizzata la libreria [**scopt**](https://github.com/scopt/scopt) per definire le opzioni disponibili.
+I dettagli di implementazione della modalità CLI e degli argomenti della linea di comando sono descritti nella sezione [Command Line Interface](../05-implementation/04-giulia-nardicchia/cli.md).
 
-Scopt fornisce una DSL dichiarativa che permette di definire con semplicità:
-
-- opzioni obbligatorie o facoltative, con relativi tipi;
-- valori di default;
-- messaggi di aiuto e documentazione;
-- versioning e validazione degli argomenti.
-
-In questa applicazione, le principali opzioni supportate sono:
-
-- `--headless`: avvia la simulazione in modalità CLI senza interfaccia grafica;
-- `--path <file>`: specifica il percorso del file di configurazione YAML;
-- `--duration <milliseconds>`: imposta la durata totale della simulazione;
-- `--seed <number>`: definisce il seme casuale per garantire riproducibilità;
-- `--help`: mostra le istruzioni disponibili;
-- `--version`: mostra la versione dell’applicazione.
-
-Il risultato del parsing è la struttura `AppArgs` che raccoglie in modo tipizzato tutti i parametri forniti dall’utente.
-Se la lettura degli argomenti fallisce, il metodo `parse(args: Seq[String])` restituisce `None`, stampando un messaggio
-di errore.
+:::
 
 ## Configuration View
 
@@ -67,16 +58,6 @@ Chiamando il metodo `init()` si apre l'interfaccia di configurazione e si restit
 utente.
 Questo processo viene facilitato dall'utilizzo dell'effetto `IO`, in quanto consente di gestire in modo semplice e
 sicuro le operazioni di input/output, garantendo la corretta esecuzione delle azioni richieste dall'utente.
-
-### ConfigurationCLI
-
-La versione CLI implementa `ConfigurationView` tramite la console.
-Permette di leggere la configurazione senza interfaccia grafica e restituisce i valori scelti dall’utente.
-Se alcuni parametri non sono specificati, `ConfigurationCLI` chiede all’utente di inserirli interattivamente tramite
-console (`askSimulationTime` e `askSeed`).
-La configurazione viene validata, se il file di configurazione non esiste o non può essere letto, viene generato un
-errore.
-Se la validazione dell’ambiente fallisce, viene segnalato un errore con il messaggio specifico.
 
 ### ConfigurationGUI
 
