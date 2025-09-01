@@ -35,12 +35,16 @@ enum Cell:
   def toEntity(pos: Point2D, cellSize: Double = 0.999999): Set[Entity] = this match
     case Cell.Empty => Set.empty
     case Cell.Obstacle => Set(obstacle at pos + Point2D(0.5, 0.5) withWidth cellSize withHeight cellSize)
-    case Cell.Light => Set(light at pos + Point2D(0.5, 0.5))
+    case Cell.Light =>
+      Set(
+        light at pos + Point2D(0.5, 0.5) withRadius 0.2 withIntensity 1.0 withIlluminationRadius 5.0 withAttenuation 1.0,
+      )
     case Cell.Robot(policy) =>
       Set(
         (robot at (pos + Point2D(0.5, 0.5)))
           .withSpeed(1.0)
           .withProximitySensors
+          .withLightSensors
           .withBehavior(policy),
       )
 
@@ -95,6 +99,20 @@ object Cell:
   infix def O: Cell = Cell.Robot(Policy.ObstacleAvoidance)
 
   /**
+   * Represents a robot cell in the grid that moves towards light sources.
+   * @return
+   *   the robot cell.
+   */
+  infix def P: Cell = Cell.Robot(Policy.Phototaxis)
+
+  /**
+   * Represents a robot cell in the grid that uses prioritized behavior.
+   * @return
+   *   the robot cell.
+   */
+  infix def M: Cell = Cell.Robot(Policy.Prioritized)
+
+  /**
    * Returns a symbol representing the given policy.
    * @param policy
    *   the policy to represent.
@@ -105,6 +123,8 @@ object Cell:
     case Policy.AlwaysForward => "A "
     case Policy.RandomWalk => "R "
     case Policy.ObstacleAvoidance => "O "
+    case Policy.Phototaxis => "P "
+    case Policy.Prioritized => "M "
 
 end Cell
 
@@ -209,12 +229,36 @@ object EnvironmentToGridDSL:
         val y0 = Math.floor(o.position.y - hRaw / 2).toInt
         x >= x0 && x < x0 + w && y >= y0 && y < y0 + h
 
-      env.entities.collectFirst {
+//      val cellEntities = env.entities.flatMap:
+//        case r: Robot if Math.floor(r.position.x).toInt == x && Math.floor(r.position.y).toInt == y =>
+//          Some(Cell.Robot(r.behavior))
+//        case l: Light if Math.floor(l.position.x).toInt == x && Math.floor(l.position.y).toInt == y =>
+//          Some(Cell.Light)
+//        case o: Obstacle if obstacleCovers(o) =>
+//          Some(Cell.Obstacle)
+//        case _ => None
+//      cellEntities.headOption.getOrElse(Cell.Empty)
+
+      val cellEntities = env.entities.collect:
         case r: Robot if Math.floor(r.position.x).toInt == x && Math.floor(r.position.y).toInt == y =>
           Cell.Robot(r.behavior)
-        case l: Light if Math.floor(l.position.x).toInt == x && Math.floor(l.position.y).toInt == y => Cell.Light
-        case o: Obstacle if obstacleCovers(o) => Cell.Obstacle
-      }.getOrElse(Cell.Empty)
+        case l: Light if Math.floor(l.position.x).toInt == x && Math.floor(l.position.y).toInt == y =>
+          Cell.Light
+        case o: Obstacle if obstacleCovers(o) =>
+          Cell.Obstacle
+
+      // Priorità: Robot > Light > Obstacle > Empty
+      cellEntities.find {
+        case Cell.Robot(_) => true
+        case _ => false
+      }.orElse(cellEntities.find {
+        case Cell.Light => true
+        case _ => false
+      }).orElse(cellEntities.find {
+        case Cell.Obstacle => true
+        case _ => false
+      }).getOrElse(Cell.Empty)
+    end cellAt
 
     val grid: Vector[Vector[Cell]] =
       Vector.tabulate(env.height, env.width)((y, x) => cellAt(x, y))
