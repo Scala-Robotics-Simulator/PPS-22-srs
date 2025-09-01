@@ -22,7 +22,7 @@ class ControlsPanel extends JPanel:
   /** Button for pausing and resuming the simulation */
   val pauseResumeButton: JButton = createActionButton("Pause", Icons.Pause)
 
-  private val (slowButton, normalButton, fastButton) = createSpeedControls()
+  private val (slowButton, normalButton, fastButton, superFastButton) = createSpeedControls()
 
   initLayout()
 
@@ -30,10 +30,10 @@ class ControlsPanel extends JPanel:
    * Registers a callback for speed change events.
    *
    * @param callback
-   *   Function to call with the selected speed ("slow", "normal", or "fast")
+   *   Function to call with the selected speed ("slow", "normal", "fast or "superfast") when the button is pressed."
    */
   def onSpeedChanged(callback: String => Unit): Unit =
-    List(slowButton, normalButton, fastButton).foreach { btn =>
+    List(slowButton, normalButton, fastButton, superFastButton).foreach { btn =>
       btn.addActionListener(_ => callback(getSelectedSpeed))
     }
 
@@ -59,11 +59,12 @@ class ControlsPanel extends JPanel:
    * Gets the currently selected speed setting.
    *
    * @return
-   *   "slow", "fast", or "normal" based on radio button selection
+   *   "slow", "fast", "superfast" or "normal"
    */
   private def getSelectedSpeed: String =
     if slowButton.isSelected then "slow"
     else if fastButton.isSelected then "fast"
+    else if superFastButton.isSelected then "superfast"
     else "normal"
 
   /**
@@ -103,14 +104,15 @@ class ControlsPanel extends JPanel:
    * Creates the speed control radio buttons.
    *
    * @return
-   *   Tuple of (slow, normal, fast) radio buttons
+   *   Tuple of (slow, normal, fast, superFast) radio buttons.
    */
-  private def createSpeedControls(): (JRadioButton, JRadioButton, JRadioButton) =
+  private def createSpeedControls(): (JRadioButton, JRadioButton, JRadioButton, JRadioButton) =
     val slowBtn = new JRadioButton("Slow", false)
     val normalBtn = new JRadioButton("Normal", true)
     val fastBtn = new JRadioButton("Fast", false)
+    val superFastBtn = new JRadioButton("Turbo", false)
 
-    val buttons = List(slowBtn, normalBtn, fastBtn)
+    val buttons = List(slowBtn, normalBtn, fastBtn, superFastBtn)
     buttons.foreach { btn =>
       btn.setBackground(Colors.backgroundMedium)
       btn.setFocusPainted(false)
@@ -119,7 +121,7 @@ class ControlsPanel extends JPanel:
     val group = new ButtonGroup()
     buttons.foreach(group.add)
 
-    (slowBtn, normalBtn, fastBtn)
+    (slowBtn, normalBtn, fastBtn, superFastBtn)
 
   /**
    * Creates a titled panel group for related controls.
@@ -164,7 +166,7 @@ class ControlsPanel extends JPanel:
     Seq(
       Box.createRigidArea(new Dimension(0, 10)),
       createControlGroup("Simulation", startStopButton, pauseResumeButton),
-      createControlGroup("Speed", slowButton, normalButton, fastButton),
+      createControlGroup("Speed", slowButton, normalButton, fastButton, superFastButton),
     ).foreach(add)
 
 end ControlsPanel
