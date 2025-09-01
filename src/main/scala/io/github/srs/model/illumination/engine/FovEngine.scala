@@ -12,7 +12,7 @@ trait FovEngine:
   /**
    * Compute a field-of-view / light propagation field.
    *
-   * @param OcclusionGridGrid
+   * @param OcclusionGrid
    *   grid of occlusion coefficients in [0,1]
    * @param startX
    *   source x (cell space)
@@ -24,5 +24,5 @@ trait FovEngine:
    *   row-major (x-fast) flattened array sized width*height with values in [0,1]
    */
   def compute(
-      OcclusionGridGrid: Grid[Double],
+      OcclusionGrid: Grid[Double],
   )(startX: Int, startY: Int, radius: Double): ArraySeq[Double]
