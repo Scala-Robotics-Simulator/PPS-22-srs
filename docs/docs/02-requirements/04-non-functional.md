@@ -8,8 +8,7 @@ description: "Requisiti non funzionali del progetto."
 
 - **[NF-01](./04-non-functional.md)** – Prestazioni: ≥ 100 robot a 30 fps.
 - **[NF-02](./04-non-functional.md)** – Usabilità GUI: questionario rivolto a N utenti per valutare l'interfaccia
-- **[NF-03](./04-non-functional.md)** – Portabilità: compatibilità multi-OS e versioni (verifiche CI).
+- **[NF-03](https://github.com/Scala-Robotics-Simulator/PPS-22-srs/actions)** – Portabilità: compatibilità multi-OS e versioni (verifiche CI).
 - **[NF-04](./04-non-functional.md)** – Riproducibilità: simulazione identica con stesso seed e parametri.
-- **[NF-05](./04-non-functional.md)** – Robustezza: copertura unit-test ≥ N %.
-- **[NF-06](./04-non-functional.md)** – Sicurezza: validazione preventiva del file di configurazione.
-- **[NF-07](./04-non-functional.md)** – Estensibilità: aggiunta di sensori e/o attuatori senza modifiche al core.
+- **[NF-05](https://github.com/Scala-Robotics-Simulator/PPS-22-srs/blob/main/src/main/scala/io/github/srs/view/ConfigurationView.scala)** – Sicurezza: validazione preventiva del file di configurazione.
+- **[NF-06](https://github.com/Scala-Robotics-Simulator/PPS-22-srs/blob/main/src/main/scala/io/github/srs/model/entity/dynamicentity/sensor/Sensor.scala)** – Estensibilità: aggiunta di sensori e/o attuatori senza modifiche al core.
