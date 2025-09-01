@@ -38,7 +38,7 @@ Questi includono, ad esempio:
 
 :::info
 
-I dettagli di implementazione della modalità CLI e degli argomenti della linea di comando sono descritti nella sezione [Command Line Interface](../05-implementation/04-giulia-nardicchia/cli.md) e [GUI](../05-implementation/02-simone-ceredi/5-config-gui.md).
+I dettagli di implementazione della modalità CLI e degli argomenti della linea di comando sono descritti nella sezione [Command Line Interface](../05-implementation/04-giulia-nardicchia/cli.md).
 
 :::
 
@@ -53,3 +53,9 @@ Questo processo viene facilitato dall'utilizzo dell'effetto `IO`, in quanto cons
 In questo modo il chiamante della funzione può essere certo che il risultato dell'`IO` sarà una configurazione valida del simulatore, con la quale potrà andare ad avviare la simulazione.
 
 Il metodo `close` è separato da `init` per lasciare libertà all'utilizzatore di gestire la chiusura dell'interfaccia utente in modo indipendente dall'inizializzazione, e non obbligatoriamente quando la configurazione è stata scelta.
+
+:::info
+
+Per i dettagli di implementazione della modalità CLI e GUI, si rimanda alle sezioni [ConfigurationCLI](../05-implementation/04-giulia-nardicchia/cli.md#configurationcli) e [ConfigurationGUI](../05-implementation/02-simone-ceredi/5-config-gui.md).
+
+:::
