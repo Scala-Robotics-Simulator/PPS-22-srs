@@ -153,64 +153,64 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
    */
   private def createStaticLayerImage(env: Environment): BufferedImage =
     val img = new BufferedImage(getWidth, getHeight, BufferedImage.TYPE_INT_ARGB)
-    val g2 = img.createGraphics()
+    val g = img.createGraphics()
     val vp = viewport(env)
 
-    g2.setColor(getBackground)
-    g2.fillRect(0, 0, getWidth, getHeight)
+    g.setColor(getBackground)
+    g.fillRect(0, 0, getWidth, getHeight)
 
-    drawGrid(g2, env, vp)
-    drawLabels(g2, env, vp)
-    drawStaticEntities(g2, env, vp)
+    drawGrid(g, env, vp)
+    drawLabels(g, env, vp)
+    drawStaticEntities(g, env, vp)
 
-    g2.dispose()
+    g.dispose()
     img
 
   /**
    * Draws the coordinate grid.
    *
-   * @param g2
+   * @param g
    *   Graphics context
    * @param env
    *   Environment for dimensions
    * @param vp
    *   Viewport configuration
    */
-  private def drawGrid(g2: Graphics2D, env: Environment, vp: Viewport): Unit =
-    g2.setColor(Color.LIGHT_GRAY)
-    g2.setStroke(gridStroke)
+  private def drawGrid(g: Graphics2D, env: Environment, vp: Viewport): Unit =
+    g.setColor(Color.LIGHT_GRAY)
+    g.setStroke(gridStroke)
 
     (0 to env.width).foreach { x =>
       val sx = vp.offsetX + (x * vp.scale).toInt
-      g2.drawLine(sx, vp.offsetY, sx, vp.offsetY + vp.height)
+      g.drawLine(sx, vp.offsetY, sx, vp.offsetY + vp.height)
     }
     (0 to env.height).foreach { y =>
       val sy = vp.offsetY + (y * vp.scale).toInt
-      g2.drawLine(vp.offsetX, sy, vp.offsetX + vp.width, sy)
+      g.drawLine(vp.offsetX, sy, vp.offsetX + vp.width, sy)
     }
 
   /**
    * Draws coordinate labels with adaptive stepping.
    *
-   * @param g2
+   * @param g
    *   Graphics context
    * @param env
    *   Environment for dimensions
    * @param vp
    *   Viewport configuration
    */
-  private def drawLabels(g2: Graphics2D, env: Environment, vp: Viewport): Unit =
-    g2.setColor(Color.DARK_GRAY)
+  private def drawLabels(g: Graphics2D, env: Environment, vp: Viewport): Unit =
+    g.setColor(Color.DARK_GRAY)
     val bottom = vp.offsetY + vp.height - LabelBottomOffset
 
     val step = adaptiveLabelStep(vp.scale)
 
     (0 to env.width by step).foreach { x =>
-      g2.drawString(x.toString, vp.offsetX + (x * vp.scale).toInt + LabelXOffset, bottom)
+      g.drawString(x.toString, vp.offsetX + (x * vp.scale).toInt + LabelXOffset, bottom)
     }
     (0 to env.height by step).foreach { y =>
       val py = vp.offsetY + (y * vp.scale).toInt
-      g2.drawString(y.toString, vp.offsetX + LabelXOffset, Math.min(bottom, py + LabelYOffset))
+      g.drawString(y.toString, vp.offsetX + LabelXOffset, Math.min(bottom, py + LabelYOffset))
     }
 
   /**
@@ -233,25 +233,25 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
   /**
    * Draws all static entities (obstacles and lights).
    *
-   * @param g2
+   * @param g
    *   Graphics context
    * @param env
    *   Environment containing entities
    * @param vp
    *   Viewport configuration
    */
-  private def drawStaticEntities(g2: Graphics2D, env: Environment, vp: Viewport): Unit =
+  private def drawStaticEntities(g: Graphics2D, env: Environment, vp: Viewport): Unit =
     env.entities.foreach:
       case StaticEntity.Obstacle(_, pos, orientation, w, h) =>
-        drawObstacle(g2, pos, orientation.degrees, w, h, vp)
-      case StaticEntity.Light(_, pos, _, radius, _, _, _) =>
-        drawLight(g2, pos, radius, vp)
+        drawObstacle(g, pos, orientation.degrees, w, h, vp)
+      case StaticEntity.Light(_, pos, _, radius, illuminationRadius, _, _) =>
+        drawLight(g, pos, radius, illuminationRadius, vp)
       case _ => ()
 
   /**
    * Draws an obstacle with gradient fill.
    *
-   * @param g2
+   * @param g
    *   Graphics context
    * @param pos
    *   Position in world coordinates
@@ -265,7 +265,7 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
    *   Viewport configuration
    */
   private def drawObstacle(
-      g2: Graphics2D,
+      g: Graphics2D,
       pos: Point2D,
       orientation: Double,
       w: Double,
@@ -274,10 +274,10 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
   ): Unit =
     import io.github.srs.utils.SimulationDefaults.UI.{ Colors, Strokes }
 
-    val savedTransform = g2.getTransform
+    val savedTransform = g.getTransform
     val centerX = vp.offsetX + pos.x * vp.scale
     val centerY = vp.offsetY + pos.y * vp.scale
-    g2.rotate(orientation.toRadians, centerX, centerY)
+    g.rotate(orientation.toRadians, centerX, centerY)
 
     val x = (vp.offsetX + (pos.x - w / 2) * vp.scale).toInt
     val y = (vp.offsetY + (pos.y - h / 2) * vp.scale).toInt
@@ -293,21 +293,21 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
       Colors.obstacleGradientEnd,
     )
 
-    g2.setPaint(gradient)
-    g2.fillRect(x, y, width, height)
+    g.setPaint(gradient)
+    g.fillRect(x, y, width, height)
 
-    g2.setColor(Colors.obstacleBorder)
-    g2.setStroke(new BasicStroke(Strokes.ObstacleStroke))
-    g2.drawRect(x, y, width, height)
+    g.setColor(Colors.obstacleBorder)
+    g.setStroke(new BasicStroke(Strokes.ObstacleStroke))
+    g.drawRect(x, y, width, height)
 
-    g2.setTransform(savedTransform)
+    g.setTransform(savedTransform)
 
   end drawObstacle
 
   /**
    * Draws a light source with radial gradient.
    *
-   * @param g2
+   * @param g
    *   Graphics context
    * @param pos
    *   Position in world coordinates
@@ -316,48 +316,106 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
    * @param vp
    *   Viewport configuration
    */
-  private def drawLight(g2: Graphics2D, pos: Point2D, radius: Double, vp: Viewport): Unit =
-    import io.github.srs.utils.SimulationDefaults.UI.Colors
+  private def drawLight(
+      g: Graphics2D,
+      pos: Point2D,
+      radius: Double,
+      illuminationRadius: Double,
+      vp: Viewport,
+  ): Unit =
 
     val cx = (vp.offsetX + pos.x * vp.scale).toInt
     val cy = (vp.offsetY + pos.y * vp.scale).toInt
-    val size = Math.max(1, (2 * radius * vp.scale).toInt)
-    val x = cx - size / 2
-    val y = cy - size / 2
 
-    val paint = new RadialGradientPaint(
-      new java.awt.geom.Point2D.Double(cx, cy),
-      (size / 2).toFloat,
-      Array(0f, 1f),
-      Array(Colors.lightCenter, Colors.lightEdge),
-    )
+    val lightSize = math.max(1, (2 * radius * vp.scale).toInt)
+    val illuminationSize = math.max(lightSize, (2 * illuminationRadius * vp.scale).toInt)
 
-    g2.setPaint(paint)
-    g2.fill(new Ellipse2D.Double(x, y, size, size))
-    g2.setColor(Color.ORANGE)
-    g2.setStroke(new BasicStroke(LightStroke))
-    g2.drawOval(x, y, size, size)
+    val gx = cx - illuminationSize / 2
+    val gy = cy - illuminationSize / 2
+
+    val gridLeft = vp.offsetX
+    val gridTop = vp.offsetY
+    val gridRight = vp.offsetX + vp.width
+    val gridBottom = vp.offsetY + vp.height
+
+    val clippedLeft = math.max(gx, gridLeft)
+    val clippedTop = math.max(gy, gridTop)
+    val clippedRight = math.min(gx + illuminationSize, gridRight)
+    val clippedBottom = math.min(gy + illuminationSize, gridBottom)
+
+    if clippedLeft < clippedRight && clippedTop < clippedBottom then
+      val originalClip = g.getClip
+
+      g.setClip(gridLeft, gridTop, vp.width, vp.height)
+
+      val fractions = Array(0f, 0.55f, 0.9f, 1f)
+      val colors = Array(
+        new Color(255, 200, 0, 28),
+        new Color(255, 180, 0, 16),
+        new Color(255, 160, 0, 6),
+        new Color(255, 140, 0, 0),
+      )
+      val glow = new RadialGradientPaint(
+        new java.awt.geom.Point2D.Double(cx, cy),
+        illuminationSize / 2f,
+        fractions,
+        colors,
+      )
+      g.setPaint(glow)
+      g.fill(new Ellipse2D.Double(gx, gy, illuminationSize, illuminationSize))
+
+      val oldComp = g.getComposite
+      g.setComposite(AlphaComposite.SrcOver.derive(0.015f))
+      g.setColor(new Color(255, 170, 0))
+      g.fill(new Ellipse2D.Double(gx, gy, illuminationSize, illuminationSize))
+      g.setComposite(oldComp)
+
+      g.setColor(new Color(255, 170, 0, 36))
+      g.setStroke(new BasicStroke(0.8f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10f, Array(4f, 6f), 0f))
+      g.drawOval(gx, gy, illuminationSize, illuminationSize)
+
+      g.setClip(originalClip)
+    end if
+
+    if cx >= gridLeft && cx <= gridRight && cy >= gridTop && cy <= gridBottom then
+      val px = cx - lightSize / 2
+      val py = cy - lightSize / 2
+      val corePaint = new RadialGradientPaint(
+        new java.awt.geom.Point2D.Double(cx, cy),
+        lightSize / 2f,
+        Array(0f, 1f),
+        Array(
+          io.github.srs.utils.SimulationDefaults.UI.Colors.lightCenter,
+          io.github.srs.utils.SimulationDefaults.UI.Colors.lightEdge,
+        ),
+      )
+      g.setPaint(corePaint)
+      g.fill(new Ellipse2D.Double(px, py, lightSize, lightSize))
+
+      g.setColor(Color.ORANGE)
+      g.setStroke(new BasicStroke(io.github.srs.utils.SimulationDefaults.Canvas.LightStroke))
+      g.drawOval(px, py, lightSize, lightSize)
 
   end drawLight
 
   /**
    * Draws all robots in the environment.
    *
-   * @param g2
+   * @param g
    *   Graphics context
    * @param env
    *   Environment containing robots
    */
-  private def drawRobots(g2: Graphics2D, env: Environment): Unit =
+  private def drawRobots(g: Graphics2D, env: Environment): Unit =
     import io.github.srs.model.environment.robots
     val vp = viewport(env)
     val currentState = state.get
-    env.robots.foreach(drawRobot(g2, _, env, vp, currentState.selectedRobotId))
+    env.robots.foreach(drawRobot(g, _, env, vp, currentState.selectedRobotId))
 
   /**
    * Draws a single robot with body and direction indicator.
    *
-   * @param g2
+   * @param g
    *   Graphics context
    * @param robot
    *   The robot to draw
@@ -367,7 +425,7 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
    *   Optional ID of the selected robot
    */
   private def drawRobot(
-      g2: Graphics2D,
+      g: Graphics2D,
       robot: Robot,
       env: Environment,
       vp: Viewport,
@@ -376,13 +434,13 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
     robot.shape match
       case ShapeType.Circle(radius) =>
         val isSelected = selectedId.contains(robot.id.toString)
-        drawRobotBody(g2, robot, radius, vp, isSelected)
-        drawRobotDirection(g2, robot, radius, env, vp)
+        drawRobotBody(g, robot, radius, vp, isSelected)
+        drawRobotDirection(g, robot, radius, env, vp)
 
   /**
    * Draws the robot's circular body with gradient and border.
    *
-   * @param g2
+   * @param g
    *   Graphics context
    * @param robot
    *   The robot to draw
@@ -393,7 +451,7 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
    * @param isSelected
    *   True if this robot is currently selected
    */
-  private def drawRobotBody(g2: Graphics2D, robot: Robot, radius: Double, vp: Viewport, isSelected: Boolean): Unit =
+  private def drawRobotBody(g: Graphics2D, robot: Robot, radius: Double, vp: Viewport, isSelected: Boolean): Unit =
     import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.{ NormalStroke, SelectionStroke }
     import io.github.srs.utils.SimulationDefaults.UI.{ Colors, Strokes }
 
@@ -415,24 +473,24 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
       Array(colors._1, colors._2),
     )
 
-    g2.setPaint(gradient)
-    g2.fill(robotShape)
+    g.setPaint(gradient)
+    g.fill(robotShape)
 
-    g2.setColor(Colors.robotShadow)
-    g2.setStroke(new BasicStroke(Strokes.RobotShadowStroke))
-    g2.draw(robotShape)
+    g.setColor(Colors.robotShadow)
+    g.setStroke(new BasicStroke(Strokes.RobotShadowStroke))
+    g.draw(robotShape)
 
-    g2.setColor(colors._3)
+    g.setColor(colors._3)
     val strokeWidth = if isSelected then SelectionStroke else NormalStroke
-    g2.setStroke(new BasicStroke(strokeWidth))
-    g2.draw(robotShape)
+    g.setStroke(new BasicStroke(strokeWidth))
+    g.draw(robotShape)
 
   end drawRobotBody
 
   /**
    * Draws an arrow indicating the robot's orientation.
    *
-   * @param g2
+   * @param g
    *   Graphics context
    * @param robot
    *   The robot to draw
@@ -441,7 +499,7 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
    * @param vp
    *   Viewport configuration
    */
-  private def drawRobotDirection(g2: Graphics2D, robot: Robot, radius: Double, env: Environment, vp: Viewport): Unit =
+  private def drawRobotDirection(g: Graphics2D, robot: Robot, radius: Double, env: Environment, vp: Viewport): Unit =
     import SimulationDefaults.DynamicEntity.Robot.*
 
     val cx = (vp.offsetX + robot.position.x * vp.scale).toInt
@@ -451,11 +509,11 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
     val width = math.max(MinArrowWidth.toDouble, radius * vp.scale * ArrowWidthFactor)
 
     val arrow = createArrowPolygon(cx, cy, angle, length, width)
-    g2.setColor(Color.BLACK)
-    g2.fillPolygon(arrow)
-    if !insideConfiguration then drawSensorLines(g2, robot, radius, env, vp)
+    g.setColor(Color.BLACK)
+    g.fillPolygon(arrow)
+    if !insideConfiguration then drawSensorLines(g, robot, radius, env, vp)
 
-  private def drawSensorLines(g2: Graphics2D, robot: Robot, radius: Double, env: Environment, vp: Viewport): Unit =
+  private def drawSensorLines(g: Graphics2D, robot: Robot, radius: Double, env: Environment, vp: Viewport): Unit =
     val cx = (vp.offsetX + robot.position.x * vp.scale).toInt
     val cy = (vp.offsetY + robot.position.y * vp.scale).toInt
     val scaledRadius = radius * vp.scale
@@ -478,13 +536,13 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
       val endY = startY + (sensorLength * math.sin(sensorAngle) * value).toInt
 
       // Draw sensor line
-      g2.setColor(Color.BLUE) // Or any color you prefer for sensors
-      g2.setStroke(new BasicStroke(1.0f)) // Thin line for sensors
-      g2.drawLine(startX, startY, endX, endY)
+      g.setColor(Color.BLUE) // Or any color you prefer for sensors
+      g.setStroke(new BasicStroke(1.0f)) // Thin line for sensors
+      g.drawLine(startX, startY, endX, endY)
 
       // Optional: Draw a small circle at the end to show sensor detection point
       val dotSize = 3
-      g2.fillOval(endX - dotSize / 2, endY - dotSize / 2, dotSize, dotSize)
+      g.fillOval(endX - dotSize / 2, endY - dotSize / 2, dotSize, dotSize)
     }
 
   end drawSensorLines
