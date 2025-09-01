@@ -5,7 +5,7 @@ sidebar_position: 10
 # Generatore di numeri casuali
 
 Per l’implementazione del generatore di numeri casuali (`RNG`) e del tipo funzionale `Rand[A]`, ci si è ispirati al 
-**Capitolo 6** del libro **Functional Programming in Scala**, che illustra come costruire generatori casuali puri e composabili
+**Capitolo 6** del libro [**Functional Programming in Scala**](https://www.manning.com/books/functional-programming-in-scala-second-edition), che illustra come costruire generatori casuali puri e composabili
 in uno stile funzionale.
 
 ## RNG
