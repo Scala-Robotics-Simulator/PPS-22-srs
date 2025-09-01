@@ -61,8 +61,8 @@ movimento direzionale e la rotazione.
 
 Il _trait_ `DynamicEntity` rappresenta un'entità in grado di muoversi e interagire con l’ambiente circostante.
 Comprende:
-<!-- TODO -->
-- `sensors: SensorSuite`: un insieme di sensori che percepiscono l’ambiente
+
+- `sensors: Vector[Sensor[? <: DynamicEntity, ? <: Environment]]`: un insieme di sensori che percepiscono l’ambiente
 - `actuators: Seq[Actuator[? <: DynamicEntity]]`: una sequenza di attuatori che modificano lo stato dell’entità o
   dell’ambiente.
 
@@ -84,8 +84,7 @@ un orientamento (`orientation: Orientation`) coerente:
 - `Obstacle`/`Boundary` sono rappresentati da un rettangolo, che può essere orientato;
 - `Light` è rappresentato da un cerchio, che non ha orientamento.
 
-<!-- TODO -->
-> i `boundary` vengono creati da `CreationDSL.validate(insertBoundaries = true)`. Sono rettangoli sottili posizionati
+> i `boundary` vengono creati da durante la validazione dell'ambiente, in quanto rappresentano i limiti dello spazio simulato e non sono definibili dall'utente. Sono rettangoli sottili posizionati
 > sui bordi e partecipano a collisioni/resistenza come gli ostacoli.
 
 ## Ostacoli
@@ -195,7 +194,6 @@ $$
 \theta' = \theta + \omega \cdot dt
 $$
 
-
 Questa logica, incapsulata nel metodo `act`, consente di aggiornare lo stato del robot in modo funzionale e validato,
 rendendo il comportamento dell’attuatore modulare ed estendibile.
 
@@ -232,6 +230,12 @@ Questo tipo consente di incapsulare le letture dei sensori in un formato coerent
 l'elaborazione dei dati raccolti.
 
 `SensorReadings` è un tipo di utilità che rappresenta una raccolta di letture dei sensori.
+
+:::info
+
+I dettagli implementativi riguardanti i sensori sono disponibili nella sezione [Implementazione dei sensori](../05-implementation/02-simone-ceredi/3-sensors.md).
+
+:::
 
 ### Sensori di prossimità
 

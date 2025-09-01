@@ -26,3 +26,9 @@ I controlli effettuati durante la validazione vanno a:
 - verificare che le entità non si sovrappongano tra loro;
 - verificare che non vi siano una quantità eccessiva di entità;
 - verificare che tutte le entità siano valide.
+
+:::info
+
+I dettagli di implementazione dell'ambiente sono disponibili nella sezione [Implementazione dell'ambiente di simulazione](../05-implementation/02-simone-ceredi/1-environment.md).
+
+:::

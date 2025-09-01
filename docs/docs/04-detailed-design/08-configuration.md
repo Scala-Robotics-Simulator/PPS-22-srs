@@ -52,3 +52,9 @@ I tipi di errore sono definiti in `ConfigError`, che include:
 - `MissingField`: un campo obbligatorio mancante.
 - `ParsingError`: un errore durante il parsing del file di configurazione, tipicamente causato dall'utilizzo di chiavi non valide.
 - `InvalidType`: un tipo di dato non valido per un campo specifico.
+
+:::info
+
+I dettagli implementativi riguardanti la configurazione sono disponibili nella sezione [Implementazione della configurazione](../05-implementation/02-simone-ceredi/4-configuration.md).
+
+:::
