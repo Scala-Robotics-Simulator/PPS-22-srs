@@ -61,7 +61,7 @@ movimento direzionale e la rotazione.
 
 Il _trait_ `DynamicEntity` rappresenta un'entità in grado di muoversi e interagire con l’ambiente circostante.
 Comprende:
-
+<!-- TODO -->
 - `sensors: SensorSuite`: un insieme di sensori che percepiscono l’ambiente
 - `actuators: Seq[Actuator[? <: DynamicEntity]]`: una sequenza di attuatori che modificano lo stato dell’entità o
   dell’ambiente.
@@ -84,6 +84,7 @@ un orientamento (`orientation: Orientation`) coerente:
 - `Obstacle`/`Boundary` sono rappresentati da un rettangolo, che può essere orientato;
 - `Light` è rappresentato da un cerchio, che non ha orientamento.
 
+<!-- TODO -->
 > i `boundary` vengono creati da `CreationDSL.validate(insertBoundaries = true)`. Sono rettangoli sottili posizionati
 > sui bordi e partecipano a collisioni/resistenza come gli ostacoli.
 
