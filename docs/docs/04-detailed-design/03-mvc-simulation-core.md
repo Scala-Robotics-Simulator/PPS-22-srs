@@ -4,9 +4,13 @@ sidebar_position: 3
 
 # MVC e Simulation Core
 
-## ModelModule
+## Model
+
+![ModelModule](../../static/img/04-detailed-design/model-module.png)
 
 ### Definizione dello stato
+
+![State](../../static/img/04-detailed-design/state.png)
 
 Il trait `State` definisce la struttura dello stato della simulazione, che include i seguenti campi:
 
@@ -14,8 +18,8 @@ Il trait `State` definisce la struttura dello stato della simulazione, che inclu
 - `elapsedTime`: tempo già trascorso dall’inizio della simulazione;
 - `dt`: delta time della simulazione, cioè l’intervallo temporale usato per ogni step;
 - `simulationSpeed`: velocità corrente della simulazione;
-- `simulationRNG`: generatore di numeri casuali (`RNG`) usato per introdurre elementi stocastici nei comportamenti dei 
-robot;
+- `simulationRNG`: generatore di numeri casuali (`RNG`) usato per introdurre elementi stocastici nei comportamenti dei
+  robot;
 - `simulationStatus`: stato corrente della simulazione;
 - `environment`: rappresenta l’ambiente della simulazione, contenente le entità validate (`ValidEnvironment`).
 
@@ -30,8 +34,8 @@ Vedere la sezione [Generatore di numeri casuali](10-random-number-generator.md),
 - `SLOW`: velocità ridotta (200 ms per tick);
 - `NORMAL`: velocità standard (100 ms per tick);
 - `FAST`: velocità aumentata (10 ms per tick);
-- `SUPERFAST`: velocità massima (0 ms per tick). Questa modalità viene utilizzata in esecuzione `headless` per far 
-girare la simulazione il più rapidamente possibile.
+- `SUPERFAST`: velocità massima (0 ms per tick). Questa modalità viene utilizzata in esecuzione `headless` per far
+  girare la simulazione il più rapidamente possibile.
 
 #### SimulationStatus
 `SimulationStatus` è una enum che rappresenta i possibili stati della simulazione:
@@ -68,7 +72,9 @@ Il trait `Component[S]` fornisce l’implementazione concreta del `Model`.
 
 L’`Interface[S]` combina `Provider` e `Component`, fungendo da interfaccia unificata del modulo.
 
-## ControllerModule
+## Controller
+
+![ControllerModule](../../static/img/04-detailed-design/controller-module.png)
 
 Il trait `Controller[S]` è parametrizzata sul tipo di stato `S`, che deve estendere `ModelModule.State`.
 Esso espone due metodi:
@@ -107,12 +113,12 @@ Il metodo `simulationLoop` implementa una funzione ricorsiva che:
 - recupera ed elabora gli eventi dalla coda (`handleEvents`)
 - aggiorna la vista con lo stato corrente (`context.view.render`)
 - verifica la condizione di stop tramite `handleStopCondition`, che gestisce lo stato di terminazione della simulazione:
-  - `STOPPED`: chiusura della view;
-  - `ELAPSED_TIME`: passa alla view lo stato finale;
+    - `STOPPED`: chiusura della view;
+    - `ELAPSED_TIME`: passa alla view lo stato finale;
 - se la simulazione non è terminata, esegue `nextStep` in base allo stato:
-  - `RUNNING`: esegue `tickEvents`, calcolando il tempo trascorso e regolando il tick in modo preciso;
-  - `PAUSED`: sospende il ciclo per un breve intervallo (`50 ms`);
-  - altri stati: restituisce lo stato corrente senza modifiche;
+    - `RUNNING`: esegue `tickEvents`, calcolando il tempo trascorso e regolando il tick in modo preciso;
+    - `PAUSED`: sospende il ciclo per un breve intervallo (`50 ms`);
+    - altri stati: restituisce lo stato corrente senza modifiche;
 - ripete ricorsivamente il loop.
 
 ### Gestione degli eventi
@@ -147,6 +153,8 @@ direttamente delle regole di aggiornamento o dei dettagli della business logic.
 
 #### LogicsBundle
 
+![LogicsBundle UML](../../static/img/04-detailed-design/logic.png)
+
 Il `LogicsBundle` raccoglie le funzioni che definiscono come lo stato della simulazione viene aggiornato in risposta a
 diversi eventi.
 Ogni funzione prende lo stato corrente e, se necessario, parametri aggiuntivi, restituendo un nuovo stato aggiornato.
@@ -163,12 +171,12 @@ Le funzioni incluse sono:
   (`SimulationState`) di conseguenza.
 
   Per ciascuna proposta:
-  - viene applicata l’azione del robot all’ambiente usando un approccio di **ricerca binaria** per
-    trovare la massima durata di movimento sicura, evitando collisioni con altri oggetti o robot;
-  - i movimenti di tutti i robot vengono calcolati in parallelo usando `parTraverse`;
-  - i robot aggiornati sostituiscono quelli originali nell’ambiente simulato, mantenendo la
-    validità dell’ambiente tramite la funzione di `validate`;
-  - se la validazione fallisce, lo stato dell’ambiente non viene modificato.
+    - viene applicata l’azione del robot all’ambiente usando un approccio di **ricerca binaria** per
+      trovare la massima durata di movimento sicura, evitando collisioni con altri oggetti o robot;
+    - i movimenti di tutti i robot vengono calcolati in parallelo usando `parTraverse`;
+    - i robot aggiornati sostituiscono quelli originali nell’ambiente simulato, mantenendo la
+      validità dell’ambiente tramite la funzione di `validate`;
+    - se la validazione fallisce, lo stato dell’ambiente non viene modificato.
 
 ### Esecuzione dei comportamenti dei robot
 
@@ -177,15 +185,18 @@ Il metodo `runBehavior` seleziona tutte le entità di tipo `Robot` presenti nell
 Per ciascun robot:
 
 - legge i sensori (`senseAll`);
-- costruisce un `BehaviorContext` e calcola l’azione da compiere tramite la logica del robot (`robot.behavior.run`);
-- aggiorna il generatore casuale della simulazione (`Event.Random`);
+- costruisce un `BehaviorContext` che incapsula le letture dei sensori e il generatore casuale (per permettere comportamenti)
+  stocastici); e calcola l’azione da compiere tramite il comportamento del robot (`robot.behavior.run`);
+- aggiorna il generatore casuale della simulazione (`Event.Random`) con quello restituito dal comportamento;
 - crea una proposta di azione (`RobotProposal`);
 - alla fine, inserisce in coda un evento `RobotActionProposals` contenente tutte le proposte di azione raccolte.
 
 Questo approccio permette di calcolare i comportamenti in parallelo, riducendo i tempi di elaborazione e mantenendo
 l’aggiornamento dello stato coerente.
 
-## ViewModule
+## View
+
+![ViewModule](../../static/img/04-detailed-design/view-module.png)
 
 Il trait `View[S]` definisce l’interfaccia della view, parametrizzata sul tipo di stato `S` che estende
 `ModelModule.State`. La view espone quattro operazioni principali:
@@ -209,41 +220,10 @@ richiamato
 dall’object `View` per creare nuove istanze.
 
 Il trait `Interface[S]` combina `Provider` e `Component`, fornendo un’interfaccia unica per l’uso del modulo `View`
-all’interno
-della simulazione.
+all’interno della simulazione.
 
-### CLIComponent
+:::info
 
-Il trait `CLIComponent[S]` estende `ViewModule.Component[S]` e fornisce un’implementazione concreta della view
-utilizzando un’interfaccia a linea di comando (CLI).
+Per i dettagli di implementazione della modalità CLI, si rimanda alla sezione [CLIComponent](../05-implementation/04-giulia-nardicchia/cli.md#clicomponent).
 
-Per scelta progettuale, il metodo `render` non stampa lo stato della simulazione ad ogni step. La visualizzazione avviene
-invece solo quando il tempo massimo della simulazione è raggiunto, tramite il metodo `timeElapsed`.
-
-In questa fase finale, la view mostra in console l’ultimo stato della simulazione, rappresentando l’ambiente in modo
-testuale con le entità e le loro posizioni in un formato semplificato.
-
-
-:::tip Esempio di ambiente testuale
-La simulazione mostra le entità presenti in una griglia testuale.
-
-Ogni simbolo rappresenta un tipo di entità (robot: `R`, ostacolo: `X`, luce: `**`, cella vuota: `--`).
-
-```text
--- | -- | -- | -- | -- | -- | -- | -- | -- | -- ||
--- | -- | -- | R  | -- | -- | -- | -- | -- | -- ||
--- | -- | ** | -- | -- | -- | -- | -- | -- | -- ||
--- | -- | -- | -- | -- | -- | -- | -- | -- | -- ||
--- | -- | -- | -- | -- | -- | -- | -- | X  | -- ||
--- | -- | -- | -- | -- | X  | -- | -- | -- | -- ||
--- | R  | -- | -- | -- | -- | -- | -- | -- | -- ||
--- | -- | -- | -- | -- | -- | -- | -- | -- | -- ||
--- | -- | -- | -- | -- | -- | -- | -- | ** | -- ||
--- | -- | -- | -- | -- | -- | -- | -- | -- | --
-```
 :::
-
-### GUIComponent
-
-Il trait `GUIComponent[S]` estende `ViewModule.Component[S]` e fornisce un’implementazione concreta della view
-utilizzando un’interfaccia grafica (GUI) basata su Swing.
