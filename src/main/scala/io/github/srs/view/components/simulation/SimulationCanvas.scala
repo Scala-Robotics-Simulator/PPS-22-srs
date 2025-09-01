@@ -7,8 +7,6 @@ import java.awt.image.BufferedImage
 import java.util.concurrent.atomic.AtomicReference
 import javax.swing.JPanel
 
-import scala.collection.immutable.List
-
 import io.github.srs.model.entity.Point2D.*
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.staticentity.StaticEntity
@@ -223,9 +221,9 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
    */
   private def adaptiveLabelStep(scale: Double): Int =
     val raw = LabelDesiredPx / scale
-    val steps = List(1, 2, 5)
+    val steps = LabelStepSequence
     LazyList
-      .iterate(1)(_ * 10)
+      .iterate(1)(_ * LabelScaleBase)
       .flatMap(m => steps.map(_ * m))
       .find(_ >= raw)
       .getOrElse(1)
@@ -327,8 +325,8 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
     val cx = (vp.offsetX + pos.x * vp.scale).toInt
     val cy = (vp.offsetY + pos.y * vp.scale).toInt
 
-    val lightSize = math.max(1, (2 * radius * vp.scale).toInt)
-    val illuminationSize = math.max(lightSize, (2 * illuminationRadius * vp.scale).toInt)
+    val lightSize = math.max(LightFX.MinLightPixels, (DiameterFactor * radius * vp.scale).toInt)
+    val illuminationSize = math.max(lightSize, (DiameterFactor * illuminationRadius * vp.scale).toInt)
 
     val gx = cx - illuminationSize / 2
     val gy = cy - illuminationSize / 2
@@ -348,16 +346,16 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
 
       g.setClip(gridLeft, gridTop, vp.width, vp.height)
 
-      val fractions = Array(0f, 0.55f, 0.9f, 1f)
-      val colors = Array(
-        new Color(255, 200, 0, 28),
-        new Color(255, 180, 0, 16),
-        new Color(255, 160, 0, 6),
-        new Color(255, 140, 0, 0),
+      val fractions = Array(
+        LightFX.GradientFraction0,
+        LightFX.GradientFraction1,
+        LightFX.GradientFraction2,
+        LightFX.GradientFraction3,
       )
+      val colors = LightFX.GradientColor
       val glow = new RadialGradientPaint(
         new java.awt.geom.Point2D.Double(cx, cy),
-        illuminationSize / 2f,
+        illuminationSize / LightFX.GradientRadiusDivisor,
         fractions,
         colors,
       )
@@ -365,13 +363,22 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
       g.fill(new Ellipse2D.Double(gx, gy, illuminationSize, illuminationSize))
 
       val oldComp = g.getComposite
-      g.setComposite(AlphaComposite.SrcOver.derive(0.015f))
+      g.setComposite(AlphaComposite.SrcOver.derive(LightFX.PostGlowAlpha))
       g.setColor(new Color(255, 170, 0))
       g.fill(new Ellipse2D.Double(gx, gy, illuminationSize, illuminationSize))
       g.setComposite(oldComp)
 
       g.setColor(new Color(255, 170, 0, 36))
-      g.setStroke(new BasicStroke(0.8f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10f, Array(4f, 6f), 0f))
+      g.setStroke(
+        new BasicStroke(
+          LightFX.RingStrokeWidth,
+          BasicStroke.CAP_BUTT,
+          BasicStroke.JOIN_MITER,
+          LightFX.RingStrokeMiterLimit,
+          Array(LightFX.RingStrokeDash1, LightFX.RingStrokeDash2),
+          LightFX.RingStrokeDashPhase,
+        ),
+      )
       g.drawOval(gx, gy, illuminationSize, illuminationSize)
 
       g.setClip(originalClip)
@@ -382,8 +389,8 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
       val py = cy - lightSize / 2
       val corePaint = new RadialGradientPaint(
         new java.awt.geom.Point2D.Double(cx, cy),
-        lightSize / 2f,
-        Array(0f, 1f),
+        lightSize / LightFX.GradientRadiusDivisor,
+        Array(LightFX.CoreFractionStart, LightFX.CoreFractionEnd),
         Array(
           io.github.srs.utils.SimulationDefaults.UI.Colors.lightCenter,
           io.github.srs.utils.SimulationDefaults.UI.Colors.lightEdge,
@@ -469,7 +476,7 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
       (vp.offsetX + robot.position.x * vp.scale).toFloat,
       (vp.offsetY + robot.position.y * vp.scale).toFloat,
       (radius * vp.scale).toFloat,
-      Array(0f, 1f),
+      Array(RobotBody.GradientFractionStart, RobotBody.GradientFractionEnd),
       Array(colors._1, colors._2),
     )
 
@@ -520,28 +527,22 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
 
     val readings = robot.senseAll[Id](env).proximityReadings
 
-    // Assuming robot has a collection of sensors with orientations
     readings.foreach { reading =>
       val sensor = reading.sensor
       val value = reading.value
       val sensorAngle = sensor.offset.toRadians + robot.orientation.toRadians
 
-      // Calculate start point (on robot border)
       val startX = cx + (scaledRadius * math.cos(sensorAngle)).toInt
       val startY = cy + (scaledRadius * math.sin(sensorAngle)).toInt
-
-      // Calculate end point (sensor range)
-      val sensorLength = DefaultRange * vp.scale // Assuming sensors have a range property
+      val sensorLength = DefaultRange * vp.scale
       val endX = startX + (sensorLength * math.cos(sensorAngle) * value).toInt
       val endY = startY + (sensorLength * math.sin(sensorAngle) * value).toInt
 
-      // Draw sensor line
-      g.setColor(Color.BLUE) // Or any color you prefer for sensors
-      g.setStroke(new BasicStroke(1.0f)) // Thin line for sensors
+      g.setColor(Color.BLUE)
+      g.setStroke(new BasicStroke(Sensors.LineStrokeWidth))
       g.drawLine(startX, startY, endX, endY)
 
-      // Optional: Draw a small circle at the end to show sensor detection point
-      val dotSize = 3
+      val dotSize = Sensors.DotSize
       g.fillOval(endX - dotSize / 2, endY - dotSize / 2, dotSize, dotSize)
     }
 
@@ -578,6 +579,6 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
         (cy + cosA * halfWidth).toInt,
         (cy - cosA * halfWidth).toInt,
       ),
-      3,
+      Arrow.TriangleVertices,
     )
 end SimulationCanvas
