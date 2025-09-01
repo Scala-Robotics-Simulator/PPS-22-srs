@@ -17,6 +17,14 @@ import io.github.srs.utils.SimulationDefaults.DynamicEntity.{ MaxSpeed, MinSpeed
  */
 object PhototaxisBehavior:
 
+  /**
+   * The decision function for the phototaxis behavior.
+   *
+   * @tparam F
+   *   The effect type.
+   * @return
+   *   A [[Decision]] that computes the action based on light sensor readings.
+   */
   def decision[F[_]: Monad]: Decision[F] =
     Kleisli { ctx =>
       val best: Option[(Double, Orientation)] =
