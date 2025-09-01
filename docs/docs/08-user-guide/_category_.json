@@ -1,0 +1,9 @@
+{
+  "label": "8. Guida utente",
+  "position": 8,
+  "link": {
+    "type": "generated-index",
+    "title": "Guida utente",
+    "description": "In questa sezione viene fornita una guida dettagliata per gli utenti del simulatore"
+  }
+}
