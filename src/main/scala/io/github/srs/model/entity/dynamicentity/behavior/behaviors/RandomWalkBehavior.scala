@@ -8,7 +8,8 @@ import io.github.srs.utils.SimulationDefaults.Behaviors.RandomWalk.*
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.{ MaxSpeed, MinSpeed }
 
 /**
- * A [[Behavior]] that makes the entity perform a random walk.
+ * A [[io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior]] that makes the entity perform a random
+ * walk.
  *
  * It randomly selects speeds for the left and right wheels, with a bias towards forward movement. Occasionally, it may
  * perform a pivot turn to change a direction more sharply.
@@ -21,7 +22,8 @@ object RandomWalkBehavior:
    * @tparam F
    *   The effect type.
    * @return
-   *   A [[Decision]] that computes the action based on random values.
+   *   A [[io.github.srs.model.entity.dynamicentity.behavior.behaviors.BehaviorCommon.Decision]] that computes the
+   *   action based on random values.
    */
   def decision[F[_]: Monad]: Decision[F] =
     Kleisli.ask[Id, BehaviorContext].map { ctx =>

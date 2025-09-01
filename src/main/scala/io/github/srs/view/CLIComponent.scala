@@ -13,7 +13,7 @@ import io.github.srs.utils.SimulationDefaults.DebugMode
  * CLI component trait that defines the interface for creating a CLI view.
  *
  * @tparam S
- *   the type of the simulation state, which must extend [[ModelModule.State]].
+ *   the type of the simulation state, which must extend [[io.github.srs.model.ModelModule.State]].
  */
 trait CLIComponent[S <: ModelModule.State] extends Component[S]:
   context: Requirements[S] =>

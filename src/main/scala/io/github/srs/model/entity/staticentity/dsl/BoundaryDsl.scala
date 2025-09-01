@@ -13,7 +13,7 @@ object BoundaryDsl:
   /**
    * Creates a new boundary with default properties.
    * @return
-   *   A new instance of [[Boundary]] with default values.
+   *   A new instance of [[io.github.srs.model.entity.staticentity.StaticEntity.Boundary]] with default values.
    */
   def boundary: Boundary = Boundary()
 
@@ -73,7 +73,8 @@ object BoundaryDsl:
      * Validates the boundary's properties. This method allows ensuring that the boundary properties reflect domain
      * constraints.
      * @return
-     *   [[Right]] with the updated [[Boundary]] if valid, otherwise [[Left]] with a validation error.
+     *   [[Right]] with the updated [[io.github.srs.model.entity.staticentity.StaticEntity.Boundary]] if valid,
+     *   otherwise [[Left]] with a validation error.
      */
     infix def validate: Validation[Boundary] =
       for

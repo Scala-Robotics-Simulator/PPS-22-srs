@@ -26,7 +26,7 @@ object ControllerModule:
    * Controller trait that defines the interface for the controller.
    *
    * @tparam S
-   *   the type of the state, which must extend [[ModelModule.State]].
+   *   the type of the state, which must extend [[io.github.srs.model.ModelModule.State]].
    */
   trait Controller[S <: ModelModule.State]:
     /**
@@ -45,7 +45,7 @@ object ControllerModule:
      * @param queue
      *   a concurrent queue that holds events to be processed.
      * @return
-     *   an [[IO]] task that completes when the simulation loop ends.
+     *   an [[cats.effect.IO]] task that completes when the simulation loop ends.
      */
     def simulationLoop(s: S, queue: Queue[IO, Event]): IO[S]
 
@@ -55,7 +55,7 @@ object ControllerModule:
    * Provider trait that defines the interface for providing a controller.
    *
    * @tparam S
-   *   the type of the state, which must extend [[ModelModule.State]].
+   *   the type of the state, which must extend [[io.github.srs.model.ModelModule.State]].
    */
   trait Provider[S <: ModelModule.State]:
     val controller: Controller[S]
@@ -71,7 +71,7 @@ object ControllerModule:
    * Component trait that defines the interface for creating a controller.
    *
    * @tparam S
-   *   the type of the simulation state, which must extend [[ModelModule.State]].
+   *   the type of the simulation state, which must extend [[io.github.srs.model.ModelModule.State]].
    */
   trait Component[S <: ModelModule.State]:
     context: Requirements[S] =>
@@ -264,7 +264,7 @@ object ControllerModule:
    * Interface trait that combines the provider and component traits for the controller module.
    *
    * @tparam S
-   *   the type of the simulation state, which must extend [[ModelModule.State]].
+   *   the type of the simulation state, which must extend [[io.github.srs.model.ModelModule.State]].
    */
   trait Interface[S <: ModelModule.State] extends Provider[S] with Component[S]:
     self: Requirements[S] =>

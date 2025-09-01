@@ -97,7 +97,8 @@ object CreationDSL:
     /**
      * Validates the environment with an option to insert boundaries.
      * @return
-     *   A [[Validation]] that contains the validated environment or an error message if validation fails.
+     *   A [[io.github.srs.model.validation.Validation]] that contains the validated environment or an error message if
+     *   validation fails.
      */
     infix def validate: Validation[ValidEnvironment] =
       val entities = env.entities.filterNot:

@@ -16,8 +16,8 @@ import io.github.srs.utils.SimulationDefaults.Illumination
  * The computational pipeline is as follows:
  *   - Build an occlusion grid from static and (optionally) dynamic entities.
  *   - For each light source, compute its individual contribution using a Field-of-View (FOV) engine.
- *   - Combine all individual light contributions into a final [[LightField]] by summing them with saturation (capping
- *     at 1.0).
+ *   - Combine all individual light contributions into a final [[io.github.srs.model.illumination.model.LightField]] by
+ *     summing them with saturation (capping at 1.0).
  */
 object IlluminationLogic:
 
@@ -52,7 +52,8 @@ object IlluminationLogic:
    * @param env
    *   The environment containing lights and entities.
    * @return
-   *   A [[LightField]] representing the final intensity value for each cell in the grid.
+   *   A [[io.github.srs.model.illumination.model.LightField]] representing the final intensity value for each cell in
+   *   the grid.
    */
   def computeLightField(scale: ScaleFactor)(fov: FovEngine)(includeDynamic: Boolean)(env: Environment): LightField =
     given ScaleFactor = scale
@@ -107,7 +108,7 @@ object IlluminationLogic:
    * @param scale
    *   The implicit scale factor.
    * @return
-   *   The final, combined `LightField`.
+   *   The final, combined [[io.github.srs.model.illumination.model.LightField]].
    */
   private def computeField(
       dims: GridDims,

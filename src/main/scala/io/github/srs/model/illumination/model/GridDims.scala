@@ -46,7 +46,7 @@ object GridDims:
    * Create grid dimensions from environment and scale factor.
    *
    * @param env
-   *   [[Environment]] to base dimensions on
+   *   [[io.github.srs.model.environment.Environment]] to base dimensions on
    * @param scale
    *   Scale factor to apply
    */

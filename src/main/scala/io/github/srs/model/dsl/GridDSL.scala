@@ -131,14 +131,14 @@ object Cell:
 end Cell
 
 /**
- * Builder for creating an [[Environment]] from a grid of cells.
+ * Builder for creating an [[io.github.srs.model.environment.Environment]] from a grid of cells.
  * @param cells
  *   the grid of cells representing the environment.
  */
 final case class EnvironmentBuilder(cells: Vector[Vector[Cell]]):
 
   /**
-   * Builds the [[Environment]] from the grid of cells.
+   * Builds the [[io.github.srs.model.environment.Environment]] from the grid of cells.
    * @return
    *   the constructed environment.
    */
@@ -161,7 +161,7 @@ final case class EnvironmentBuilder(cells: Vector[Vector[Cell]]):
 object GridDSL:
 
   /**
-   * Implicit conversion from [[EnvironmentBuilder]] to [[Environment]].
+   * Implicit conversion from [[EnvironmentBuilder]] to [[io.github.srs.model.environment.Environment]].
    */
   given Conversion[EnvironmentBuilder, Environment] with
     def apply(builder: EnvironmentBuilder): Environment = builder.build()
@@ -204,12 +204,13 @@ object GridDSL:
 end GridDSL
 
 /**
- * Utility object for converting an [[Environment]] to a grid-based DSL representation and pretty-printing it.
+ * Utility object for converting an [[io.github.srs.model.environment.Environment]] to a grid-based DSL representation
+ * and pretty-printing it.
  */
 object EnvironmentToGridDSL:
 
   /**
-   * Converts an [[Environment]] to an [[EnvironmentBuilder]].
+   * Converts an [[io.github.srs.model.environment.Environment]] to an [[EnvironmentBuilder]].
    * @param env
    *   the environment to convert.
    * @return

@@ -38,7 +38,7 @@ trait EnvironmentParameters:
    * A set of entities that exist within the environment.
    *
    * @return
-   *   a Set of [[Entity]] representing the entities in the environment.
+   *   a Set of [[io.github.srs.model.entity.Entity]] representing the entities in the environment.
    */
   def entities: Set[Entity]
 
@@ -46,7 +46,7 @@ trait EnvironmentParameters:
    * The light field of the environment, representing the illumination conditions.
    *
    * @return
-   *   a [[LightField]] representing the light field of the environment.
+   *   a [[io.github.srs.model.illumination.model.LightField]] representing the light field of the environment.
    */
   def lightField: LightField
 
