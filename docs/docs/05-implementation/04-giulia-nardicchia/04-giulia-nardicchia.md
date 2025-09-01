@@ -24,8 +24,7 @@ L’implementazione realizzata si concentra principalmente sulle seguenti funzio
     - Azioni di movimento predefinite: avanti, indietro, rotazione e stop
     - Azioni di movimento custom con validazione dei parametri
 - Generatore di numeri casuali
-- DSL
-    - Creazione di ambienti grid-based per la simulazione
-- Command Line Interface (CLI)
+- [DSL per la creazione di ambienti grid-based per la simulazione](./dsl-environment-grid-based.md)
+- [Command Line Interface (CLI)](./cli.md)
     - Parsing degli argomenti da linea di comando
-    - View della CLI di simulazione e configurazione
+    - View della CLI di configurazione e simulazione

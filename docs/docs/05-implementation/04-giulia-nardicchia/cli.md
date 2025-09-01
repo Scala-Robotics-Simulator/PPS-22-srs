@@ -61,8 +61,12 @@ Anche la validazione dell’ambiente avviene prima dell’avvio della simulazion
 
 ## CLIComponent
 
-Il componente `CLIComponent` rappresenta la vista testuale della simulazione nell’architettura MVC.
-La classe interna `CLIViewImpl` implementa i metodi principali di `View`:
+Il trait `CLIComponent[S]` estende `ViewModule.Component[S]` e costituisce la vista testuale della simulazione
+nell’architettura MVC. È definito in modo generico rispetto al tipo di stato `S`, che deve estendere `ModelModule.State`,
+così da poter essere riutilizzato con diversi modelli di simulazione.
+
+L’implementazione concreta della view è affidata alla classe interna `CLIViewImpl`, che definisce i principali metodi
+dell’interfaccia `View`:
 
 - `init(queue: Queue[IO, Event])`: stampa un messaggio di benvenuto;
 - `render(state: S)`: invocato a ogni aggiornamento dello stato, ma lasciato volutamente vuoto per evitare output
@@ -73,3 +77,35 @@ La classe interna `CLIViewImpl` implementa i metodi principali di `View`:
 
 In questo modo, `CLIComponent` fornisce un’interfaccia minimale ma sufficiente per monitorare la simulazione,
 concentrandosi sui messaggi chiave e sull’output finale, senza appesantire l’esecuzione con rendering continui.
+
+
+:::tip Esempio di ambiente testuale
+
+La simulazione mostra le entità presenti in una griglia testuale.
+
+Ogni simbolo rappresenta un tipo di entità:
+- robot: `R` (RandomWalk), `A` (AlwaysForward), `O` (ObstacleAvoidance);
+- ostacolo: `X`;
+- luce: `**`;
+- cella vuota: `--`.
+
+```text
+-- | -- | -- | -- | -- | -- | -- | X  | -- | -- ||
+-- | -- | -- | -- | -- | -- | -- | X  | -- | -- ||
+-- | A  | ** | -- | -- | -- | -- | X  | -- | -- ||
+-- | -- | -- | -- | -- | -- | -- | X  | -- | -- ||
+-- | -- | -- | X  | X  | X  | -- | X  | -- | -- ||
+-- | -- | -- | A  | -- | -- | -- | X  | -- | -- ||
+-- | -- | -- | -- | -- | -- | -- | X  | -- | -- ||
+-- | -- | -- | -- | -- | -- | -- | -- | -- | -- ||
+-- | -- | -- | -- | -- | -- | -- | -- | ** | -- ||
+-- | -- | -- | -- | -- | -- | -- | -- | -- | --
+```
+:::
+
+:::info
+
+Per ulteriori dettagli sull'implementazione del DSL per la creazione di ambienti grid-based, si rimanda alla sezione
+dedicata nella documentazione [DSL ambiente grid-based](./dsl-environment-grid-based.md).
+
+:::
