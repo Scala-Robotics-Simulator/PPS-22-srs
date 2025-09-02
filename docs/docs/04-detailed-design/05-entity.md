@@ -227,6 +227,10 @@ $$
 Questa logica, incapsulata nel metodo `act`, consente di aggiornare lo stato del robot in modo funzionale e validato,
 rendendo il comportamento dell’attuatore modulare ed estendibile.
 
+:::info
+Per ulteriori dettagli sull’implementazione degli attuatori, vedere la sezione [Attuatori](../05-implementation/04-giulia-nardicchia/actuators.md).
+:::
+
 ## Sensori
 
 ![Sensor](../../static/img/04-detailed-design/sensor.png)
