@@ -36,14 +36,14 @@ export function BacklogTable({ data, sprintData, showValidation = false }) {
     let cumulative = 0;
     const remaining = sprints.map(done => {
       cumulative += done || 0;
-      return Math.max(stima - cumulative, 0);
+      return Math.max(effettivo - cumulative, 0);
     });
   
     // pad up to maxSprints with last remaining value
     const padded = [
       ...remaining,
       ...Array(Math.max(0, maxSprints - remaining.length)).fill(
-        remaining.length > 0 ? remaining[remaining.length - 1] : stima
+        remaining.length > 0 ? remaining[remaining.length - 1] : effettivo
       )
     ];
   

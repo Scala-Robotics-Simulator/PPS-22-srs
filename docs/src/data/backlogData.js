@@ -38,8 +38,8 @@ export const backlogData = [
     id: 6,
     item: "Come utente, voglio modificare la dimensione dell'ambiente e aggiungere/rimuovere le entità al suo interno",
     stima: 5,
-    effettivo: 6,
-    sprints: [0, 1, 5, 0, 0]
+    effettivo: 6.5,
+    sprints: [0, 1, 5, 0, 0.5]
   },
   {
     id: 7,
@@ -143,8 +143,8 @@ export const backlogData = [
     id: 21,
     item: "Come un utente, voglio poter scegliere una configurazione della simulazione, così che possa osservare determinati comportamenti.",
     stima: 15,
-    effettivo: 16,
-    sprints: [0, 0, 0, 16, 0]
+    effettivo: 16.5,
+    sprints: [0, 0, 0, 16, 0.5]
   },
   {
     id: 22,
