@@ -6,30 +6,27 @@ sidebar_position: 7
 
 ![Action](../../static/img/04-detailed-design/action.png)
 
-Per la modellazione della tipologia di azioni che è possibile svolgere dalle entità dinamiche è stato adottato un
-approccio basato sul pattern **Tagless Final**, che consente di definire in maniera astratta e composabile i
-comportamenti applicabili a un’entità senza vincolarsi a una specifica implementazione.
+Il modulo `Action` definisce il comportamento eseguibile dalle entità dinamiche all’interno della simulazione, modellando
+le possibili azioni in maniera astratta, composabile e indipendente dall’implementazione concreta.
 
-Il trait `Action[F[_]]` rappresenta un’azione generica parametrizzata sul tipo di effetto `F[_]`, in modo da poter
-essere eseguita in contesti differenti. L’esecuzione dell’azione è demandata a un’interfaccia separata,
-`ActionAlg[F, E]`, che definisce l’algebra delle operazioni disponibili su un’entità dinamica `E` che deve
-estendere `DynamicEntity`.
-In questo modo si realizza una netta distinzione tra cosa può essere fatto (la definizione dell’azione) e come viene
-fatto (la sua interpretazione concreta).
+Un’interfaccia dedicata `ActionAlg` specifica quali operazioni sono disponibili per un’entità dinamica,
+come l’assegnazione di velocità differenziate alle ruote per controllarne il movimento. L’algebra definisce _cosa_ può
+essere fatto, lasciando a implementazioni concrete la responsabilità di stabilire _come_ avviene l’azione.
 
-Al momento, `ActionAlg[F, E]` definisce un singolo metodo:
+Diverse tipologie di azioni sono disponibili, tra cui:
+- movimenti che applicano velocità diverse alle ruote dell’entità;
+- azioni nulle, che lasciano invariato lo stato;
+- sequenze di azioni, che consentono la composizione ordinata e monadica di più comportamenti.
 
-- `moveWheels`, che consente di applicare velocità diverse alle ruote dell’entità dinamica, permettendo così di
-  controllarne il movimento.
+Sono inoltre fornite azioni predefinite per i movimenti più comuni (avanti, indietro, svolta a sinistra/destra, stop),
+semplificando l’utilizzo. È anche possibile definire azioni personalizzate, con validazione dei parametri in fase di
+creazione per garantirne la coerenza dei parametri.
 
-In futuro, questa interfaccia potrà essere estesa per includere ulteriori tipologie di azioni.
+In questo modo, il modulo `Action` si presenta come un componente estendibile, che mantiene la distinzione tra interfaccia
+astratta e implementazioni concrete, permettendo l’evoluzione futura del sistema con l’aggiunta di nuove tipologie di
+azioni senza modificare le logiche esistenti.
 
-Sono state poi definite diverse implementazioni di `Action`:
-
-- `MovementAction`: che rappresenta un movimento applicando velocità diverse alle ruote;
-- `NoAction`: che lascia inalterata l’entità;
-- `SequenceAction`: che permette di comporre più azioni in sequenza, garantendo un’esecuzione ordinata e monadica.
-
-A supporto è stato introdotto anche l’oggetto `MovementActionFactory`, che fornisce un insieme di azioni predefinite
-(avanti, indietro, svolta a sinistra/destra, stop) e un metodo per la creazione di movimenti personalizzati con
-validazione sui parametri di velocità.
+:::info
+Per i dettagli di implementazione del modulo **Action**, si rimanda alla
+sezione [Action](../05-implementation/04-giulia-nardicchia/action.md).
+:::

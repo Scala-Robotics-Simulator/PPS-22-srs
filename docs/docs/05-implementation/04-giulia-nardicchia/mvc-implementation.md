@@ -182,7 +182,7 @@ l’aggiornamento della `UI` e la sincronizzazione con il ciclo di simulazione.
 
 Il modulo segue il **Cake Pattern**, articolandosi in:
 - `Provider[S]`: espone un’istanza concreta della `View` agli altri moduli, supportando l’iniezione delle dipendenze;
-- `Component[S]`: definisce l’implementazione concreta della view tramite `makeView()`, usato per costruire nuove istanze;
+- `Component[S]`: definisce l’implementazione concreta della view tramite `makeView()`, usato per costruire nuove istanze (richiede `ControllerModule.Provider`);
 - `Interface[S]`: combina `Provider` e `Component`, offrendo un’unica interfaccia al resto della simulazione.
 
 In questo modo, la `View` resta indipendente e intercambiabile: è possibile fornire implementazioni diverse (ad esempio, CLI o GUI) senza modificare le logiche di simulazione.

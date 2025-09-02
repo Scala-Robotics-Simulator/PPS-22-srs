@@ -20,7 +20,7 @@ L’implementazione realizzata si concentra principalmente sulle seguenti funzio
     - Robot
 - Attuatori
     - Motori differenziali (con velocità indipendenti per ruota sinistra e destra)
-- Algebra delle azioni
+- [Azioni e Algebra delle azioni](./action.md)
     - Movimento delle ruote dei motori differenziali delle entità dinamiche
     - Azioni di movimento predefinite: avanti, indietro, rotazione e stop
     - Azioni di movimento custom con validazione dei parametri
