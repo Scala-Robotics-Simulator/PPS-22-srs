@@ -9,7 +9,6 @@ import io.github.srs.model.entity.dynamicentity.behavior.behaviors.BehaviorCommo
 import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings.*
 import io.github.srs.utils.SimulationDefaults.Behaviors
 import io.github.srs.model.entity.dynamicentity.behavior.dsl.BehaviorDsl.*
-
 import io.github.srs.utils.random.RNG
 
 /**
