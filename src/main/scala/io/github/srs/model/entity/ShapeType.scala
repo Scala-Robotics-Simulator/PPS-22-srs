@@ -9,7 +9,7 @@ enum ShapeType:
    * A circular shape.
    *
    * @param radius
-   *   the radius of the circle, must be a positive value.
+   *   the radius of the circle must be a positive value.
    */
   case Circle(radius: Double)
 
@@ -17,8 +17,8 @@ enum ShapeType:
    * A rectangular shape.
    *
    * @param width
-   *   the width of the rectangle, must be a positive value.
+   *   the width of the rectangle must be a positive value.
    * @param height
-   *   the height of the rectangle, must be a positive value.
+   *   the height of the rectangle must be a positive value.
    */
   case Rectangle(width: Double, height: Double)
