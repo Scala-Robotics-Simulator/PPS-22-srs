@@ -21,13 +21,13 @@ Il `launcher` rappresenta il ponte tra il `main` e l’architettura MVC:
 - collega `Model`, `View` e `Controller`;
 - avvia la simulazione passando al `Controller` lo stato iniziale.
 
-In questo modo, il `main` si limita a scegliere e configurare, mentre il `launcher` si occupa di predisporre i componenti
-dell’architettura e avviarne l’esecuzione.
+In questo modo, il `main` si limita a selezionare e configurare, mentre il `launcher` predispone i componenti
+dell’architettura e ne
+avvia l’esecuzione.
 
 ### Gestione degli argomenti
 
-All’avvio, gli argomenti della linea di comando vengono analizzati per determinare i parametri di configurazione della
-simulazione.
+All’avvio, gli argomenti della riga di comando vengono analizzati per impostare i parametri della simulazione, tra cui:
 Questi includono, ad esempio:
 
 - scelta della modalità (CLI o GUI);
@@ -38,7 +38,8 @@ Questi includono, ad esempio:
 
 :::info
 
-I dettagli di implementazione della modalità CLI e degli argomenti della linea di comando sono descritti nella sezione [Command Line Interface](../05-implementation/04-giulia-nardicchia/cli.md).
+I dettagli di implementazione della modalità CLI e degli argomenti della linea di comando sono descritti
+in [Command Line Interface](../05-implementation/04-giulia-nardicchia/cli.md).
 
 :::
 
@@ -48,14 +49,17 @@ L’interfaccia `ConfigurationView` definisce il comportamento comune delle vist
 
 ![Configuration View UML](../../static/img/04-detailed-design/configuration-view.png)
 
-Chiamando il metodo `init()` si apre l'interfaccia di configurazione e si restituisce la configurazione scelta dall'utente.
-Questo processo viene facilitato dall'utilizzo dell'effetto `IO`, in quanto consente di gestire in modo semplice e sicuro le operazioni di input/output, garantendo la corretta esecuzione delle azioni richieste dall'utente.
-In questo modo il chiamante della funzione può essere certo che il risultato dell'`IO` sarà una configurazione valida del simulatore, con la quale potrà andare ad avviare la simulazione.
+Chiamando il metodo `init()` si apre l'interfaccia di configurazione e restituisce la configurazione scelta dall'
+utente. L’uso dell’effetto `IO` consente di gestire in modo sicuro le operazioni di I/O, , garantendo che il risultato
+sia una configurazione valida con cui avviare la simulazione.
 
-Il metodo `close` è separato da `init` per lasciare libertà all'utilizzatore di gestire la chiusura dell'interfaccia utente in modo indipendente dall'inizializzazione, e non obbligatoriamente quando la configurazione è stata scelta.
+Il metodo `close()` è separato da `init()`  per consentire a chi utilizza la vista di gestire la chiusura
+dell’interfaccia indipendentemente dall’inizializzazione.
 
 :::info
 
-Per i dettagli di implementazione della modalità CLI e GUI, si rimanda alle sezioni [ConfigurationCLI](../05-implementation/04-giulia-nardicchia/cli.md#configurationcli) e [ConfigurationGUI](../05-implementation/02-simone-ceredi/5-config-gui.md).
+Per i dettagli di implementazione della modalità CLI e GUI, vedere
+sezioni [ConfigurationCLI](../05-implementation/04-giulia-nardicchia/cli.md#configurationcli)
+e [ConfigurationGUI](../05-implementation/02-simone-ceredi/5-config-gui.md).
 
 :::
