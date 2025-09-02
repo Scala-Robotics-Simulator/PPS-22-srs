@@ -42,13 +42,43 @@ export function SprintTable({ data, backlogData, showValidation = false }) {
       : Array(maxDays).fill(0)
   }));
 
+  const printingData = data.map(task => {
+    const stima = typeof task.stima === 'number' ? task.stima : 0;
+    const effettivo = typeof task.effettivo === 'number' ? task.effettivo : 0;
+    const days = Array.isArray(task.days) ? task.days : [];
+  
+    let cumulative = 0;
+    const remaining = days.map(done => {
+      cumulative += done || 0;
+      return Math.max(effettivo - cumulative, 0);
+    });
+  
+    const padded = [
+      ...remaining,
+      ...Array(Math.max(0, maxDays - remaining.length)).fill(
+        remaining.length > 0 ? remaining[remaining.length - 1] : stima
+      )
+    ];
+  
+    return {
+      backlogItem: task.backlogItem || '',
+      id: task.id || '',
+      task: task.task || '',
+      volontario: task.volontario || '',
+      stima,
+      effettivo,
+      days: padded
+    };
+  });
+
+
   const dayTotals = Array(maxDays).fill(0);
   
-  const effettivoTot = normalizedData.reduce((acc, task) => {
+  const effettivoTot = printingData.reduce((acc, task) => {
     task.days.forEach((d, i) => (dayTotals[i] += d));
     return acc + task.effettivo;
   }, 0);
-  const stimaTot = normalizedData.reduce((acc, task) => {
+  const stimaTot = printingData.reduce((acc, task) => {
     return acc + task.stima;
   }, 0);
 
@@ -132,10 +162,10 @@ export function SprintTable({ data, backlogData, showValidation = false }) {
         </tr>
       </thead>
       <tbody>
-        {normalizedData.map(({ backlogItem, id, task, volontario, stima, effettivo, days }, i) => {
+        {printingData.map(({ backlogItem, id, task, volontario, stima, effettivo, days }, i) => {
           // Check if this task has a validation error (days sum doesn't match effettivo)
           const daysSum = days.reduce((sum, day) => sum + (typeof day === 'number' ? day : 0), 0);
-          const daysSumMismatch = Math.abs(daysSum - effettivo) > 0.01;
+          const daysSumMismatch = false;
           
           return (
             <tr key={id || i} style={{

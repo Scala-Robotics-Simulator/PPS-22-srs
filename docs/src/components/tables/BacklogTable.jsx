@@ -28,15 +28,34 @@ export function BacklogTable({ data, sprintData, showValidation = false }) {
   ));
   
   // Normalize data to ensure consistent structure
-  const normalizedData = data.map(item => ({
-    id: item.id || '',
-    item: item.item || '',
-    stima: typeof item.stima === 'number' ? item.stima : 0,
-    effettivo: typeof item.effettivo === 'number' ? item.effettivo : 0,
-    sprints: Array.isArray(item.sprints) 
-      ? [...item.sprints, ...Array(Math.max(0, maxSprints - item.sprints.length)).fill(0)]
-      : Array(maxSprints).fill(0)
-  }));
+  const normalizedData = data.map(item => {
+    const stima = typeof item.stima === 'number' ? item.stima : 0;
+    const effettivo = typeof item.effettivo === 'number' ? item.effettivo : 0;
+    const sprints = Array.isArray(item.sprints) ? item.sprints : [];
+    
+    let cumulative = 0;
+    const remaining = sprints.map(done => {
+      cumulative += done || 0;
+      return Math.max(stima - cumulative, 0);
+    });
+  
+    // pad up to maxSprints with last remaining value
+    const padded = [
+      ...remaining,
+      ...Array(Math.max(0, maxSprints - remaining.length)).fill(
+        remaining.length > 0 ? remaining[remaining.length - 1] : stima
+      )
+    ];
+  
+    return {
+      id: item.id || '',
+      item: item.item || '',
+      stima,
+      effettivo,
+      sprints: padded
+    };
+  });
+
   
   const totals = normalizedData.reduce(
     (acc, item) => {
