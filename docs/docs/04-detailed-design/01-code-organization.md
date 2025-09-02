@@ -9,7 +9,7 @@ disposizione delle cartelle:
 
 ![Code Organization](../../static/img/04-detailed-design/code-organization.png)
 
-> NB: alcune cartelle sono state omesse per semplificare la visualizzazione, ad esempio quelle in `utils` e tutte le
+> Nota: alcune cartelle sono state omesse per semplificare la visualizzazione, ad esempio quelle in `utils` e tutte le
 > cartelle `dsl`.
 
 ## Descrizione delle Cartelle

@@ -78,16 +78,17 @@ Restituisce un `EnvironmentBuilder` contenente una riga iniziale con le due cell
 extension (env: EnvironmentBuilder)
 
   infix def |(next: Cell): EnvironmentBuilder =
-    env.cells match
-      case init :+ lastRow => EnvironmentBuilder(init :+ (lastRow :+ next))
-      case _ => EnvironmentBuilder(Vector(Vector(next)))
+    EnvironmentBuilder(
+      env.cells.dropRight(1) :+ (env.cells.lastOption.getOrElse(Vector.empty: Vector[Cell]) :+ next)
+    )
 ```
 
-L’operatore `|` estende `EnvironmentBuilder` e consente di aggiungere una cella alla riga corrente:
+L’operatore `|` che estende `EnvironmentBuilder` consente di aggiungere una cella alla riga corrente:
 
 - `env.cells` contiene tutte le righe definite fino a quel momento;
-- `init :+ lastRow` separa tutte le righe eccetto l’ultima (`init`) dall’ultima riga (`lastRow`).
-  Viene creato un nuovo `EnvironmentBuilder` aggiornando solo l’ultima riga con la nuova cella `next`.
+- `dropRight(1)` rimuove l’ultima riga, che verrà aggiornata;
+- `lastOption.getOrElse(Vector.empty: Vector[Cell])` recupera l’ultima riga, o una riga vuota se non esiste;
+- `:+ next` aggiunge la nuova cella `next` alla fine dell’ultima riga;
 
 ### Inizio di una nuova riga
 

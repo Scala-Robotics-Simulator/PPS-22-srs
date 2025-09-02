@@ -4,15 +4,20 @@ sidebar_position: 3
 
 # MVC e Simulation Core
 
+In questa sezione viene presentato il design di dettaglio del `Model`, `View` e `Controller` della simulazione.
+
 ## Model
 
 ![ModelModule](../../static/img/04-detailed-design/model-module.png)
+
+Il `Model` è responsabile della gestione dello stato della simulazione in maniera funzionale e sicura.
+Si occupa di applicare le logiche di aggiornamento dello stato in risposta agli eventi generati dal `Controller`.
 
 ### Definizione dello stato
 
 ![State](../../static/img/04-detailed-design/state.png)
 
-Il trait `State` definisce la struttura dello stato della simulazione, che include i seguenti campi:
+Il _trait_ `State` definisce la struttura dello stato della simulazione, che comprende i seguenti campi:
 
 - `simulationTime`: durata totale prevista (opzionale, per supportare simulazioni infinite);
 - `elapsedTime`: tempo trascorso dall’inizio della simulazione;
@@ -30,8 +35,7 @@ maggiori dettagli.
 
 #### SimulationSpeed
 
-`SimulationSpeed` è una enum che definisce le possibili velocità della simulazione:
-
+`SimulationSpeed` è una _enum_ che definisce le possibili velocità della simulazione:
 - `SLOW`: velocità ridotta (200 ms per tick);
 - `NORMAL`: velocità standard (100 ms per tick);
 - `FAST`: velocità aumentata (10 ms per tick);
@@ -39,7 +43,7 @@ maggiori dettagli.
 
 #### SimulationStatus
 
-`SimulationStatus` è una enum che rappresenta i possibili stati della simulazione:
+`SimulationStatus` è una _enum_ che rappresenta i possibili stati della simulazione:
 
 - `RUNNING`: simulazione in esecuzione;
 - `PAUSED`: simulazione in pausa;
@@ -48,143 +52,102 @@ maggiori dettagli.
 
 ### Logica di aggiornamento dello stato
 
-Il trait `Model[S]` è parametrizzato sul tipo di stato `S`, che deve estendere `State`.
-Esso definisce l’interfaccia per aggiornare lo stato della simulazione in modo funzionale e sicuro.
+L’interfaccia del `Model` espone il metodo `update`, che accetta lo stato corrente e una funzione di aggiornamento.
+Questa funzione viene applicata per produrre un nuovo stato, garantendo così l’immuabilità e la consistenza della
+simulazione.
 
-Il metodo `update(s: S)(using f: S => IO[S]): IO[S]` accetta:
-
-- lo stato corrente `s`;
-- una funzione di aggiornamento `f` denominata updateLogic, che produce (in modo asincrono( un nuovo stato incapsulato
-  in `IO`.
-
-Grazie al parametro di contesto `using`, la logica di aggiornamento viene passata implicitamente: il `Model` non deve
-conoscere quali eventi o regole hanno causato l’aggiornamento; si limita ad applicare la funzione ricevuta.
-
-> Si noti che lo stato è immutabile: ogni aggiornamento produce una nuova istanza di `State`, mantenendo
-> l’integrità e la coerenza dei dati.
-
-- `Provider[S]`: espone un’istanza concreta di `Model`, agli altri moduli, permettendo l’iniezione delle
-  dipendenze secondo il **Cake Pattern**;
-- `Component[S]`: fornisce l’implementazione concreta del `Model`;
-- `ModelImpl`: implementa `update` delegando l’aggiornamento alla funzione passata tramite `using`, rendendo
-  l’applicazione della logica di trasformazione completamente modulare e riutilizzabile;
-- `Interface[S]`: combina `Provider` e `Component` come interfaccia unificata del modulo.
+:::info
+Per i dettagli di implementazione riguardante il **Model**, si rimanda alla
+sezione [ModelModule](../05-implementation/04-giulia-nardicchia/mvc-simulation-core.md#modelmodule).
+:::
 
 ## Controller
 
 ![ControllerModule](../../static/img/04-detailed-design/controller-module.png)
 
-Il trait `Controller[S]` è parametrizzata sul tipo di stato `S`, che estende `ModelModule.State`.
-Esso espone due metodi:
+Il `Controller` ha il compito di orchestrare la simulazione, coordinando l’interazione tra `Model` e `View`.
+Le sue responsabilità principali sono:
 
-- `start(initialState: S): IO[S]`: avvia la simulazione;
-- `simulationLoop(s: S, queue: Queue[IO, Event]): IO[S]`: esegue il ciclo principale della simulazione.
+- avviare la simulazione partendo da uno stato iniziale;
+- gestire il ciclo di esecuzione della simulazione;
+- elaborare gli eventi prodotti dal sistema o dai robot;
+- aggiornare la `View` in base allo stato corrente;
+- richiedere al `Model` l’applicazione delle logiche di aggiornamento appropriate.
 
-Il `Controller` è responsabile dell’avvio della simulazione, della gestione del ciclo di esecuzione, del trattamento
-degli eventi e della comunicazione tra il `Model` e la `View`.
-L’implementazione segue un approccio modulare e funzionale, sfruttando **Cats Effect** per la gestione della concorrenza
-ed effetti asincroni.
+Il comportamento del `Controller` può essere schematizzato in tre macro-attività:
 
-- `Provider[S]`: espone un’istanza concreta di `Controller[S]`, permettendo  l’iniezione del controller nei moduli
-  che ne hanno bisogno.
-- `Component[S]`: implementazione concreta del `Controller` (richiede `ModelModule.Provider` e `ViewModule.Provider`);
-- `Interface[S]`: combina `Provider` e `Component`, operando da interfaccia unificata del modulo.
+- avvio della simulazione;
+- ciclo di simulazione;
+- gestione degli eventi.
 
 ### Avvio della simulazione
 
-Il metodo `start` inizializza la simulazione creando una coda di eventi e avviando il ciclo di simulazione:
-
-- utilizza `Queue.unbounded[IO, Event]` per creare una coda di eventi asincrona e non bloccante;
-- avvia la view chiamando `context.view.init`, che prepara l’interfaccia utente;
-- esegue i comportamenti dei robot con `runBehavior`, che raccoglie in parallelo le proposte di azione dei robot;
-- infine, avvia il ciclo principale chiamando `simulationLoop` passando lo stato iniziale e la coda degli eventi.
+- inizializza le strutture necessarie alla gestione degli eventi;
+- prepara la `View` per la rappresentazione grafica;
+- attiva i comportamenti dei robot per generare azioni iniziali.
 
 ### Ciclo di simulazione
 
-Il metodo `simulationLoop` implementa una funzione ricorsiva che:
-
-- esegue i comportamenti dei robot se lo stato è `RUNNING`
-- recupera ed elabora gli eventi dalla coda (`handleEvents`)
-- aggiorna la vista con lo stato corrente (`context.view.render`)
-- verifica la condizione di stop tramite `handleStopCondition`, che gestisce lo stato di terminazione della simulazione:
-    - `STOPPED`: chiusura della view;
-    - `ELAPSED_TIME`: passa alla view lo stato finale;
-- se la simulazione non termina, esegue `nextStep` in base allo stato:
-    - `RUNNING`: esegue `tickEvents`, calcolando il tempo trascorso e regolando il tick in modo preciso;
-    - `PAUSED`: sospende il ciclo per un breve intervallo (`50 ms`);
-    - altri stati: restituisce lo stato corrente senza modifiche;
-- ripete ricorsivamente il loop.
+- gestisce gli eventi ricevuti;
+- aggiorna lo stato tramite il `Model`;
+- aggiorna la `View` per riflettere lo stato corrente;
+- controlla le condizioni di terminazione (stop manuale o tempo massimo raggiunto);
+- prosegue fino alla fine della simulazione.
 
 ### Gestione degli eventi
 
-La gestione degli eventi è stata resa più modulare:
+- traduce gli eventi in funzioni di aggiornamento dello stato;
+- delega al `Model` l’applicazione delle logiche di trasformazione (avanzamento del tempo, pausa, stop, azioni dei
+  robot, ecc.).
 
-- `handleEvents`: processa una sequenza di eventi in ordine, applicando ciascun evento allo stato corrente;
-- `handleEvent`: gestisce un singolo evento, aggiornando lo stato tramite le logiche definite nel `LogicsBundle`.
+Di seguito è illustrato il diagramma dei possibili eventi gestiti dal `Controller` e un tipo di messaggio usato per
+utilità:
+![Event and RobotProposal Protocol](../../static/img/04-detailed-design/protocol-message.png)
 
-[Protocollo Event e Message RobotProposal](../../static/img/04-detailed-design/protocol-message.png)
+### LogicsBundle
 
-Gli eventi (`Event`) comprendono:
+Per mantenere separata la business logic dal `Controller`, le logiche di aggiornamento sono raccolte in un
+`LogicsBundle`, che contiene funzioni come:
 
-- `Tick`: avanzamento temporale della simulazione;
-- `TickSpeed`: modifica della velocità dei tick;
-- `Random`: aggiornamento del generatore casuale;
-- `Pause` / `Resume` / `Stop`: controllo dello stato della simulazione;
-- `RobotActionProposals`: gestione delle proposte di azione (`RobotProposal`) dei robot a ogni tick.
+- avanzamento del tempo;
+- gestione della velocità;
+- pausa/ripresa/stop della simulazione;
+- aggiornamento del generatore casuale;
+- applicazione delle azioni proposte dai robot.
 
-Ogni evento nel `Controller` viene trasformato in un aggiornamento dello stato tramite le logiche definite nel
-`LogicsBundle`.
-Il `LogicsBundle` viene passato implicitamente al controller come `given` e utilizzato con la keyword `using` quando il
-`Controller` chiama il metodo `update` del model.
+Il `Controller` utilizza queste logiche per aggiornare lo stato in risposta agli eventi, delegando l’effettiva
+trasformazione al `Model`.
 
-In questo modo:
-
-- il `Controller` non modifica direttamente lo stato;
-- ma delega tutte le trasformazioni al `Model`, specificando quale logica applicare (`tick`, `pause`, `stop`, `resume`,
-  ecc.);
-- il `Model` applica la logica appropriata e restituisce il nuovo stato aggiornato.
-
-Questo consente al `Controller` di continuare il ciclo della simulazione con lo stato corretto, senza occuparsi
-direttamente delle regole di aggiornamento o dei dettagli della business logic.
-
-#### LogicsBundle
-
+Di seguito è riportato il diagramma del `LogicsBundle`:
 ![LogicsBundle UML](../../static/img/04-detailed-design/logic.png)
 
-Il `LogicsBundle` raccoglie le funzioni che definiscono come lo stato della simulazione viene aggiornato in risposta a
-diversi eventi.
-Ogni funzione prende lo stato corrente e, se necessario, parametri aggiuntivi, restituendo un nuovo stato aggiornato.
-Le funzioni incluse sono:
+:::info
+Per i dettagli di implementazione del **Controller**, si rimanda alla
+sezione [ControllerModule](../05-implementation/04-giulia-nardicchia/mvc-simulation-core.md#controllermodule).
+:::
 
-- `tick`: aggiorna lo stato della simulazione avanzando il tempo trascorso e, se necessario, modificando lo stato in
-  base al tempo massimo raggiunto;
-- `tickSpeed`: modifica la velocità della simulazione;
-- `random`: aggiorna il generatore di numeri casuali nello stato;
-- `pause`: mette la simulazione in pausa aggiornando lo stato;
-- `resume`: riprende la simulazione aggiornando lo stato;
-- `stop`: ferma la simulazione aggiornando lo stato;
-- `robotActions`: gestisce le proposte di azione dei robot (`RobotProposal`) e aggiorna lo stato della simulazione
-  (`SimulationState`) di conseguenza.
+## View
 
-  Per ciascuna proposta:
-    - si applica l’azione del robot all’ambiente usando una  **ricerca binaria** per
-      calcolare la massima durata di movimento sicura ( evitando collisioni con altri oggetti o robot);
-    - i movimenti di tutti i robot vengono calcolati in parallelo usando `parTraverse`;
-    - i robot aggiornati sostituiscono quelli originali nell’ambiente simulato, mantenendo la
-      validità dell’ambiente tramite la funzione di `validate`;
-    - se la validazione fallisce, lo stato dell’ambiente non viene modificato.
+![ViewModule](../../static/img/04-detailed-design/view-module.png)
 
-### Esecuzione dei comportamenti dei robot
+La `View` ha il compito di gestire la rappresentazione della simulazione e l’interazione con l’utente.
+Le responsabilità principali della `View` si possono sintetizzare in tre fasi:
+- inizializzazione
+  - prepara l’interfaccia (grafica o testuale);
+  - collega la coda degli eventi, in modo da permettere all’utente o al sistema di inviare comandi alla simulazione;
+- aggiornamento
+  - riceve lo stato corrente dal `Controller`;
+  - visualizza l’ambiente e le entità aggiornate, riflettendo l’evoluzione della simulazione in tempo reale;
+- terminazione
+  - chiude l’interfaccia alla fine della simulazione (nel caso della modalità grafica);
+  - esegue azioni dedicate quando viene raggiunto il tempo massimo (ad esempio, mostrando l'ambiente dello stato finale).
 
-Il metodo `runBehavior` seleziona tutte le entità di tipo `Robot` presenti nell’ambiente.
+In questo modo la `View` resta un modulo indipendente e intercambiabile: è possibile fornire diverse implementazioni (ad
+esempio CLI o GUI) senza alterare le logiche di simulazione.
 
-Per ciascun robot:
-
-- legge i sensori (`senseAll`);
-- costruisce un `BehaviorContext` (letture sensori + RNG) e calcola l’azione con `robot.behavior.run`;
-- aggiorna il generatore casuale della simulazione (`Event.Random`) con quello restituito dal comportamento;
-- crea una proposta di azione (`RobotProposal`);
-- inserisce in coda un evento `RobotActionProposals` contenente tutte le proposte di azione raccolte.
-
-Questo approccio permette di calcolare i comportamenti in parallelo, riducendo i tempi di elaborazione e mantenendo
-l’aggiornamento dello stato coerente.
+:::info
+Per ulteriori dettagli sull’implementazione della:
+- **View**, si rimanda alla
+  sezione [ViewModule](../05-implementation/04-giulia-nardicchia/mvc-simulation-core.md#viewmodule);
+- modalità **CLI**, si veda la sezione [CLIComponent](../05-implementation/04-giulia-nardicchia/cli.md#clicomponent).
+:::

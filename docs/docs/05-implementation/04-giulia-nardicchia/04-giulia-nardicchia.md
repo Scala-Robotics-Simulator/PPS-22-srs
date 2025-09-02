@@ -6,14 +6,15 @@ sidebar_position: 4
 
 L’implementazione realizzata si concentra principalmente sulle seguenti funzionalità:
 
-- Architettura MVC: Model
+- [Model-View-Controller (MVC) con Cake Pattern](./mvc-simulation-core.md)
+  - Model
     - Stato della simulazione
     - Logica di aggiornamento dello stato della simulazione (evoluzione temporale, gestione dei comandi di
       controllo, velocità e collisioni)
-- Architettura MVC: Controller
+  - Controller
     - Gestione del ciclo di simulazione
     - Gestione degli eventi
-- Architettura MVC: View
+  - View
     - Interfaccia comune
 - Entità dinamiche
     - Robot
@@ -23,7 +24,7 @@ L’implementazione realizzata si concentra principalmente sulle seguenti funzio
     - Movimento delle ruote dei motori differenziali delle entità dinamiche
     - Azioni di movimento predefinite: avanti, indietro, rotazione e stop
     - Azioni di movimento custom con validazione dei parametri
-- Generatore di numeri casuali
+- [Generatore di numeri casuali](./random-number-generator.md)
 - [DSL per la creazione di ambienti grid-based per la simulazione](./dsl-environment-grid-based.md)
 - [Command Line Interface (CLI)](./cli.md)
     - Parsing degli argomenti da linea di comando
