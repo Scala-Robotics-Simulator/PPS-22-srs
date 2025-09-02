@@ -188,9 +188,7 @@ object GridDSL:
      *   an [[EnvironmentBuilder]] with the cell added to the current row.
      */
     infix def |(next: Cell): EnvironmentBuilder =
-      env.cells match
-        case init :+ lastRow => EnvironmentBuilder(init :+ (lastRow :+ next))
-        case _ => EnvironmentBuilder(Vector(Vector(next)))
+      EnvironmentBuilder(env.cells.dropRight(1) :+ (env.cells.lastOption.getOrElse(Vector.empty: Vector[Cell]) :+ next))
 
     /**
      * Starts a new row in the environment grid.
