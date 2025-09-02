@@ -16,26 +16,25 @@ def update(s: S)(using f: S => IO[S]): IO[S]
 Esso accetta:
 
 - lo stato corrente `s`;
-- una funzione di aggiornamento `f`, che trasforma lo stato in modo asincrono restituendo un
-  nuovo stato incapsulato in `IO`.
+- una funzione di aggiornamento `f`, che produce, in modo asincrono, un nuovo stato incapsulato in `IO`.
 
-L’uso della keyword `using` permette di passare la logica di aggiornamento implicitamente, in questo modo, il `Model`
-non ha bisogno di sapere quali eventi o logiche hanno causato l’aggiornamento; si limita ad applicare la funzione
+Grazie al parametro di contesto `using` la logica di aggiornamento viene passata implicitamente: il `Model`
+non deve conoscere quali eventi o regole hanno causato l’aggiornamento; si limita ad applicare la funzione
 ricevuta.
 
-Si noti che lo stato è immutabile: ogni aggiornamento produce una nuova istanza di `State`, mantenendo
-l’integrità e la coerenza dei dati.
+> Si noti che lo stato è immutabile: ogni aggiornamento produce una nuova istanza di `State`, mantenendo
+> l’integrità e la coerenza dei dati.
 
 Il modulo segue il **Cake Pattern**, articolandosi in:
-- `Provider[S]`: espone un’istanza concreta del `Model` agli altri moduli, permettendo l’iniezione delle dipendenze;
+- `Provider[S]`: espone un’istanza concreta di `Model` agli altri moduli, permettendo l’iniezione delle dipendenze;
 - `Component[S]`: fornisce l’implementazione concreta del `Model`;
-- `Interface[S]`: combina `Provider` e `Component`, fungendo da interfaccia unificata del modulo.
+- `Interface[S]`: combina `Provider` e `Component`, come interfaccia unificata del modulo.
 
 `ModelImpl` implementa `update` semplicemente delegando l’aggiornamento alla funzione passata tramite `using`, rendendo l’applicazione della logica di trasformazione completamente modulare e riutilizzabile.
 
 ## ControllerModule
 
-Il trait `Controller[S]` è parametrizzata sul tipo di stato `S`, che deve estendere `ModelModule.State`.
+Il trait `Controller[S]` è parametrizzata sul tipo di stato `S`, che estende `ModelModule.State`.
 Esso espone due metodi:
 
 ```scala
@@ -47,14 +46,15 @@ def simulationLoop(s: S, queue: Queue[IO, Event]): IO[S]
 
 Il `Controller` è responsabile dell’avvio della simulazione, della gestione del ciclo di esecuzione, del trattamento
 degli eventi e della comunicazione tra il `Model` e la `View`.
-L’implementazione segue un approccio modulare e funzionale, sfruttando `Cats Effect` per la gestione della concorrenza
+L’implementazione segue un approccio modulare e funzionale, sfruttando **Cats Effect** per la gestione della concorrenza
 ed effetti asincroni.
 
 Il modulo segue il **Cake Pattern**, articolandosi in:
-- `Provider[S]`: espone un’istanza concreta del `Controller` agli altri moduli, supportando l’iniezione delle dipendenze;
-- `Component[S]`: fornisce l’implementazione concreta del `Controller` e richiede i moduli `ModelModule.Provider`
-  e `ViewModule.Provider`;
-- `Interface[S]`: combina `Provider` e `Component`, fungendo da interfaccia unificata del modulo.
+- `Provider[S]`: espone un’istanza concreta di `Controller` permettendo l’iniezione del controller nei moduli
+  che ne hanno bisogno;
+- `Component[S]`: fornisce l’implementazione concreta del `Controller` (richiede `ModelModule.Provider`
+  e `ViewModule.Provider`);
+- `Interface[S]`: combina `Provider` e `Component`, operando da interfaccia unificata del modulo.
 
 ### Avvio della simulazione
 
@@ -73,12 +73,12 @@ Il metodo `simulationLoop` implementa una funzione ricorsiva che:
 - recupera ed elabora gli eventi dalla coda (`handleEvents`)
 - aggiorna la vista con lo stato corrente (`context.view.render`)
 - verifica la condizione di stop tramite `handleStopCondition`, che gestisce lo stato di terminazione della simulazione:
-    - `STOPPED`: chiusura della view;
-    - `ELAPSED_TIME`: passa alla view lo stato finale;
-- se la simulazione non è terminata, esegue `nextStep` in base allo stato:
-    - `RUNNING`: esegue `tickEvents`, calcolando il tempo trascorso e regolando il tick in modo preciso;
-    - `PAUSED`: sospende il ciclo per un breve intervallo (`50 ms`);
-    - altri stati: restituisce lo stato corrente senza modifiche;
+  - `STOPPED`: chiusura della view;
+  - `ELAPSED_TIME`: passa alla view lo stato finale;
+- se la simulazione non termina, esegue `nextStep` in base allo stato:
+  - `RUNNING`: esegue `tickEvents`, calcolando il tempo trascorso e regolando il tick in modo preciso;
+  - `PAUSED`: sospende il ciclo per un breve intervallo (`50 ms`);
+  - altri stati: restituisce lo stato corrente senza modifiche;
 - ripete ricorsivamente il loop.
 
 ### Gestione degli eventi
@@ -118,7 +118,7 @@ In questo modo:
 Questo consente al `Controller` di continuare il ciclo della simulazione con lo stato corretto, senza occuparsi
 direttamente delle regole di aggiornamento o dei dettagli della business logic.
 
-#### LogicsBundle
+### LogicsBundle
 
 Il `LogicsBundle` raccoglie le funzioni che definiscono come lo stato della simulazione viene aggiornato in risposta a
 diversi eventi.
@@ -136,12 +136,12 @@ Le funzioni incluse sono:
   (`SimulationState`) di conseguenza.
 
   Per ciascuna proposta:
-    - viene applicata l’azione del robot all’ambiente usando un approccio di **ricerca binaria** per
-      trovare la massima durata di movimento sicura, evitando collisioni con altri oggetti o robot;
-    - i movimenti di tutti i robot vengono calcolati in parallelo usando `parTraverse`;
-    - i robot aggiornati sostituiscono quelli originali nell’ambiente simulato, mantenendo la
-      validità dell’ambiente tramite la funzione di `validate`;
-    - se la validazione fallisce, lo stato dell’ambiente non viene modificato.
+  - si applica l’azione del robot all’ambiente usando una  **ricerca binaria** per
+    calcolare la massima durata di movimento sicura ( evitando collisioni con altri oggetti o robot);
+  - i movimenti di tutti i robot vengono calcolati in parallelo usando `parTraverse`;
+  - i robot aggiornati sostituiscono quelli originali nell’ambiente simulato, mantenendo la
+    validità dell’ambiente tramite la funzione di `validate`;
+  - se la validazione fallisce, lo stato dell’ambiente non viene modificato.
 
 ### Esecuzione dei comportamenti dei robot
 
@@ -150,11 +150,10 @@ Il metodo `runBehavior` seleziona tutte le entità di tipo `Robot` presenti nell
 Per ciascun robot:
 
 - legge i sensori (`senseAll`);
-- costruisce un `BehaviorContext` che incapsula le letture dei sensori e il generatore casuale (per permettere comportamenti)
-  stocastici); e calcola l’azione da compiere tramite il comportamento del robot (`robot.behavior.run`);
+- costruisce un `BehaviorContext` (letture sensori + RNG) e calcola l’azione con `robot.behavior.run`;
 - aggiorna il generatore casuale della simulazione (`Event.Random`) con quello restituito dal comportamento;
 - crea una proposta di azione (`RobotProposal`);
-- alla fine, inserisce in coda un evento `RobotActionProposals` contenente tutte le proposte di azione raccolte.
+- inserisce in coda un evento `RobotActionProposals` contenente tutte le proposte di azione raccolte.
 
 Questo approccio permette di calcolare i comportamenti in parallelo, riducendo i tempi di elaborazione e mantenendo
 l’aggiornamento dello stato coerente.
@@ -186,4 +185,4 @@ Il modulo segue il **Cake Pattern**, articolandosi in:
 - `Component[S]`: definisce l’implementazione concreta della view tramite `makeView()`, usato per costruire nuove istanze;
 - `Interface[S]`: combina `Provider` e `Component`, offrendo un’unica interfaccia al resto della simulazione.
 
-In questo modo, la View resta indipendente e intercambiabile: è possibile fornire implementazioni diverse (ad esempio, CLI o GUI) senza modificare le logiche di simulazione.
+In questo modo, la `View` resta indipendente e intercambiabile: è possibile fornire implementazioni diverse (ad esempio, CLI o GUI) senza modificare le logiche di simulazione.

@@ -58,7 +58,7 @@ simulazione.
 
 :::info
 Per i dettagli di implementazione riguardante il **Model**, si rimanda alla
-sezione [ModelModule](../05-implementation/04-giulia-nardicchia/mvc-simulation-core.md#modelmodule).
+sezione [ModelModule](../05-implementation/04-giulia-nardicchia/mvc-implementation.md#modelmodule).
 :::
 
 ## Controller
@@ -123,7 +123,7 @@ Di seguito è riportato il diagramma del `LogicsBundle`:
 
 :::info
 Per i dettagli di implementazione del **Controller**, si rimanda alla
-sezione [ControllerModule](../05-implementation/04-giulia-nardicchia/mvc-simulation-core.md#controllermodule).
+sezione [ControllerModule](../05-implementation/04-giulia-nardicchia/mvc-implementation.md#controllermodule).
 :::
 
 ## View
@@ -148,6 +148,6 @@ esempio CLI o GUI) senza alterare le logiche di simulazione.
 :::info
 Per ulteriori dettagli sull’implementazione della:
 - **View**, si rimanda alla
-  sezione [ViewModule](../05-implementation/04-giulia-nardicchia/mvc-simulation-core.md#viewmodule);
+  sezione [ViewModule](../05-implementation/04-giulia-nardicchia/mvc-implementation.md#viewmodule);
 - modalità **CLI**, si veda la sezione [CLIComponent](../05-implementation/04-giulia-nardicchia/cli.md#clicomponent).
 :::

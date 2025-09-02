@@ -6,7 +6,7 @@ sidebar_position: 4
 
 L’implementazione realizzata si concentra principalmente sulle seguenti funzionalità:
 
-- [Model-View-Controller (MVC) con Cake Pattern](./mvc-simulation-core.md)
+- [Model-View-Controller (MVC) con Cake Pattern](mvc-implementation.md)
   - Model
     - Stato della simulazione
     - Logica di aggiornamento dello stato della simulazione (evoluzione temporale, gestione dei comandi di
