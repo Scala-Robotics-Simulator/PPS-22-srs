@@ -122,7 +122,7 @@ object SimulationDefaults:
 
   val Duration: Option[Long] = None
   val Seed: Option[Long] = None
-  val DebugMode = true
+  val DebugMode = false
   val BinarySearchDurationThreshold: FiniteDuration = 1.microseconds
 
   /**
@@ -298,6 +298,10 @@ object SimulationDefaults:
       val DefaultPolicy: Policy = Policy.AlwaysForward
     end Robot
   end DynamicEntity
+
+  object GridDSL:
+    val ObstacleSize: Double = 0.999999
+    val IncrementToCenterPos: Point2D = Point2D(0.5, 0.5)
 
   object Fields:
 
