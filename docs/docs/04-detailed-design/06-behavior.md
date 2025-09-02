@@ -41,6 +41,12 @@ Il modello si basa su quattro livelli di astrazione crescente:
 - **Behavior** – composizione di regole con  _fallback_ garantito per assicurare totalità (sempre un’azione `A`);
 - **Policy** – strategie complete e riusabili per casi d'uso specifici (evita ostacoli, fototassi, ecc.).
 
+## Panoramica tra Policy e Behavior
+
+Il diagramma seguente sintetizza le relazioni tra `Policy`, i behavior concreti, `Decision[F]` e `BehaviorContext`.
+
+![Policy e Behaviors](../../static/img/04-detailed-design/policy-behaviors.png)
+
 ## DSL di composizione
 
 Il modulo fornisce un linguaggio specifico di dominio per comporre comportamenti in modo dichiarativo:
