@@ -15,7 +15,7 @@ Ha permesso al team di visualizzare l’avanzamento, assegnare compiti e tenere 
   sono stati assegnati ai membri del team.
 - I task meno prioritari non vengono assegnati preventivamente: restano disponibili per essere presi in carico da chi ha
   capacità libera durante lo sprint.
-- Nei Team Sync, i membri aggiornano lo stato dei task su Trello, spostandoli tra “Sprint Backlog”, “In Progress” e
+- Nei Daily Standup, i membri aggiornano lo stato dei task su Trello, spostandoli tra “Sprint Backlog”, “In Progress” e
   “Done Sprint [end date]” a seconda dello stato.
 
 Sono state utilizzate le label di Trello per categorizzare i task per priorità e tipologia, facilitando la

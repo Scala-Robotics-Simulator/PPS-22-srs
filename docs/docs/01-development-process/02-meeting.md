@@ -14,7 +14,7 @@ Le seguenti tipologie di meeting sono state utilizzate durante lo sviluppo:
 - **Sprint Planning**: meeting di pianificazione all'inizio di ogni sprint (circa 1-2 ore), svolto di
   Lunedì ogni due settimane, per definire gli obiettivi, selezionare gli elementi del backlog da completare e assegnare
   i compiti ai membri del team. Si discutono priorità e stime, assicurando l’allineamento del team.
-- **Team Sync**: brevi incontri giornalieri della durata di 15 minuti, tenuti ogni 2 giorni, per aggiornare il team
+- **Daily Standup**: brevi incontri giornalieri della durata di 15 minuti, tenuti ogni 2 giorni, per aggiornare il team
   sui progressi, discutere eventuali impedimenti e pianificare le attività a breve. Questi meeting sono stati
   fondamentali per mantenere la comunicazione aperta e la visibilità sullo stato del progetto.
 - **Sprint Review and Retrospective**: incontro a fine sprint (circa 1 ora), per presentare il lavoro completato,
