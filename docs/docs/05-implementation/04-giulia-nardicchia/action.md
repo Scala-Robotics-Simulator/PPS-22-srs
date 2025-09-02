@@ -8,6 +8,18 @@ Per la modellazione della tipologia di azioni che è possibile svolgere dalle en
 approccio basato sul pattern **Tagless Final**, che consente di definire in maniera astratta e composabile i
 comportamenti applicabili a un’entità senza vincolarsi a una specifica implementazione.
 
+Il pattern **Tagless Final** consente di separare la definizione di un’azione dalla sua esecuzione concreta.
+
+In particolare:
+
+- l'interfaccia astratta `Action[F[_]]` descrive le operazioni disponibili e i comportamenti possibili,
+  parametrizzandoli sul tipo di effetto `F[_]` (ad esempio `IO`, `State` o altre monadi).
+- l'algebra concreta `ActionAlg[F, E]` specifica come tali operazioni vengono effettivamente eseguite su una
+  determinata entità `E`.
+
+Questo approccio favorisce la flessibilità e la riusabilità, consentendo di definire nuove azioni o contesti di
+esecuzione senza modificare il modello di base delle entità dinamiche.
+
 L’interfaccia principale è `Action[F[_]]`, che rappresenta un’azione parametrizzata sul tipo di effetto `F[_]`, in modo
 da poter essere eseguita in contesti differenti. Di seguito viene riportata la definizione di `Action`:
 ```scala
