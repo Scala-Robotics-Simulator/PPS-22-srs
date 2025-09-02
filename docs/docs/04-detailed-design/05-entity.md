@@ -10,122 +10,148 @@ In questa sezione, viene descritta la struttura e le funzionalità delle entità
 
 ![Entity](../../static/img/04-detailed-design/entity.png)
 
-Il _trait_ `Entity` descrive un’entità spaziale dotata di una posizione bidimensionale (`position: Point2D`), una forma
-geometrica (`shape: ShapeType`), rappresentata dal tipo enumerato `ShapeType`, e un orientamento (
-`orientation: Orientation`) espresso in gradi.  
-Questo trait costituisce l’interfaccia di base per ogni oggetto collocato nello spazio simulato, fornendo una struttura
-comune per modellare oggetti dinamici o statici.
+Il `trait` `Entity` modella un oggetto spaziale 2D con:
+
+- `id: UUID` - ID univoco dell'entità;
+- `position: Point2D` — posizione cartesiana;
+- `shape: ShapeType` — forma geometrica (vedi sotto);
+- `orientation: Orientation` — direzione espressa in gradi.
+
+Costituisce l’interfaccia base comune per oggetti **statici** e **dinamici**.
 
 ### Posizione
 
-La classe `Point2D` rappresenta un punto nel piano cartesiano bidimensionale. Oltre ai campi `x: Double` e `y: Double`,
-essa fornisce un insieme di operazioni geometriche fondamentali:
+`Point2D` rappresenta un punto nel piano cartesiano (`x: Double` e `y: Double`) e fornisce primitive geometriche:
 
-- Somma e sottrazione vettoriale
-- Moltiplicazione per scalare
-- Prodotto scalare
-- Modulo del vettore
-- Normalizzazione del vettore
-- Calcolo della distanza tra punti
+- somma/sottrazione vettoriale, moltiplicazione per scalare;
+- prodotto scalare, modulo, normalizzazione;
+- distanza euclidea.
 
-Questa classe costituisce la base per il calcolo di spostamenti, direzioni e interazioni spaziali tra entità.
+> Queste operazioni sono la base per spostamenti, direzioni e collisioni.
 
 ### Forma
 
-La forma geometrica delle entità è definita dal tipo _enum_ `ShapeType`, che può assumere due varianti:
+La forma è un’`enum` `ShapeType` con due varianti:
 
-- `Circle(radius: Double)`: rappresenta un cerchio con raggio specificato.
-- `Rectangle(width: Double, height: Double)`: rappresenta un rettangolo con larghezza e altezza definite.
+- `Circle(radius: Double)` — cerchio di raggio `radius`;
+- `Rectangle(width: Double, height: Double)` — rettangolo con larghezza/altezza.
 
-Questo approccio consente una modellazione semplice ma estensibile delle dimensioni fisiche degli oggetti nello spazio
-simulato.
+> Questo approccio consente una modellazione semplice ma estensibile delle dimensioni fisiche degli oggetti nello spazio
+> simulato.
 
 ### Orientamento
 
-Il _trait_ `Orientation` descrive l’angolo di rotazione di un’entità rispetto a un sistema di riferimento fisso.
-Contiene:
+`Orientation` rappresenta l’angolo di rotazione rispetto a un riferimento fisso:
 
-- `degrees: Double`: l’orientamento espresso in gradi.
-- `toRadians: Double`: la conversione in radianti, utile per calcoli trigonometrici e trasformazioni geometriche.
+- `degrees: Double` — gradi;
+- `toRadians: Double` — conversione in radianti per la trigonometria.
 
-L’orientamento permette di rappresentare la direzione verso cui è rivolto un oggetto nello spazio, supportando il
-movimento direzionale e la rotazione.
+> L’orientamento permette di rappresentare la direzione verso cui è rivolto un oggetto nello spazio, supportando il
+> movimento direzionale e la rotazione.
 
 ## Entità statiche e dinamiche
 
 ![Entities](../../static/img/04-detailed-design/entities.png)
 
-`DynamicEntity` e `StaticEntity` sono due _trait_ che estendono `Entity`.
+`StaticEntity` e `DynamicEntity` estendono `Entity` separando responsabilità e capacità.
 
 ### DynamicEntity
 
-Il _trait_ `DynamicEntity` rappresenta un'entità in grado di muoversi e interagire con l’ambiente circostante.
-Comprende:
+`DynamicEntity` rappresenta un’entità che **percepisce** e **agisce** nel ciclo **sense → decide → act**:
 
-- `sensors: Vector[Sensor[? <: DynamicEntity, ? <: Environment]]`: un insieme di sensori che percepiscono l’ambiente
-- `actuators: Seq[Actuator[? <: DynamicEntity]]`: una sequenza di attuatori che modificano lo stato dell’entità o
-  dell’ambiente.
+- `sensors: Vector[Sensor[? <: DynamicEntity, ? <: Environment, ?]]`;
+- `actuators: Seq[Actuator[? <: DynamicEntity]]`;
+- `behavior: Policy `.
 
-Questa struttura è pensata per simulare comportamenti robotici, in cui percezione e azione sono fortemente integrati.
+I **sensori** raccolgono dati dall’ambiente; il **behavior** elabora le letture in base alla *policy* e seleziona
+un’azione; gli **attuatori** applicano l’azione all’entità. Questa struttura consente di modellare agenti robotici con
+ciclo **sense–decision–act**.
 
-<!-- TODO: behavior -->
+:::info
+
+Approfondimento: progettazione del motore decisionale (**Behavior**) — regole, comportamenti, policy e DSL — nella
+pagina di design [Behavior](./06-behavior.md).
+
+:::
 
 ### StaticEntity
 
-Il _trait_ `StaticEntity` rappresenta un’entità fissa nello spazio, che non può muoversi né agire attivamente
-sull’ambiente, come:
+`StaticEntity` modella entità **non mobili** che possono interagire passivamente con l'ambiente. Possono essere:
 
-- `Obstacle`: ostacoli fissi che impediscono il movimento di entità dinamiche
-- `Light`: fonti di luce che influenzano l’ambiente ma non interagiscono attivamente.
+- `Obstacle`/ `Boundary` — rettangoli (orientabili) che occupano spazio e collidono;
+- `Light` — cerchi che emettono illuminazione (isotropica).
 
-Ogni `StaticEntity` ha una forma geometrica (`shape: ShapeType`) e una posizione (`position: Point2D`) e
-un orientamento (`orientation: Orientation`) coerente:
-
-- `Obstacle`/`Boundary` sono rappresentati da un rettangolo, che può essere orientato;
-- `Light` è rappresentato da un cerchio, che non ha orientamento.
-
-> i `boundary` vengono creati da durante la validazione dell'ambiente, in quanto rappresentano i limiti dello spazio simulato e non sono definibili dall'utente. Sono rettangoli sottili posizionati
-> sui bordi e partecipano a collisioni/resistenza come gli ostacoli.
+> I **boundary** sono creati automaticamente durante la **validazione** dell’ambiente: sono rettangoli sottili posti sui
+> bordi, partecipano a collisioni e alla resistenza luminosa, e sono percepibili dai sensori di prossimità.
 
 ## Ostacoli
 
-Gli **ostacoli** (`StaticEntity.Obstacle`) sono i “muri” dell’ambiente di simulazione:
-blocchi **rettangolari** che occupano spazio, fermano i robot e interrompono il passaggio della luce. Servono a
-costruire scenari realistici — dal corridoio stretto al piccolo labirinto — in cui i robot devono pianificare il
-movimento ed evitare collisioni.
+Gli **ostacoli** (`StaticEntity.Obstacle`) sono “muri” rettangolari che bloccano il movimento e la luce, creando
+corridoi, stanze e scenari di navigazione.
 
-Ogni ostacolo ha:
+**Attributi principali**:
 
-- una **posizione** (`position`) e un’**orientazione** (`orientation`) nello spazio;
-- due **dimensioni** (`width`, `height`);
-- una **forma** coerente, esposta come `ShapeType.Rectangle(width, height)`.
+- `id: UUID` — identificativo univoco;
+- `position: Point2D` — posizione del centro dell’ostacolo;
+- `orientation: Orientation` — angolo in gradi;
+- `width: Double`, `height: Double` — dimensioni;
+- `shape = Rectangle(width, height)` — forma rettangolare.
 
-In fase di **validazione** verifichiamo che le dimensioni siano **> 0**, che l’ostacolo stia **dentro i limiti**
-dell’ambiente e che **non si sovrapponga** ad altre entità.
+**Validazione**:
+
+- Dimensioni **> 0**;
+- Inclusione nei limiti dell’ambiente;
+- **Assenza di sovrapposizioni** con altre entità;
+
+> Servono a costruire scenari realistici — dal corridoio stretto al piccolo labirinto — in cui i robot devono
+> pianificare il movimento ed evitare collisioni.
 
 ## Luce
 
-Le **luci** (`StaticEntity.Light`) sono sorgenti **radiali**: da un punto emettono illuminazione che **decresce con la
-distanza** e viene **bloccata** dagli ostacoli e robot. Sono l’ingrediente che rende
-l’ambiente leggibile per futuri foto-sensori e utile per esperimenti di percezione.
+Le **luci** (`StaticEntity.Light`) sono sorgenti **radiali** che forniscono un **campo percettivo** per i
+`LightSensor` e rendono osservabile lo stato luminoso (`Environment.lightField`).
 
-Ogni luce definisce:
+**Attributi**:
 
-- un **raggio fisico** (`radius`) usato per la sua forma (`ShapeType.Circle(radius)`);
-- un **raggio di illuminazione** (`illuminationRadius`) che ne delimita la portata;
-- **intensità** (`intensity`) e **attenuazione** (`attenuation`) per controllare quanto e come “decade” la luce;
-- un’**orientazione** presente per uniformità del modello, ma l’emissione è **isotropica** (non direzionale).
+- `id: UUID` - identificativo univoco;
+- `position: Point2D` — posizione del centro della luce;
+- `orientation: Orientation` — presente per uniformità di modello; impostato a `Orientation(0.0)`; l’emissione è *
+  *isotropica** (non direzionale);
+- `radius: Double` — raggio **geometrico** usato per la `shape` (`ShapeType.Circle(radius)`);
+- `illuminationRadius: Double` — **portata luminosa** efficace (raggio del contributo nel campo luce);
+- `intensity: Double`, `attenuation: Double` — livello e **decadimento** con la distanza;
+- `shape = Circle(radius)` — forma circolare.
 
-In fase di **validazione** verifichiamo che raggio, intensità e attenuazione siano **> 0** e che la luce sia
-posizionata **all'interno** dell'ambiente.
+**Validazione**:
+
+- parametri strettamente `> 0`;
+- inclusione nei limiti dell’ambiente;
+- **assenza di sovrapposizioni** con altre entità.
+
+> Servono a creare zone buie/illuminate utili per testare policy di navigazione e priorità tra comportamenti.
 
 ## Boundary
 
-L'ultima tipologia di entità statiche sono i **boundary** (`StaticEntity.Boundary`), che rappresentano i confini dell'ambiente di simulazione. Questi elementi sono fondamentali per definire i limiti entro cui le entità possono muoversi e interagire.
-Sono simili agli **ostacoli**, ma con la differenza che hanno larghezza o altezza pari a zero.
-La loro similarità agli ostacoli implica che anche i boundary partecipano alle collisioni e possono influenzare il comportamento delle entità dinamiche.
-Sono infine percepibili dai sensori di prossimità.
-Vengono creati automaticamente durante la fase di validazione dell'ambiente, in modo tale che l'utente non debba preoccuparsi di definirli esplicitamente.
+I **boundary** (`StaticEntity.Boundary`) definiscono i **confini** dell’ambiente. Sono creati **automaticamente** in
+validazione, in modo tale che l'utente non debba preoccuparsi di definirli esplicitamente. Simili agli **ostacoli**,
+ma con la differenza che hanno larghezza o altezza pari a zero.
+
+**Attributi principali**:
+
+- `id: UUID` — identificativo univoco;
+- `position: Point2D` — centro del lato;
+- `orientation: Orientation` — in factory impostato a `Orientation(0.0)`;
+- `width: Double`, `height: Double` — **uno dei due è 0.0** (spessore zero);
+- `shape = Rectangle(width, height)` *(derivata)*;
+- **Factory**: `StaticEntity.Boundary.createBoundaries(width, height)` crea i 4 boundary ai bordi.
+
+**Validazione**:
+
+- Presenza su **tutti i lati** dell’ambiente;
+- Dimensioni coerenti con i bordi (spessore zero consentito per i boundary);
+- Nessuna sovrapposizione anomala con entità interne.
+
+> Questi elementi sono fondamentali per definire i limiti entro cui le entità possono muoversi e interagire.
 
 ## Robot
 
@@ -158,8 +184,10 @@ Vedere la sezione [Action](./07-action.md) per i dettagli sull’algebra delle a
 
 ![Actuator](../../static/img/04-detailed-design/actuator.png)
 
-Un attuatore è un componente in grado di modificare lo stato di un’entità dinamica (`DynamicEntity`). Il _trait_ `Actuator[E]`
-definisce l’interfaccia generica, tramite il metodo `act(dt, entity)`, che aggiorna l’entità dopo un intervallo temporale
+Un attuatore è un componente in grado di modificare lo stato di un’entità dinamica (`DynamicEntity`). Il _trait_
+`Actuator[E]`
+definisce l’interfaccia generica, tramite il metodo `act(dt, entity)`, che aggiorna l’entità dopo un intervallo
+temporale
 `dt`, restituendone una nuova istanza in un contesto monadico `F[_]`.
 
 ### Attuatori di movimento
@@ -168,13 +196,15 @@ Gli attuatori di movimento sono modellati tramite i motori differenziali (`Diffe
 ruote (`Wheel`) – sinistra e destra – dotate di velocità lineare (`speed`) e una forma circolare (`ShapeType.Circle`).
 Il movimento del robot viene calcolato con un modello cinematico differenziale (`DifferentialKinematics`), in cui:
 
-- **Velocità lineare** (media delle velocità delle due ruote; ottenute moltiplicando la velocità (`speed`) per il raggio della ruota (`radius`)):
+- **Velocità lineare** (media delle velocità delle due ruote; ottenute moltiplicando la velocità (`speed`) per il raggio
+  della ruota (`radius`)):
 
 $$
 v = \frac{v_{\text{left}} + v_{\text{right}}}{2}
 $$
 
-- **Velocità angolare** (proporzionale alla differenza tra le velocità delle ruote divisa per la distanza tra le ruote; si assume che la distanza tra le ruote sia pari al diametro del robot):
+- **Velocità angolare** (proporzionale alla differenza tra le velocità delle ruote divisa per la distanza tra le ruote;
+  si assume che la distanza tra le ruote sia pari al diametro del robot):
 
 $$
 \omega = \frac{v_{\text{right}} - v_{\text{left}}}{d_{\text{wheel}}}
@@ -210,7 +240,8 @@ I sensori sono parametrizzati su tre tipi:
   stesso).
 - `Data`: il tipo di dato restituito dal sensore.
 
-Inoltre i sensori contengono un campo `offset` che rappresenta la posizione del sensore rispetto all'entità che lo possiede.
+Inoltre i sensori contengono un campo `offset` che rappresenta la posizione del sensore rispetto all'entità che lo
+possiede.
 
 Infine un metodo `sense[F[_]](entity: Entity, env: Environment): F[Data]` che permette di ottenere i dati di rilevamento
 dal sensore.
@@ -233,7 +264,8 @@ l'elaborazione dei dati raccolti.
 
 :::info
 
-I dettagli implementativi riguardanti i sensori sono disponibili nella sezione [Implementazione dei sensori](../05-implementation/02-simone-ceredi/3-sensors.md).
+I dettagli implementativi riguardanti i sensori sono disponibili nella
+sezione [Implementazione dei sensori](../05-implementation/02-simone-ceredi/3-sensors.md).
 
 :::
 
@@ -249,6 +281,10 @@ le entità nell'ambiente, restituendo il valore normalizzato.
 
 ### Sensori di luce
 
-La _case class_ `LightSensor` estende `Sensor[Robot, Environment]` e rappresenta un sensore di luce, in grado di rilevare l'intensità luminosa in una determinata area.
-Anche in questo caso i valori restituiti dal sensore sono `Double`, e rappresentano l'intensità luminosa normalizzata tra 0 e 1, dove 0 indica assenza di luce e 1 indica luce massima.
-La distribuzione della luce nell'ambiente è rappresentata da un campo `lightField` all'interno di `Environment`, il metodo `sense` implementa la logica di rilevamento, utilizzando il `lightField` per ottenere i dati di intensità luminosa.
+La _case class_ `LightSensor` estende `Sensor[Robot, Environment]` e rappresenta un sensore di luce, in grado di
+rilevare l'intensità luminosa in una determinata area.
+Anche in questo caso i valori restituiti dal sensore sono `Double`, e rappresentano l'intensità luminosa normalizzata
+tra 0 e 1, dove 0 indica assenza di luce e 1 indica luce massima.
+La distribuzione della luce nell'ambiente è rappresentata da un campo `lightField` all'interno di `Environment`, il
+metodo `sense` implementa la logica di rilevamento, utilizzando il `lightField` per ottenere i dati di intensità
+luminosa.
