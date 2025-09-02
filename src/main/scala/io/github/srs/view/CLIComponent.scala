@@ -4,8 +4,10 @@ import cats.effect.IO
 import cats.effect.std.Queue
 import io.github.srs.controller.protocol.Event
 import io.github.srs.model.ModelModule
-import io.github.srs.model.dsl.EnvironmentToGridDSL.prettyPrint
 import io.github.srs.view.ViewModule.{ Component, Requirements, View }
+import io.github.srs.model.SimulationState.prettyPrint
+import io.github.srs.model.dsl.EnvironmentToGridDSL
+import io.github.srs.utils.SimulationDefaults.DebugMode
 
 /**
  * CLI component trait that defines the interface for creating a CLI view.
@@ -37,7 +39,10 @@ trait CLIComponent[S <: ModelModule.State] extends Component[S]:
      * @inheritdoc
      */
     override def render(state: S): IO[Unit] =
-      IO.unit
+      for _ <-
+          if DebugMode then IO.println(s"Current environment:\n${EnvironmentToGridDSL.prettyPrint(state.environment)}")
+          else IO.unit
+      yield ()
 
     /**
      * @inheritdoc
@@ -50,7 +55,9 @@ trait CLIComponent[S <: ModelModule.State] extends Component[S]:
      * @inheritdoc
      */
     override def timeElapsed(state: S): IO[Unit] =
-      for _ <- IO.println(s"Simulation finished. Resulting environment:\n${prettyPrint(state.environment)}")
+      for
+        _ <- IO.println(s"Simulation finished. Resulting state:\n${state.prettyPrint}")
+        _ <- IO.println(s"Resulting environment:\n${EnvironmentToGridDSL.prettyPrint(state.environment)}")
       yield ()
   end CLIViewImpl
 end CLIComponent

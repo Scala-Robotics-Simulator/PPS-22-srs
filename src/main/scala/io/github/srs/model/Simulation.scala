@@ -1,5 +1,7 @@
 package io.github.srs.model
 
+import io.github.srs.config.SimulationConfig
+import io.github.srs.model.environment.ValidEnvironment.ValidEnvironment
 import io.github.srs.utils.SimulationDefaults
 
 /**
@@ -46,5 +48,26 @@ object Simulation:
      */
     infix def withSeed(seed: Long): Simulation =
       simulation.copy(seed = Some(seed))
+
+    /**
+     * Sets the environment for the simulation and returns a [[SimulationConfig]].
+     *
+     * @param validEnv
+     *   the valid environment to set for the simulation.
+     * @return
+     *   a new [[SimulationConfig]] instance with the specified valid environment.
+     */
+    infix def withEnvironment(validEnv: ValidEnvironment): SimulationConfig[ValidEnvironment] =
+      SimulationConfig(simulation, validEnv)
+
+    /**
+     * Sets the environment for the simulation and returns a [[SimulationConfig]].
+     * @param validEnv
+     *   the valid environment to set for the simulation.
+     * @return
+     *   a new [[SimulationConfig]] instance with the specified valid environment.
+     */
+    infix def in(validEnv: ValidEnvironment): SimulationConfig[ValidEnvironment] =
+      withEnvironment(validEnv)
   end extension
 end Simulation
