@@ -30,6 +30,15 @@ object SimulationDefaults:
 
   object Behaviors:
 
+    object Prioritized:
+      val DangerDist: Double = 0.40
+      val LightThreshold: Double = 0.05
+
+    object Phototaxis:
+      val Epsilon: Double = 1e-9
+      val MinForwardBias: Double = 0.4
+      val TurnGain: Double = 1.0
+
     object ObstacleAvoidance:
       val CruiseSpeed: Double = 0.35
       val WarnSpeed: Double = 0.15
@@ -46,6 +55,8 @@ object SimulationDefaults:
       val TurnExponent: Double = 1.2
       val PivotBoostProb: Double = 0.20
       val PivotBoostAbs: Double = 0.15
+
+  end Behaviors
 
   object UI:
 
@@ -360,6 +371,52 @@ object SimulationDefaults:
     val LabelBottomOffset: Int = 4
     val LabelYOffset: Int = 12
     val LabelXOffset: Int = 2
+
+    val LabelStepSequence: List[Int] = List(1, 2, 5)
+    val LabelScaleBase: Int = 10
+    val DiameterFactor: Double = 2.0
+
+    object Sensors:
+      val LineStrokeWidth: Float = 1.0f
+      val DotSize: Int = 3
+
+    object LightFX:
+
+      val GradientFraction0: Float = 0f
+      val GradientFraction1: Float = 0.55f
+      val GradientFraction2: Float = 0.9f
+      val GradientFraction3: Float = 1f
+
+      val CoreFractionStart: Float = 0f
+      val CoreFractionEnd: Float = 1f
+
+      val GradientRadiusDivisor: Float = 2f
+      val MinLightPixels: Int = 1
+      val PostGlowAlpha: Float = 0.015f
+
+      val RingStrokeWidth: Float = 0.8f
+      val RingStrokeMiterLimit: Float = 10f
+      val RingStrokeDash1: Float = 4f
+      val RingStrokeDash2: Float = 6f
+      val RingStrokeDashPhase: Float = 0f
+
+      val GradientColor: Array[Color] = Array(
+        new Color(255, 200, 0, 28),
+        new Color(255, 180, 0, 16),
+        new Color(255, 160, 0, 6),
+        new Color(255, 140, 0, 0),
+      )
+
+    end LightFX
+
+    object Arrow:
+      val TriangleVertices: Int = 3
+
+    object RobotBody:
+      val GradientFractionStart: Float = 0f
+      val GradientFractionEnd: Float = 1f
+
+  end Canvas
 
   object ControlsPanel:
     val StartStopButtonText: String = "Start/Stop"

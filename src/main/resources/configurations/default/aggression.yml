@@ -9,11 +9,13 @@ environment:
       position: [2, 2]
       illuminationRadius: 5.0
       intensity: 1.0
+      radius: 0.2
       attenuation: 1.0
   - light:
       position: [8, 8]
       illuminationRadius: 5.0
       intensity: 1.0
+      radius: 0.2
       attenuation: 1.0
   - robot:
       position: [3, 1]
