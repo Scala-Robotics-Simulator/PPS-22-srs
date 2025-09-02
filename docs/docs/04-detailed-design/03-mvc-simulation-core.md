@@ -29,7 +29,7 @@ Il _trait_ `State` definisce la struttura dello stato della simulazione, che com
 - `environment`: rappresenta l’ambiente della simulazione, contenente le entità validate (di tipo `ValidEnvironment`).
 
 :::info note
-Vedere la sezione [Generatore di numeri casuali](../05-implementation/04-giulia-nardicchia/random-number-generator.md), [Environment](./04-environment.md) per
+Vedere la sezione [Generatore di numeri casuali](./10-random-number-generator.md), [Environment](./04-environment.md) per
 maggiori dettagli.
 :::
 

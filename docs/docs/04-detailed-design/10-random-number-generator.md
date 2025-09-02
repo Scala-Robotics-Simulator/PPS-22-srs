@@ -10,7 +10,7 @@ in uno stile funzionale.
 
 ## RNG
 
-![RNG](../../../static/img/04-detailed-design/random.png)
+![RNG](../../static/img/04-detailed-design/random.png)
 
 `RNG` è un generatore di numeri casuali basato su `scala.util.Random`, che fornisce metodi per generare numeri casuali
 in modo funzionale e sicuro.
