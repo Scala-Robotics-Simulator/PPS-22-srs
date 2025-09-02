@@ -4,31 +4,45 @@ sidebar_position: 4
 
 # Environment
 
-La case class `Environment`, estende dal trait `EnvironmentParameters` e rappresenta l'ambiente di simulazione in cui le entità interagiscono. Esso contiene un campo `entities: Set[Entity]`, che rappresenta l'insieme delle entità presenti nell'ambiente.
-L'ambiente ha una larghezza (`width: Int`) e un'altezza (`height: Int`), che definiscono le dimensioni dello spazio in cui le entità possono muoversi.
-Ai bordi dell'ambiente si trovano dei `Boundary`, si tratta di entità statiche che impediscono alle entità dinamiche di uscire dallo spazio di simulazione.
-`LightField` è utilizzato per ottenere l'illuminazione dell'ambiente.
+La case class `Environment`, estende il trait `EnvironmentParameters` e rappresenta l'ambiente di simulazione in cui le
+entità interagiscono. Contiene:
+
+- `entities: Set[Entity]`: l’insieme delle entità presenti;
+- `width: Int` e `height: Int`: dimensioni dello spazio simulato in cui le entità possono muoversi;
+  `lightField: LightField`: campo di illuminazione corrente dell’ambiente, ricalcolato a ogni tick dal motore di
+  illuminazione.
+
+Ai bordi dell’ambiente sono presenti `Boundary`, entità statiche che impediscono alle entità dinamiche di uscire dallo
+spazio di simulazione.
 
 ![Environment](../../static/img/04-detailed-design/environment.png)
 
 ## ValidEnvironment
 
-Tramite un metodo `validate` è possibile ottenere un `ValidEnvironment`, che rappresenta un ambiente di simulazione valido.
+Tramite un metodo `validate` è possibile ottenere un `ValidEnvironment`, che rappresenta un ambiente di simulazione
+valido.
 
 <!-- TODO: aggiungere collegamento a validation -->
 
-È possibile creare un `ValidEnvironment` solamente tramite il metodo `validate`. Questo permette di garantire che l'ambiente sia valido e conforme ai requisiti definiti.
+> È possibile creare un `ValidEnvironment` **solo** tramite `validate`, così da garantire la correttezza dell’ambiente.
 
-I controlli effettuati durante la validazione vanno a:
+I controlli di validazione includono:
 
-- controllare che `width` e `height` siano in un intervallo valido;
-- controllare che le entità siano posizionate all'interno dei limiti definiti da `width` e `height`;
-- verificare che le entità non si sovrappongano tra loro;
-- verificare che non vi siano una quantità eccessiva di entità;
-- verificare che tutte le entità siano valide.
+- `width` e `height` in intervalli validi;
+- posizionamento delle entità entro i limiti (`width` × `height`);
+- assenza di sovrapposizioni tra entità;
+- limite massimo al numero di entità;
+- validità intrinseca di ciascuna entità.
 
 :::info
 
-I dettagli di implementazione dell'ambiente sono disponibili nella sezione [Implementazione dell'ambiente di simulazione](../05-implementation/02-simone-ceredi/1-environment.md).
+I dettagli di implementazione dell'ambiente sono disponibili nella
+sezione [Implementazione dell'ambiente di simulazione](../05-implementation/02-simone-ceredi/1-environment.md).
 
 :::
+
+## Illuminazione
+
+Il `lightField` modella l’illuminazione dell’ambiente ed è ricalcolato a ogni tick dal motore di illuminazione, in
+funzione delle entità statiche e dinamiche (ad es. robot e ostacoli).
+Per maggiori dettagli consultare [la gestione dell’illuminazione](../04-detailed-design/09-light-diffusion.md).
