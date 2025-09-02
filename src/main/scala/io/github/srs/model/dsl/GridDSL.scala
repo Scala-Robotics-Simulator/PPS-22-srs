@@ -13,6 +13,7 @@ import io.github.srs.model.entity.{ Entity, Point2D }
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.environment.dsl.CreationDSL.*
 import io.github.srs.utils.EqualityGivenInstances.given_CanEqual_Cell_Cell
+import io.github.srs.utils.SimulationDefaults.GridDSL.{ IncrementToCenterPos, ObstacleSize }
 
 /**
  * Represents a cell in the grid-based DSL for defining environments.
@@ -27,21 +28,22 @@ enum Cell:
    * Converts the cell to a set of entities at the given position.
    * @param pos
    *   the position where the entity should be placed.
-   * @param cellSize
-   *   the size of the cell (default is 0.999999 to avoid overlaps).
    * @return
    *   a set of entities corresponding to the cell type.
    */
-  def toEntity(pos: Point2D, cellSize: Double = 0.999999): Set[Entity] = this match
+  def toEntity(pos: Point2D): Set[Entity] = this match
     case Cell.Empty => Set.empty
-    case Cell.Obstacle => Set(obstacle at pos + Point2D(0.5, 0.5) withWidth cellSize withHeight cellSize)
+    case Cell.Obstacle =>
+      Set(
+        obstacle at pos + IncrementToCenterPos withWidth ObstacleSize withHeight ObstacleSize,
+      )
     case Cell.Light =>
       Set(
-        light at pos + Point2D(0.5, 0.5) withRadius 0.2 withIntensity 1.0 withIlluminationRadius 5.0 withAttenuation 1.0,
+        light at pos + IncrementToCenterPos withRadius 0.2 withIntensity 1.0 withIlluminationRadius 6.0 withAttenuation 1.0,
       )
     case Cell.Robot(policy) =>
       Set(
-        (robot at (pos + Point2D(0.5, 0.5)))
+        (robot at (pos + IncrementToCenterPos))
           .withSpeed(1.0)
           .withProximitySensors
           .withLightSensors
@@ -229,36 +231,12 @@ object EnvironmentToGridDSL:
         val y0 = Math.floor(o.position.y - hRaw / 2).toInt
         x >= x0 && x < x0 + w && y >= y0 && y < y0 + h
 
-//      val cellEntities = env.entities.flatMap:
-//        case r: Robot if Math.floor(r.position.x).toInt == x && Math.floor(r.position.y).toInt == y =>
-//          Some(Cell.Robot(r.behavior))
-//        case l: Light if Math.floor(l.position.x).toInt == x && Math.floor(l.position.y).toInt == y =>
-//          Some(Cell.Light)
-//        case o: Obstacle if obstacleCovers(o) =>
-//          Some(Cell.Obstacle)
-//        case _ => None
-//      cellEntities.headOption.getOrElse(Cell.Empty)
-
-      val cellEntities = env.entities.collect:
+      val cell = env.entities.collectFirst:
         case r: Robot if Math.floor(r.position.x).toInt == x && Math.floor(r.position.y).toInt == y =>
           Cell.Robot(r.behavior)
-        case l: Light if Math.floor(l.position.x).toInt == x && Math.floor(l.position.y).toInt == y =>
-          Cell.Light
-        case o: Obstacle if obstacleCovers(o) =>
-          Cell.Obstacle
-
-      // Priorità: Robot > Light > Obstacle > Empty
-      cellEntities.find {
-        case Cell.Robot(_) => true
-        case _ => false
-      }.orElse(cellEntities.find {
-        case Cell.Light => true
-        case _ => false
-      }).orElse(cellEntities.find {
-        case Cell.Obstacle => true
-        case _ => false
-      }).getOrElse(Cell.Empty)
-    end cellAt
+        case l: Light if Math.floor(l.position.x).toInt == x && Math.floor(l.position.y).toInt == y => Cell.Light
+        case o: Obstacle if obstacleCovers(o) => Cell.Obstacle
+      cell.getOrElse(Cell.Empty)
 
     val grid: Vector[Vector[Cell]] =
       Vector.tabulate(env.height, env.width)((y, x) => cellAt(x, y))

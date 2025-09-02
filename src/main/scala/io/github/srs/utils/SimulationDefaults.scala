@@ -299,6 +299,10 @@ object SimulationDefaults:
     end Robot
   end DynamicEntity
 
+  object GridDSL:
+    val ObstacleSize: Double = 0.999999
+    val IncrementToCenterPos: Point2D = Point2D(0.5, 0.5)
+
   object Fields:
 
     object Simulation:
