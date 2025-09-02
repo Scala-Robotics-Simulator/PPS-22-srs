@@ -5,14 +5,12 @@ import cats.data.Kleisli
 import io.github.srs.model.entity.dynamicentity.*
 
 /**
- * Core types for the Behavior DSL
+ * Core types for Behavior
  *
- *   - [[Behavior]] — total, pure decision (`I => A` via `Kleisli[Id, I, A]`)
+ *   - [[Behavior]] — Total, pure decision (`I => A` via `Kleisli[Id, I, A]`)
  *   - [[PartialBehavior]] — partial decision (`I => Option[A]` via `Kleisli[Option, I, A]`)
  *   - [[Condition]] — boolean predicate on the input
  *
- * Partial behaviors compose left-biased (first `Some` wins) and are finalized into total behaviors via the DSL’s
- * orElse.
  */
 object BehaviorTypes:
 
