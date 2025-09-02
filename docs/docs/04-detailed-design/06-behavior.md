@@ -4,70 +4,81 @@ sidebar_position: 6
 
 # Behavior
 
-Il package `behavior` è il **motore decisionale**: a partire da un input `I` (nel nostro caso le letture dei sensori)
-calcola l’**azione** `A` da eseguire su entità dinamiche (i `Robot`). L'obiettivo è di separare:
+Il modulo `Behavior` è il **motore decisionale** del ciclo **sense → decision → act**.
 
-- **regole**: piccole condizioni locali (*parziali*);
-- **comportamenti**: composizioni *totali* con fallback chiaro;
-- **politiche**: builder riutilizzabili che assemblano comportamenti “pronti”.
+Riceve le **letture sensoriali** (`SensorReadings`) e produce l'**intenzione** (l’`Action`) da applicare a un'entità
+dinamica (es. `Robot`), mantenendo una separazione netta tra decisione ed esecuzione.
 
-In più un **DSL espressivo** per definire regole, priorità e fallback, restando agnostici rispetto
-all’effetto.
+## Posizionamento nel ciclo di simulazione
 
-## Panoramica e concetti
+1. **Sense**:  il robot acquisisce informazioni dall'ambiente tramite i sensori (`SensorReadings`);
+2. **Decision**: il `Behavior` elabora il contesto e sceglie un’azione appropriata;
+3. **Act**: l’azione viene interpretata dagli attuatori che modificano lo stato dell’entità.
 
-- **Condition[I]** → predicato su `I` (applicato ai `SensorReadings`: vedi [Sensori](05-entity.md#sensori)).
-- **Rule** (*parziale*): `Rule[F, I, A] = Kleisli[F, I, Option[A]]`: se la condizione non è soddisfatta ⇒ `None`.
-- **Behavior** (*totale*): `Behavior[F, I, A] = Kleisli[F, I, A]`: si ottiene componendo più `Rule` e chiudendo con
-  `default(...)`.
-- **Policy** (*ricetta*): costruisce un `Behavior` partendo da regole e parametri.
+> Il behavior è **stateless** (decisione _cieca_ sul tick corrente).  
+> Se servisse “memoria”, bisognerebbe **estendere il contesto di input**  invece di introdurre mutazioni.
 
-> In breve: **Rule** = mattone decisionale *parziale* · **Behavior** = composizione *totale* con default · **Policy** =
-> costruttore di `Behavior` pronti.
+## I/O e contratti
 
-## Kleisli
+Il sistema di behavior opera su dati strutturati che incapsulano tutte le informazioni necessarie:
 
-Usiamo `Kleisli[F, I, A]` come shorthand di **`I => F[A]`**.
-Le **Rule** producono `Option[A]` (possono non dare un’azione), i **Behavior** invece **garantiscono** sempre un’azione
-grazie al fallback.
+- **Input** (`BehaviorContext`):
+    - `sensorReadings: SensorReadings`: letture sensoriali correnti;
+    - `rng: RNG`: generatore pseudo-casuale per comportamenti stocastici e riproducibili.
+- **Output** → **Decision**`(Action[F], RNG)`:
+    - `Action[F]` da eseguire sull’entità;
+    - `RNG`: stato del generatore aggiornato.
 
-### Architettura del package
+> Invariante fondamentale: un behavior deve sempre produrre un'azione valida, garantendo la totalità della funzione
+> decisionale.
 
-![Behavior: Rule, Behavior, Policy](../../static/img/04-detailed-design/behavior-package.svg)
+## Astrazione dei comportamenti
 
-Tutto vive in `io.github.srs.model.entity.dynamicentity.behavior`.
+Il modello si basa su quattro livelli di astrazione crescente:
 
-* **BehaviorTypes**: alias di tipo (`Behavior`, `Rule`, `Condition`, e l’utility `always`).
-* **Rules**: regole utili per comporre e testare i comportamenti. Alcuni esempi semplici:
-    - `avoidObstacle(front, safeDist)`: se il sensore **frontale** (valore normalizzato ∈ `[0,1]`, dove `0` = vicino) è
-      `< safeDist` ⇒ propone `turnRight`.
-    - `alwaysForward`: proposta di `moveForward` come marcia base.
+- **Condition**: _predicati_ che valutano lo stato sensoriale (es. soglie/relazioni);
+- **PartialBehavior**: regole che possono _proporre_ `A` (`Some`) o defers (`None`);
+- **Behavior** – composizione di regole con  _fallback_ garantito per assicurare totalità (sempre un’azione `A`);
+- **Policy** – strategie complete e riusabili per casi d'uso specifici (evita ostacoli, fototassi, ecc.).
 
-* **Policy**: builder di comportamenti comuni. Un esempio:
-    - `Policy.simple(front)`: evita ostacoli frontali, altrimenti va avanti; fallback `NoAction`.
+## DSL di composizione
 
-- **dsl**: mini linguaggio per comporre in modo naturale:
-    - `cond ==> action` (crea una `Rule`), `r1 | r2` (fallback), `rules.default(fallback)` (chiusura in `Behavior`)
-    - `rule.onlyIf(...)`, `rule.mapAction(...)`
-    - Operatori su sensori: `front < t`, `front > t`
-    - Composizione condizioni: `and`, `or`, `not`
-
-### Flusso di esecuzione
-
-1. Il robot legge i sensori: `r.senseAll[F](env): F[SensorReadings]`.
-2. Il **Behavior** elabora quelle letture e produce un’`Action[F]`.
-3. L’azione viene eseguita via `ActionAlg[F, Robot]` e applicata dagli attuatori (
-   vedi [Attuatori](05-entity.md#attuatori)).
-
-## Esempio (DSL)
-
-Una policy minima che evita l’ostacolo davanti, prova a girare se serve e altrimenti avanza; chiudiamo con un fallback
-sicuro:
+Il modulo fornisce un linguaggio specifico di dominio per comporre comportamenti in modo dichiarativo:
 
 ```scala
+// Esempio: evitamento ostacoli con fallback
 ((front < 0.30) ==> turnRight[F]) |
   ((left < 0.25) ==> turnRight[F]) |
-  ((right < 0.25) ==> turnLeft[F]) |
-  Rules.alwaysForward[F]
-    .default(stop[F])
-```
+  ((right < 0.25) ==> turnLeft[F])
+    .default(moveForward[F])
+````
+
+Il DSL supporta:
+
+- Composizione left-biased con priorità esplicite;
+- Operatori logici per condizioni complesse;
+- Fallback garantiti per totalità.
+
+## Politiche predefinite
+
+Sono incluse un insieme di politiche standard che coprono i casi d'uso più comuni:
+
+| Policy                | Descrizione                          | Caso d'uso                  |
+|-----------------------|--------------------------------------|-----------------------------|
+| **AlwaysForward**     | Movimento costante in avanti         | Testing, comportamento base |
+| **RandomWalk**        | Esplorazione stocastica              | Copertura spaziale          |
+| **ObstacleAvoidance** | Evitamento ostacoli multi-livello    | Navigazione sicura          |
+| **Phototaxis**        | Attrazione verso sorgenti luminose   | Comportamento biologico     |
+| **Prioritized**       | Composizione gerarchica di strategie | Comportamenti complessi     |
+
+## Estensibilità
+
+Il sistema è progettato per facilitare l'aggiunta di nuovi comportamenti.
+
+1. _Nuove condizioni_: estendere i predicati per nuovi tipi di sensori.
+2. _Nuove azioni_: aggiungere azioni al catalogo disponibile.
+3. _Nuove policy_: comporre comportamenti esistenti o crearne di completamente nuovi.
+4. _Nuovi contesti_: se necessario, estendere `BehaviorContext` per informazioni aggiuntive (es. memoria).
+
+Per i dettagli tecnici di implementazione, consultare la
+sezione [implememtazione behavior](../05-implementation/03-david-cohen/behavior.md).
