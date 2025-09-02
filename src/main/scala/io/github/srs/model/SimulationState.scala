@@ -34,7 +34,7 @@ final case class SimulationState(
 ) extends ModelModule.State
 
 /**
- * Compansion methods for the [[ModelModule.State]] to provide pretty-printing functionality.
+ * Companion methods for the [[ModelModule.State]] to provide pretty-printing functionality.
  */
 object SimulationState:
 

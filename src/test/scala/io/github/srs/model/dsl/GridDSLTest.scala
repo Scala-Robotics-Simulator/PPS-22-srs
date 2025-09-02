@@ -21,6 +21,7 @@ import io.github.srs.utils.SimulationDefaults.GridDSL.ObstacleSize
 import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import cats.effect.unsafe.implicits.global
 
 class GridDSLTest extends AnyFlatSpec with Matchers:
 
@@ -90,7 +91,7 @@ class GridDSLTest extends AnyFlatSpec with Matchers:
     val expectedEnv = (environment withWidth 5 withHeight 3 containing
       (robot at Point2D(4.5, 1.5) withSpeed 1.0 withBehavior Policy.AlwaysForward)
     ).validate.toOption.value
-    val runSimulationEnv1 = (simulation withDuration 60000 withSeed 42 in valEnv run).value.environment
+    val runSimulationEnv1 = (simulation withDuration 60000 withSeed 42 in valEnv run).unsafeRunSync().value.environment
     (runSimulationEnv1 shouldEqualExceptIds expectedEnv) shouldBe true
 
   it should "verify that a type O robot with ObstacleAvoidance policy avoids adjacent cells of obstacles" in:
@@ -103,7 +104,7 @@ class GridDSLTest extends AnyFlatSpec with Matchers:
     val obstaclePos1 = Point2D(1.5, 0.5)
     val obstaclePos2 = Point2D(2.5, 0.5)
     val forbiddenCellPos = neighborhood(obstaclePos1) ++ neighborhood(obstaclePos2)
-    val runSimulationEnv = (simulation withDuration 60000 withSeed 42 in valEnv run).value.environment
+    val runSimulationEnv = (simulation withDuration 60000 withSeed 42 in valEnv run).unsafeRunSync().value.environment
     val result = runSimulationEnv.entities.exists:
       case robot: Robot =>
         forbiddenCellPos.exists(expected => almostEqual(robot.position, expected))
@@ -119,8 +120,8 @@ class GridDSLTest extends AnyFlatSpec with Matchers:
       -- | -- | -- | -- | --
 
     val valEnv: ValidEnvironment = env.validate.toOption.value
-    val runSimulationEnv1 = (simulation withDuration 60000 withSeed 42 in valEnv run).value.environment
-    val runSimulationEnv2 = (simulation withDuration 60000 withSeed 42 in valEnv run).value.environment
+    val runSimulationEnv1 = (simulation withDuration 60000 withSeed 42 in valEnv run).unsafeRunSync().value.environment
+    val runSimulationEnv2 = (simulation withDuration 60000 withSeed 42 in valEnv run).unsafeRunSync().value.environment
     (runSimulationEnv1 shouldEqualExceptIdsStrict runSimulationEnv2) shouldBe true
 
   it should "produce different positions for a type R robot with RandomWalk when using different seeds" in:
@@ -132,8 +133,8 @@ class GridDSLTest extends AnyFlatSpec with Matchers:
       -- | -- | -- | -- | --
       
     val valEnv: ValidEnvironment = env.validate.toOption.value
-    val runSimulationEnv1 = (simulation withDuration 150000 withSeed 42 in valEnv run).value.environment
-    val runSimulationEnv2 = (simulation withDuration 150000 withSeed 1234 in valEnv run).value.environment
+    val runSimulationEnv1 = (simulation withDuration 150000 withSeed 42 in valEnv run).unsafeRunSync().value.environment
+    val runSimulationEnv2 = (simulation withDuration 150000 withSeed 1234 in valEnv run).unsafeRunSync().value.environment
     (runSimulationEnv1 shouldEqualExceptIdsStrict runSimulationEnv2) shouldBe false
 
   it should "verify that a type P robot with Phototaxis ends up near a light source" in :
@@ -153,7 +154,7 @@ class GridDSLTest extends AnyFlatSpec with Matchers:
     val lightPos1 = Point2D(2, 2)
     val lightPos2 = Point2D(8, 8)
     val expectedRobotPos = neighborhood(lightPos1) ++ neighborhood(lightPos2)
-    val runSimulationEnv = (simulation withDuration 140000 withSeed 42 in valEnv run).value.environment
+    val runSimulationEnv = (simulation withDuration 140000 withSeed 42 in valEnv run).unsafeRunSync().value.environment
     val result = runSimulationEnv.entities.exists:
       case robot: Robot =>
         expectedRobotPos.exists(expected => almostEqual(robot.position, expected))
@@ -176,7 +177,7 @@ class GridDSLTest extends AnyFlatSpec with Matchers:
     val valEnv: ValidEnvironment = env.validate.toOption.value
     val lightPos = Point2D(10, 5)
     val expectedRobotPos = neighborhood(lightPos)
-    val runSimulationEnv = (simulation withDuration 450000 withSeed 42 in valEnv run).value.environment
+    val runSimulationEnv = (simulation withDuration 450000 withSeed 42 in valEnv run).unsafeRunSync().value.environment
     val result = runSimulationEnv.entities.exists:
       case robot: Robot =>
         expectedRobotPos.exists(expected => almostEqual(robot.position, expected))
