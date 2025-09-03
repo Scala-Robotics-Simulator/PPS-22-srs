@@ -58,24 +58,4 @@ object SimulationState:
       simulationStatus = status,
       environment = cfg.environment,
     )
-
-  extension (state: ModelModule.State)
-
-    /**
-     * Pretty prints the simulation state in a human-readable format.
-     * @return
-     *   a string representation of the simulation state.
-     */
-    def prettyPrint: String =
-      s"""
-         |--- SimulationState ---
-         | Simulation Time : ${state.simulationTime.map(t => s"${t.toMillis} ms").getOrElse("∞")}
-         | Elapsed Time    : ${state.elapsedTime.toMillis} ms
-         | Δt              : ${state.dt.toMillis} ms
-         | Speed           : ${state.simulationSpeed}
-         | RNG Seed        : ${state.simulationRNG}
-         | Status          : ${state.simulationStatus}
-         | Environment     : ${state.environment}
-         |-----------------------
-        """.stripMargin
 end SimulationState
