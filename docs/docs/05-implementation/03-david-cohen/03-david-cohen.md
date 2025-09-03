@@ -4,27 +4,25 @@ sidebar_position: 2
 
 # David Cohen
 
-L’implementazione realizzata si concentra principalmente sulle seguenti funzionalità:
+L’implementazione realizzata si concentra principalmente sulle seguenti aree:
 
-- [Implementazione della validazione di dominio](./validation.md):
-  - definizione della validazione di domino.
-  - implementazione di regole di validazione per le entità.
-- [Implementazione delle entità statiche](../../04-detailed-design/05-entity.md#StaticEntity)
-    - Luci
-    - Ostacoli
-- [Implementazione del motore di illuminazione](./light-engine.md)
-    - Diffusione della luce
-    - Calcolo del campo luminoso
-- [Implementazione dei behavior](./behavior.md)
-    - definizione di behavior
-    - implementazione del dsl per la creazione di behavior singoli e composti
-    - implementazione della politica di selezione dei behavior
-    - implementazione di comportamenti predefiniti:
-      - comportamento di evitamento ostacoli
-      - comportamento di inseguimento luce
-      - comportamento di esplorazione
-      - comportamento combinato
-- [Implementazione della GUI di simulazione](./simulation-gui.md)
-    - visualizzazione dell'ambiente di simulazione
-    - visualizzazione dello stato delle entità
-    - controllo della simulazione (avvio, pausa, reset)
+- [Validazione di dominio](./domain-validation.md)
+    - definizione del modello di *validazione*;
+    - regole di validazione per entità e ambiente.
+- [Entità statiche](../../04-detailed-design/05-entity.md#staticentity)
+    - definizione di fonti di luce;
+    - definizione di ostacoli.
+- [Motore di illuminazione](./illumination.md)
+    - diffusione della luce (pipeline FOV/occlusione, interpolazione);
+    - calcolo e combinazione del campo luminoso.
+- [Comportamenti delle entità dinamiche](./behaviors.md)
+    - definizione dei behavior e DSL di composizione (parziali e totali);
+    - politica di selezione dei behavior e comportamenti predefiniti:
+        - _obstacle avoidance_;
+        - _phototaxis_;
+        - _exploration_ (random walk);
+        - _composizione prioritaria_ (fallback gerarchico).
+- [GUI di simulazione](./simulation-gui.md)
+    - visualizzazione dell’ambiente di simulazione;
+    - selezione del robot sia da lista sia da canvas con evidenziazione ed esposizione dettagli
+    - controlli ciclo di vita e velocità della simulazione (avvio, pausa, arresto/velocità).
