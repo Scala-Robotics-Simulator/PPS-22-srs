@@ -74,7 +74,6 @@ parallelizzata in modo adattivo in base alla dimensione della griglia e al numer
 Per ottimizzare, usiamo validazioni economiche (bounds, raggio, intensità) per evitare computazione inutile.
 Infine, la somma dei contributi usa una somma saturata (`zipSat`) per mantenere i valori in `[0,1]`.
 
-
 ```scala
 
 // IlluminationLogic.scala (estratto)
@@ -122,7 +121,7 @@ private def computeSingleLightContribution(dims, occlusion, fov, light)(using sc
 ### Engine FOV Pluggable
 
 L'interfaccia `FovEngine` astrae l'algoritmo di propagazione della luce. L'implementazione può essere sostituita senza
-modificare il resto della pipeline, permettendo di sperimentare con diversi profili di decadimento e/o ottimizzazioni.
+modificare il resto della pipeline, permettendo di sperimentare con diversi profili di decadimento.
 
 ```scala
 // engine/FovEngine.scala
@@ -166,7 +165,8 @@ final case class LightField(dims: GridDims, data: ArraySeq[Double]) {
 
 ### Type-Safe Scale e Dimensioni
 
-`ScaleFactor` è un _tipo opaco_ (`opaque type`) che incapsula un intero con validazione (1..1000). Questo previene errori
+`ScaleFactor` è un _tipo opaco_ (`opaque type`) che incapsula un intero con validazione (1..1000). Questo previene
+errori
 di
 configurazione e rende esplicita la sua semantica di "celle per metro".
 
@@ -184,9 +184,8 @@ object ScaleFactor:
 ### Integrazione con Environment
 
 Il campo luce è un `lazy val`, quindi viene calcolato on-demand al primo accesso e poi riusato in modo da fare caching.
-In
-caso le entità o luci cambiano o semplicemente si vuole aggiornare il campo, bisogna ricomputare via LightMap o ricrea
-l’Environment.
+In caso le entità o luci cambiano o semplicemente si vuole aggiornare il campo, bisogna ri-elaborare attraverso la
+LightMap o ricreare l’`Environment`.
 
 ```scala
 // Environment.scala
