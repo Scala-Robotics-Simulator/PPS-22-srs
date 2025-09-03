@@ -45,8 +45,7 @@ Lo spazio continuo è campionato in una griglia di `width*scale × height*scale`
 da uno `ScaleFactor` (celle per metro). Un valore più alto aumenta la qualità delle ombre e dei
 dettagli, ma incrementa anche il costo computazionale.
 
-> *Nota*: l'accuratezza dipende dalla risoluzione. A scale basse, i contorni delle ombre possono apparire "sgranati" (
-> aliasing).
+> *Nota*: l'accuratezza dipende dalla risoluzione. A scale basse, i contorni delle ombre possono apparire "sgranati" (> aliasing).
 
 ### Mappa di occlusione pre-calcolata
 
@@ -56,7 +55,7 @@ rasterizzati:
 * **Ostacoli statici** (sempre inclusi);
 * **Entità dinamiche**, come robot (inclusione opzionale, utile quando devono proiettare ombre).
 
-Le forme geometriche sono convertite in celle occluse tramite algoritmi ottimizzati e cache-friendly (es. scan-line per i
+Le forme geometriche sono convertite in celle occluse tramite algoritmi ottimizzati e cache-friendly (es. Scan-line per i
 cerchi). Questo approccio è veloce, ma la binarizzazione (0/1) non supporta oggetti semitrasparenti.
 
 ### Propagazione della Luce Indipendente (Per-Light FOV)
@@ -65,7 +64,7 @@ Ogni sorgente luminosa è trattata in modo _indipendente_. Un `FovEngine` calcol
 una singola sorgente, rispettando la mappa di occlusione. Questo disaccoppia la logica di propagazione dalla libreria
 di FOV, rendendo il motore sostituibile.
 
-> *Nota*: il _profilo di decadimento_ della luce è determinato dall'engine FOV.
+> *Nota*: il _profilo di decadimento_ della luce è determinato dal motore di FOV.
 `Light.intensity` scala il contributo, mentre `illuminationRadius` limita la portata.
 
 ### Combinazione dei contributi
@@ -86,6 +85,8 @@ Grazie alla somma saturata (associativa), la riduzione parallela resta determini
 
 Il `LightField` finale memorizza valori discreti per cella. Questo permettere ai sensori di leggere un valore di luce
 da una coordinata continua (`Point2D`), utilizzando l'_interpolazione bilineare_ (risultati fluidi e aliasing ridotto).
+
+> Note: fuori dai confini ritorna `0.0`.
 
 ### Integrazione con `Environment`
 
