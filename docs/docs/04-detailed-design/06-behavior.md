@@ -24,10 +24,10 @@ Il `Behavior` si inserisce perfettamente nel ciclo di esecuzione di un'entità a
 
 Il sistema opera su dati strutturati che incapsulano tutte le informazioni necessarie:
 
-- **Input**: (BehaviorContext`
+- **Input**: `BehaviorContext`
     * `sensorReadings: SensorReadings`: le letture sensoriali correnti;
     * `rng: RNG`: un generatore di numeri pseudo-casuali per comportamenti stocastici e riproducibili.
-- **Output** `Decision[F]` che è un alias per `(Action[F], RNG)`
+- **Output** una `Decision[F]` n che è una funzione totale `BehaviorContext => (Action[F], RNG)` (modellata come Kleisli).
     * `Action[F]` l'azione da eseguire sull'entità.
     * `RNG`: lo stato aggiornato del generatore, per garantire che la sequenza casuale non venga riutilizzata.
 
@@ -78,7 +78,6 @@ Sono incluse un insieme di politiche standard che coprono i casi d'uso più comu
 | **ObstacleAvoidance** | Evitamento ostacoli multi-livello    | Navigazione sicura          |
 | **Phototaxis**        | Attrazione verso sorgenti luminose   | Comportamento biologico     |
 | **Prioritized**       | Composizione gerarchica di strategie | Comportamenti complessi     |
-| **Prioritized**       | Composizione gerarchica di strategie | Comportamenti complessi     |
 
 ## Come estendere il sistema di behavior
 
@@ -90,4 +89,4 @@ Il sistema è progettato per facilitare l'aggiunta di nuovi comportamenti.
 4. _Nuovi contesti_: se necessario, estendere `BehaviorContext` per informazioni aggiuntive (es. memoria).
 
 Per i dettagli tecnici di implementazione, consultare la
-sezione [implementazione behavior](../05-implementation/03-david-cohen/behavior.md).
+sezione [implementazione behavior](../05-implementation/03-david-cohen/behaviors.md).
