@@ -1,7 +1,7 @@
 # Meeting
 
-Prima del meeting di **Initial Planning**, si è svolto un incontro preliminare tra **Product Owner** e l'*
-*Esperto di Dominio** per definire gli obiettivi e aspettative del progetto, in modo da garantire al team una chiara
+Prima del meeting di **Initial Planning**, si è svolto un incontro preliminare tra **Product Owner** e l'**Esperto di Dominio**
+per definire gli obiettivi e aspettative del progetto, in modo da garantire al team una chiara
 comprensione delle esigenze degli utenti e degli obiettivi di business. L'incontro ha portato alla stesura dei requisiti
 iniziali e alla definizione iniziale del backlog iniziale, presentato e completato in chiusura
 dell’Initial Planning.
