@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 3
 ---
 
 # Behavior
@@ -215,7 +215,7 @@ def decision[F[_] : Monad]: Decision[F] =
   Kleisli.ask[Id, BehaviorContext].map { ctx =>
     val action =
       bestLight(ctx.sensorReadings.lightReadings) match
-        case None => MovementActionFactory.moveForward[F]
+        case None => moveForward[F]
         case Some((s, off)) =>
           val (l, r) = wheelsTowards(s, off)
           moveOrNo[F](l, r)
