@@ -87,4 +87,4 @@ Il sistema è progettato per facilitare l'aggiunta di nuovi comportamenti.
 4. _Nuovi contesti_: se necessario, estendere `BehaviorContext` per informazioni aggiuntive (es. memoria).
 
 Per i dettagli tecnici di implementazione, consultare la
-sezione [implememtazione behavior](../05-implementation/03-david-cohen/behavior.md).
+sezione [implementazione behavior](../05-implementation/03-david-cohen/behavior.md).

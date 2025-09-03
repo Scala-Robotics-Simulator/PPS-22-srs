@@ -39,7 +39,7 @@ L'utilizzo di `Kleisli` fornisce:
 - Combinatori pronti (`map`, `flatMap`)
 - Forma uniforme per il DSL (alias di tipo) su cui definire i combinatori del DSL (es. `|`, `default`).
 - incapsulare la funzione in un **wrapper** con combinatori già pronti (es. `map`, `flatMap`).
-- Accesso esplicito al contesto con `Kleisly { ctx => }` e `Kleisli.ask`
+- Accesso esplicito al contesto con `Kleisli { ctx => }` e `Kleisli.ask`
 
 ```scala
 // Esempio di Composizione con Kleisli
@@ -139,6 +139,7 @@ def decision[F[_] : Monad]: Decision[F] = Kleisli { ctx =>
   val (uM, r3) = r2.generate(range)
 
   val base = calculateBaseSpeed(uF)
+  ...
   val turn = calculateTurn(uT, uM)
   val (left, right) = applyTurnToWheels(base, turn)
 
@@ -165,17 +166,31 @@ Sistema a tre fasi basato su distanze:
 private enum Phase:
   case Free, Warn, Blocked
 
-def decision[F[_] : Monad]: Decision[F] = Kleisli { ctx =>
-  val readings = ctx.sensorReadings.proximityReadings
-  val phase = determinePhase(readings)
+def decision[F[_] : Monad]: Decision[F] =
+  Kleisli.ask[Id, BehaviorContext].map { ctx =>
+    val readings = ctx.sensorReadings.proximityReadings
 
-  val (left, right) = phase match
-    case Free => (CruiseSpeed, CruiseSpeed)
-    case Warn => applyWarnSteering(readings)
-    case Blocked => applyPivot(readings)
+    val front = minIn(readings)(deg => math.abs(deg) <= 10)
+    val frontLeft = minIn(readings)(deg => deg > 0.0 && deg <= 100.0)
+    val frontRight = minIn(readings)(deg => deg < 0.0 && deg >= -100.0)
 
-  (wheels[F](left, right), ctx.rng)
-}
+    val phase = pickPhase(frontLeft, frontRight)
+    val sign = turnSign(readings)
+
+    val (l, r) =
+      if front < CriticalDist then (-1.0, -0.1)
+      else
+        phase match
+          case Phase.Free => (CruiseSpeed, CruiseSpeed)
+          case Phase.Warn =>
+            if sign > 0.0 then (WarnSpeed - WarnTurnSpeed, WarnSpeed + WarnTurnSpeed)
+            else (WarnSpeed + WarnTurnSpeed, WarnSpeed - WarnTurnSpeed)
+          case Phase.Blocked =>
+            if sign > 0.0 then (-BackBoost, BackBoost)
+            else (BackBoost, -BackBoost)
+
+    (wheels[F](l, r), ctx.rng)
+  }
 ```
 
 Procedura:
@@ -195,13 +210,17 @@ Procedura:
 Orientamento verso sorgenti luminose:
 
 ```scala
-def decision[F[_] : Monad]: Decision[F] = Kleisli { ctx =>
-  bestLight(ctx.sensorReadings.lightReadings) match
-    case None => (forward[F], ctx.rng)
-    case Some((intensity, offset)) =>
-      val (l, r) = wheelsTowards(intensity, offset)
-      (moveOrNo[F](l, r), ctx.rng)
-}
+def decision[F[_] : Monad]: Decision[F] =
+  Kleisli.ask[Id, BehaviorContext].map { ctx =>
+    val action =
+      bestLight(ctx.sensorReadings.lightReadings) match
+        case None => MovementActionFactory.moveForward[F]
+        case Some((s, off)) =>
+          val (l, r) = wheelsTowards(s, off)
+          moveOrNo[F](l, r)
+
+    (action, ctx.rng)
+  }
 ```
 
 Procedura:
@@ -219,18 +238,22 @@ Composizione gerarchica di comportamenti in modo dichiarativo. Non duplica logic
 
 ```scala
 // behaviors/PrioritizedBehavior.scala (cuore)
-val danger: Condition[BehaviorContext] = _.sensorReadings.proximityReadings.exists(_.value < Behaviors.Prioritized.DangerDist)
-val hasLight: Condition[BehaviorContext] = _.sensorReadings.lightReadings.exists(_.value >= Behaviors.Prioritized.LightThreshold)
+def decision[F[_] : Monad]: Decision[F] =
+  val danger: Condition[BehaviorContext] =
+    ctx => ctx.sensorReadings.proximityReadings.exists(_.value < Behaviors.Prioritized.DangerDist)
 
-val chooser: Behavior[BehaviorContext, BehaviorContext => (Action[F], RNG)] =
-  ((danger ==> ObstacleAvoidanceBehavior.decision[F].run) |
-    (hasLight ==> PhototaxisBehavior.decision[F].run))
-    .default(RandomWalkBehavior.decision[F].run)
+  val hasLight: Condition[BehaviorContext] =
+    ctx => ctx.sensorReadings.lightReadings.exists(_.value >= Behaviors.Prioritized.LightThreshold)
 
-Kleisli { ctx =>
-  val runSelected = chooser.run(ctx)
-  runSelected(ctx)
-}
+  val chooser: Behavior[BehaviorContext, BehaviorContext => (Action[F], RNG)] =
+    (
+      (danger ==> ObstacleAvoidanceBehavior.decision[F].run) |
+        (hasLight ==> PhototaxisBehavior.decision[F].run)
+      ).default(RandomWalkBehavior.decision[F].run)
+
+  Kleisli.ask[Id, BehaviorContext].flatMap { ctx =>
+    Kleisli.liftF(chooser.run(ctx)(ctx))
+  }
 ```
 
 Procedura:
