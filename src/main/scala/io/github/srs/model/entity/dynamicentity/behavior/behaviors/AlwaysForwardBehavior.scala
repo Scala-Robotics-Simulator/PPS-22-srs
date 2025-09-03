@@ -1,6 +1,8 @@
 package io.github.srs.model.entity.dynamicentity.behavior.behaviors
 
+import cats.Id
 import cats.data.Kleisli
+import io.github.srs.model.entity.dynamicentity.behavior.BehaviorContext
 import io.github.srs.model.entity.dynamicentity.behavior.behaviors.BehaviorCommon.*
 
 /**
@@ -17,4 +19,6 @@ object AlwaysForwardBehavior:
    *   A [[Decision]] that always returns a forward movement action.
    */
   def decision[F[_]]: Decision[F] =
-    Kleisli(ctx => (forward[F], ctx.rng))
+    Kleisli.ask[Id, BehaviorContext].map { ctx =>
+      (forward[F], ctx.rng)
+    }
