@@ -1,19 +1,49 @@
 # Simulazione
 
-<!-- TODO: Con windows vengono più belli gli screenshots :) -->
-![Simulazione](../../static/img/08-user-guide/simulation.png)
+La schermata di simulazione mostra l’ambiente virtuale in cui i robot interagiscono.  
+È possibile osservare il loro comportamento in tempo reale e analizzare i risultati della simulazione.
 
-La schermata di simulazione mostra l'ambiente virtuale in cui i robot interagiscono. È possibile osservare il comportamento dei robot in tempo reale e analizzare i risultati della simulazione.
+## Stato della simulazione
 
-Sulla sinistra viene mostrato lo stato attuale della simulazione.
+### Area di simulazione
+L’area di simulazione occupa la gran parte della schermata a sinistra. Qui vengono visualizzati i robot e l’ambiente in
+cui si muovono (compreso di ostacoli e luci). Rappresenta lo stato attuale della simulazione.
 
-È possibile mettere in pausa, riprendere o fermare la simulazione in qualsiasi momento.
-3 diverse velocità di riproduzione sono disponibili per adattarsi alle esigenze dell'utente.
+### Tempo di simulazione
+A destra è presente il **`tempo della simulazione`**, mostrato come tempo:
 
-Attraverso il menu "Active Robots" è possibile selezionare un robot del quale osservare le informazioni, quali:
+- **rimanente**, se specificato nella configurazione;
+- **trascorso**, fino a quel momento.
 
-- Id
-- Posizione
-- Direzione
-- Letture dei sensori di prossimità
-- Letture dei fotosensori
+### Active Robots
+
+Attraverso il menù **`Active Robots`** è possibile selezionare un robot durante l'esecuzione della simulazione e
+consultare le relative informazioni:
+
+- **Id**
+- **Posizione** (coordinate *x*, *y*)
+- **Direzione** (angolo in gradi)
+- **Letture dei sensori di prossimità**
+- **Letture dei fotosensori**
+
+## Controlli della simulazione
+
+- **Controlli di esecuzione** — la simulazione può essere messa in pausa, ripresa o interrotta in qualsiasi momento;
+- **Velocità di riproduzione** — disponibili tre modalità, per adattare l’esecuzione alle esigenze dell’utente.
+
+### Simulazione in pre-avvio
+
+La simulazione non è avviata finché l’utente non preme il pulsante di **`► Start`**.
+![Simulazione](../../static/img/08-user-guide/gui-simulation-not-started.png)
+
+### Simulazione in pausa
+
+Una volta avviata, la simulazione può essere messa in pausa in qualsiasi momento premendo il pulsante di **`❚❚ Pause`**.
+Può essere ripresa premendo il pulsante di **`► Resume`**.
+![Simulazione in pausa](../../static/img/08-user-guide/gui-simulation-paused.png)
+
+### Simulazione stoppata
+
+La simulazione può essere interrotta in qualsiasi momento premendo il pulsante **`■ Stop`**.  
+In questo caso viene presentata una **richiesta di conferma all’utente** prima di procedere con l’interruzione.
+![Simulazione stoppata](../../static/img/08-user-guide/gui-simulation-stopped.png)
