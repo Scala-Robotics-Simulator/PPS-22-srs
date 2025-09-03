@@ -45,4 +45,4 @@ sezione [Implementazione dell'ambiente di simulazione](../05-implementation/02-s
 
 Il `lightField` modella l’illuminazione dell’ambiente ed è ricalcolato a ogni tick dal motore di illuminazione, in
 funzione delle entità statiche e dinamiche (ad es. robot e ostacoli).
-Per maggiori dettagli consultare [la gestione dell’illuminazione](../04-detailed-design/09-light-diffusion.md).
+Per maggiori dettagli consultare [la gestione dell’illuminazione](../04-detailed-design/09-illumination.md).
