@@ -75,8 +75,7 @@ casi d'uso.
   - **[SF-07](https://github.com/Scala-Robotics-Simulator/PPS-22-srs/blob/main/src/test/scala/io/github/srs/model/environment/dsl/CreationDSLTest.scala)** – Limiti ambientali.
 - Logica di sistema:
   <!-- TODO: aggiungere quando viene mergiata pr -->
-  - **[SF-08](./03-functional.md)** – Definire un set di regole logiche per gestire le decisioni;
-  - **[SF-09](./03-functional.md)** – Esporre API di controllo headless;
-  - **[SF-10](https://github.com/Scala-Robotics-Simulator/PPS-22-srs/blob/main/src/test/scala/io/github/srs/model/environment/dsl/CreationDSLTest.scala)** – Invalidazione di entità sovrapposte;
-  - **[SF-11](./03-functional.md)** – Ritorno posizioni finali dei robot a fine simulazione.
-- **[SF-12](./03-functional.md)** – Eseguire simulazione CLI a massima velocità.
+  - **[SF-08](./03-functional.md)** – Esporre API di controllo da CLI;
+  - **[SF-09](https://github.com/Scala-Robotics-Simulator/PPS-22-srs/blob/main/src/test/scala/io/github/srs/model/environment/dsl/CreationDSLTest.scala)** – Invalidazione di entità sovrapposte;
+  - **[SF-10](./03-functional.md)** – Ritorno posizioni finali dei robot a fine simulazione.
+- **[SF-11](./03-functional.md)** – Eseguire simulazione CLI a massima velocità.

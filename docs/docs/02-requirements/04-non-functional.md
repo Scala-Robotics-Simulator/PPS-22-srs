@@ -6,9 +6,9 @@ description: "Requisiti non funzionali del progetto."
 
 # Non funzionali
 
-- **[NF-01](./04-non-functional.md)** – Prestazioni: ≥ 100 robot a 30 fps.
+- **[NF-01](https://github.com/Scala-Robotics-Simulator/PPS-22-srs/blob/main/src/test/scala/io/github/srs/model/dsl/GridDSLTest.scala)** – Prestazioni: ≥ 100 robot a 30 fps.
 - **[NF-02](./04-non-functional.md)** – Usabilità GUI: questionario rivolto a N utenti per valutare l'interfaccia
-- **[NF-03](https://github.com/Scala-Robotics-Simulator/PPS-22-srs/actions)** – Portabilità: compatibilità multi-OS e versioni (verifiche CI).
-- **[NF-04](./04-non-functional.md)** – Riproducibilità: simulazione identica con stesso seed e parametri.
+- **[NF-03](https://github.com/Scala-Robotics-Simulator/PPS-22-srs/actions)** – Portabilità: compatibilità multi-OS e versioni.
+- **[NF-04](https://github.com/Scala-Robotics-Simulator/PPS-22-srs/blob/main/src/test/scala/io/github/srs/model/dsl/GridDSLTest.scala)** – Riproducibilità: simulazione identica con stesso seed e parametri.
 - **[NF-05](https://github.com/Scala-Robotics-Simulator/PPS-22-srs/blob/main/src/main/scala/io/github/srs/view/ConfigurationView.scala)** – Sicurezza: validazione preventiva del file di configurazione.
 - **[NF-06](https://github.com/Scala-Robotics-Simulator/PPS-22-srs/blob/main/src/main/scala/io/github/srs/model/entity/dynamicentity/sensor/Sensor.scala)** – Estensibilità: aggiunta di sensori e/o attuatori senza modifiche al core.
