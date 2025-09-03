@@ -27,12 +27,24 @@ Il sistema opera su dati strutturati che incapsulano tutte le informazioni neces
 - **Input**: `BehaviorContext`
     * `sensorReadings: SensorReadings`: le letture sensoriali correnti;
     * `rng: RNG`: un generatore di numeri pseudo-casuali per comportamenti stocastici e riproducibili.
-- **Output** una `Decision[F]` n che è una funzione totale `BehaviorContext => (Action[F], RNG)` (modellata come Kleisli).
+- **Output** una `Decision[F]` n che è una funzione totale `BehaviorContext => (Action[F], RNG)` (modellata come
+  Kleisli).
     * `Action[F]` l'azione da eseguire sull'entità.
     * `RNG`: lo stato aggiornato del generatore, per garantire che la sequenza casuale non venga riutilizzata.
 
 > **Invariante**: un `Behavior` completo deve essere una **funzione totale**. Dato un qualsiasi `BehaviorContext`
 > valido, deve *sempre* produrre un'`Action` valida.
+
+## Pattern Kleisli
+
+I comportamenti sono modellati come funzioni pure da un contesto a una decisione:
+`Decision[F] = Kleisli[Id, BehaviorContext, (Action[F], RNG)]`. Questo permette di avere:
+
+- **Accesso al contesto**: `Kleisli.ask` fornisce accesso esplicito al contesto;
+- **Composizione**: con `Kleisli` otteniamo combinatori (`map/flatMap`, `andThen`, `local`, `ask`) e un DSL pulito;
+- **Testabilità**: si testa con `decision.run(ctx)` in modo deterministico;
+- **Astrazione degli effetti**: attualmente utilizziamo `Id`, di conseguenza è una funziona pura; in futuro può
+  sfruttare`Either/IO` senza cambiare le API del DSL.
 
 ## Astrazione dei comportamenti
 

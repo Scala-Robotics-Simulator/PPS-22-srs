@@ -33,9 +33,23 @@ Il calcolo segue una pipeline ben definita in tre fasi:
 * **`IlluminationLogic`**: l'_orchestratore_ della pipeline. Calcola l’occlusione, invoca il FOV per
   ogni luce e combina i risultati e decide se parallelizzare il calcolo.
 * **`OcclusionRaster`**: converte le *geometrie* (cerchi, rettangoli) in una mappa di occlusione su griglia.
-* **`FovEngine`**: un'interfaccia _pluggable_ per gli algoritmi propagazione della luce. L'implementazione attuale usa **SquidLib**.
+* **`FovEngine`**: un'interfaccia _pluggable_ per gli algoritmi propagazione della luce. L'implementazione attuale usa *
+  *SquidLib**.
 * **`LightField`**: la *struttura dati finale* che rappresenta il campo luminoso, interrogabile in coordinate continue
   tramite _interpolazione bilineare_.
+
+### Tagless Final in `LightMap`
+
+`LightMap` è modellato come un’algebra parametrica sull’effetto `F[_]`. Questo permette di avere:
+
+* **Astrazione dall’effetto**: attualmente usiamo `IO` di `cats-effect`, ma potremmo passare a `Either`, `Future` o
+  `IO` senza cambiare il core del calcolo;
+* **Composizione**: si integra con `cats-effect` e combinatori monadici per orchestrare eventuale parallelismo/caching;
+* **Testabilità**: nei test si può istanziare un interprete puro (`Id`) che restituisce campi predefiniti;
+* **Evoluzione futura**: se in futuro servissero effetti più complessi (es. logging, error handling), si può
+  passare a `EitherT[IO, Error, A]` senza cambiare le API pubbliche.
+
+> L` effetto `F[_]` incapsula solo le *politiche di esecuzione* (quando e come eseguire).
 
 ## Scelte di Design
 
@@ -45,7 +59,8 @@ Lo spazio continuo è campionato in una griglia di `width*scale × height*scale`
 da uno `ScaleFactor` (celle per metro). Un valore più alto aumenta la qualità delle ombre e dei
 dettagli, ma incrementa anche il costo computazionale.
 
-> *Nota*: l'accuratezza dipende dalla risoluzione. A scale basse, i contorni delle ombre possono apparire "sgranati" (> aliasing).
+> *Nota*: l'accuratezza dipende dalla risoluzione. A scale basse, i contorni delle ombre possono apparire "sgranati" (>
+> aliasing).
 
 ### Mappa di occlusione pre-calcolata
 
@@ -55,7 +70,8 @@ rasterizzati:
 * **Ostacoli statici** (sempre inclusi);
 * **Entità dinamiche**, come robot (inclusione opzionale, utile quando devono proiettare ombre).
 
-Le forme geometriche sono convertite in celle occluse tramite algoritmi ottimizzati e cache-friendly (es. Scan-line per i
+Le forme geometriche sono convertite in celle occluse tramite algoritmi ottimizzati e cache-friendly (es. Scan-line per
+i
 cerchi). Questo approccio è veloce, ma la binarizzazione (0/1) non supporta oggetti semitrasparenti.
 
 ### Propagazione della Luce Indipendente (Per-Light FOV)
