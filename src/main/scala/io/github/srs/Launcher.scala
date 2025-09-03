@@ -1,11 +1,14 @@
 package io.github.srs
 
+import scala.annotation.targetName
 import scala.language.postfixOps
 
 import cats.effect.IO
+import io.github.srs.config.SimulationConfig
 import io.github.srs.controller.ControllerModule
 import io.github.srs.controller.ControllerModule.Controller
 import io.github.srs.model.ModelModule.Model
+import io.github.srs.model.environment.ValidEnvironment.ValidEnvironment
 import io.github.srs.model.logic.simulationStateLogicsBundle
 import io.github.srs.model.{ ModelModule, SimulationState }
 import io.github.srs.view.ViewModule.View
@@ -49,3 +52,29 @@ object GUILauncher extends BaseLauncher with GUIComponent[SimulationState]:
  */
 object CLILauncher extends BaseLauncher with CLIComponent[SimulationState]:
   override val view: View[SimulationState] = View()
+
+object Launcher:
+
+  /**
+   * Runs the simulation with the given configuration.
+   * @param headless
+   *   the flag indicating whether to run in headless mode (CLI) or with GUI.
+   * @return
+   *   an IO effect that runs the simulation and returns an optional final state.
+   */
+  def run(headless: Boolean = true)(simulationConfig: SimulationConfig[ValidEnvironment]): IO[Option[SimulationState]] =
+    val launcher = if headless then CLILauncher else GUILauncher
+    val initialState = SimulationState.from(simulationConfig, headless)
+    if headless && simulationConfig.simulation.duration.isEmpty then IO.pure(None)
+    else launcher.runMVC(initialState).map(Some(_))
+
+extension (simulationConfig: SimulationConfig[ValidEnvironment])
+
+  /**
+   * Infix operator to run the simulation with the given configuration.
+   * @return
+   *   an IO effect that runs the simulation and returns an optional final state.
+   */
+  @targetName("run")
+  infix def >>> : IO[Option[SimulationState]] =
+    Launcher.run()(simulationConfig)
