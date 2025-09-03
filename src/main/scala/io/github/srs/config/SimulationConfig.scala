@@ -2,7 +2,6 @@ package io.github.srs.config
 
 import cats.effect.IO
 import io.github.srs.CLILauncher.runMVC
-import io.github.srs.mkInitialState
 import io.github.srs.model.{ Simulation, SimulationState }
 import io.github.srs.model.environment.EnvironmentParameters
 import io.github.srs.model.environment.ValidEnvironment.ValidEnvironment
@@ -32,7 +31,7 @@ extension (simulationConfig: SimulationConfig[ValidEnvironment])
    *   simulation runs indefinitely.
    */
   infix def run: IO[Option[SimulationState]] =
-    val initialState = mkInitialState(simulationConfig, headless = true)
+    val initialState = SimulationState.from(simulationConfig, headless = true)
     simulationConfig.simulation.duration match
       case None => IO.pure(None)
       case _ => runMVC(initialState).map(Some(_))

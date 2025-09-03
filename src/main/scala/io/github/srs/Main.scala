@@ -2,6 +2,7 @@ package io.github.srs
 
 import io.github.srs.view.{ ConfigurationCLI, ConfigurationGUI, ConfigurationView }
 import cats.effect.unsafe.implicits.global
+import io.github.srs.model.SimulationState
 
 @main def main(args: String*): Unit =
   ArgParser.parse(args) match
@@ -13,7 +14,7 @@ import cats.effect.unsafe.implicits.global
 
       val runner = for
         cfg <- configurationView.init()
-        state = mkInitialState(cfg, parsed.headless)
+        state = SimulationState.from(cfg, parsed.headless)
         _ <- configurationView.close()
         _ <- launcher.runMVC(state)
       yield ()
