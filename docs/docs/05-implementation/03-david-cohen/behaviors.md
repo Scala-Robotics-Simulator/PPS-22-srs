@@ -35,12 +35,11 @@ type Condition[I] = I => Boolean // Predicato
 type Decision[F[_]] = Behavior[BehaviorContext, (Action[F], RNG)]
 ```
 
-L'utilizzo di `Kleisli` fornisce:
+> Nota: le motivazioni sono descitte in [**Design → Behavior
+**](../../04-detailed-design/06-behavior.md#pattern-reader--kleisli-razionale).
 
-- Combinatori pronti (`map`, `flatMap`)
-- Forma uniforme per il DSL (alias di tipo) su cui definire i combinatori del DSL (es. `|`, `default`).
-- incapsulare la funzione in un **wrapper** con combinatori già pronti (es. `map`, `flatMap`).
-- Accesso esplicito al contesto con `Kleisli { ctx => }` e `Kleisli.ask`
+Una decisione è una funzione totale che, dato un `BehaviorContext`, restituisce una tupla con l’`Action[F]` da eseguire
+e il nuovo stato del generatore di numeri casuali `RNG`.
 
 ```scala
 // Esempio di Composizione con Kleisli
@@ -140,7 +139,8 @@ def decision[F[_] : Monad]: Decision[F] = Kleisli { ctx =>
   val (uM, r3) = r2.generate(range)
 
   val base = calculateBaseSpeed(uF)
-  ...
+  .
+..
   val turn = calculateTurn(uT, uM)
   val (left, right) = applyTurnToWheels(base, turn)
 
