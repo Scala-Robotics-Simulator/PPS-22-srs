@@ -29,27 +29,7 @@ final case class Robot(
     override val actuators: Seq[Actuator[Robot]] = DefaultActuators,
     override val sensors: Vector[Sensor[Robot, Environment]] = DefaultSensors,
     override val behavior: Policy = DefaultPolicy,
-) extends DynamicEntity:
-
-  given CanEqual[Policy, Policy] = CanEqual.derived
-
-  // TODO: serialize the id
-  //  override def equals(obj: Any): Boolean = obj match
-  //    case that: Robot => this.id == that.id
-  //    case _ => false
-
-  override def equals(obj: Any): Boolean = obj match
-    case that: Robot =>
-      this.id == that.id &&
-      this.position == that.position &&
-      this.shape == that.shape &&
-      this.orientation == that.orientation &&
-      this.actuators == that.actuators &&
-      this.sensors == that.sensors &&
-      this.behavior == that.behavior
-    case _ => false
-
-end Robot
+) extends DynamicEntity
 
 object Robot:
 

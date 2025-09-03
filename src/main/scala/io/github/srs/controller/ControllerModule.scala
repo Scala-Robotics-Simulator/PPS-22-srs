@@ -14,7 +14,7 @@ import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.behavior.BehaviorContext
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
 import io.github.srs.model.logic.*
-import io.github.srs.utils.EqualityGivenInstances.given_CanEqual_Event_Event
+import io.github.srs.utils.EqualityGivenInstances.given
 import io.github.srs.utils.SimulationDefaults.DebugMode
 
 /**
