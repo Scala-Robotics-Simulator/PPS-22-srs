@@ -222,6 +222,7 @@ object Validation:
    *   [[DomainError.Collision]] error containing the colliding entities.
    */
   def noCollisions(field: String, elements: Set[Entity]): Validation[Set[Entity]] =
+    import io.github.srs.utils.collision.Collision.*
     elements.toSeq
       .combinations(2)
       .collectFirst:

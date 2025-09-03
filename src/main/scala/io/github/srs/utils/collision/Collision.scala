@@ -3,8 +3,39 @@ package io.github.srs.utils.collision
 import io.github.srs.model.entity.ShapeType.Circle
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.utils.*
+import io.github.srs.model.entity.Entity
 
 object Collision:
+
+  extension (e: Entity)
+
+    /**
+     * Checks if this entity collides with another entity.
+     *
+     * @param other
+     *   the other entity to check for collision against this entity.
+     * @return
+     *   true if the two entities collide, false otherwise.
+     */
+    def collidesWith(other: Entity): Boolean =
+      import Point2D.*
+      (e.shape, other.shape) match
+        case (ShapeType.Circle(eRadius), ShapeType.Circle(otherRadius)) =>
+          e.position.distanceTo(other.position) <= (eRadius + otherRadius)
+        case (ShapeType.Rectangle(w, h), ShapeType.Rectangle(_, _)) =>
+          isColliding(e.position, ShapeType.Rectangle(w, h), e.orientation)(
+            other.position,
+            other.shape,
+            other.orientation,
+          )
+        case (ShapeType.Circle(_), ShapeType.Rectangle(_, _)) => other.collidesWith(e)
+        case (ShapeType.Rectangle(w, h), ShapeType.Circle(_)) =>
+          isColliding(e.position, ShapeType.Rectangle(w, h), e.orientation)(
+            other.position,
+            other.shape,
+            other.orientation,
+          )
+  end extension
 
   /**
    * Checks if a rectangle is colliding with another shape.
@@ -23,7 +54,7 @@ object Collision:
    * @return
    *   true if the rectangle is colliding with the other shape, false otherwise
    */
-  def isColliding(position: Point2D, shape: ShapeType.Rectangle, orientation: Orientation)(
+  private def isColliding(position: Point2D, shape: ShapeType.Rectangle, orientation: Orientation)(
       otherPosition: Point2D,
       otherShape: ShapeType,
       otherOrientation: Orientation,
