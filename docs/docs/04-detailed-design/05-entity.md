@@ -151,6 +151,7 @@ ma con la differenza che hanno larghezza o altezza pari a zero.
 - Dimensioni coerenti con i bordi (spessore zero consentito per i boundary);
 - Nessuna sovrapposizione anomala con entità interne.
 
+> Gli eventuali boundary definiti nel file YAML vengono ignorati: in validazione vengono sempre ricreati i 4 canonicali
 > Questi elementi sono fondamentali per definire i limiti entro cui le entità possono muoversi e interagire.
 
 ## Robot
