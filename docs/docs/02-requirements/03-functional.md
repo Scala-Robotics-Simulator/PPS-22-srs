@@ -74,7 +74,6 @@ casi d'uso.
   - **[SF-06](https://github.com/Scala-Robotics-Simulator/PPS-22-srs/blob/main/src/test/scala/io/github/srs/model/illumination/LightMapTest.scala)** – Calcolo diffusione della luce;
   - **[SF-07](https://github.com/Scala-Robotics-Simulator/PPS-22-srs/blob/main/src/test/scala/io/github/srs/model/environment/dsl/CreationDSLTest.scala)** – Limiti ambientali.
 - Logica di sistema:
-  <!-- TODO: aggiungere quando viene mergiata pr -->
   - **[SF-08](./../08-user-guide/03-cli.md)** – Esporre API di controllo da CLI;
   - **[SF-09](https://github.com/Scala-Robotics-Simulator/PPS-22-srs/blob/main/src/test/scala/io/github/srs/model/environment/dsl/CreationDSLTest.scala)** – Invalidazione di entità sovrapposte;
   - **[SF-10](https://github.com/Scala-Robotics-Simulator/PPS-22-srs/blob/main/src/test/scala/io/github/srs/model/dsl/GridDSLTest.scala)** – Ritorno posizioni finali dei robot a fine simulazione.
