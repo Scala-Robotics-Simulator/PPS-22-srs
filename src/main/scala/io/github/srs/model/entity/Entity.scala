@@ -1,7 +1,5 @@
 package io.github.srs.model.entity
 
-import scala.annotation.tailrec
-
 import io.github.srs.model.entity.ShapeType.Rectangle
 import io.github.srs.model.entity.{ Orientation, ShapeType }
 import io.github.srs.utils.collision.Collision.isColliding
@@ -88,7 +86,6 @@ object Entity:
      * @return
      *   true if the two entities collide, false otherwise.
      */
-    @tailrec
     def collidesWith(other: Entity): Boolean =
       import Point2D.*
       (e.shape, other.shape) match
