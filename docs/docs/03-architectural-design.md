@@ -16,7 +16,8 @@ injection* che permette di definire i componenti Model, View e Controller come m
 specificando in modo esplicito le dipendenze tra di essi. Questo approccio facilita la composizione, la testabilità e la
 sostituzione dei singoli componenti.
 
-L’intera architettura è definita in modo generico rispetto al tipo di stato `S`, che rappresenta l’informazione mantenuta
+L’intera architettura è definita in modo generico rispetto al tipo di stato `S`, che rappresenta l’informazione
+mantenuta
 e gestita durante la simulazione. I trait `Model`, `View` e `Controller` sono parametrizzati rispetto a `S`, garantendo
 riusabilità e indipendenza rispetto a una specifica rappresentazione dello stato.
 
@@ -44,8 +45,32 @@ L'architettura è costituita da tre componenti principali:
 - ### Controller
   È il componente che gestisce la logica di controllo dell'applicazione. Funge da intermediario tra Model e View,
   mantenendo una chiara separazione delle responsabilità. Il Controller espone la funzione `simulationLoop`,
-  che rappresenta il ciclo principale della simulazione. All'interno di questo ciclo, il Controller riceve l'attuale stato
+  che rappresenta il ciclo principale della simulazione. All'interno di questo ciclo, il Controller riceve l'attuale
+  stato
   dell'applicazione, elabora gli eventi provenienti dalla View, costruisce le funzioni di aggiornamento da applicare al
-  Model e richiama la View per visualizzare i risultati tramite `render`. 
+  Model e richiama la View per visualizzare i risultati tramite `render`.
   Questo approccio consente di centralizzare la logica del flusso di simulazione, separando chiaramente il controllo
   dalla logica di business e dalla presentazione, rendendo l'applicazione più modulare ed estendibile.
+
+### Pattern ↔ uso nel progetto
+
+L’implementazione adotta alcuni pattern funzionali per mantenere il codice modulare, testabile e facile da estendere.
+
+- **Cake Pattern (MVC)**: usato per comporre `Model`, `View`, `Controller` come moduli indipendenti e iniettarne le
+  dipendenze in modo
+  esplicito. Migliora sostituibilità e testabilità dei componenti.
+
+- **Tagless Final (azioni, configurazione)**: le interfacce sono parametrizzate su `F[_]` (es. `Action[F]`,
+  `ConfigManager[F]`), così l’uso dell’effetto è un
+  dettaglio sostituibile (`IO`, `SyncIO`, `EitherT`, ecc.) e i test possono usare interpreti fittizi.
+
+- **Reader via Kleisli (behavior)**: le decisioni sono funzioni da un contesto immutabile a un risultato, modellate con
+  `Kleisli`.
+
+| Pattern/Concetto   | Dove                         | Perché utile                                     |
+|--------------------|------------------------------|--------------------------------------------------|
+| Cake Pattern (MVC) | Architettura MVC             | DI esplicita, moduli sostituibili, testabilità   |
+| Tagless Final      | Action, ConfigManager        | Effetto astratto, interpreti multipli, test      |
+| Kleisli            | Behavior/Policy DSL          | Contesto puro, composizione, refactoring effetti |
+| ADT & opaque types | Dominio, ScaleFactor, Errori | Modello sicuro, invarianti a compile-time        |
+| cats-effect (IO)   | Controller/View, LightMap    | Effetti e concorrenza gestiti in modo sicuro     |
