@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-# Behavior — Implementazione
+# Behavior
 
 Il modulo `behavior` implementa il sistema decisionale per le entità dinamiche, fornendo un framework puro e componibile
 per la selezione delle azioni basata su input sensoriali.
@@ -14,10 +14,11 @@ per la selezione delle azioni basata su input sensoriali.
 Incapsula l'input immutabile per la decisione:
 
 ```scala
-final case class BehaviorContext(
-                                  sensorReadings: SensorReadings,
-                                  rng: RNG
-                                )
+final case class BehaviorContext
+(
+  sensorReadings: SensorReadings,
+  rng: RNG
+)
 ```
 
 ### Kleisli Arrow

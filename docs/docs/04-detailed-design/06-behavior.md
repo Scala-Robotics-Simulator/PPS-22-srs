@@ -4,33 +4,35 @@ sidebar_position: 6
 
 # Behavior
 
-Il modulo `Behavior` è il **motore decisionale** del ciclo **sense → decision → act**.
-
-Riceve le **letture sensoriali** (`SensorReadings`) e produce l'**intenzione** (l’`Action`) da applicare a un'entità
-dinamica (es. `Robot`), mantenendo una separazione netta tra decisione ed esecuzione.
+Il modulo `Behavior` è il **motore decisionale**  di un'entità dinamica, progettato per operare all'interno del ciclo di
+simulazione sense → decision → act.
+La sua responsabilità è ricevere le  **letture sensoriali** (`SensorReadings`) e produrre una '**intenzione**, ossia l’
+`Action` da eseguire, mantenendo una separazione netta tra la logica decisionale e l'esecuzione fisica dell'azione.
 
 ## Posizionamento nel ciclo di simulazione
 
-1. **Sense**:  il robot acquisisce informazioni dall'ambiente tramite i sensori (`SensorReadings`);
+Il `Behavior` si inserisce perfettamente nel ciclo di esecuzione di un'entità autonoma:
+
+1. **Sense**: l'entità acquisisce informazioni sull'ambiente tramite i suoi sensori, producendo un `SensorReadings`;
 2. **Decision**: il `Behavior` elabora il contesto e sceglie un’azione appropriata;
-3. **Act**: l’azione viene interpretata dagli attuatori che modificano lo stato dell’entità.
+3. **Act**: l’azione viene passata agli attuatori, che modificano lo stato dell'entità (es. velocità delle ruote).
 
 > Il behavior è **stateless** (decisione _cieca_ sul tick corrente).  
 > Se servisse “memoria”, bisognerebbe **estendere il contesto di input**  invece di introdurre mutazioni.
 
 ## I/O e contratti
 
-Il sistema di behavior opera su dati strutturati che incapsulano tutte le informazioni necessarie:
+Il sistema opera su dati strutturati che incapsulano tutte le informazioni necessarie:
 
-- **Input** (`BehaviorContext`):
-    - `sensorReadings: SensorReadings`: letture sensoriali correnti;
-    - `rng: RNG`: generatore pseudo-casuale per comportamenti stocastici e riproducibili.
-- **Output** → **Decision**`(Action[F], RNG)`:
-    - `Action[F]` da eseguire sull’entità;
-    - `RNG`: stato del generatore aggiornato.
+- **Input**: (BehaviorContext`
+    * `sensorReadings: SensorReadings`: le letture sensoriali correnti;
+    * `rng: RNG`: un generatore di numeri pseudo-casuali per comportamenti stocastici e riproducibili.
+- **Output** `Decision[F]` che è un alias per `(Action[F], RNG)`
+    * `Action[F]` l'azione da eseguire sull'entità.
+    * `RNG`: lo stato aggiornato del generatore, per garantire che la sequenza casuale non venga riutilizzata.
 
-> Invariante fondamentale: un behavior deve sempre produrre un'azione valida, garantendo la totalità della funzione
-> decisionale.
+> **Invariante**: un `Behavior` completo deve essere una **funzione totale**. Dato un qualsiasi `BehaviorContext`
+> valido, deve *sempre* produrre un'`Action` valida.
 
 ## Astrazione dei comportamenti
 
@@ -76,8 +78,9 @@ Sono incluse un insieme di politiche standard che coprono i casi d'uso più comu
 | **ObstacleAvoidance** | Evitamento ostacoli multi-livello    | Navigazione sicura          |
 | **Phototaxis**        | Attrazione verso sorgenti luminose   | Comportamento biologico     |
 | **Prioritized**       | Composizione gerarchica di strategie | Comportamenti complessi     |
+| **Prioritized**       | Composizione gerarchica di strategie | Comportamenti complessi     |
 
-## Estensibilità
+## Come estendere il sistema di behavior
 
 Il sistema è progettato per facilitare l'aggiunta di nuovi comportamenti.
 
