@@ -1,6 +1,6 @@
 package io.github.srs.model.entity.dynamicentity.behavior.behaviors
 
-import cats.Monad
+import cats.{ Id, Monad }
 import cats.data.Kleisli
 import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.behavior.BehaviorContext
@@ -41,8 +41,7 @@ object PrioritizedBehavior:
           (hasLight ==> PhototaxisBehavior.decision[F].run)
       ).default(RandomWalkBehavior.decision[F].run)
 
-    Kleisli { ctx =>
-      val runSelected = chooser.run(ctx)
-      runSelected(ctx)
+    Kleisli.ask[Id, BehaviorContext].flatMap { ctx =>
+      Kleisli.liftF(chooser.run(ctx)(ctx))
     }
 end PrioritizedBehavior
