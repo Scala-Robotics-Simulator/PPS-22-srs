@@ -8,9 +8,9 @@ import io.github.srs.utils.SimulationDefaults.DynamicEntity.{ MaxSpeed, MinSpeed
 import io.github.srs.utils.random.RNG
 
 /**
- * Common utilities and types for behaviors.
+ * Common utilities and types of behaviors.
  */
-object BehaviorCommon:
+protected object BehaviorCommon:
 
   /**
    * Type alias for a behavioral decision. A decision is a function that takes a behavioral context and returns an
@@ -46,19 +46,6 @@ object BehaviorCommon:
    */
   inline def clamp(v: Double, lo: Double, hi: Double): Double =
     if v < lo then lo else if v > hi then hi else v
-
-  /**
-   * Clamps wheel speeds between the allowed minimum and maximum values.
-   *
-   * @param l
-   *   The left wheel speed.
-   * @param r
-   *   The right wheel speed.
-   * @return
-   *   A tuple containing the clamped left and right wheel speeds.
-   */
-  inline private def clampWheels(l: Double, r: Double): (Double, Double) =
-    (clamp(l, MinSpeed, MaxSpeed), clamp(r, MinSpeed, MaxSpeed))
 
   /**
    * Converts an angle in degrees to a value between -180 and 180.
@@ -99,9 +86,9 @@ object BehaviorCommon:
    * maximum values.
    *
    * @param l
-   *   The left wheel speed.
+   *   The left-wheel speed.
    * @param r
-   *   The right wheel speed.
+   *   The right-wheel speed.
    * @tparam F
    *   The effect type (e.g., IO, Future).
    * @return
@@ -121,4 +108,31 @@ object BehaviorCommon:
    */
   def forward[F[_]]: Action[F] =
     MovementActionFactory.moveForward[F]
+
+  /**
+   * Creates a movement action based on the provided wheel speeds or returns a no-action if the speeds are invalid.
+   *
+   * @param l
+   *   The speed to apply to the left wheel.
+   * @param r
+   *   The speed to apply to the right wheel.
+   * @tparam F
+   *   The effect type (e.g., IO, Future).
+   */
+  inline def moveOrNo[F[_]: cats.Monad](l: Double, r: Double): Action[F] =
+    MovementActionFactory.customMove[F](l, r).getOrElse(NoAction[F]())
+
+  /**
+   * Clamps wheel speeds between the allowed minimum and maximum values.
+   *
+   * @param l
+   *   The left-wheel speed.
+   * @param r
+   *   The right-wheel speed.
+   * @return
+   *   A tuple containing the clamped left and right-wheel speeds.
+   */
+  inline private def clampWheels(l: Double, r: Double): (Double, Double) =
+    (clamp(l, MinSpeed, MaxSpeed), clamp(r, MinSpeed, MaxSpeed))
+
 end BehaviorCommon
