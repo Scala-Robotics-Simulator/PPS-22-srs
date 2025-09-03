@@ -1,13 +1,13 @@
 package io.github.srs.model.entity.dynamicentity.behavior.behaviors
 
-import cats.Monad
 import cats.data.Kleisli
+import cats.{ Id, Monad }
+import io.github.srs.model.entity.dynamicentity.behavior.BehaviorContext
 import io.github.srs.model.entity.dynamicentity.behavior.behaviors.BehaviorCommon.*
 import io.github.srs.model.entity.dynamicentity.sensor.ProximityReadings
 import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings.*
 import io.github.srs.utils.SimulationDefaults.Behaviors.ObstacleAvoidance.*
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.{ MaxSpeed, MinSpeed }
-import io.github.srs.utils.SimulationDefaults.Behaviors.ObstacleAvoidance.CriticalDist
 
 /**
  * A [[Behavior]] that avoid obstacles using proximity sensor readings.
@@ -29,23 +29,15 @@ object ObstacleAvoidanceBehavior:
    *   A [[Decision]] that computes the action based on proximity sensor readings.
    */
   def decision[F[_]: Monad]: Decision[F] =
-    Kleisli { ctx =>
+    Kleisli.ask[Id, BehaviorContext].map { ctx =>
       val readings = ctx.sensorReadings.proximityReadings
 
-      // Front region: ±60°
       val front = minIn(readings)(deg => math.abs(deg) <= 10)
       val frontLeft = minIn(readings)(deg => deg > 0.0 && deg <= 100.0)
       val frontRight = minIn(readings)(deg => deg < 0.0 && deg >= -100.0)
-      val minFront = math.min(frontLeft, frontRight)
 
-      val phase =
-        if minFront <= CriticalDist then Phase.Blocked
-        else if minFront < SafeDist then Phase.Warn
-        else Phase.Free
-
-      // Determine the turn direction
-      val (avgLeft, avgRight) = hemisphereAverages(readings)
-      val turnSign = if avgLeft > avgRight then MaxSpeed else if avgLeft < avgRight then MinSpeed else MaxSpeed
+      val phase = pickPhase(frontLeft, frontRight)
+      val sign = turnSign(readings)
 
       val (l, r) =
         if front < CriticalDist then (-1.0, -0.1)
@@ -53,10 +45,10 @@ object ObstacleAvoidanceBehavior:
           phase match
             case Phase.Free => (CruiseSpeed, CruiseSpeed)
             case Phase.Warn =>
-              if turnSign > 0.0 then (WarnSpeed - WarnTurnSpeed, WarnSpeed + WarnTurnSpeed)
+              if sign > 0.0 then (WarnSpeed - WarnTurnSpeed, WarnSpeed + WarnTurnSpeed)
               else (WarnSpeed + WarnTurnSpeed, WarnSpeed - WarnTurnSpeed)
             case Phase.Blocked =>
-              if turnSign > 0.0 then (-BackBoost, BackBoost)
+              if sign > 0.0 then (-BackBoost, BackBoost)
               else (BackBoost, -BackBoost)
 
       (wheels[F](l, r), ctx.rng)
@@ -104,5 +96,42 @@ object ObstacleAvoidanceBehavior:
     val avgL = if cntL == 0 then 1.0 else sumL / cntL
     val avgR = if cntR == 0 then 1.0 else sumR / cntR
     (avgL, avgR)
+
+  /**
+   * Determines the operational phase of the obstacle avoidance behavior based on proximity sensor readings.
+   *
+   * @param frontLeft
+   *   The proximity reading from the front-left sensor.
+   * @param frontRight
+   *   The proximity reading from the front-right sensor.
+   * @return
+   *   The determined [[Phase]].
+   */
+  private def pickPhase(frontLeft: Double, frontRight: Double): Phase =
+    val minFront = math.min(frontLeft, frontRight)
+    if minFront <= CriticalDist then Phase.Blocked
+    else if minFront < SafeDist then Phase.Warn
+    else Phase.Free
+
+  /**
+   * Determines the turning speed of the robot based on proximity sensor readings.
+   *
+   * The method compares the average "freedom" values for the left and right hemispheres to decide which direction the
+   * robot should turn. A higher average "freedom" on the left side results in a higher turning speed to the left, while
+   * a higher value on the right leads to turning right.
+   *
+   * @param readings
+   *   The proximity sensor readings, used to calculate the average "freedom" for the left and right hemispheres.
+   * @return
+   *   The turning speed:
+   *   - Returns the maximum speed if the left side has more "freedom."
+   *   - Returns the minimum speed if the right side has more "freedom."
+   *   - Returns the maximum speed if both sides have equal "freedom."
+   */
+  private def turnSign(readings: ProximityReadings): Double =
+    val (avgLeft, avgRight) = hemisphereAverages(readings)
+    if avgLeft > avgRight then MaxSpeed // più “libero” a sinistra → gira a sinistra
+    else if avgLeft < avgRight then MinSpeed
+    else MaxSpeed
 
 end ObstacleAvoidanceBehavior
