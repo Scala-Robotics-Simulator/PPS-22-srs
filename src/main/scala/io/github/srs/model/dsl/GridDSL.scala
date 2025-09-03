@@ -12,7 +12,7 @@ import io.github.srs.model.entity.staticentity.dsl.ObstacleDsl.*
 import io.github.srs.model.entity.{ Entity, Point2D }
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.environment.dsl.CreationDSL.*
-import io.github.srs.utils.EqualityGivenInstances.given_CanEqual_Cell_Cell
+import io.github.srs.utils.EqualityGivenInstances.given
 import io.github.srs.utils.SimulationDefaults.GridDSL.{ IncrementToCenterPos, ObstacleSize }
 
 /**
