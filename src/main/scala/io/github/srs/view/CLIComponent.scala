@@ -5,7 +5,7 @@ import cats.effect.std.Queue
 import io.github.srs.controller.protocol.Event
 import io.github.srs.model.ModelModule
 import io.github.srs.view.ViewModule.{ Component, Requirements, View }
-import io.github.srs.model.SimulationState.prettyPrint
+import io.github.srs.utils.PrettyPrintExtensions.*
 import io.github.srs.model.dsl.EnvironmentToGridDSL
 import io.github.srs.utils.SimulationDefaults.DebugMode
 

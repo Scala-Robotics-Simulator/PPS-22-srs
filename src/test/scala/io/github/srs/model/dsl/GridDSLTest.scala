@@ -63,18 +63,18 @@ class GridDSLTest extends AnyFlatSpec with Matchers:
   "GridDSL" should "create an empty environment from a grid" in:
     val env: Environment =
       -- | -- ||
-        -- | --
+      -- | --
 
     val expectedEnv = environment withWidth 2 withHeight 2 containing (Set.empty: Set[Entity])
     env shouldEqual expectedEnv
 
   it should "create an environment from a grid" in:
     val env: Environment =
-      -- | -- | X | -- | -- ||
-        -- | -- | -- | -- | -- ||
-        X | -- | -- | -- | -- ||
-        -- | -- | -- | ** | -- ||
-        -- | -- | -- | -- | --
+      -- | -- | X  | -- | -- ||
+      -- | -- | -- | -- | -- ||
+      X  | -- | -- | -- | -- ||
+      -- | -- | -- | ** | -- ||
+      -- | -- | -- | -- | --
 
     val expectedEnv = environment withWidth 5 withHeight 5 containing
       (obstacle at Point2D(2.5, 0.5) withWidth ObstacleSize withHeight ObstacleSize) and
@@ -85,8 +85,8 @@ class GridDSLTest extends AnyFlatSpec with Matchers:
   it should "verify that a type A robot with AlwaysForward policy moves moves straight ahead until the boundary" in:
     val env: Environment =
       -- | -- | -- | -- | -- ||
-        A | -- | -- | -- | -- ||
-        -- | -- | -- | -- | --
+      A  | -- | -- | -- | -- ||
+      -- | -- | -- | -- | --
 
     val valEnv: ValidEnvironment = env.validate.toOption.value
     val expectedEnv = (environment withWidth 5 withHeight 3 containing
@@ -96,9 +96,9 @@ class GridDSLTest extends AnyFlatSpec with Matchers:
 
   it should "verify that a type O robot with ObstacleAvoidance policy avoids adjacent cells of obstacles" in:
     val env: Environment =
-      -- | X | X ||
-        -- | O | -- ||
-        ** | -- | --
+      -- | X  | X  ||
+      -- | O  | -- ||
+      ** | -- | --
 
     val valEnv: ValidEnvironment = env.validate.toOption.value
     val obstaclePos1 = Point2D(1.5, 0.5)
@@ -113,11 +113,11 @@ class GridDSLTest extends AnyFlatSpec with Matchers:
 
   it should "verify reproducibility of RandomWalk for type R robot with a fixed seed" in:
     val env: Environment =
-      -- | X | X | -- | -- ||
-        R | -- | -- | -- | -- ||
-        -- | -- | -- | -- | -- ||
-        ** | -- | -- | -- | -- ||
-        -- | -- | -- | -- | --
+      -- | X  | X  | -- | -- ||
+      R  | -- | -- | -- | -- ||
+      -- | -- | -- | -- | -- ||
+      ** | -- | -- | -- | -- ||
+      -- | -- | -- | -- | --
 
     val valEnv: ValidEnvironment = env.validate.toOption.value
     val runSimulationEnv1 = (simulation withDuration 60000 withSeed 42 in valEnv >>>).unsafeRunSync().value.environment
@@ -127,10 +127,10 @@ class GridDSLTest extends AnyFlatSpec with Matchers:
   it should "produce different positions for a type R robot with RandomWalk when using different seeds" in:
     val env: Environment =
       -- | -- | -- | -- | -- ||
-        R | -- | -- | -- | -- ||
-        -- | -- | -- | -- | -- ||
-        -- | -- | -- | -- | -- ||
-        -- | -- | -- | -- | --
+      R  | -- | -- | -- | -- ||
+      -- | -- | -- | -- | -- ||
+      -- | -- | -- | -- | -- ||
+      -- | -- | -- | -- | --
 
     val valEnv: ValidEnvironment = env.validate.toOption.value
     val runSimulationEnv1 = (simulation withDuration 150000 withSeed 42 in valEnv >>>).unsafeRunSync().value.environment
@@ -140,16 +140,16 @@ class GridDSLTest extends AnyFlatSpec with Matchers:
 
   it should "verify that a type P robot with Phototaxis ends up near a light source" in:
     val env: Environment =
-      -- | -- | -- | -- | -- | -- | -- | X | -- | -- ||
-        -- | -- | -- | P | -- | -- | -- | X | -- | -- ||
-        -- | -- | ** | -- | -- | -- | -- | X | -- | -- ||
-        -- | -- | -- | -- | -- | -- | -- | X | -- | -- ||
-        -- | -- | -- | -- | X | X | -- | X | -- | -- ||
-        -- | -- | -- | -- | -- | -- | -- | X | -- | -- ||
-        -- | -- | -- | -- | -- | -- | -- | X | -- | -- ||
-        -- | P | -- | -- | -- | -- | -- | -- | -- | -- ||
-        -- | -- | -- | -- | -- | -- | -- | -- | ** | -- ||
-        -- | -- | -- | -- | -- | -- | -- | -- | -- | --
+      -- | -- | -- | -- | -- | -- | -- | X  | -- | -- ||
+      -- | -- | -- | P  | -- | -- | -- | X  | -- | -- ||
+      -- | -- | ** | -- | -- | -- | -- | X  | -- | -- ||
+      -- | -- | -- | -- | -- | -- | -- | X  | -- | -- ||
+      -- | -- | -- | -- | X  | X  | -- | X  | -- | -- ||
+      -- | -- | -- | -- | -- | -- | -- | X  | -- | -- ||
+      -- | -- | -- | -- | -- | -- | -- | X  | -- | -- ||
+      -- | P  | -- | -- | -- | -- | -- | -- | -- | -- ||
+      -- | -- | -- | -- | -- | -- | -- | -- | ** | -- ||
+      -- | -- | -- | -- | -- | -- | -- | -- | -- | --
 
     val valEnv: ValidEnvironment = env.validate.toOption.value
     val lightPos1 = Point2D(2, 2)
@@ -165,15 +165,15 @@ class GridDSLTest extends AnyFlatSpec with Matchers:
   it should "verify that Mixed behavior (Phototaxis + ObstacleAvoidance + RandomWalk) leads the robot near the light" in:
     val env: Environment =
       -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- ||
-        -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- ||
-        -- | -- | M | -- | -- | X | X | -- | -- | -- | -- | -- ||
-        -- | -- | -- | -- | -- | X | X | -- | -- | -- | -- | -- ||
-        -- | -- | -- | -- | -- | X | X | -- | -- | -- | -- | -- ||
-        -- | -- | -- | -- | -- | X | X | -- | -- | ** | -- | -- ||
-        -- | -- | -- | -- | -- | X | X | -- | -- | -- | -- | -- ||
-        -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- ||
-        -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- ||
-        -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | --
+      -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- ||
+      -- | -- | M  | -- | -- | X  | X  | -- | -- | -- | -- | -- ||
+      -- | -- | -- | -- | -- | X  | X  | -- | -- | -- | -- | -- ||
+      -- | -- | -- | -- | -- | X  | X  | -- | -- | -- | -- | -- ||
+      -- | -- | -- | -- | -- | X  | X  | -- | -- | ** | -- | -- ||
+      -- | -- | -- | -- | -- | X  | X  | -- | -- | -- | -- | -- ||
+      -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- ||
+      -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- ||
+      -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | --
 
     val valEnv: ValidEnvironment = env.validate.toOption.value
     val lightPos = Point2D(10, 5)
@@ -204,10 +204,10 @@ class GridDSLTest extends AnyFlatSpec with Matchers:
   it should "run the simulation at maximum speed" in:
     val env: Environment =
       -- | -- | -- | -- | -- ||
-        R | -- | -- | -- | -- ||
-        -- | -- | -- | -- | -- ||
-        -- | -- | -- | -- | -- ||
-        -- | -- | -- | -- | --
+      R  | -- | -- | -- | -- ||
+      -- | -- | -- | -- | -- ||
+      -- | -- | -- | -- | -- ||
+      -- | -- | -- | -- | --
 
     val valEnv: ValidEnvironment = env.validate.toOption.value
     val duration = 100_000
