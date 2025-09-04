@@ -16,8 +16,6 @@ L’implementazione realizzata si concentra principalmente sulle seguenti funzio
     - Gestione degli eventi
   - View
     - Interfaccia comune
-- Entità dinamiche (riguardanti principalmente gli attuatori)
-  - Robot
 - [Attuatori](./actuators.md)
   - Motori differenziali (con velocità indipendenti per ruota sinistra e destra)
   - Cinematica differenziale per il calcolo della nuova posizione e orientamento

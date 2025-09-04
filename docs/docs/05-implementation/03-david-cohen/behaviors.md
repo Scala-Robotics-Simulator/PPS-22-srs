@@ -35,7 +35,7 @@ type Condition[I] = I => Boolean // Predicato
 type Decision[F[_]] = Behavior[BehaviorContext, (Action[F], RNG)]
 ```
 
-> Nota: le motivazioni sono descitte in [**Design → Behavior**](../../04-detailed-design/06-behavior.md#pattern-reader--kleisli-razionale).
+> Nota: le motivazioni sono descitte in [**Design → Behavior**](../../04-detailed-design/06-behavior.md#pattern-kleisli).
 
 Una decisione è una funzione totale che, dato un `BehaviorContext`, restituisce una tupla con l’`Action[F]` da eseguire
 e il nuovo stato del generatore di numeri casuali `RNG`.

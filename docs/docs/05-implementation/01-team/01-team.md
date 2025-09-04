@@ -9,8 +9,8 @@ Il codice prodotto dal team si concentra principalmente sulle seguenti porzioni 
 - Entry point
   - [Implementazione dell'entry point](./02-entry-point.md);
 - Entità
-  - [Implementazione delle entità dinamiche](./../04-detailed-design/05-entity.md#dynamicentity);
-  - [Implementazione dei robot](./../04-detailed-design/05-entity.md#robot).
+  - [Implementazione delle entità dinamiche](../../04-detailed-design/05-entity.md#dynamicentity);
+  - [Implementazione dei robot](../../04-detailed-design/05-entity.md#robot).
 
 ## Pair programming
 
