@@ -12,10 +12,10 @@ qualità del codice.
 
 Per garantire la qualità del codice, sono stati utilizzati i seguenti plugin:
 
-- **scalafmt**: formattazione automatica del codice secondo le convenzioni di stile Scala.
+- **scalafmt**: formattazione automatica del codice secondo le convenzioni di stile Scala;
 - **scalafix e wartremover**: analisi statica del codice per identificare potenziali problemi e migliorare la qualità
-  del codice.
-- **jaCoCo**: generazione dei report di copertura del codice permettendo di monitorare la percentuale di
+  del codice;
+- **jaCoCo**: generazione dei report di copertura del codice, permettendo di monitorare la percentuale di
   codice testato e identificare le aree da migliorare.
 
 ## Continuous Integration (CI)
@@ -26,15 +26,15 @@ Questo strumento ha permesso di automatizzare il processo di integrazione contin
 le build del progetto a ogni push o pull request.
 Le azioni configurate sono:
 
-- **build**: compila il codice ed esegue i test.
-- **code-style**:verifica la conformità agli standard di stile e qualità definiti.
-- **code-coverage**: genera report di copertura, garantendo che le modifiche apportate non riducano la
-  qualità del codice e carica i risultati su Coveralls.
-- **dry-website-build**: verifica che il sito web generato dalla documentazione sia corretto e privo di errori.
-- **release**: gestisce le release creando automaticamente tag e pubblicando le versioni su GitHub.
-- **upload-docs**: carica la documentazione generata su GitHub Pages, rendendola disponibile online.
+- **build**: compila il codice ed esegue i test;
+- **code-style**: verifica la conformità agli standard di stile e qualità definiti;
+- **code-coverage**: genera report di copertura e carica i risultati su [Coveralls (PPS-22-srs)](https://coveralls.io/github/Scala-Robotics-Simulator/PPS-22-srs);
+- **dry-website-build**: verifica che il sito web generato dalla documentazione sia corretto e privo di errori;
+- **release**: gestisce le release creando automaticamente tag e pubblicando le versioni su GitHub;
+- **upload-docs**: carica la documentazione generata su GitHub Pages, rendendola disponibile online;
 - **success**: controlla che tutte le azioni siano state eseguite con successo e notifica eventuali errori.
 
+<div align="center">
 ```mermaid
 flowchart LR
    E[release] -- ✅ --> G[success]
@@ -50,12 +50,13 @@ flowchart LR
    E[release] -- ✅ --> G[success]
    F[upload-docs] -- ✅ --> G[success]
 ```
+</div>
 
 ### Deployment
 
 Il deployment del sito web generato dalla documentazione è automatizzato con GitHub Actions, la quale pubblica su GitHub
-Pages a
-ogni push su `main`. Questo ha garantito che la documentazione fosse sempre aggiornata e accessibile agli utenti. Il
-deployment dell’applicazione avviene al termine di ogni sprint richiamando manualmente il workflow release, che crea un
-tag e una release su GitHub, genera il file JAR e lo pubblica nella sezione “Releases” del repository. Questo processo
+Pages a ogni push su `main`. Questo ha garantito che la documentazione fosse sempre aggiornata e accessibile agli utenti.
+
+Il deployment dell’applicazione avviene al termine di ogni sprint richiamando manualmente il workflow di **release**, che crea un
+tag e una release su GitHub, genera il file `JAR` e lo pubblica nella sezione “Releases” del repository. Questo processo
 consente di mantenere una versione stabile e facilmente distribuibile, pronta per l’uso da parte degli utenti finali.
