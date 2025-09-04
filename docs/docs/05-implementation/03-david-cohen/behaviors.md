@@ -300,3 +300,12 @@ enum Policy:
 [//]: # (- **Myopic**: Non c'è pianificazione a lungo termine)
 
 [//]: # (- **Locale**: Le euristiche non considerano lo stato globale)
+
+## Come estendere il sistema di behavior
+
+Il sistema è progettato per facilitare l'aggiunta di nuovi comportamenti.
+
+1. _nuove condizioni_: estendere i predicati per nuovi tipi di sensori.
+2. _nuove azioni_: aggiungere azioni al catalogo disponibile.
+3. _nuove policy_: comporre comportamenti esistenti o crearne di completamente nuovi.
+4. _nuovi contesti_: se necessario, estendere `BehaviorContext` per informazioni aggiuntive (es. memoria).
