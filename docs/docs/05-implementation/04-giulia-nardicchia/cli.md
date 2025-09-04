@@ -29,8 +29,7 @@ In questa applicazione, le principali opzioni supportate sono:
 - `--path <file>`: specifica il percorso del file di configurazione YAML;
 - `--duration <milliseconds>`: imposta la durata totale della simulazione;
 - `--seed <number>`: definisce il seme casuale per garantire riproducibilità;
-- `--help`: mostra le istruzioni disponibili;
-- `--version`: mostra la versione dell’applicazione.
+- `--help`: mostra le istruzioni disponibili.
 
 Il risultato del parsing è la struttura `AppArgs` che raccoglie in modo tipizzato tutti i parametri forniti dall’utente.
 Se la lettura degli argomenti fallisce, il metodo `parse(args: Seq[String])` restituisce `None`, stampando un messaggio

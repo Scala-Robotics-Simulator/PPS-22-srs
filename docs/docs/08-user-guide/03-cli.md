@@ -21,8 +21,7 @@ Le opzioni disponibili sono:
 - `--path <file>`: specifica il percorso del file di configurazione _YAML_;
 - `--duration <milliseconds>`: imposta la durata totale della simulazione;
 - `--seed <number>`: definisce il seme casuale per garantire riproducibilità;
-- `--help`: mostra le istruzioni disponibili;
-- `--version`: mostra la versione dell’applicazione.
+- `--help`: mostra le istruzioni disponibili.
 
 Se non viene specificato il percorso, la durata o il seed, questi verranno richiesti interattivamente all’avvio della simulazione.
 
