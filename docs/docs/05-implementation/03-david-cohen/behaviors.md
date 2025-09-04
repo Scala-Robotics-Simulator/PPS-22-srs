@@ -28,15 +28,14 @@ Il modulo utilizza `Kleisli` per modellare funzioni pure con effetti:
 ```scala
 // in BehaviorTypes.scala
 type Behavior[I, A] = Kleisli[Id, I, A] // I => A (totale)
-type PartialBehavior[I, A] = Kleisli[Option, I, A] // I => Option[A] (parziale), 
+type PartialBehavior[I, A] = Kleisli[Option, I, A] // I => Option[A] (parziale),
 type Condition[I] = I => Boolean // Predicato
 
 // in BehaviorCommon.scala
 type Decision[F[_]] = Behavior[BehaviorContext, (Action[F], RNG)]
 ```
 
-> Nota: le motivazioni sono descitte in [**Design → Behavior
-**](../../04-detailed-design/06-behavior.md#pattern-reader--kleisli-razionale).
+> Nota: le motivazioni sono descitte in [**Design → Behavior**](../../04-detailed-design/06-behavior.md#pattern-reader--kleisli-razionale).
 
 Una decisione è una funzione totale che, dato un `BehaviorContext`, restituisce una tupla con l’`Action[F]` da eseguire
 e il nuovo stato del generatore di numeri casuali `RNG`.
@@ -50,6 +49,14 @@ val decision: Kleisli[Id, BehaviorContext, (Action[F], RNG)] =
     (moveForward[F], ctx.rng)
   }
 ```
+
+:::info
+Per ulteriori informazioni su `Action[F]` e `RNG`, vedere:
+
+- [Azioni](../../04-detailed-design/07-action.md)
+- [RNG](../../04-detailed-design/10-random-number-generator.md)
+
+:::
 
 ## DSL di composizione
 
@@ -73,7 +80,7 @@ def or(c1: Condition[I], c2: Condition[I]): Condition[I]
 def not(c: Condition[I]): Condition[I]
 ```
 
-### Esempio di uso
+:::tip Esempio di creazione di un comportamento semplice
 
 ```scala
 /** Definiamo un comportamento che:
@@ -89,6 +96,8 @@ val behavior = {
       .default(moveForward)
 }
 ```
+
+:::
 
 ## Utility comuni (estratto)
 
@@ -107,8 +116,8 @@ def wheels[F[_] : Monad](l: Double, r: Double): Action[F]
 def moveOrNo[F[_] : Monad](l: Double, r: Double): Action[F]
 ```
 
-> A tutte le velocità viene fatto il clamp tra MinSpeed e MaxSpeed. I parametri/tuning vivono in
-> io.github.srs.utils.SimulationDefaults.
+> Nota: a tutte le velocità viene fatto il clamp tra `MinSpeed` e `MaxSpeed`. I parametri/tuning vivono in
+> `io.github.srs.utils.SimulationDefaults`.
 
 ## Implementazioni delle Policy
 
@@ -123,9 +132,9 @@ def decision[F[_]]: Decision[F] =
 
 Procedura:
 
-1. Ignora le letture sensoriali.
-2. Seleziona sempre l’azione “avanti” a velocità di crociera.
-3. Clamp delle velocità in `[MinSpeed, MaxSpeed]`.
+1. ignora le letture sensoriali;
+2. seleziona sempre l’azione “avanti” a velocità di crociera;
+3. clamp delle velocità in `[MinSpeed, MaxSpeed]`;
 4. RNG restituito **invariato**.
 
 ### RandomWalk
@@ -150,14 +159,14 @@ def decision[F[_] : Monad]: Decision[F] = Kleisli { ctx =>
 
 Procedura:
 
-1. Estrae tre valori uniformi e indipendenti in `[MinSpeed, MaxSpeed]`:
+1. estrae tre valori uniformi e indipendenti in `[MinSpeed, MaxSpeed]`:
    `uF` (base-speed), `uT` (turn-magnitude), `uM` (pivot-mix); RNG avanza `r → r1 → r2 → r3`.
-2. Calcola la base: `MinForwardFactor` + `MaxForwardExtra * |uF|`, poi clamp in `[MinSpeed, MaxSpeed]`.
-3. Deriva l’ampiezza di sterzo da `|uT|` con curva `TurnExponent`, scalata tra `MinTurnOfBase` e `MaxTurnOfBase` (in
-   funzione della base).
-4. Applica un **pivot-boost** con bassa probabilità (`PivotBoostProb`), entità `PivotBoostAbs`.
-5. Converte in velocità differenziali (sx/dx), clamp in `[MinSpeed, MaxSpeed]`.
-6. Restituisce azione + **RNG avanzato** a `r3`.
+2. calcola la base: $$MinForwardFactor + MaxForwardExtra * |uF|$$, poi clamp in `[MinSpeed, MaxSpeed]`;
+3. deriva l’ampiezza di sterzo da `|uT|` con curva `TurnExponent`, scalata tra `MinTurnOfBase` e `MaxTurnOfBase` (in
+   funzione della base);
+4. applica un **pivot-boost** con bassa probabilità (`PivotBoostProb`);
+5. converte in velocità differenziali (sx/dx), clamp in `[MinSpeed, MaxSpeed]`;
+6. restituisce azione + **RNG successivo** a `r3`.
 
 ### ObstacleAvoidance
 
@@ -196,14 +205,14 @@ def decision[F[_] : Monad]: Decision[F] =
 
 Procedura:
 
-1. Aggrega prossimità in zone frontali (front, front-left, front-right); valori normalizzati in `[0,1]`.
-2. Determina la **fase** tramite soglie: `SafeDist`, `CriticalDist` → `Free | Warn | Blocked`.
-3. Stima direzione di sterzo via medie emisferiche (sinistra vs destra) e segno conseguente.
-4. Imposta velocità:
-    * `Free` → `CruiseSpeed, CruiseSpeed`
-    * `Warn` → `WarnSpeed ± WarnTurnSpeed` (sterza **lontano** dal lato più occupato)
-    * `Blocked` → pivot/retromarcia `±BackBoost`.
-5. Clamp finale in `[MinSpeed, MaxSpeed]`.
+1. aggrega letture dei sensori di prossimità in zone frontali (front, front-left, front-right); valori normalizzati in `[0,1]`;
+2. determina la **fase** tramite soglie: `SafeDist`, `CriticalDist` → `Free | Warn | Blocked`;
+3. stima direzione di sterzo via medie emisferiche (sinistra vs destra) e segno conseguente;
+4. imposta velocità:
+   - `Free` → `CruiseSpeed, CruiseSpeed`;
+   - `Warn` → `WarnSpeed ± WarnTurnSpeed` (sterza **lontano** dal lato più occupato);
+   - `Blocked` → pivot/retromarcia `±BackBoost`.
+5. clamp finale in `[MinSpeed, MaxSpeed]`;
 6. RNG restituito **invariato**.
 
 ### Phototaxis
@@ -226,11 +235,11 @@ def decision[F[_] : Monad]: Decision[F] =
 
 Procedura:
 
-1. Seleziona la luce “migliore” per intensità; tie-break su offset più frontale con tolleranza `Epsilon`.
-2. Se nessuna luce: fallback **forward**; altrimenti continua.
-3. Base ∝ intensità: `MinForwardBias + (1 − MinForwardBias) * strength`, clamp in `[MinSpeed, MaxSpeed]`.
-4. Sterzo ∝ errore angolare normalizzato (`|offset|/180`), guadagno `TurnGain`; segno verso la luce.
-5. Converte in velocità differenziali e clamp in `[MinSpeed, MaxSpeed]`.
+1. seleziona la luce “migliore” per intensità; tie-break su offset più frontale con tolleranza `Epsilon`;
+2. se non è presente nessuna luce ricade in fallback **forward**; altrimenti continua;
+3. la velocità di base è proporzionale all’intensità: $$MinForwardBias + (1 − MinForwardBias) * strength$$, clamp in `[MinSpeed, MaxSpeed]`;
+4. lo sterzo dipende dall'errore angolare normalizzato ($$|offset|/180$$), guadagno `TurnGain`; segno verso la luce;
+5. converte in velocità differenziali e clamp in `[MinSpeed, MaxSpeed]`;
 6. RNG restituito **invariato**.
 
 ### Prioritized
@@ -259,47 +268,13 @@ def decision[F[_] : Monad]: Decision[F] =
 
 Procedura:
 
-1. Valuta condizioni globali: `danger` se prossimità < `Behaviors.Prioritized.DangerDist`; `hasLight` se luce ≥
-   `Behaviors.Prioritized.LightThreshold`.
-2. Seleziona **in ordine**: `ObstacleAvoidance` → `Phototaxis` → `RandomWalk` (fallback).
-3. Esegue la policy scelta sul `BehaviorContext` corrente.
-4. Restituisce l’azione (totalità garantita) + RNG della policy selezionata (immutato per OA/Phototaxis, avanzato per
+1. valuta condizioni globali:
+   - `danger` se prossimità < `DangerDist`;
+   - `hasLight` se luce ≥ `LightThreshold`.
+2. seleziona **in ordine**: `ObstacleAvoidance` → `Phototaxis` → `RandomWalk` (fallback);
+3. esegue la policy scelta sul `BehaviorContext` corrente;
+4. restituisce l’azione (totalità garantita) + RNG della policy selezionata (immutato per Obstacle Avoidance/Phototaxis, avanzato per
    RandomWalk).
-
-## Estensione del modulo
-
-Per aggiungere una nuova policy:
-
-1. **Creare il behavior** in `behaviors/`:
-
-```scala
-object MyBehavior:
-  def decision[F[_] : Monad]: Decision[F] = Kleisli { ctx =>
-    // Logica decisionale
-    (action, ctx.rng)
-  }
-```
-
-2. **Registrare in Policy enum**:
-
-```scala
-enum Policy:
-  case MyPolicy extends Policy("MyPolicy")
-
-  def run[F[_] : Monad](input: BehaviorContext): (Action[F], RNG) =
-    this match
-      case MyPolicy => MyBehavior.decision.run(input)
-```
-
-[//]: # (## Limiti noti)
-
-[//]: # ()
-
-[//]: # (- **Stateless**: Le decisioni non mantengono memoria tra tick)
-
-[//]: # (- **Myopic**: Non c'è pianificazione a lungo termine)
-
-[//]: # (- **Locale**: Le euristiche non considerano lo stato globale)
 
 ## Come estendere il sistema di behavior
 

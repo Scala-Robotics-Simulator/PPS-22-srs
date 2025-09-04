@@ -4,13 +4,13 @@ sidebar_position: 2
 
 # Illumination
 
-## Pipeline di Calcolo
+## Pipeline di calcolo
 
 La funzione `computeLightField` orchestra la pipeline:
 
-1. **Dimensionamento**: traduce lo spazio continuo in una griglia discreta (in funzione di `ScaleFactor`);
-2. **Occlusione**: costruisce la mappa di occlusione a partire dall’ambiente (ostacoli sempre, dinamici opzionali).
-3. **Per-luce** + **combina**: calcola il contributo di ogni luce e li somma in un unico campo luminoso (`LightField`).
+1. **dimensionamento**: traduce lo spazio continuo in una griglia discreta (in funzione di `ScaleFactor`);
+2. **occlusione**: costruisce la mappa di occlusione a partire dall’ambiente (ostacoli e dinamici opzionali);
+3. **combinazione**: calcola il contributo di ogni luce e li somma in un unico campo luminoso (`LightField`).
 
 ```scala
 def computeLightField(scale: ScaleFactor)(fov: FovEngine)
@@ -29,13 +29,13 @@ def computeLightField(scale: ScaleFactor)(fov: FovEngine)
 }
 ```
 
-### Rasterizzazione delle Occlusioni
+### Rasterizzazione delle occlusioni
 
 La conversione delle geometrie in occlusioni è ottimizzata per ogni forma:
 
-- **Cerchi**: Algoritmo scan-line fill.
-- **Rettangoli** allineati: Fast path che riempie direttamente l'area.
-- **Rettangoli ruotati**: Test inverse-rotate sul centro di ogni cella all'interno di un'area di interesse ristretta.
+- **cerchi**: algoritmo scan-line fill;
+- **rettangoli** allineati: fast path che riempie direttamente l'area;
+- **rettangoli ruotati**: test inverse-rotate sul centro di ogni cella all'interno di un'area di interesse ristretta.
 
 ```scala
 // OcclusionRaster.scala (estratto)
@@ -67,12 +67,12 @@ private def rasterizeRotatedRect(center, w, h, orientation, dims)
 def combine(base, overlay) = Grid.overlayMax(base, overlay) // max per cella (0/1)
 ```
 
-### Calcolo Per-Luce e Combinazione
+### Calcolo e combinazione del campo luminoso
 
-Per ogni campo luminoso, calcoliamo un campo locale con `FovEngine` e li riduciamo. La combinazione può essere
+Per ogni campo luminoso, si calcola un campo locale con `FovEngine` e lo si riduce. La combinazione può essere
 parallelizzata in modo adattivo in base alla dimensione della griglia e al numero di luci.
-Per ottimizzare, usiamo validazioni economiche (bounds, raggio, intensità) per evitare computazione inutile.
-Infine, la somma dei contributi usa una somma saturata (`zipSat`) per mantenere i valori in `[0,1]`.
+Per ottimizzare, si usano guardie (bounds, raggio, intensità) per evitare computazione inutile.
+Infine, per ottenere la somma dei contributi si usa una somma saturata (`zipSat`) per mantenere i valori in `[0,1]`.
 
 ```scala
 
@@ -118,7 +118,7 @@ private def computeSingleLightContribution(dims, occlusion, fov, light)(using sc
 
 ```
 
-### Engine FOV Pluggable
+### Engine FOV pluggable
 
 L'interfaccia `FovEngine` astrae l'algoritmo di propagazione della luce. L'implementazione può essere sostituita senza
 modificare il resto della pipeline, permettendo di sperimentare con diversi profili di decadimento.
@@ -140,9 +140,9 @@ object SquidLibFovEngine extends FovEngine {
 }
 ```
 
-### LightField: Query dai Sensori
+### LightField: query dai sensori
 
-Il `LightField` è il dato finale interrogato dai sensori: prende coordinate continue e restituisce un valore _smooth_
+Il `LightField` è il dato finale utilizzato dai sensori: prende coordinate continue e restituisce un valore _smooth_
 grazie all’interpolazione bilineare sulle quattro celle adiacenti. Fuori dai confini, il valore è 0.0 per un
 comportamento prevedibile.
 
@@ -163,12 +163,10 @@ final case class LightField(dims: GridDims, data: ArraySeq[Double]) {
 }
 ```
 
-### Type-Safe Scale e Dimensioni
+### Type-safe scale e dimensioni
 
 `ScaleFactor` è un _tipo opaco_ (`opaque type`) che incapsula un intero con validazione (1..1000). Questo previene
-errori
-di
-configurazione e rende esplicita la sua semantica di "celle per metro".
+errori di configurazione e rende esplicita la sua semantica di "celle per metro".
 
 ```scala
 // model/ScaleFactor.scala
@@ -181,11 +179,11 @@ object ScaleFactor:
 ...
 ```
 
-### Integrazione con Environment
+### Integrazione con environment
 
 Il campo luce è un `lazy val`, quindi viene calcolato on-demand al primo accesso e poi riusato in modo da fare caching.
 In caso le entità o luci cambiano o semplicemente si vuole aggiornare il campo, bisogna ri-elaborare attraverso la
-LightMap o ricreare l’`Environment`.
+`LightMap` o ricreare l’`Environment`.
 
 ```scala
 // Environment.scala
@@ -202,10 +200,9 @@ lazy val lightField: LightField =
   lightMap.computeField(this, includeDynamic = true).unsafeRunSync()
 ```
 
-### Facciata LightMap (Effect-Aware)
+### Facade LightMap (Effect-Aware)
 
-La facade `LightMap` isola il codice di calcolo dai side-effect (come l'esecuzione asincrona gestita da IO di Cats
-Effect).
+La facade `LightMap` isola il codice di calcolo dai side-effect (come l'esecuzione asincrona gestita da `IO` di `cats.effect`).
 
 ```scala
 // LightMap.scala
@@ -213,25 +210,41 @@ trait LightMap[F[_]]:
   def computeField(env: Environment, includeDynamic: Boolean): F[LightField]
 ```
 
-### Configurazioni Disponibili
+#### Tagless final pattern
 
-La scelta del preset si fa via DSL senza toccare il core. Ci sono tre preset nel `LightMapConfigs`:
+`LightMap` segue il **tagless final pattern**: le operazioni sono parametrizzate su un tipo di effetto `F[_]` e vincolate solo alle capacità necessarie, ad esempio `Sync` nel caso di `LightMapImpl`.
+Il vincolo di tipo (`cats.effect.Sync`) definisce le capacità richieste - sospendere side-effect - senza imporre implementazioni concrete.
 
-1. **High Precision** (scale = 100):
-    - Alta qualità visiva;
-    - Adatto per ambienti piccoli/medi.
-2. **Fast** (scale = 5):
-    - Performance ottimale;
-    - Adatto per ambienti grandi.
-3. **Default** (scale = 10):
-    - Bilanciamento qualità/performance;
-    - Configurazione standard.
+In questo contesto si distinguono quindi:
 
-## Motivazioni per la Scelta di SquidLib
+- **algebra**: il trait `LightMap`, che definisce le operazioni disponibili senza specificare come debbano essere implementate;
+- **interpreti**: le varie implementazioni concrete dell’algebra. Ad esempio `LightMapImpl[F]` interpreta le operazioni eseguendo i calcoli richiesti, mentre in futuro potrebbero esserci interpreti diversi.
+
+Questo approccio consente:
+
+- indipendenza dal tipo di effetto specifico utilizzato per l'esecuzione;
+- migliore testabilità tramite interpreti fittizi o mock;
+- separazione netta tra la definizione dell'algebra (`LightMap`) e le implementazioni concrete (_interpreti_ come `LightMapImpl`).
+
+### Configurazioni disponibili
+
+Il preset viene scelto tramite DSL senza toccare il core. Sono presenti tre preset nel `LightMapConfigs`:
+
+1. `HighPrecision` (scale = 100):
+   - alta qualità visiva;
+   - adatto per ambienti piccoli/medi.
+2. `Fast` (scale = 5):
+   - performance ottimale;
+   - adatto per ambienti grandi.
+3. `Default` (scale = 10):
+   - bilanciamento qualità/performance;
+   - configurazione standard.
+
+## Motivazioni per la scelta di SquidLib
 
 La libreria **SquidLib** è stata scelta per il calcolo del FOV per diverse ragioni:
 
-* **Basata su Griglia**: opera nativamente su griglie 2D.
-* **Fisica Semplificata**: fornisce un modello di visibilità binario (visibile/non visibile) e un'attenuazione lineare.
-* **Performance**: è ottimizzata per calcoli rapidi su griglie.
-* **API Minimale**: l'API è semplice e diretta (`FOV.reuseFOV(...)`), facilitando l'integrazione.
+- **basata su griglia**: opera nativamente su griglie 2D;
+- **fisica semplificata**: fornisce un modello di visibilità binario (visibile/non visibile) e un'attenuazione lineare;
+- **performance**: è ottimizzata per calcoli rapidi su griglie;
+- **API minimale**: l'API è semplice e diretta (`FOV.reuseFOV(...)`), facilitando l'integrazione.
