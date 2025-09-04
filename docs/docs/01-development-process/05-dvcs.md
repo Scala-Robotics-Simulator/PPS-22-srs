@@ -30,7 +30,7 @@ la conformità alle convenzioni
 e richiede che siano state superate tutte le verifiche di Continuous Integration (CI) prima di poter essere unite a
 `main`.
 
-## Definition of Done
+## Definition of done
 
 Per chiudere una pull request, è necessario che siano soddisfatte le seguenti condizioni:
 

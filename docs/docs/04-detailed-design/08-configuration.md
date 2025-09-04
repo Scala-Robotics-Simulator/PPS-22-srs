@@ -29,7 +29,7 @@ L'implementazione prevede:
 - utility di parsing e serializzazione (`YamlManager`, `YamlSimulationConfigParser`, `YamlSimulationConfigSerializer`): gestiscono la conversione tra oggetti Scala e rappresentazioni _YAML_;
 - `ConfigError` e `ConfigResult[A]`: tipi per gestire gli errori di configurazione e i risultati delle operazioni di caricamento e salvataggio.
 
-### Tagless Final Pattern
+### Tagless final pattern
 
 Il `ConfigManager[F[_]]` segue il **Tagless Final Pattern**: le operazioni sono parametrizzate su un tipo di effetto `F[_]` e vincolate solo alle capacità necessarie, ad esempio `Sync` e `Files` per `YamlConfigManager[F[_]]`.
 I vincoli di tipo (`cats.effect.Sync` e `fs2.Files`) definiscono le capacità richieste - sospendere side-effect e interagire con il file system - senza imporre implementazioni concrete.
@@ -46,7 +46,7 @@ Questo approccio consente:
 - migliore testabilità tramite interpreti fittizi o mock;
 - separazione netta tra la definizione dell'algebra (`ConfigManager`) e le implementazioni concrete (_interpreti_ come `YamlConfigManager`).
 
-## Gestione degli Errori
+## Gestione degli errori
 
 La gestione degli errori durante il caricamento della configurazione è stata gestita tramite il tipo `ConfigResult[A]` (alias per `Either[Seq[ConfigError], A]`).
 Rappresenta il risultato di un'operazione di configurazione e può essere un successo (`Right`) o un fallimento (`Left`).

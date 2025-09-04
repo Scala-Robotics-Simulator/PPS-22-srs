@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-# Organizzazione del Codice
+# Organizzazione del codice
 
 La struttura del codice è organizzata in maniera _modulare_, per facilitare comprensione e manutenzione.
 La seguente immagine mostra la disposizione delle cartelle:
@@ -12,7 +12,7 @@ La seguente immagine mostra la disposizione delle cartelle:
 > Nota: alcune cartelle sono state omesse per semplificare la visualizzazione, ad esempio quelle in `utils` e tutte le
 > cartelle `dsl`.
 
-## Descrizione delle Cartelle
+## Descrizione delle cartelle
 
 Il codice è suddiviso in 5 _package_ principali:
 

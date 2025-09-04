@@ -4,7 +4,7 @@ sidebar_position: 2
 description: "Modello di dominio del progetto."
 ---
 
-# Modello di Dominio
+# Modello di dominio
 
 Sotto la guida dell'esperto di dominio, è stato creato un modello di dominio per rappresentare le principali entità e le
 loro relazioni all'interno del sistema.
@@ -15,7 +15,7 @@ Tuttavia, la struttura di base del modello di dominio è rimasta sostanzialmente
 
 ![Modello di Dominio](../../static/img/02-requirements/domain-model.png)
 
-## Descrizione del Modello di Dominio
+## Descrizione del modello di dominio
 
 I robot sono entità dinamiche autonome che operano in un ambiente bidimensionale. Essi percepiscono l’ambiente tramite
 sensori e vi agiscono attraverso attuatori, seguendo un insieme di regole comportamentali che determinano le loro azioni
