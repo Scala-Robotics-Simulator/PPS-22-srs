@@ -87,7 +87,6 @@ export function SprintTable({ data, backlogData, showValidation = false }) {
     ? formatValidationResults(validateBacklogConsistency(backlogData, normalizedData))
     : null;
 
-  // TODO: calculate days and effective time programmatically
   return (
     <>
       {/* Validation Results - Only show when there are errors or warnings */}
