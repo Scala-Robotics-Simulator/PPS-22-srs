@@ -70,6 +70,9 @@ lazy val root = project
       Wart.Recursion,
       Wart.ImplicitParameter,
     ),
+    jacocoExcludes := Seq(
+      "io.github.srs.view.*"
+    ),
     jacocoReportSettings := JacocoReportSettings(
       title = "PR report",
       None,
