@@ -72,9 +72,9 @@ export const backlogData = [
   {
     id: 11,
     item: "Come utente, voglio gestire le luci, così da configurare il numero, la posizione e l'intensità di essi",
-    stima: 8,
-    effettivo: 12,
-    sprints: [0, 10, 2, 0, 0]
+    stima: 16,
+    effettivo: 20,
+    sprints: [0, 10, 2, 0, 8]
   },
   {
     id: 12,
@@ -100,9 +100,9 @@ export const backlogData = [
   {
     id: 15,
     item: "Come utente, voglio modificare il comportamento dei robot, così da poter personalizzare le loro azioni",
-    stima: 13,
-    effettivo: 13,
-    sprints: [0, 0, 11, 3, 0]
+    stima: 20,
+    effettivo: 20,
+    sprints: [0, 0, 11, 3, 7]
   },
   {
     id: 16,
@@ -149,9 +149,9 @@ export const backlogData = [
   {
     id: 22,
     item: "Come utente voglio visualizzare l'andamento della simulazione in tempo reale, per studiare il comportamento dei robot",
-    stima: 13,
-    effettivo: 15,
-    sprints: [0, 0, 0, 15, 0]
+    stima: 14,
+    effettivo: 16,
+    sprints: [0, 0, 0, 15, 1]
   },
   {
     id: 23,
@@ -163,9 +163,9 @@ export const backlogData = [
   {
     id: 24,
     item: "Come utente voglio creare un DSL con cui posso testare facilmente le funzionalità del sistema e i comportamenti dei robot",
-    stima: 0,
-    effettivo: 0,
-    sprints: [0, 0, 0, 0, 0]
+    stima: 8,
+    effettivo: 13,
+    sprints: [0, 0, 0, 0, 13]
   },
   {
     id: 25,
