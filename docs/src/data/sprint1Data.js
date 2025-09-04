@@ -40,7 +40,7 @@ export const sprint1Data = [
     id: "8.1",
     task: "Modellazione robot (entità dinamiche)",
     volontario: "Nardicchia",
-    stima: 3,
+    stima: 4,
     effettivo: 5,
     days: [0, 1.5, 1.5, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
   },

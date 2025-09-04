@@ -1,6 +1,6 @@
 /**
  * Validates consistency between backlog data and sprint data
- * @param {Array} backlogData - Array of backlog items with effettivo hours
+ * @param {Array} backlogData - Array of backlog items with effettivo and stima hours
  * @param {Array} sprintData - Array of sprint tasks with backlogItem references
  * @returns {Object} Validation results with errors and warnings
  */
@@ -41,23 +41,27 @@ export function validateBacklogConsistency(backlogData, sprintData) {
     }
   });
 
-  // Group sprint tasks by backlogItem and sum their effettivo hours
+  // Group sprint tasks by backlogItem and sum their effettivo and stima hours
   const sprintTotals = sprintData.reduce((acc, task) => {
     const backlogItem = task.backlogItem || '';
     const effettivo = typeof task.effettivo === 'number' ? task.effettivo : 0;
+    const stima = typeof task.stima === 'number' ? task.stima : 0;
     
     if (!acc[backlogItem]) {
       acc[backlogItem] = {
         totalEffettivo: 0,
+        totalStima: 0,
         tasks: []
       };
     }
     
     acc[backlogItem].totalEffettivo += effettivo;
+    acc[backlogItem].totalStima += stima;
     acc[backlogItem].tasks.push({
       id: task.id,
       task: task.task,
-      effettivo: effettivo
+      effettivo,
+      stima
     });
     
     return acc;
@@ -67,18 +71,22 @@ export function validateBacklogConsistency(backlogData, sprintData) {
   backlogData.forEach(backlogItem => {
     const itemName = backlogItem.item || `ID ${backlogItem.id}`;
     const backlogEffettivo = typeof backlogItem.effettivo === 'number' ? backlogItem.effettivo : 0;
+    const backlogStima = typeof backlogItem.stima === 'number' ? backlogItem.stima : 0;
     
     // Find corresponding sprint data
     const sprintData = sprintTotals[itemName];
     
     if (!sprintData) {
       // No sprint tasks found for this backlog item
-      if (backlogEffettivo > 0) {
-        results.warnings.push(`Backlog item "${itemName}" has ${backlogEffettivo}h but no corresponding sprint tasks found`);
+      if (backlogEffettivo > 0 || backlogStima > 0) {
+        results.warnings.push(`Backlog item "${itemName}" has Effettivo ${backlogEffettivo}h, Stima ${backlogStima}h but no corresponding sprint tasks found`);
         results.details[itemName] = {
           backlogEffettivo,
           sprintEffettivo: 0,
-          difference: backlogEffettivo,
+          diffEffettivo: backlogEffettivo,
+          backlogStima,
+          sprintStima: 0,
+          diffStima: backlogStima,
           status: 'missing_sprint_data'
         };
       }
@@ -86,26 +94,34 @@ export function validateBacklogConsistency(backlogData, sprintData) {
     }
 
     const sprintEffettivo = sprintData.totalEffettivo;
-    const difference = Math.abs(backlogEffettivo - sprintEffettivo);
+    const sprintStima = sprintData.totalStima;
+    const diffEffettivo = Math.abs(backlogEffettivo - sprintEffettivo);
+    const diffStima = Math.abs(backlogStima - sprintStima);
     
     // Store details for this item
     results.details[itemName] = {
       backlogEffettivo,
       sprintEffettivo,
-      difference,
+      diffEffettivo,
+      backlogStima,
+      sprintStima,
+      diffStima,
       tasks: sprintData.tasks
     };
 
     // Check for mismatches
-    if (difference > 0.01) { // Use small threshold for floating point comparison
+    if (diffEffettivo > 0.01) {
       results.isValid = false;
-      const status = backlogEffettivo > sprintEffettivo ? 'backlog_higher' : 'sprint_higher';
-      
       results.errors.push(
-        `Mismatch in "${itemName}": Backlog shows ${backlogEffettivo}h, Sprint tasks total ${sprintEffettivo}h (difference: ${difference.toFixed(2)}h)`
+        `Mismatch in "${itemName}" effettivo: Backlog shows ${backlogEffettivo}h, Sprint tasks total ${sprintEffettivo}h (difference: ${diffEffettivo.toFixed(2)}h)`
       );
-      
-      results.details[itemName].status = status;
+      results.details[itemName].status = 'effettivo_mismatch';
+    } else if (diffStima > 0.01) {
+      results.isValid = false;
+      results.errors.push(
+        `Mismatch in "${itemName}" stima: Backlog shows ${backlogStima}h, Sprint tasks total ${sprintStima}h (difference: ${diffStima.toFixed(2)}h)`
+      );
+      results.details[itemName].status = 'stima_mismatch';
     } else {
       results.details[itemName].status = 'valid';
     }
@@ -117,7 +133,7 @@ export function validateBacklogConsistency(backlogData, sprintData) {
     
     if (!hasBacklogItem && sprintItemName !== '') {
       results.warnings.push(
-        `Sprint tasks for "${sprintItemName}" (${sprintTotals[sprintItemName].totalEffettivo}h) have no corresponding backlog item`
+        `Sprint tasks for "${sprintItemName}" (Effettivo ${sprintTotals[sprintItemName].totalEffettivo}h, Stima ${sprintTotals[sprintItemName].totalStima}h) have no corresponding backlog item`
       );
     }
   });

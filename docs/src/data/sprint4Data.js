@@ -31,9 +31,9 @@ export const sprint4Data = [
         id: "15.7",
         task: "Implementazione delle policy comportamentali (ObstacleAvoidance, Phototaxis, RandomWalk, Prioritized)",
         volontario: "Cohen",
-        stima: 5,
-        effettivo: 5,
-        days: [0, 0, 0, 0, 0, 0, 1, 2, 2, 0, 0]
+        stima: 10,
+        effettivo: 8,
+        days: [0, 0, 0, 0, 0, 0, 3, 2, 3, 0, 0]
     },
     {
         backlogItem: "Come un utente, voglio poter scegliere una configurazione della simulazione, così che possa osservare determinati comportamenti.",
