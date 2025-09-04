@@ -69,6 +69,15 @@ export const sprint4Data = [
         stima: 0,
         effettivo: 0,
         days: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    }
+    },
+    {
+        backlogItem: "Come utente, mi aspetto che i sensori di prossimità rilevino correttamente gli ostacoli nell'ambiente di simulazione, in modo che i robot possano evitare collisioni e navigare in modo sicuro",
+        id: "25.1",
+        task: "Sistemazione errore di lettura sensori di prossimità",
+        volontario: "Ceredi",
+        stima: 5,
+        effettivo: 4,
+        days: [0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    },
 ];
 

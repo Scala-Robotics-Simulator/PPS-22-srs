@@ -167,4 +167,11 @@ export const backlogData = [
     effettivo: 0,
     sprints: [0, 0, 0, 0, 0]
   },
+  {
+    id: 25,
+    item: "Come utente, mi aspetto che i sensori di prossimità rilevino correttamente gli ostacoli nell'ambiente di simulazione, in modo che i robot possano evitare collisioni e navigare in modo sicuro",
+    stima: 5,
+    effettivo: 4,
+    sprints: [0, 0, 0, 0, 4]
+  },
 ];
