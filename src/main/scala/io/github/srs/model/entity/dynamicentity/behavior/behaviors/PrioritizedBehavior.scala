@@ -25,7 +25,8 @@ object PrioritizedBehavior:
    * @tparam F
    *   The effect type.
    * @return
-   *   A [[Decision]] that computes the action based on prioritized conditions.
+   *   A [[io.github.srs.model.entity.dynamicentity.behavior.behaviors.BehaviorCommon.Decision]] that computes the
+   *   action based on prioritized conditions.
    */
   def decision[F[_]: Monad]: Decision[F] =
 
