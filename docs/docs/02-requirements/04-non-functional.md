@@ -6,7 +6,7 @@ description: "Requisiti non funzionali del progetto."
 
 # Non funzionali
 
-- **[NF-01](https://github.com/Scala-Robotics-Simulator/PPS-22-srs/blob/main/src/test/scala/io/github/srs/model/dsl/GridDSLTest.scala)** – Prestazioni: ≥ 100 robot a 30 fps.
+- **[NF-01](https://github.com/Scala-Robotics-Simulator/PPS-22-srs/blob/main/src/test/scala/io/github/srs/model/dsl/GridDSLTest.scala)** – Prestazioni: ≥ 30 robot a 10 fps.
 - **[NF-02](./04-non-functional.md)** – Usabilità GUI: questionario rivolto a N utenti per valutare l'interfaccia
 - **[NF-03](https://github.com/Scala-Robotics-Simulator/PPS-22-srs/actions)** – Portabilità: compatibilità multi-OS e versioni.
 - **[NF-04](https://github.com/Scala-Robotics-Simulator/PPS-22-srs/blob/main/src/test/scala/io/github/srs/model/dsl/GridDSLTest.scala)** – Riproducibilità: simulazione identica con stesso seed e parametri.
