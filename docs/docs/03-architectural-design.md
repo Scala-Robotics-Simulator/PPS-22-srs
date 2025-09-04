@@ -51,26 +51,3 @@ L'architettura è costituita da tre componenti principali:
   Model e richiama la View per visualizzare i risultati tramite `render`.
   Questo approccio consente di centralizzare la logica del flusso di simulazione, separando chiaramente il controllo
   dalla logica di business e dalla presentazione, rendendo l'applicazione più modulare ed estendibile.
-
-### Pattern ↔ uso nel progetto
-
-L’implementazione adotta alcuni pattern funzionali per mantenere il codice modulare, testabile e facile da estendere.
-
-- **Cake Pattern (MVC)**: usato per comporre `Model`, `View`, `Controller` come moduli indipendenti e iniettarne le
-  dipendenze in modo
-  esplicito. Migliora sostituibilità e testabilità dei componenti.
-
-- **Tagless Final (azioni, configurazione)**: le interfacce sono parametrizzate su `F[_]` (es. `Action[F]`,
-  `ConfigManager[F]`), così l’uso dell’effetto è un
-  dettaglio sostituibile (`IO`, `SyncIO`, `EitherT`, ecc.) e i test possono usare interpreti fittizi.
-
-- **Reader via Kleisli (behavior)**: le decisioni sono funzioni da un contesto immutabile a un risultato, modellate con
-  `Kleisli`.
-
-| Pattern/Concetto   | Dove                         | Perché utile                                     |
-|--------------------|------------------------------|--------------------------------------------------|
-| Cake Pattern (MVC) | Architettura MVC             | DI esplicita, moduli sostituibili, testabilità   |
-| Tagless Final      | Action, ConfigManager        | Effetto astratto, interpreti multipli, test      |
-| Kleisli            | Behavior/Policy DSL          | Contesto puro, composizione, refactoring effetti |
-| ADT & opaque types | Dominio, ScaleFactor, Errori | Modello sicuro, invarianti a compile-time        |
-| cats-effect (IO)   | Controller/View, LightMap    | Effetti e concorrenza gestiti in modo sicuro     |
