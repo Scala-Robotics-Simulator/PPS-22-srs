@@ -18,4 +18,4 @@ Il codice prodotto si concentra principalmente sulle seguenti porzioni del simul
   - Caricamento e salvataggio della configurazione
   - Validazione della configurazione
 - [Implementazione della GUI di configurazione](./5-config-gui.md)
-- [Gestione della CI per build, test, release, gestione delle dipendenze e delle pull request](./../../01-development-process/06-ci.md)
+- [Gestione della CI per build, test, release, gestione delle dipendenze e delle pull request](./../../01-development-process/06-ci.mdx)
