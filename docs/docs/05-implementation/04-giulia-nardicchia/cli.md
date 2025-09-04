@@ -5,7 +5,7 @@ console. Tutti i parametri necessari per l’esecuzione della simulazione posson
 inseriti interattivamente dall’utente.
 
 In fase di avvio, il launcher selezionato determina le componenti della simulazione in base alla modalità scelta.
-In base al flag `--headless`, il launcher seleziona i componenti appropriati: in modalità CLI vengono utilizzati
+Utilizzando il flag `--headless`, il launcher seleziona i componenti appropriati: in modalità CLI vengono utilizzati
 `ConfigurationCLI`, per la lettura dei parametri iniziali e la validazione dei parametri di configurazione, e
 `CLIComponent`, che gestisce la vista testuale della simulazione.
 Questa distinzione mantiene invariata la logica della simulazione rispetto alla modalità GUI, differenziando solo i
@@ -16,7 +16,7 @@ meccanismi di input/output e di rendering dello stato.
 `ArgParser` gestisce l’analisi degli argomenti passati da linea di comando all'avvio dell’applicazione.
 Viene utilizzata la libreria [**scopt**](https://github.com/scopt/scopt) per definire le opzioni disponibili.
 
-Scopt fornisce una DSL dichiarativa che permette di definire con semplicità:
+Scopt fornisce un DSL dichiarativo che permette di definire con semplicità:
 
 - opzioni obbligatorie o facoltative, con relativi tipi;
 - valori di default;
@@ -26,7 +26,7 @@ Scopt fornisce una DSL dichiarativa che permette di definire con semplicità:
 In questa applicazione, le principali opzioni supportate sono:
 
 - `--headless`: avvia la simulazione in modalità CLI senza interfaccia grafica;
-- `--path <file>`: specifica il percorso del file di configurazione YAML;
+- `--path <file>`: specifica il percorso del file di configurazione _YAML_;
 - `--duration <milliseconds>`: imposta la durata totale della simulazione;
 - `--seed <number>`: definisce il seme casuale per garantire riproducibilità;
 - `--help`: mostra le istruzioni disponibili.
@@ -42,6 +42,7 @@ Esempio di avvio del simulatore in modalità CLI con parametri specifici:
 ```bash
   java -jar PPS-22-srs.jar --headless --path config.yaml --duration 60000 --seed 42
 ```
+
 :::
 
 ## ConfigurationCLI
@@ -51,16 +52,20 @@ Il suo compito principale è leggere e validare la configurazione iniziale della
 `SimulationConfig[ValidEnvironment]` pronto per il modello.
 
 I valori mancanti, come durata della simulazione o il seed, vengono richiesti interattivamente all’utente tramite
-console (`askSimulationTime` e `askSeed`).
+console (tramite le funzioni `askSimulationTime` e `askSeed`).
 
-La lettura del file `YAML` di configurazione è affidata a `YamlConfigManager`, con gestione degli errori per file
+La lettura del file _YAML_ di configurazione è affidata a `YamlConfigManager`, con gestione degli errori per file
 inesistenti o non validi.
 
 Anche la validazione dell’ambiente avviene prima dell’avvio della simulazione, generando un’eccezione in caso di errori.
 
+:::info
+Per ulteriori informazioni sulla gestione della configurazione si rimanda alla sezione [Configuration](../02-simone-ceredi/4-configuration.md).
+:::
+
 ## CLIComponent
 
-Il trait `CLIComponent[S]` estende `ViewModule.Component[S]` e costituisce la vista testuale della simulazione
+Il _trait_ `CLIComponent[S]` estende `ViewModule.Component[S]` e costituisce la vista testuale della simulazione
 nell’architettura MVC. È definito in modo generico rispetto al tipo di stato `S`, che deve estendere `ModelModule.State`,
 così da poter essere riutilizzato con diversi modelli di simulazione.
 
@@ -68,22 +73,21 @@ L’implementazione concreta della view è affidata alla classe interna `CLIView
 dell’interfaccia `View`:
 
 - `init(queue: Queue[IO, Event])`: stampa un messaggio di benvenuto;
-- `render(state: S)`: invocato a ogni aggiornamento dello stato, ma lasciato volutamente vuoto per evitare output
-  continuo
-  in console;
+- `render(state: S)`: richiamato a ogni aggiornamento dello stato, ma lasciato volutamente vuoto per evitare output
+  continuo in console;
 - `close()`: stampa un messaggio di chiusura al termine della simulazione;
-- `timeElapsed(state: S)`: mostra il risultato finale stampando l’ambiente in formato tabellare, tramite `prettyPrint`.
+- `timeElapsed(state: S)`: mostra il risultato finale stampando lo stato della simulazione e l’ambiente in formato tabellare, tramite `prettyPrint`.
 
 In questo modo, `CLIComponent` fornisce un’interfaccia minimale ma sufficiente per monitorare la simulazione,
 concentrandosi sui messaggi chiave e sull’output finale, senza appesantire l’esecuzione con rendering continui.
-
 
 :::tip Esempio di ambiente testuale
 
 La simulazione mostra le entità presenti in una griglia testuale.
 
 Ogni simbolo rappresenta un tipo di entità:
-- robot: `R` (RandomWalk), `A` (AlwaysForward), `O` (ObstacleAvoidance);
+
+- robot, sulla base della `Policy` associata: `R` (RandomWalk), `A` (AlwaysForward), `O` (ObstacleAvoidance), `P` (PhotoTaxis), `M` (Prioritized);
 - ostacolo: `X`;
 - luce: `**`;
 - cella vuota: `--`.
@@ -100,6 +104,7 @@ Ogni simbolo rappresenta un tipo di entità:
 -- | -- | -- | -- | -- | -- | -- | -- | ** | -- ||
 -- | -- | -- | -- | -- | -- | -- | -- | -- | --
 ```
+
 :::
 
 :::info

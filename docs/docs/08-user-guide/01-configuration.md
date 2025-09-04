@@ -13,25 +13,27 @@ Sono inoltre disponibili i seguenti pulsanti:
 La schermata di configurazione è suddivisa in aree dedicate:
 
 - **Parametri della simulazione**
-    - **`Durata`** — tempo totale di esecuzione in millisecondi (lasciato vuoto la simulazione è infinita);
-    - **`Seed`** — per garantire la ripetibilità dei risultati;
+
+  - **`Durata`** — tempo totale di esecuzione in millisecondi (lasciato vuoto la simulazione è infinita);
+  - **`Seed`** — per garantire la ripetibilità dei risultati;
 
 - **Caratteristiche dell’ambiente**
-    - **`Dimensioni`** — altezza e larghezza dell’area di simulazione;
+
+  - **`Dimensioni`** — altezza e larghezza dell’area di simulazione;
 
 - **Entità presenti nell’ambiente**  
-  Tutte le entità sono definite da: posizione (coordinate *x*, *y*) e orientamento (in gradi, 0° verso destra,
-  90° verso l’alto).
+  Tutte le entità sono definite da: posizione (coordinate _x_, _y_) e orientamento (in gradi, 0° verso destra,
+  90° verso il basso).
   Parametri specifici:
-    - **`Ostacoli`** — dimensioni (larghezza e altezza);
-    - **`Luci`** — raggio (in metri), raggio di illuminazione, intensità, attenuazione;
-    - **`Robot`** — raggio (in metri), velocità (valida per entrambe le ruote, valore incluso tra -1.0 e 1.0), sensori (
-      prossimità, luce) attivabili/disattivabili tramite _checkbox_, comportamento selezionabile da menu
-      a tendina.
+  - **`Ostacoli`** — dimensioni (larghezza e altezza);
+  - **`Luci`** — raggio (in metri), raggio di illuminazione, intensità, attenuazione;
+  - **`Robot`** — raggio (in metri), velocità (valida per entrambe le ruote, valore incluso tra -1.0 e 1.0), sensori (
+    prossimità, luce) attivabili/disattivabili tramite _checkbox_, comportamento selezionabile da menu
+    a tendina.
 
 ## Anteprima e avvio
 
 - Con il pulsante **`Refresh Field`** è possibile visualizzare un’anteprima della configurazione attuale.
 - Premendo **`Start Simulation`**, il sistema verifica la configurazione:
-    - se valida, la simulazione viene avviata;
-    - in caso di errori, viene mostrato un messaggio che indica quali parametri non sono stati impostati correttamente.  
+  - se valida, la simulazione viene avviata;
+  - in caso di errori, viene mostrato un messaggio che indica quali parametri non sono stati impostati correttamente.

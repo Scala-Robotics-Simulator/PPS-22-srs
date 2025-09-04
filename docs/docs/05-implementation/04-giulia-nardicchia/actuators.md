@@ -20,7 +20,7 @@ sull’intero
 modello `Robot`.
 
 È stato implementato solo un tipo di attuatore, `DifferentialWheelMotor`.
-Ma l'interfaccia `Actuator` è progettata per essere estesa facilmente con nuovi tipi di attuatori in futuro.
+L'interfaccia `Actuator` è progettata per essere estesa facilmente con nuovi tipi di attuatori.
 
 ## DifferentialWheelMotor
 
@@ -39,10 +39,10 @@ differenziale di un robot a due ruote.
 Si trattano di **funzioni di ordine superiore** (_higher-order functions_) perché prendono parametri di configurazione e
 restituiscono altre funzioni che eseguono i calcoli veri e propri.
 
-Questo approccio permette di separare:
+Questo approccio permette di separare parametri:
 
-- parametri statici: configurazione del robot (es. distanza tra le ruote, orientamento iniziale, durata del tick);
-- parametri dinamici: valori che cambiano ad ogni tick della simulazione (es. velocità delle ruote, velocità lineare e
+- statici: configurazione del robot (es. distanza tra le ruote, orientamento iniziale, delta time);
+- dinamici: valori che cambiano ad ogni tick della simulazione (es. velocità delle ruote, velocità lineare e
   angolare).
 
 :::info

@@ -31,7 +31,7 @@ L'implementazione prevede:
 
 ### Tagless final pattern
 
-Il `ConfigManager[F[_]]` segue il **Tagless Final Pattern**: le operazioni sono parametrizzate su un tipo di effetto `F[_]` e vincolate solo alle capacità necessarie, ad esempio `Sync` e `Files` per `YamlConfigManager[F[_]]`.
+Il `ConfigManager[F[_]]` segue il **tagless final pattern**: le operazioni sono parametrizzate su un tipo di effetto `F[_]` e vincolate solo alle capacità necessarie, ad esempio `Sync` e `Files` per `YamlConfigManager[F[_]]`.
 I vincoli di tipo (`cats.effect.Sync` e `fs2.Files`) definiscono le capacità richieste - sospendere side-effect e interagire con il file system - senza imporre implementazioni concrete.
 
 A differenza di [Action](./07-action.md), non è stata suddivisa l'algebra dall'interfaccia, ma saranno le diverse implementazioni a fornire le concrete realizzazioni delle operazioni.  

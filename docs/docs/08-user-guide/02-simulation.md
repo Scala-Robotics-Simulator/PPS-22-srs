@@ -5,11 +5,13 @@ La schermata di simulazione mostra l’ambiente virtuale in cui i robot interagi
 
 ## Stato della simulazione
 
-### Area di simulazione
-L’area di simulazione occupa la gran parte della schermata a sinistra. Qui vengono visualizzati i robot e l’ambiente in
+### Griglia di simulazione
+
+La griglia di simulazione occupa la gran parte della schermata a sinistra. Qui vengono visualizzati i robot e l’ambiente in
 cui si muovono (compreso di ostacoli e luci). Rappresenta lo stato attuale della simulazione.
 
 ### Tempo di simulazione
+
 A destra è presente il **`tempo della simulazione`**, mostrato come tempo:
 
 - **rimanente**, se specificato nella configurazione;
@@ -21,7 +23,7 @@ Attraverso il menù **`Active Robots`** è possibile selezionare un robot durant
 consultare le relative informazioni:
 
 - **Id**
-- **Posizione** (coordinate *x*, *y*)
+- **Posizione** (coordinate _x_, _y_)
 - **Direzione** (angolo in gradi)
 - **Letture dei sensori di prossimità**
 - **Letture dei fotosensori**

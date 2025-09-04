@@ -1,13 +1,12 @@
 # DSL per la creazione dell'ambiente grid-based
 
 In questa pagina viene descritto il **Domain-Specific Language** (DSL) sviluppato in Scala per la definizione di
-ambienti
-bidimensionali a griglia, popolati da **entità statiche** (ostacoli, luci) e **dinamiche** (robot).
+ambienti bidimensionali a griglia, popolati da **entità statiche** (ostacoli, luci) e **dinamiche** (robot).
 Il DSL fornisce un linguaggio dichiarativo e leggibile, che permette di costruire e visualizzare gli ambienti in maniera
 compatta, senza dover gestire manualmente coordinate o parametri delle entità.
 
-Nota: il DSL rappresenta un'approssimazione dell'ambiente reale; alcune funzionalità sono state semplificate e per altre
-vengono utilizzati parametri di default.
+> Nota: il DSL rappresenta un'approssimazione dell'ambiente reale; alcune funzionalità sono state semplificate e per altre
+> vengono utilizzati parametri di default.
 
 Il modulo si compone di tre parti principali:
 
@@ -24,12 +23,10 @@ L'_enum_ `Cell` modella i possibili contenuti di una cella della griglia:
 - `Obstacle`: cella contenente un ostacolo;
 - `Light`: cella contenente una fonte di luce;
 - `Robot(policy: Policy)`: cella occupata da un robot dotato di una determinata politica comportamentale (
-  `AlwaysForward`,
-  `RandomWalk`, `ObstacleAvoidance`, ecc.).
+  `AlwaysForward`, `RandomWalk`, `ObstacleAvoidance`, ecc.).
 
 Ogni cella può essere convertita in una entità concreta (Entity) posizionata nello spazio bidimensionale tramite il
-metodo
-`toEntity`. Questo passaggio traduce la rappresentazione astratta in oggetti del modello della simulazione.
+metodo `toEntity`. Questo passaggio traduce la rappresentazione astratta in oggetti del modello della simulazione.
 
 Il _companion object_ di `Cell` fornisce operatori simbolici che rendono più leggibile la definizione di un ambiente:
 
@@ -38,7 +35,7 @@ Il _companion object_ di `Cell` fornisce operatori simbolici che rendono più le
 - `**`: luce;
 - `A`, `R`, `O`, `P`, `M`: robot con diverse politiche di movimento.
 
-Il metodo `symbolFor` serve invece per convertire una politica (`Policy`) nel corrispondente simbolo testuale, utile
+La funzione `symbolFor` serve invece per convertire una politica (`Policy`) nel corrispondente simbolo testuale, utile
 nella fase di stampa.
 
 ## EnvironmentBuilder e GridDSL
@@ -88,7 +85,7 @@ L’operatore `|` che estende `EnvironmentBuilder` consente di aggiungere una ce
 - `env.cells` contiene tutte le righe definite fino a quel momento;
 - `dropRight(1)` rimuove l’ultima riga, che verrà aggiornata;
 - `lastOption.getOrElse(Vector.empty: Vector[Cell])` recupera l’ultima riga, o una riga vuota se non esiste;
-- `:+ next` aggiunge la nuova cella `next` alla fine dell’ultima riga;
+- `:+ next` aggiunge la nuova cella `next` alla fine dell’ultima riga.
 
 ### Inizio di una nuova riga
 
@@ -109,14 +106,14 @@ Tramite la conversione implicita, un `EnvironmentBuilder` può essere usato dire
 Questa componente si occupa di fare il processo inverso: ovvero, dato un `Environment` già popolato di entità, produce la griglia di `Cell` corrispondente.
 
 Per ogni posizione `(x, y)` della griglia, si determina quale cella è presente:
+
 - `Robot`: priorità massima;
-- `Light`: priorità intermedia.
+- `Light`: priorità intermedia;
 - `Obstacle`: priorità bassa;
 - `Empty`: se non ci sono entità.
 
 Si ricostruisce un `EnvironmentBuilder` a partire dall’ambiente reale.
 Il metodo `prettyPrint` genera una stringa formattata che mostra la griglia.
-
 
 :::tip Esempio di stampa della griglia
 
@@ -132,4 +129,5 @@ Il metodo `prettyPrint` genera una stringa formattata che mostra la griglia.
   -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- ||
   -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | --
 ```
+
 :::
