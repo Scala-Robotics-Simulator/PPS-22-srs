@@ -4,13 +4,12 @@ sidebar_position: 1
 
 # Implementazione dell'ambiente di simulazione
 
-L'ambiente di simulazione è implementato a partire da un _trait_ `EnvironmentParameters` che definisce i parametri dell'ambiente, quali:
+L'`Environment` è implementato a partire da un _trait_ `EnvironmentParameters` che definisce i parametri dell'ambiente, quali:
 
-- Dimensioni dell'ambiente
-- Entità presenti nell'ambiente
-- LightField per ottenere informazioni sulla luce nell'ambiente
+- dimensioni dell'ambiente;
+- entità presenti nell'ambiente;
+- `lightField` per ottenere informazioni su un campo di luce nell'ambiente.
 
-Una case class `Environment` implementa il trait `EnvironmentParameters` e fornisce i dettagli specifici dell'ambiente di simulazione, come le dimensioni, le entità presenti e le informazioni sulla luce.
 Le informazioni sulla luce sono calcolate solo se necessario, grazie a un sistema di lazy evaluation che evita calcoli inutili.
 
 ## DSL
@@ -37,9 +36,7 @@ infix def and(entity: Entity): Environment
 infix def validate: Validation[ValidEnvironment]
 ```
 
-:::info
-
-In questo modo è possibile creare un ambiente tramite:
+:::tip Esempio di creazione di un ambiente
 
 ```scala
 environment withWidth 10 withHeight 10 containing robot and obstacle and light
@@ -51,8 +48,8 @@ Allo stesso modo, il DSL rende più semplice la gestione della configurazione de
 
 ## Gestione della validazione
 
-La validazione dell'ambiente e delle entità al suo interno sfrutta il package `io.github.srs.model.validation` che fornisce strumenti per la definizione di regole di validazione e per l'applicazione di queste regole alle entità presenti nell'ambiente.
-All'interno di environment le regole sono applicate tramite la funzione `validate`:
+La validazione dell'ambiente e delle entità al suo interno sfruttano il package `io.github.srs.model.validation` che fornisce strumenti per la definizione di regole di validazione e per l'applicazione di queste alle entità presenti nell'ambiente.
+All'interno di `Environment` le regole sono applicate tramite la funzione `validate`:
 
 ```scala
 infix def validate: Validation[ValidEnvironment] =
@@ -63,7 +60,7 @@ infix def validate: Validation[ValidEnvironment] =
   for
     width <- bounded(s"$Self width", env.width, MinWidth, MaxWidth, includeMax = true)
     height <- bounded(s"$Self height", env.height, MinHeight, MaxHeight, includeMax = true)
-    _ <- bounded(s"$Self entities", env.entities.size, 0, MaxEntities, includeMax = true)
+    _ <- bounded(s"$Self entities", entities.size, 0, MaxEntities, includeMax = true)
     entities <- withinBounds(s"$Self entities", entities, width, height)
     entities <- noCollisions(s"$Self entities", entities ++ boundaries)
     _ <- entities.toList.traverse_(validateEntity)
@@ -73,6 +70,10 @@ infix def validate: Validation[ValidEnvironment] =
 In questo modo si vanno a controllare le dimensioni dell'ambiente, oltre alla posizione delle entità al suo interno e alla presenza di eventuali collisioni tra di esse.
 Si garantisce poi la validità di tutte le entità presenti nell'ambiente, assicurando che rispettino le regole di dominio definite.
 
-Se le regole sono rispettate viene quindi creato un valore `ValidEnvironment` che rappresenta l'ambiente di simulazione valido.
+Se le regole sono rispettate viene quindi creato un `ValidEnvironment` che rappresenta l'ambiente di simulazione corretto.
 Questo tipo viene utilizzato all'interno del motore di simulazione per garantire che solo ambienti validi vengano utilizzati durante la simulazione.
-Inoltre , `ValidEnvironment` è utilizzato durante la gestione della configurazione realizzata dall'utente, per garantire che le configurazioni siano sempre valide e coerenti con le regole di dominio.
+Inoltre è utilizzato durante la gestione della configurazione realizzata dall'utente, per garantire che le configurazioni siano sempre valide e coerenti con le regole di dominio.
+
+:::info
+Per maggiori dettagli sulla validazione di dominio, si rimanda alla sezione [Validazione di dominio](../03-david-cohen/domain-validation.md).
+:::
