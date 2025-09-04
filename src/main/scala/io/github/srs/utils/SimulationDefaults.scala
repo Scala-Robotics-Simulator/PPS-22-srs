@@ -206,7 +206,7 @@ object SimulationDefaults:
     val MaxHeight: Int = 500
 
     val DefaultEntities: Set[Entity] = Set.empty
-    val MaxEntities: Int = 200
+    val MaxEntities: Int = 50
 
   object StaticEntity:
 

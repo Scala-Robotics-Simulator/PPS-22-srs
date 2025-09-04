@@ -120,7 +120,7 @@ object ControllerModule:
             for
               startTime <- Clock[IO].realTime.map(_.toMillis)
               _ <- runBehavior(queue, state).whenA(state.simulationStatus == RUNNING)
-              events <- queue.tryTakeN(Some(50))
+              events <- queue.tryTakeN(None)
               newState <- handleEvents(state, events)
               _ <- context.view.render(newState)
               result <- handleStopCondition(newState) match
