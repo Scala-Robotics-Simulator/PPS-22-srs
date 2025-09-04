@@ -25,7 +25,8 @@ object PhototaxisBehavior:
    * @tparam F
    *   The effect type.
    * @return
-   *   A [[Decision]] that computes the action based on light sensor readings.
+   *   A [[io.github.srs.model.entity.dynamicentity.behavior.behaviors.BehaviorCommon.Decision]] that computes the
+   *   action based on light sensor readings.
    */
   def decision[F[_]: Monad]: Decision[F] =
     Kleisli.ask[Id, BehaviorContext].map { ctx =>
