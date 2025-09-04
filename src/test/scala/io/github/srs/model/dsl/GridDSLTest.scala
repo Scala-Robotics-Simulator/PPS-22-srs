@@ -1,5 +1,7 @@
 package io.github.srs.model.dsl
 
+import scala.language.postfixOps
+
 import cats.effect.unsafe.implicits.global
 import io.github.srs.>>>
 import io.github.srs.model.Simulation.*
@@ -21,8 +23,6 @@ import io.github.srs.utils.SimulationDefaults.GridDSL.ObstacleSize
 import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-
-import scala.language.postfixOps
 
 class GridDSLTest extends AnyFlatSpec with Matchers:
 
