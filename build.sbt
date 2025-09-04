@@ -56,7 +56,7 @@ lazy val root = project
       "-language:implicitConversions",
       "-deprecation",
     ),
-    coverageEnabled := true,
+    coverageEnabled := false,
     semanticdbEnabled := true,
     semanticdbVersion := scalafixSemanticdb.revision,
     wartremoverErrors ++= Warts.all,
