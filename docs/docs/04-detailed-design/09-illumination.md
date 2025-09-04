@@ -105,8 +105,8 @@ da una coordinata continua (`Point2D`), utilizzando l'_interpolazione bilineare_
 
 ### Integrazione con `Environment`
 
-Nell'`Environment` il campo luminoso (`LightField`) è un `lazy val`: viene calcolato solo alla prima richiesta e il
-risultato viene messo in cache per tutta la vita dell'istanza.
+Nell'`Environment` il campo luminoso (`LightField`) è un `lazy val`.
+Di conseguenza viene calcolato solo alla prima richiesta e il risultato viene messo in cache per tutta la vita dell'istanza.
 
 > Nota: se l'ambiente o le luci cambiano, il `LightField` deve essere invalidato (non è gestito automaticamente).
 
