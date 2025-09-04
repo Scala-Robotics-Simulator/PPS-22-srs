@@ -8,8 +8,7 @@ import scopt.OParser
 object ArgParser:
 
   private val manifest = getClass.getPackage
-  private val appVersion = Option(manifest.getImplementationVersion).getOrElse("dev")
-  private val appTitle = Option(manifest.getImplementationTitle).getOrElse("SRS")
+  private val appTitle = Option(manifest.getImplementationTitle).getOrElse("PPS-22-srs")
 
   /**
    * The command-line arguments builder.
@@ -23,7 +22,7 @@ object ArgParser:
     import builder.*
     OParser.sequence(
       programName("Scala Robotics Simulator"),
-      head(appTitle, appVersion),
+      head(appTitle),
       opt[Unit]("headless")
         .action((_, c) => c.copy(headless = true))
         .text("Run in CLI headless mode (no GUI)"),
@@ -37,10 +36,9 @@ object ArgParser:
         .text("Total simulation time in milliseconds"),
       opt[Long]("seed")
         .action((seed, c) => c.copy(seed = Some(seed)))
-        .valueName("<seed>")
+        .valueName("<number>")
         .text("Random seed for simulation reproducibility"),
       help("help").text("Print this help message"),
-      version("version").text("Show version"),
     )
   end parser
 

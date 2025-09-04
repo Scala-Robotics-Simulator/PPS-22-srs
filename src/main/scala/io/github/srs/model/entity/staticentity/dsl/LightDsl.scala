@@ -6,6 +6,7 @@ import io.github.srs.model.entity.staticentity.StaticEntity.Light
 import io.github.srs.model.entity.{ Orientation, Point2D }
 import io.github.srs.model.validation.Validation
 import io.github.srs.model.validation.Validation.positive
+import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Light.Self
 
 /**
  * The DSL for creating and configuring lights in the simulation.
@@ -15,7 +16,7 @@ object LightDsl:
   /**
    * Creates a new light with default properties.
    * @return
-   *   A new instance of [[Light]] with default values.
+   *   A new instance of [[io.github.srs.model.entity.staticentity.StaticEntity.Light]] with default values.
    */
   def light: Light = Light()
 
@@ -92,10 +93,10 @@ object LightDsl:
 
     infix def validate: Validation[Light] =
       for
-        r <- positive("radius", light.radius)
-        ir <- positive("illumination radius", light.illuminationRadius)
-        i <- positive("intensity", light.intensity)
-        a <- positive("attenuation", light.attenuation)
+        r <- positive(s"$Self radius", light.radius)
+        ir <- positive(s"$Self illumination radius", light.illuminationRadius)
+        i <- positive(s"$Self intensity", light.intensity)
+        a <- positive(s"$Self attenuation", light.attenuation)
       yield light.copy(radius = r, illuminationRadius = ir, intensity = i, attenuation = a)
   end extension
 end LightDsl

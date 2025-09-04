@@ -20,8 +20,8 @@ object MovementActionFactory:
    * @tparam F
    *   the effect type of the action.
    * @return
-   *   a [[Validation]] containing the [[MovementAction]] if the speeds are within the defined bounds, or an error if
-   *   they are not.
+   *   a [[io.github.srs.model.validation.Validation]] containing the [[MovementAction]] if the speeds are within the
+   *   defined bounds, or an error if they are not.
    */
   infix def customMove[F[_]](left: Double, right: Double): Validation[MovementAction[F]] =
     for

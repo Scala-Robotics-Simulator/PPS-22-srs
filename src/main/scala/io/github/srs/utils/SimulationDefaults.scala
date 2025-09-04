@@ -142,7 +142,8 @@ object SimulationDefaults:
      * High-precision light map for detailed rendering Uses scale factor 100 for maximum precision.
      *
      * @return
-     *   A [[LightMap]] configured for high precision, or the default light map if the scale factor is invalid.
+     *   A [[io.github.srs.model.illumination.LightMap]] configured for high precision, or the default light map if the
+     *   scale factor is invalid.
      */
     def HPLightMap: LightMap[IO] =
       ScaleFactor
@@ -158,7 +159,8 @@ object SimulationDefaults:
      * Fast light map for real-time simulation Uses scale factor 5 for maximum performance.
      *
      * @return
-     *   A [[LightMap]] configured for fast computation, or the default light map if the scale factor is invalid.
+     *   A [[io.github.srs.model.illumination.LightMap]] configured for fast computation, or the default light map if
+     *   the scale factor is invalid.
      */
     def fastLightMap: LightMap[IO] =
       ScaleFactor
@@ -176,8 +178,8 @@ object SimulationDefaults:
      * @param scaleFactor
      *   The desired scale factor (cells per meter).
      * @return
-     *   A [[LightMap]] configured with the specified scale factor, or the default light map if the scale factor is
-     *   invalid.
+     *   A [[io.github.srs.model.illumination.LightMap]] configured with the specified scale factor, or the default
+     *   light map if the scale factor is invalid.
      */
     def withScale(scaleFactor: Int): LightMap[IO] =
       ScaleFactor
@@ -204,7 +206,7 @@ object SimulationDefaults:
     val MaxHeight: Int = 500
 
     val DefaultEntities: Set[Entity] = Set.empty
-    val MaxEntities: Int = 200
+    val MaxEntities: Int = 50
 
   object StaticEntity:
 

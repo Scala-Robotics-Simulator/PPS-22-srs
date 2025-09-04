@@ -2,9 +2,10 @@ package io.github.srs.model
 
 import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
 
+import io.github.srs.config.SimulationConfig
 import io.github.srs.model.SimulationConfig.{ SimulationSpeed, SimulationStatus }
 import io.github.srs.model.environment.ValidEnvironment
-import io.github.srs.utils.random.RNG
+import io.github.srs.utils.random.{ RNG, SimpleRNG }
 
 /**
  * Simulation state case class that holds the current state of the simulation.
@@ -38,23 +39,23 @@ final case class SimulationState(
  */
 object SimulationState:
 
-  extension (state: ModelModule.State)
-
-    /**
-     * Pretty prints the simulation state in a human-readable format.
-     * @return
-     *   a string representation of the simulation state.
-     */
-    def prettyPrint: String =
-      s"""
-         |--- SimulationState ---
-         | Simulation Time : ${state.simulationTime.map(t => s"${t.toMillis} ms").getOrElse("∞")}
-         | Elapsed Time    : ${state.elapsedTime.toMillis} ms
-         | Δt              : ${state.dt.toMillis} ms
-         | Speed           : ${state.simulationSpeed}
-         | RNG Seed        : ${state.simulationRNG}
-         | Status          : ${state.simulationStatus}
-         | Environment     : ${state.environment}
-         |-----------------------
-        """.stripMargin
+  /**
+   * Creates the initial state of the simulation based on the provided configuration.
+   *
+   * @param cfg
+   *   the simulation configuration to use for initializing the state
+   * @return
+   *   the initial state of the simulation
+   */
+  def from(cfg: SimulationConfig[ValidEnvironment], headless: Boolean): SimulationState =
+    val speed = if headless then SimulationSpeed.SUPERFAST else SimulationSpeed.NORMAL
+    val status = if headless then SimulationStatus.RUNNING else SimulationStatus.PAUSED
+    val rng = SimpleRNG(cfg.simulation.seed.getOrElse(42))
+    SimulationState(
+      simulationTime = cfg.simulation.duration.map(FiniteDuration(_, MILLISECONDS)),
+      simulationSpeed = speed,
+      simulationRNG = rng,
+      simulationStatus = status,
+      environment = cfg.environment,
+    )
 end SimulationState

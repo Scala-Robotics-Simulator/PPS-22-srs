@@ -1,6 +1,6 @@
 package io.github.srs
 
-import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
+import scala.annotation.targetName
 import scala.language.postfixOps
 
 import cats.effect.IO
@@ -8,11 +8,9 @@ import io.github.srs.config.SimulationConfig
 import io.github.srs.controller.ControllerModule
 import io.github.srs.controller.ControllerModule.Controller
 import io.github.srs.model.ModelModule.Model
-import io.github.srs.model.SimulationConfig.{ SimulationSpeed, SimulationStatus }
-import io.github.srs.model.environment.ValidEnvironment
+import io.github.srs.model.environment.ValidEnvironment.ValidEnvironment
 import io.github.srs.model.logic.simulationStateLogicsBundle
 import io.github.srs.model.{ ModelModule, SimulationState }
-import io.github.srs.utils.random.SimpleRNG
 import io.github.srs.view.ViewModule.View
 import io.github.srs.view.{ CLIComponent, GUIComponent, ViewModule }
 
@@ -55,22 +53,28 @@ object GUILauncher extends BaseLauncher with GUIComponent[SimulationState]:
 object CLILauncher extends BaseLauncher with CLIComponent[SimulationState]:
   override val view: View[SimulationState] = View()
 
-/**
- * Creates the initial state of the simulation based on the provided configuration.
- *
- * @param cfg
- *   the simulation configuration to use for initializing the state
- * @return
- *   the initial state of the simulation
- */
-def mkInitialState(cfg: SimulationConfig[ValidEnvironment], headless: Boolean): SimulationState =
-  val speed = if headless then SimulationSpeed.SUPERFAST else SimulationSpeed.NORMAL
-  val status = if headless then SimulationStatus.RUNNING else SimulationStatus.PAUSED
-  val rng = SimpleRNG(cfg.simulation.seed.getOrElse(42))
-  SimulationState(
-    simulationTime = cfg.simulation.duration.map(FiniteDuration(_, MILLISECONDS)),
-    simulationSpeed = speed,
-    simulationRNG = rng,
-    simulationStatus = status,
-    environment = cfg.environment,
-  )
+object Launcher:
+
+  /**
+   * Runs the simulation with the given configuration.
+   * @param headless
+   *   the flag indicating whether to run in headless mode (CLI) or with GUI.
+   * @return
+   *   an IO effect that runs the simulation and returns an optional final state.
+   */
+  def run(headless: Boolean = true)(simulationConfig: SimulationConfig[ValidEnvironment]): IO[Option[SimulationState]] =
+    val launcher = if headless then CLILauncher else GUILauncher
+    val initialState = SimulationState.from(simulationConfig, headless)
+    if headless && simulationConfig.simulation.duration.isEmpty then IO.pure(None)
+    else launcher.runMVC(initialState).map(Some(_))
+
+extension (simulationConfig: SimulationConfig[ValidEnvironment])
+
+  /**
+   * Infix operator to run the simulation with the given configuration.
+   * @return
+   *   an IO effect that runs the simulation and returns an optional final state.
+   */
+  @targetName("run")
+  infix def >>> : IO[Option[SimulationState]] =
+    Launcher.run()(simulationConfig)

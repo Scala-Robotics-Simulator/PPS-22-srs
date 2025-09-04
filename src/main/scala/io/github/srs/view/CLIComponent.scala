@@ -5,7 +5,7 @@ import cats.effect.std.Queue
 import io.github.srs.controller.protocol.Event
 import io.github.srs.model.ModelModule
 import io.github.srs.view.ViewModule.{ Component, Requirements, View }
-import io.github.srs.model.SimulationState.prettyPrint
+import io.github.srs.utils.PrettyPrintExtensions.*
 import io.github.srs.model.dsl.EnvironmentToGridDSL
 import io.github.srs.utils.SimulationDefaults.DebugMode
 
@@ -13,7 +13,7 @@ import io.github.srs.utils.SimulationDefaults.DebugMode
  * CLI component trait that defines the interface for creating a CLI view.
  *
  * @tparam S
- *   the type of the simulation state, which must extend [[ModelModule.State]].
+ *   the type of the simulation state, which must extend [[io.github.srs.model.ModelModule.State]].
  */
 trait CLIComponent[S <: ModelModule.State] extends Component[S]:
   context: Requirements[S] =>

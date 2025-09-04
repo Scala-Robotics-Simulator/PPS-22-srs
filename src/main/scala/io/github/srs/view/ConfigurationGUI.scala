@@ -174,7 +174,7 @@ object ConfigurationGUI:
                   )
 
             case None =>
-              showValidationErrors(Seq("Please fix configuration errors before starting")),
+              (),
       )
 
     end init

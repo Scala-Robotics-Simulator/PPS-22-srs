@@ -17,7 +17,7 @@ trait RandomLogic[S <: ModelModule.State]:
    * @param rng
    *   the random number generator.
    * @return
-   *   an [[IO]] effect producing the new state with updated RNG.
+   *   an [[cats.effect.IO]] effect producing the new state with updated RNG.
    */
   def random(s: S, rng: RNG): IO[S]
 

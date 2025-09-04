@@ -6,7 +6,8 @@ import io.github.srs.model.entity.dynamicentity.behavior.BehaviorContext
 import io.github.srs.model.entity.dynamicentity.behavior.behaviors.BehaviorCommon.*
 
 /**
- * A [[Behavior]] that always makes the entity move forward.
+ * A [[io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior]] that always makes the entity move
+ * forward.
  */
 object AlwaysForwardBehavior:
 
@@ -16,7 +17,8 @@ object AlwaysForwardBehavior:
    * @tparam F
    *   The effect type.
    * @return
-   *   A [[Decision]] that always returns a forward movement action.
+   *   A [[io.github.srs.model.entity.dynamicentity.behavior.behaviors.BehaviorCommon.Decision]] that always returns a
+   *   forward movement action.
    */
   def decision[F[_]]: Decision[F] =
     Kleisli.ask[Id, BehaviorContext].map { ctx =>

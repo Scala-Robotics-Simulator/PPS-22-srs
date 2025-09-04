@@ -35,21 +35,21 @@ enum Event:
   /**
    * Event representing a change in the simulation speed.
    * @param speed
-   *   the new [[SimulationSpeed]].
+   *   the new [[io.github.srs.model.SimulationConfig.SimulationSpeed]].
    */
   case TickSpeed(speed: SimulationSpeed)
 
   /**
    * Event representing a random event in the simulation.
    * @param rng
-   *   the random number generator [[RNG]] used for the event.
+   *   the random number generator [[io.github.srs.utils.random.RNG]] used for the event.
    */
   case Random(rng: RNG)
 
   /**
    * Event representing a proposal for robot actions.
    * @param proposals
-   *   the list of [[RobotProposal]] to be processed.
+   *   the list of [[io.github.srs.controller.message.RobotProposal]] to be processed.
    */
   case RobotActionProposals(proposals: List[RobotProposal])
 end Event

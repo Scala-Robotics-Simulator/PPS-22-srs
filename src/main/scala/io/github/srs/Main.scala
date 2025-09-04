@@ -6,16 +6,16 @@ import cats.effect.unsafe.implicits.global
 @main def main(args: String*): Unit =
   ArgParser.parse(args) match
     case Some(parsed) =>
-      val launcher = if parsed.headless then CLILauncher else GUILauncher
       val configurationView: ConfigurationView =
-        if parsed.headless then ConfigurationCLI(parsed.path, parsed.simulationTime, parsed.seed)
+        if parsed.headless
+        then ConfigurationCLI(parsed.path, parsed.simulationTime, parsed.seed)
         else ConfigurationGUI()
+      val run = Launcher.run(parsed.headless)
 
       val runner = for
         cfg <- configurationView.init()
-        state = mkInitialState(cfg, parsed.headless)
         _ <- configurationView.close()
-        _ <- launcher.runMVC(state)
+        _ <- run(cfg)
       yield ()
 
       runner.unsafeRunSync()

@@ -70,6 +70,10 @@ lazy val root = project
       Wart.Recursion,
       Wart.ImplicitParameter,
     ),
+    jacocoExcludes := Seq(
+      "io.github.srs.view.*",
+      "io.github.srs.utils.SimulationDefaults.*"
+    ),
     jacocoReportSettings := JacocoReportSettings(
       title = "PR report",
       None,
@@ -98,5 +102,4 @@ lazy val root = project
 Compile / packageBin / packageOptions +=
   Package.ManifestAttributes(
     "Implementation-Title" -> name.value,
-    "Implementation-Version" -> version.value
   )

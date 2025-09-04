@@ -24,7 +24,7 @@ import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings.prettyPrin
  * GUI component trait that defines the interface for creating a GUI view.
  *
  * @tparam S
- *   the type of the simulation state, which must extend [[ModelModule.State]].
+ *   the type of the simulation state, which must extend [[io.github.srs.model.ModelModule.State]].
  */
 trait GUIComponent[S <: ModelModule.State] extends Component[S]:
   context: Requirements[S] =>
@@ -79,9 +79,10 @@ trait GUIComponent[S <: ModelModule.State] extends Component[S]:
     /**
      * @inheritdoc
      */
-    override def timeElapsed(state: S): IO[Unit] = IO:
+    override def timeElapsed(state: S): IO[Unit] =
       controls.startStopButton.setEnabled(false)
       controls.pauseResumeButton.setEnabled(false)
+      IO.never[Unit]
 
     /**
      * Sets up the main UI layout with split pane configuration.

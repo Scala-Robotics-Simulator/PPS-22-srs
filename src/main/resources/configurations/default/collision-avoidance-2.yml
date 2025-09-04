@@ -1,0 +1,51 @@
+simulation:
+  seed: 42
+environment:
+  width: 10
+  height: 10
+  entities:
+  - robot:
+      id: 1f4a4494-fb9d-4b80-8040-0092764dbdd9
+      radius: 0.25
+      orientation: 90.0
+      position: [9.0, 2.0]
+      withLightSensors: true
+      speed: 1.0
+      behavior: ObstacleAvoidance
+      withProximitySensors: true
+  - robot:
+      id: f900e2f2-8973-45ae-8524-18051d2ab1f7
+      radius: 0.25
+      orientation: 300.0
+      speed: 1.0
+      withProximitySensors: true
+      withLightSensors: true
+      behavior: ObstacleAvoidance
+      position: [5.0, 9.0]
+  - obstacle:
+      id: 6a2139a4-84bc-4d19-9b34-b664bd94119d
+      width: 7.0
+      height: 0.20000000298023224
+      position: [8.0, 4.0]
+      orientation: 90.0
+  - obstacle:
+      width: 1.5
+      orientation: 340.0
+      height: 0.2
+      position: [9.0, 9.5]
+      id: 722c7adb-a63e-4060-b29a-d036718ca7a2
+  - obstacle:
+      position: [5.0, 5.0]
+      height: 0.5
+      orientation: 0.0
+      id: bae40217-20a2-4e0f-836c-d0f105ddb4f4
+      width: 5.0
+  - robot:
+      speed: 1.0
+      position: [3.0, 1.0]
+      behavior: ObstacleAvoidance
+      orientation: 90.0
+      withProximitySensors: true
+      radius: 0.25
+      id: c8184d99-697e-4e25-9d84-cb79026370af
+      withLightSensors: true

@@ -30,7 +30,7 @@ trait RobotActionsLogic[S <: ModelModule.State]:
    * @param proposals
    *   the list of robot action proposals.
    * @return
-   *   an [[IO]] effect that produces the updated simulation state.
+   *   an [[cats.effect.IO]] effect that produces the updated simulation state.
    */
   def handleRobotActionsProposals(
       s: S,
@@ -63,12 +63,12 @@ object RobotActionsLogic:
        * @param maxAttempts
        *   the maximum number of attempts for the binary search.
        * @return
-       *   an [[IO]] effect that produces the updated robot after applying the safe movement.
+       *   an [[cats.effect.IO]] effect that produces the updated robot after applying the safe movement.
        */
       def safeMove(
           env: ValidEnvironment,
           robot: Robot,
-          action: Action[IO],
+          action: Action[cats.effect.IO],
           maxDt: FiniteDuration,
           maxAttempts: Int = DefaultMaxRetries,
       ): IO[Robot] =
@@ -84,14 +84,14 @@ object RobotActionsLogic:
          * @param attempts
          *   the current number of attempts made.
          * @return
-         *   an [[IO]] effect that produces the best valid robot found.
+         *   an [[cats.effect.IO]] effect that produces the best valid robot found.
          */
         def binarySearch(low: FiniteDuration, high: FiniteDuration, best: Option[Robot], attempts: Int): IO[Robot] =
           if attempts >= maxAttempts || (high - low) <= BinarySearchDurationThreshold then
             IO.pure(best.getOrElse(robot))
           else
             val mid = low + (high - low) / 2
-            robot.applyMovementActions[IO](mid, action).flatMap { candidate =>
+            robot.applyMovementActions[cats.effect.IO](mid, action).flatMap { candidate =>
               val updatedEntities = env.entities.map:
                 case r: Robot if r.id == robot.id => candidate
                 case e => e
@@ -110,7 +110,7 @@ object RobotActionsLogic:
        * @param proposals
        *   the list of robot action proposals.
        * @return
-       *   an [[IO]] effect that produces a list of tuples containing the original and updated robots.
+       *   an [[cats.effect.IO]] effect that produces a list of tuples containing the original and updated robots.
        */
       def computeMovesParallel(env: ValidEnvironment, proposals: List[RobotProposal]): IO[List[(Robot, Robot)]] =
         proposals.parTraverse:

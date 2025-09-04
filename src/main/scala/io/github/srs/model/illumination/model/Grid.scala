@@ -131,7 +131,7 @@ object Grid:
      * Flattens the grid in row-major order (x-fast).
      *
      * @return
-     *   An [[ArraySeq]] containing all elements of the grid in row-major order.
+     *   An [[scala.collection.immutable.ArraySeq]] containing all elements of the grid in row-major order.
      */
     def flattenRowMajor: ArraySeq[A] =
       ArraySeq.unsafeWrapArray(g.transpose.flatten)

@@ -13,14 +13,14 @@ import io.github.srs.model.illumination.model.{ LightField, ScaleFactor }
  */
 trait LightMap[F[_]]:
   /**
-   * Compute the [[LightField]] for the given environment.
+   * Compute the [[io.github.srs.model.illumination.model.LightField]] for the given environment.
    *
    * @param env
-   *   The [[Environment]] containing entities and lights
+   *   The [[io.github.srs.model.environment.Environment]] containing entities and lights
    * @param includeDynamic
    *   Whether to include dynamic entities in the computation
    * @return
-   *   An effectful computation yielding the computed [[LightField]]
+   *   An effectful computation yielding the computed [[io.github.srs.model.illumination.model.LightField]]
    */
   def computeField(env: Environment, includeDynamic: Boolean): F[LightField]
 

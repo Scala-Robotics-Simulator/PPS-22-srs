@@ -20,7 +20,7 @@ object ScaleFactor:
    * @param n
    *   The integer value to validate as a scale factor.
    * @return
-   *   A [[Validation]] result containing the validated [[ScaleFactor]] or an error.
+   *   A [[io.github.srs.model.validation.Validation]] result containing the validated [[ScaleFactor]] or an error.
    */
   def validate(n: Int): Validation[ScaleFactor] =
     bounded("ScaleFactor", n, 1, 1000, includeMax = true).map(v => v: ScaleFactor)

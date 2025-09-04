@@ -9,6 +9,7 @@ import io.github.srs.model.validation.DomainError
 import org.scalatest.Inside.inside
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import io.github.srs.utils.SimulationDefaults.Fields.Environment.Self
 
 class EnvironmentTest extends AnyFlatSpec with Matchers:
   given CanEqual[Entity, Entity] = CanEqual.derived
@@ -40,32 +41,33 @@ class EnvironmentTest extends AnyFlatSpec with Matchers:
         val expected = (Set(entity1, entity2) ++ createBoundaries(10, 10))
           .map(e => (e.position, e.shape, e.orientation))
         actual should contain theSameElementsAs expected
+      case Left(error) => fail(s"Environment creation failed: ${error.errorMessage}")
 
   it should "not be created with negative width" in:
     inside(Environment(-10, 10).validate):
-      case Left(DomainError.OutOfBounds("width", _, _, _)) => succeed
+      case Left(DomainError.OutOfBounds(s"$Self width", _, _, _)) => succeed
 
   it should "not be created with negative height" in:
     inside(Environment(10, -10).validate):
-      case Left(DomainError.OutOfBounds("height", _, _, _)) => succeed
+      case Left(DomainError.OutOfBounds(s"$Self height", _, _, _)) => succeed
 
   it should "not be created with zero width" in:
     inside(Environment(0, 10).validate):
-      case Left(DomainError.OutOfBounds("width", _, _, _)) => succeed
+      case Left(DomainError.OutOfBounds(s"$Self width", _, _, _)) => succeed
 
   it should "not be created with zero height" in:
     inside(Environment(10, 0).validate):
-      case Left(DomainError.OutOfBounds("height", _, _, _)) => succeed
+      case Left(DomainError.OutOfBounds(s"$Self height", _, _, _)) => succeed
 
   it should "not be created with width exceeding maximum" in:
     import io.github.srs.utils.SimulationDefaults.Environment.MaxWidth
     inside(Environment(MaxWidth + 1, 10).validate):
-      case Left(DomainError.OutOfBounds("width", _, _, _)) => succeed
+      case Left(DomainError.OutOfBounds(s"$Self width", _, _, _)) => succeed
 
   it should "not be created with height exceeding maximum" in:
     import io.github.srs.utils.SimulationDefaults.Environment.MaxHeight
     inside(Environment(10, MaxHeight + 1).validate):
-      case Left(DomainError.OutOfBounds("height", _, _, _)) => succeed
+      case Left(DomainError.OutOfBounds(s"$Self height", _, _, _)) => succeed
 
   it should "not be created with too many entities" in:
     import io.github.srs.utils.SimulationDefaults.Environment.MaxEntities
@@ -78,19 +80,19 @@ class EnvironmentTest extends AnyFlatSpec with Matchers:
           .toSet,
       ).validate,
     ):
-      case Left(DomainError.OutOfBounds("entities", _, _, _)) => succeed
+      case Left(DomainError.OutOfBounds(s"$Self entities", _, _, _)) => succeed
 
   it should "detect collisions in circular entities" in:
     val entity1 = createEntity((1.0, 1.0), ShapeType.Circle(1.0), Orientation(0.0))
     val entity2 = createEntity((1.5, 1.5), ShapeType.Circle(1.0), Orientation(90.0))
     inside(Environment(10, 10, Set(entity1, entity2)).validate):
-      case Left(error) => error.errorMessage shouldBe "entities have 1 collision(s), expected none"
+      case Left(error) => error.errorMessage shouldBe s"$Self entities have 1 collision(s), expected none"
 
   it should "detect collisions in rectangular entities" in:
     val entity1 = createEntity((1.0, 1.0), ShapeType.Rectangle(2.0, 2.0), Orientation(0.0))
     val entity2 = createEntity((1.5, 1.5), ShapeType.Rectangle(2.0, 2.0), Orientation(90.0))
     inside(Environment(10, 10, Set(entity1, entity2)).validate):
-      case Left(error) => error.errorMessage shouldBe "entities have 1 collision(s), expected none"
+      case Left(error) => error.errorMessage shouldBe s"$Self entities have 1 collision(s), expected none"
 
   it should "not detect collisions in non-overlapping circular entities" in:
     val entity1 = createEntity((1.0, 1.0), ShapeType.Circle(0.99), Orientation(0.0))
@@ -118,13 +120,13 @@ class EnvironmentTest extends AnyFlatSpec with Matchers:
     val circularEntity = createEntity((1.0, 1.0), ShapeType.Circle(1.0), Orientation(0.0))
     val rectangularEntity = createEntity((1.5, 1.5), ShapeType.Rectangle(2.0, 2.0), Orientation(90.0))
     inside(Environment(10, 10, Set(circularEntity, rectangularEntity)).validate):
-      case Left(error) => error.errorMessage shouldBe "entities have 1 collision(s), expected none"
+      case Left(error) => error.errorMessage shouldBe s"$Self entities have 1 collision(s), expected none"
 
   it should "detect collisions between circular and rectangular entities" in:
     val circularEntity = createEntity((1.0, 1.0), ShapeType.Circle(1.0), Orientation(0.0))
     val rectangularEntity = createEntity((1.5, 1.5), ShapeType.Rectangle(2.0, 2.0), Orientation(90.0))
     inside(Environment(10, 10, Set(rectangularEntity, circularEntity)).validate):
-      case Left(error) => error.errorMessage shouldBe "entities have 1 collision(s), expected none"
+      case Left(error) => error.errorMessage shouldBe s"$Self entities have 1 collision(s), expected none"
 
   it should "not detect collisions in mixed entities when they do not overlap" in:
     val circularEntity = createEntity((1.0, 1.0), ShapeType.Circle(0.99), Orientation(0.0))
@@ -156,7 +158,7 @@ class EnvironmentTest extends AnyFlatSpec with Matchers:
     val entity2 = createEntity((5.0, 5.0), ShapeType.Circle(1.0), Orientation(90.0))
     inside(Environment(10, 10, Set(entity1, entity2)).validate):
       case Left(error) =>
-        error.errorMessage shouldBe "entities = (-1.0, 1.0) is outside the bounds (width: [0.0, 10.0], height: [0.0, 10.0])"
+        error.errorMessage shouldBe s"$Self entities = (-1.0, 1.0) is outside the bounds (width: [0.0, 10.0], height: [0.0, 10.0])"
 
   it should "not validate entities out of x axis bounds" in:
     val entity1 = createEntity((11.0, 1.0), ShapeType.Circle(1.0), Orientation(0.0))
