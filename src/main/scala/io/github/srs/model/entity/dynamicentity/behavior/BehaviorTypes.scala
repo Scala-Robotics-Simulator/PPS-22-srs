@@ -7,9 +7,9 @@ import io.github.srs.model.entity.dynamicentity.*
 /**
  * Core types for Behavior
  *
- *   - [[Behavior]] — Total, pure decision (`I => A` via `Kleisli[Id, I, A]`)
- *   - [[PartialBehavior]] — partial decision (`I => Option[A]` via `Kleisli[Option, I, A]`)
- *   - [[Condition]] — boolean predicate on the input
+ *   - [[Behavior]] total, pure decision (`I => A` via `Kleisli[Id, I, A]`)
+ *   - [[PartialBehavior]] partial decision (`I => Option[A]` via `Kleisli[Option, I, A]`)
+ *   - [[Condition]] boolean predicate on the input
  */
 object BehaviorTypes:
 
