@@ -99,17 +99,7 @@ lazy val root = project
     libraryDependencies += scopt,
   )
 
-version := {
-  import scala.sys.process.*
-  try {
-    "git describe --tags --abbrev=0".!!.trim
-  } catch {
-    case _: Throwable => "dev"
-  }
-}
-
 Compile / packageBin / packageOptions +=
   Package.ManifestAttributes(
     "Implementation-Title" -> name.value,
-    "Implementation-Version" -> version.value
   )
