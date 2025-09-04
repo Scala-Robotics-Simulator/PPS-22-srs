@@ -2,7 +2,7 @@ export const backlogData = [
   {
     id: 1,
     item: "Setup repository",
-    stima: 6,
+    stima: 7,
     effettivo: 6,
     sprints: [6, 0, 0, 0, 0]
   },
@@ -16,7 +16,7 @@ export const backlogData = [
   {
     id: 3,
     item: "Scelta e implementazione pattern architetturale",
-    stima: 3,
+    stima: 4,
     effettivo: 3,
     sprints: [3, 0, 0, 0, 0]
   },
@@ -37,9 +37,9 @@ export const backlogData = [
   {
     id: 6,
     item: "Come utente, voglio modificare la dimensione dell'ambiente e aggiungere/rimuovere le entità al suo interno",
-    stima: 5,
-    effettivo: 6,
-    sprints: [0, 1, 5, 0, 0]
+    stima: 8,
+    effettivo: 6.5,
+    sprints: [0, 1, 5, 0, 0.5]
   },
   {
     id: 7,
@@ -58,7 +58,7 @@ export const backlogData = [
   {
     id: 9,
     item: "Come utente, voglio gestire gli attuatori di spostamento del robot, come le ruote motorizzate, così da poterli aggiungere, rimuovere o modificare la loro velocità per personalizzare la mobilità del robot",
-    stima: 6,
+    stima: 8,
     effettivo: 10,
     sprints: [0, 7, 3, 0, 0]
   },
@@ -72,9 +72,9 @@ export const backlogData = [
   {
     id: 11,
     item: "Come utente, voglio gestire le luci, così da configurare il numero, la posizione e l'intensità di essi",
-    stima: 8,
-    effettivo: 12,
-    sprints: [0, 10, 2, 0, 0]
+    stima: 18,
+    effettivo: 20,
+    sprints: [0, 10, 2, 0, 8]
   },
   {
     id: 12,
@@ -100,9 +100,9 @@ export const backlogData = [
   {
     id: 15,
     item: "Come utente, voglio modificare il comportamento dei robot, così da poter personalizzare le loro azioni",
-    stima: 13,
-    effettivo: 13,
-    sprints: [0, 0, 11, 3, 0]
+    stima: 25,
+    effettivo: 23,
+    sprints: [0, 0, 11, 3, 10]
   },
   {
     id: 16,
@@ -128,7 +128,7 @@ export const backlogData = [
   {
     id: 19,
     item: "Come un utente, voglio poter caricare e salvare un file di configurazione personalizzato della simulazione, così che possa verificare nuovamente comportamenti eseguiti precedentemente",
-    stima: 11,
+    stima: 12,
     effettivo: 16,
     sprints: [0, 0, 12, 4, 0]
   },
@@ -142,16 +142,16 @@ export const backlogData = [
   {
     id: 21,
     item: "Come un utente, voglio poter scegliere una configurazione della simulazione, così che possa osservare determinati comportamenti.",
-    stima: 15,
-    effettivo: 16,
-    sprints: [0, 0, 0, 16, 0]
+    stima: 17,
+    effettivo: 16.5,
+    sprints: [0, 0, 0, 16, 0.5]
   },
   {
     id: 22,
     item: "Come utente voglio visualizzare l'andamento della simulazione in tempo reale, per studiare il comportamento dei robot",
-    stima: 13,
-    effettivo: 15,
-    sprints: [0, 0, 0, 15, 0]
+    stima: 14,
+    effettivo: 16,
+    sprints: [0, 0, 0, 15, 1]
   },
   {
     id: 23,
@@ -159,5 +159,19 @@ export const backlogData = [
     stima: 1,
     effettivo: 1,
     sprints: [0, 0, 0, 1, 0]
-  }
+  },
+  {
+    id: 24,
+    item: "Come utente voglio creare un DSL con cui posso testare facilmente le funzionalità del sistema e i comportamenti dei robot",
+    stima: 8,
+    effettivo: 13,
+    sprints: [0, 0, 0, 0, 13]
+  },
+  {
+    id: 25,
+    item: "Come utente, mi aspetto che i sensori di prossimità rilevino correttamente gli ostacoli nell'ambiente di simulazione, in modo che i robot possano evitare collisioni e navigare in modo sicuro",
+    stima: 5,
+    effettivo: 4,
+    sprints: [0, 0, 0, 0, 4]
+  },
 ];

@@ -7,7 +7,7 @@ description: "Requisiti di implementazione del progetto."
 # Di implementazione
 
 - Stack tecnologico:
-  - Scala 3.0;
+  - Scala 3.*;
   - sbt;
   - ScalaTest.
 - Pipeline CI/CD:

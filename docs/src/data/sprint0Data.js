@@ -103,7 +103,7 @@ export const sprint0Data = [
     id: "2.4",
     task: "Modellazione di dominio (UML)",
     volontario: "Team",
-    stima: 5,
+    stima: 6,
     effettivo: 8,
     days: [0, 0, 4, 4, 0, 0, 0, 0]
   },
@@ -148,7 +148,7 @@ export const sprint0Data = [
     id: "4.3",
     task: "Definizione requisiti funzionali - sistema",
     volontario: "Team",
-    stima: 1,
+    stima: 2,
     effettivo: 1.5,
     days: [1.5, 0, 0, 0, 0, 0, 0, 0]
   },
