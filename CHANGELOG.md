@@ -1,3 +1,9 @@
+## [1.1.1](https://github.com/Scala-Robotics-Simulator/PPS-22-srs/compare/v1.1.0...v1.1.1) (2025-09-04)
+
+### Bug Fixes
+
+* disable coverage in build.sbt ([1475ee9](https://github.com/Scala-Robotics-Simulator/PPS-22-srs/commit/1475ee940faf91189910d2b71ed96a4932229962))
+
 ## [1.1.0](https://github.com/Scala-Robotics-Simulator/PPS-22-srs/compare/v1.0.0...v1.1.0) (2025-09-04)
 
 ### Features
