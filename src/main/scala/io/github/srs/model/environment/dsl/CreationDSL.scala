@@ -108,7 +108,7 @@ object CreationDSL:
       for
         width <- bounded(s"$Self width", env.width, MinWidth, MaxWidth, includeMax = true)
         height <- bounded(s"$Self height", env.height, MinHeight, MaxHeight, includeMax = true)
-        _ <- bounded(s"$Self entities", env.entities.size, 0, MaxEntities, includeMax = true)
+        _ <- bounded(s"$Self entities", entities.size, 0, MaxEntities, includeMax = true)
         entities <- withinBounds(s"$Self entities", entities, width, height)
         entities <- noCollisions(s"$Self entities", entities ++ boundaries)
         _ <- entities.toList.traverse_(validateEntity)
