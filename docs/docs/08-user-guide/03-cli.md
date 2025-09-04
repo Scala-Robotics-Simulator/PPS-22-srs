@@ -10,14 +10,16 @@ A differenza della **GUI**, in modalità **CLI**:
 
 ## Avvio della simulazione
 
-La simulazione può essere avviata in modalità CLI aggiungendo il flag `--headless` al seguente comando:
+La simulazione può essere avviata in modalità CLI tramite il seguente comando:
 
 ```bash
   java -jar PPS-22-srs.jar --headless [options]
 ```
 
 ### Opzioni
+
 Le opzioni disponibili sono:
+
 - `--path <file>`: specifica il percorso del file di configurazione _YAML_;
 - `--duration <milliseconds>`: imposta la durata totale della simulazione;
 - `--seed <number>`: definisce il seme casuale per garantire riproducibilità;
@@ -26,13 +28,16 @@ Le opzioni disponibili sono:
 Se non viene specificato il percorso, la durata o il seed, questi verranno richiesti interattivamente all’avvio della simulazione.
 
 ### Esempio di avvio
+
 Esempio di avvio del simulatore in modalità CLI con parametri specifici:
+
 ```bash
   java -jar PPS-22-srs.jar --headless --path config.yaml --duration 60000 --seed 42
 ```
 
 :::tip Esempio di risultato della simulazione
 Al termine della simulazione, viene mostrato lo stato finale dell’ambiente e dei robot in console:
+
 ```plaintext
 Simulation finished. Resulting state:
 --- SimulationState ---
@@ -97,6 +102,7 @@ Sensors:
   Light (offset: 270.0°) -> 0.07430186024527663
   Light (offset: 315.0°) -> 0.5979437728212829
 ```
+
 ```plaintext
 Resulting environment:
 -- | -- | -- | -- | -- | -- | -- | X  | -- | -- ||
@@ -110,4 +116,5 @@ Resulting environment:
 -- | -- | -- | -- | -- | -- | -- | -- | ** | -- ||
 -- | -- | -- | -- | -- | -- | -- | -- | -- | --
 ```
+
 :::

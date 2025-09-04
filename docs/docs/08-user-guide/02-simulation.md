@@ -30,7 +30,7 @@ consultare le relative informazioni:
 
 ## Controlli della simulazione
 
-- **Controlli di esecuzione**: la simulazione può essere messa in pausa, ripresa o interrotta in qualsiasi momento;
+- **Controlli di esecuzione**: la simulazione può essere messa in pausa, ripresa o interrotta in qualsiasi momento.
 - **Velocità di riproduzione**: disponibili tre modalità, per adattare l’esecuzione alle esigenze dell’utente.
 
 ### Simulazione in pre-avvio
