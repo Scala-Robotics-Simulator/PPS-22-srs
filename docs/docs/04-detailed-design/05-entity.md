@@ -12,10 +12,10 @@ In questa sezione, viene descritta la struttura e le funzionalità delle entità
 
 Il _trait_ `Entity` modella un oggetto bidimensionale con:
 
-- `id: UUID` - identificativo univoco dell'entità;
-- `position: Point2D` — posizione cartesiana;
-- `shape: ShapeType` — forma geometrica;
-- `orientation: Orientation` — direzione espressa in gradi.
+- `id: UUID`: identificativo univoco dell'entità;
+- `position: Point2D`: posizione cartesiana;
+- `shape: ShapeType`: forma geometrica;
+- `orientation: Orientation`: direzione espressa in gradi.
 
 Costituisce l’interfaccia base comune per oggetti **statici** e **dinamici**.
 
@@ -33,8 +33,8 @@ Costituisce l’interfaccia base comune per oggetti **statici** e **dinamici**.
 
 `ShapeType` è un'_enum_ con due varianti:
 
-- `Circle(radius: Double)` — cerchio di raggio `radius`;
-- `Rectangle(width: Double, height: Double)` — rettangolo con larghezza e altezza.
+- `Circle(radius: Double)`: cerchio di raggio `radius`;
+- `Rectangle(width: Double, height: Double)`: rettangolo con larghezza e altezza.
 
 > Nota: questo approccio consente una modellazione semplice ma estensibile delle dimensioni fisiche degli oggetti nello spazio
 > simulato.
@@ -43,8 +43,8 @@ Costituisce l’interfaccia base comune per oggetti **statici** e **dinamici**.
 
 `Orientation` rappresenta l’angolo di rotazione rispetto a un riferimento fisso:
 
-- `degrees: Double` — gradi;
-- `toRadians: Double` — conversione in radianti per la trigonometria.
+- `degrees: Double`: gradi;
+- `toRadians: Double`: conversione in radianti per la trigonometria.
 
 > Nota: l’orientamento permette di rappresentare la direzione verso cui è rivolto un oggetto nello spazio, supportando il
 > movimento direzionale e la rotazione.
@@ -69,7 +69,7 @@ ciclo **sense–plan–act**.
 
 :::info
 
-Progettazione del motore decisionale (**Behavior**) — regole, comportamenti, policy e DSL — nella
+Progettazione del motore decisionale (**Behavior**) - regole, comportamenti, policy e DSL - nella
 pagina di design [Behavior](./06-behavior.md).
 
 :::
@@ -103,7 +103,7 @@ La _validazione_ include:
 - Inclusione nei limiti dell’ambiente;
 - _Assenza di sovrapposizioni_ con altre entità;
 
-> Nota: servono a costruire scenari realistici — dal corridoio stretto al piccolo labirinto — in cui i robot devono
+> Nota: servono a costruire scenari realistici - dal corridoio stretto al piccolo labirinto - in cui i robot devono
 > pianificare il movimento ed evitare collisioni.
 
 ## Luce

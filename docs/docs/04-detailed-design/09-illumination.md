@@ -111,5 +111,5 @@ Di conseguenza viene calcolato solo alla prima richiesta e il risultato viene me
 > Nota: se l'ambiente o le luci cambiano, il `LightField` deve essere invalidato (non è gestito automaticamente).
 
 :::info
-Per i dettagli e gli snippet di codice, vedi [Illumination — Implementazione](../05-implementation/03-david-cohen/illumination.md).
+Per i dettagli e gli snippet di codice, vedi [l'implementazione di Illumination](../05-implementation/03-david-cohen/illumination.md).
 :::

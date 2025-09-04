@@ -6,7 +6,7 @@ sidebar_position: 2
 
 ## Commenti finali
 
-Questo progetto mi ha fatto crescere molto — è stata una bella sfida. Scala oggi mi spaventa meno: ho preso confidenza
+Questo progetto mi ha fatto crescere molto. Scala oggi mi spaventa meno: ho preso confidenza
 con _cats-effect_, con uno stile più “puro” e con pattern che prima erano solo teoria (_Cake Pattern_, _Tagless Final_,
 _Kleisli_). Ho studiato da fonti esterne e dalle slide del corso, trasformando quelle idee in scelte di design più
 consapevoli.

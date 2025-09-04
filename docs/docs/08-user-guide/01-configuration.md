@@ -5,8 +5,8 @@
 Il menù a tendina **`Configuration`** consente di selezionare diverse configurazioni predefinite.  
 Sono inoltre disponibili i seguenti pulsanti:
 
-- **`Load`** — carica una configurazione personalizzata da file in formato _YAML_.
-- **`Save`** — salva la configurazione attuale in un file _YAML_.
+- **`Load`**: carica una configurazione personalizzata da file in formato _YAML_.
+- **`Save`**: salva la configurazione attuale in un file _YAML_.
 
 ## Parametri configurabili
 
@@ -14,20 +14,20 @@ La schermata di configurazione è suddivisa in aree dedicate:
 
 - **Parametri della simulazione**
 
-  - **`Durata`** — tempo totale di esecuzione in millisecondi (lasciato vuoto la simulazione è infinita);
-  - **`Seed`** — per garantire la ripetibilità dei risultati;
+  - **`Durata`**: tempo totale di esecuzione in millisecondi (lasciato vuoto la simulazione è infinita);
+  - **`Seed`**: per garantire la ripetibilità dei risultati;
 
 - **Caratteristiche dell’ambiente**
 
-  - **`Dimensioni`** — altezza e larghezza dell’area di simulazione;
+  - **`Dimensioni`**: altezza e larghezza dell’area di simulazione;
 
 - **Entità presenti nell’ambiente**  
   Tutte le entità sono definite da: posizione (coordinate _x_, _y_) e orientamento (in gradi, 0° verso destra,
   90° verso il basso).
   Parametri specifici:
-  - **`Ostacoli`** — dimensioni (larghezza e altezza);
-  - **`Luci`** — raggio (in metri), raggio di illuminazione, intensità, attenuazione;
-  - **`Robot`** — raggio (in metri), velocità (valida per entrambe le ruote, valore incluso tra -1.0 e 1.0), sensori (
+  - **`Ostacoli`**: dimensioni (larghezza e altezza);
+  - **`Luci`**: raggio (in metri), raggio di illuminazione, intensità, attenuazione;
+  - **`Robot`**: raggio (in metri), velocità (valida per entrambe le ruote, valore incluso tra -1.0 e 1.0), sensori (
     prossimità, luce) attivabili/disattivabili tramite _checkbox_, comportamento selezionabile da menu
     a tendina.
 
