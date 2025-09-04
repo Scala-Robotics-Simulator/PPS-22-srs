@@ -71,7 +71,8 @@ lazy val root = project
       Wart.ImplicitParameter,
     ),
     jacocoExcludes := Seq(
-      "io.github.srs.view.*"
+      "io.github.srs.view.*",
+      "io.github.srs.utils.SimulationDefaults.*"
     ),
     jacocoReportSettings := JacocoReportSettings(
       title = "PR report",
