@@ -40,3 +40,5 @@ del carico di lavoro e ha agevolato la pianificazione.
 
 Nel caso in cui un task venga stimato di durata superiore a 13 ore, viene suddiviso in task più piccoli, in modo da
 facilitare la gestione e il monitoraggio del progresso.
+
+![Trello board](../../static/img/01-development-process/trello.png)
