@@ -7,13 +7,14 @@ sidebar_position: 7
 ![Action](../../static/img/04-detailed-design/action.png)
 
 Il modulo `Action` definisce il comportamento eseguibile dalle entità dinamiche all’interno della simulazione, modellando
-le possibili azioni in maniera astratta, composabile e indipendente dall’implementazione concreta.
+le possibili azioni in maniera astratta, componibile e indipendente dall’implementazione concreta.
 
 Un’interfaccia dedicata `ActionAlg` specifica quali operazioni sono disponibili per un’entità dinamica,
 come l’assegnazione di velocità differenziate alle ruote per controllarne il movimento. L’algebra definisce _cosa_ può
 essere fatto, lasciando a implementazioni concrete la responsabilità di stabilire _come_ avviene l’azione.
 
 Diverse tipologie di azioni sono disponibili, tra cui:
+
 - movimenti che applicano velocità diverse alle ruote dell’entità;
 - azioni nulle, che lasciano invariato lo stato;
 - sequenze di azioni, che consentono la composizione ordinata e monadica di più comportamenti.
