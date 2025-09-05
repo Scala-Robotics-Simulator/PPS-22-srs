@@ -23,6 +23,10 @@ You can run the simulator by downloading the latest release and running the `PPS
 java -jar PPS-22-srs.jar
 ```
 
+You can also run the simulator via the CLI by adding the flag `--headless`.
+
+You can find more informations about the other flags available in our [User Guide](https://scala-robotics-simulator.github.io/PPS-22-srs/docs/category/8-guida-utente).
+
 ## Documentation
 
 The documentation is available at [PPS-22-srs doc](https://scala-robotics-simulator.github.io/PPS-22-srs/).
