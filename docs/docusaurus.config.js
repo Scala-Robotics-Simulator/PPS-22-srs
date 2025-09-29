@@ -17,6 +17,9 @@ const config = {
   favicon: "img/favicon.ico",
   markdown: {
     mermaid: true,
+    hooks: {
+      onBrokenMarkdownLinks: "warn",
+    },
   },
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
@@ -36,7 +39,6 @@ const config = {
   projectName: "PPS-22-srs", // Usually your repo name.
 
   onBrokenLinks: "throw",
-  onBrokenMarkdownLinks: "warn",
 
   // Add the Mermaid plugin
   themes: ["@docusaurus/theme-mermaid"],
@@ -65,10 +67,6 @@ const config = {
             type: ["rss", "atom"],
             xslt: true,
           },
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
           // Useful options to enforce blogging best practices
           onInlineTags: "warn",
           onInlineAuthors: "warn",
