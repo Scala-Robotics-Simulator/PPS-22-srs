@@ -1,5 +1,7 @@
 package io.github.srs.performance
 
+import scala.language.postfixOps
+
 import cats.effect.unsafe.implicits.global
 import io.github.srs.>>>
 import io.github.srs.model.Simulation.*
@@ -15,8 +17,6 @@ import io.github.srs.model.environment.dsl.CreationDSL.*
 import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-
-import scala.language.postfixOps
 
 class SimulationPerformanceTest extends AnyFlatSpec with Matchers {
   

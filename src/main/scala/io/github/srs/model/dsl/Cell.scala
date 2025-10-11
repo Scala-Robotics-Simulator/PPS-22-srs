@@ -1,15 +1,15 @@
 package io.github.srs.model.dsl
 
-import scala.language.{implicitConversions, postfixOps}
+import scala.language.{ implicitConversions, postfixOps }
 
 import io.github.srs.model.entity.Point2D.*
 import io.github.srs.model.entity.dynamicentity.behavior.Policy
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 import io.github.srs.model.entity.staticentity.dsl.LightDsl.*
 import io.github.srs.model.entity.staticentity.dsl.ObstacleDsl.*
-import io.github.srs.model.entity.{Entity, Point2D}
+import io.github.srs.model.entity.{ Entity, Point2D }
 import io.github.srs.utils.EqualityGivenInstances.given
-import io.github.srs.utils.SimulationDefaults.GridDSL.{IncrementToCenterPos, ObstacleSize}
+import io.github.srs.utils.SimulationDefaults.GridDSL.{ IncrementToCenterPos, ObstacleSize }
 
 /**
  * Represents a cell in the grid-based DSL for defining environments.
