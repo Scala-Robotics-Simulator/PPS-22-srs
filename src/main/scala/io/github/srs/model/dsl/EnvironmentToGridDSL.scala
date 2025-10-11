@@ -1,10 +1,10 @@
 package io.github.srs.model.dsl
 
-import scala.language.{implicitConversions, postfixOps}
+import scala.language.{ implicitConversions, postfixOps }
 
 import io.github.srs.model.entity.Point2D.*
 import io.github.srs.model.entity.dynamicentity.Robot
-import io.github.srs.model.entity.staticentity.StaticEntity.{Light, Obstacle}
+import io.github.srs.model.entity.staticentity.StaticEntity.{ Light, Obstacle }
 import io.github.srs.model.environment.Environment
 import io.github.srs.utils.EqualityGivenInstances.given
 
@@ -62,12 +62,12 @@ object EnvironmentToGridDSL:
     val envBuilder: EnvironmentBuilder = fromEnvironment(environment)
 
     envBuilder.cells.map { row =>
-        row.map {
-          case Cell.Robot(policy) => Cell.symbolFor(policy)
-          case Cell.Light => "**"
-          case Cell.Obstacle => "X "
-          case Cell.Empty => "--"
-        }.mkString(" | ")
-      }
+      row.map {
+        case Cell.Robot(policy) => Cell.symbolFor(policy)
+        case Cell.Light => "**"
+        case Cell.Obstacle => "X "
+        case Cell.Empty => "--"
+      }.mkString(" | ")
+    }
       .mkString(" ||\n")
 end EnvironmentToGridDSL

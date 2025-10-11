@@ -1,5 +1,7 @@
 package io.github.srs.system
 
+import scala.language.postfixOps
+
 import cats.effect.unsafe.implicits.global
 import io.github.srs.>>>
 import io.github.srs.model.Simulation.*
@@ -16,8 +18,6 @@ import io.github.srs.testutils.EnvironmentTestUtils.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.OptionValues.convertOptionToValuable
-
-import scala.language.postfixOps
 
 class SimulationSystemTest extends AnyFlatSpec with Matchers:
 

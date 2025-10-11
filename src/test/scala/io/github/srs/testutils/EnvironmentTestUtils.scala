@@ -1,7 +1,7 @@
 package io.github.srs.testutils
 
 import io.github.srs.model.entity.Point2D.*
-import io.github.srs.model.entity.{Entity, Point2D}
+import io.github.srs.model.entity.{ Entity, Point2D }
 import io.github.srs.model.entity.staticentity.StaticEntity.Obstacle
 import io.github.srs.model.environment.Environment
 
@@ -15,7 +15,7 @@ object EnvironmentTestUtils:
     val sameDims = (a, e) match
       case (ao: Obstacle, eo: Obstacle) =>
         math.abs(ao.width - eo.width) <= tol &&
-          math.abs(ao.height - eo.height) <= tol
+        math.abs(ao.height - eo.height) <= tol
       case _ => true
     samePos && sameDims
 
@@ -33,8 +33,10 @@ object EnvironmentTestUtils:
     yield Point2D(pos.x.toInt + dx, pos.y.toInt + dy)).toSet
 
   extension (env: Environment)
+
     infix def shouldEqualExceptIds(expectedEnv: Environment, tol: Double = 0.5): Boolean =
       envAlmostEqual(env, expectedEnv, tol)
 
     infix def shouldEqualExceptIdsStrict(expectedEnv: Environment, tol: Double = 1e-6): Boolean =
       envAlmostEqual(env, expectedEnv, tol)
+end EnvironmentTestUtils
