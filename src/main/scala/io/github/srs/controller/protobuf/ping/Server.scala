@@ -14,7 +14,7 @@ object Server:
     PongerFs2Grpc.bindServiceResource[IO](new PongerService)
 
   private def runServer(service: ServerServiceDefinition): Resource[IO, Server] =
-    NettyServerBuilder.forPort(9999).addService(service).resource[IO]
+    NettyServerBuilder.forPort(50051).addService(service).resource[IO]
 
   val grpcServer: Resource[IO, Server] =
     pongerService
