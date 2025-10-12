@@ -4,6 +4,7 @@ import scala.concurrent.duration.{ DurationInt, FiniteDuration, MILLISECONDS }
 import scala.language.postfixOps
 
 import cats.effect.std.Queue
+import cats.effect.unsafe.implicits.global
 import cats.effect.{ Clock, IO }
 import io.github.srs.controller.message.RobotProposal
 import io.github.srs.controller.protocol.Event
@@ -17,6 +18,9 @@ import io.github.srs.utils.EqualityGivenInstances.given
 import cats.implicits.*
 import io.github.srs.utils.random.RNG
 import com.typesafe.scalalogging.Logger
+import io.github.srs.protos.ping.PongerFs2Grpc
+import io.github.srs.controller.protobuf.ping.PongerService
+import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder
 
 /**
  * Module that defines the controller logic for the Scala Robotics Simulator.
@@ -104,9 +108,16 @@ object ControllerModule:
         override def start(initialState: S): IO[S] =
           for
             queueSim <- Queue.unbounded[IO, Event]
+            service <- PongerFs2Grpc.bindServiceResource(new PongerService).allocated
+            (svc, release) = service
+            server = NettyServerBuilder.forPort(9999).addService(svc).build()
+            _ <- IO.println("Starting PongerService") *> IO(server.start())
+            _ <- IO(server).void.start // optional: supervise separately if needed
+            fiber <- IO.never.start // keep alive if you want an always-running task
             _ <- context.view.init(queueSim)
             _ <- runBehavior(queueSim, initialState)
             result <- simulationLoop(initialState, queueSim)
+            _ <- fiber.cancel.guarantee(IO(server.shutdown()) *> IO(release.unsafeRunSync()))
           yield result
 
         /**

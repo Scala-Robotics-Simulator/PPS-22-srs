@@ -1,12 +1,20 @@
 import Dependencies.*
 
-enablePlugins(JacocoCoverallsPlugin)
+val scala3Version = "3.7.3"
+
+lazy val protobuf = project
+  .in(file("protobuf"))
+  .settings(
+    name := "protobuf",
+    scalaVersion := scala3Version,
+  )
+  .enablePlugins(Fs2Grpc)
 
 lazy val root = project
   .in(file("."))
   .settings(
     name := "PPS-22-srs",
-    scalaVersion := "3.7.3",
+    scalaVersion := scala3Version,
     organization := "io.github.scala-robotics-simulator",
     description := "A robotics simulator written in scala.",
     homepage := Some(
@@ -70,6 +78,7 @@ lazy val root = project
       Wart.Recursion,
       Wart.ImplicitParameter,
       Wart.SeqUpdated,
+      Wart.Nothing,
     ),
     jacocoExcludes := Seq(
       "io.github.srs.view.*",
@@ -99,7 +108,10 @@ lazy val root = project
     libraryDependencies += squidLib,
     libraryDependencies += fs2Io,
     libraryDependencies += scopt,
+    libraryDependencies += grpc,
   )
+  .enablePlugins(JacocoCoverallsPlugin)
+  .dependsOn(protobuf)
 
 Compile / packageBin / packageOptions +=
   Package.ManifestAttributes(

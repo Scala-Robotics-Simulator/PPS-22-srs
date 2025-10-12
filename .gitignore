@@ -34,3 +34,14 @@ metals.sbt
 # NodeJs
 node_modules/
 
+# Nix
+.direnv/
+.envrc
+flake.nix
+flake.lock
+
+# Python
+env/
+__pycache__/
+python/*_pb2*.py
+
