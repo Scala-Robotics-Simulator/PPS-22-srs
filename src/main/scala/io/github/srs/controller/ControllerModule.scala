@@ -110,7 +110,7 @@ object ControllerModule:
             queueSim <- Queue.unbounded[IO, Event]
             service <- PongerFs2Grpc.bindServiceResource(new PongerService).allocated
             (svc, release) = service
-            server = NettyServerBuilder.forPort(9999).addService(svc).build()
+            server = NettyServerBuilder.forPort(50051).addService(svc).build()
             _ <- IO.println("Starting PongerService") *> IO(server.start())
             _ <- IO(server).void.start // optional: supervise separately if needed
             fiber <- IO.never.start // keep alive if you want an always-running task

@@ -21,7 +21,7 @@ class PingPongClient:
         Initialize the client
 
         Args:
-            server_address: Server address (e.g., 'localhost:9999')
+            server_address: Server address (e.g., 'localhost:50051')
             client_name: Name to identify this client
         """
         self.server_address = server_address
@@ -136,7 +136,7 @@ class PingPongClient:
 async def main():
     """Main entry point"""
     # Configuration
-    SERVER_ADDRESS = "localhost:9999"
+    SERVER_ADDRESS = "localhost:50051"
     CLIENT_NAME = "PythonClient"
     PING_COUNT = 5
     PING_INTERVAL = 1.0  # seconds
