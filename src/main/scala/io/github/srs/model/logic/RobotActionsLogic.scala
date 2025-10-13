@@ -92,10 +92,7 @@ object RobotActionsLogic:
           else
             val mid = low + (high - low) / 2
             robot.applyMovementActions[cats.effect.IO](mid, action).flatMap { candidate =>
-              val updatedEntities = env.entities.map:
-                case r: Robot if r.id == robot.id => candidate
-                case e => e
-              env.copy(entities = updatedEntities).validate match
+              env.updateEntity(candidate) match
                 case Right(_) => binarySearch(mid, high, Some(candidate), attempts + 1)
                 case Left(_) => binarySearch(low, mid, best, attempts + 1)
             }

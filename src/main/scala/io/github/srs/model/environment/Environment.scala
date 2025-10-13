@@ -1,13 +1,15 @@
 package io.github.srs.model.environment
 
 import cats.effect.IO
+import cats.effect.unsafe.implicits.global
 import io.github.srs.model.entity.Entity
 import io.github.srs.model.entity.dynamicentity.Robot
-import io.github.srs.utils.SimulationDefaults.Environment.*
-import io.github.srs.model.illumination.model.LightField
-import cats.effect.unsafe.implicits.global
 import io.github.srs.model.entity.staticentity.StaticEntity.Light
 import io.github.srs.model.illumination.LightMap
+import io.github.srs.model.illumination.model.LightField
+import io.github.srs.model.validation.{ DomainError, Validation }
+import io.github.srs.utils.EqualityGivenInstances.given_CanEqual_T_T
+import io.github.srs.utils.SimulationDefaults.Environment.*
 import io.github.srs.utils.SimulationDefaults.LightMapConfigs
 
 /**
@@ -74,6 +76,25 @@ object ValidEnvironment:
     env
 
   given Conversion[ValidEnvironment, Environment] = identity
+
+  extension (env: ValidEnvironment)
+
+    /**
+     * Updates an entity in the environment, ensuring no collisions occur.
+     * @param entity
+     *   the entity to update.
+     * @return
+     *   a [[io.github.srs.model.validation.Validation]] that contains the updated environment or a collision error if
+     *   the update would result in a collision.
+     */
+    def updateEntity(entity: Entity): Validation[ValidEnvironment] =
+      import io.github.srs.utils.collision.Collision.*
+      val otherEntities = env.entities.filterNot(_.id == entity.id)
+      if otherEntities.forall(!entity.collidesWith(_)) then
+        Right[DomainError, ValidEnvironment](ValidEnvironment.from(env.copy(entities = otherEntities + entity)))
+      else
+        Left[DomainError, ValidEnvironment](DomainError.Collision("entity", otherEntities.filter(entity.collidesWith)))
+end ValidEnvironment
 
 export ValidEnvironment.ValidEnvironment
 
