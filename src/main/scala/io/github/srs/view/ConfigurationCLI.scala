@@ -4,6 +4,7 @@ import cats.effect.IO
 import io.github.srs.config.{ ConfigError, SimulationConfig, YamlConfigManager }
 import io.github.srs.model.environment.ValidEnvironment.ValidEnvironment
 import io.github.srs.model.environment.dsl.CreationDSL.validate
+import com.typesafe.scalalogging.Logger
 
 /**
  * ConfigurationView companion object with factory method to create an instance of a CLI-based configuration view.
@@ -28,6 +29,8 @@ object ConfigurationCLI:
       simulationTimeOpt: Option[Long],
       seedOpt: Option[Long],
   ) extends ConfigurationView:
+
+    private val logger = Logger(getClass.getName)
 
     /**
      * @inheritdoc
@@ -73,7 +76,7 @@ object ConfigurationCLI:
         _ <- IO.print("Enter simulation time (ms): ")
         line <- IO.readLine
         duration <- IO(line.toLong)
-          .handleErrorWith(_ => IO.println("Invalid input, try again.") *> askSimulationTime)
+          .handleErrorWith(_ => IO(logger.error("Invalid input, try again.")) *> askSimulationTime)
       yield duration
 
     /**
@@ -86,7 +89,7 @@ object ConfigurationCLI:
         _ <- IO.print("Enter random seed: ")
         line <- IO.readLine
         seed <- IO(line.toLong)
-          .handleErrorWith(_ => IO.println("Invalid input, try again.") *> askSeed)
+          .handleErrorWith(_ => IO(logger.error("Invalid input, try again.")) *> askSeed)
       yield seed
 
     /**

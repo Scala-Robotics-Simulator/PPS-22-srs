@@ -7,7 +7,7 @@ import io.github.srs.model.ModelModule
 import io.github.srs.view.ViewModule.{ Component, Requirements, View }
 import io.github.srs.utils.PrettyPrintExtensions.*
 import io.github.srs.model.dsl.EnvironmentToGridDSL
-import io.github.srs.utils.SimulationDefaults.DebugMode
+import com.typesafe.scalalogging.Logger
 
 /**
  * CLI component trait that defines the interface for creating a CLI view.
@@ -17,6 +17,7 @@ import io.github.srs.utils.SimulationDefaults.DebugMode
  */
 trait CLIComponent[S <: ModelModule.State] extends Component[S]:
   context: Requirements[S] =>
+  private val logger = Logger(getClass.getName)
 
   /**
    * @inheritdoc
@@ -40,8 +41,7 @@ trait CLIComponent[S <: ModelModule.State] extends Component[S]:
      */
     override def render(state: S): IO[Unit] =
       for _ <-
-          if DebugMode then IO.println(s"Current environment:\n${EnvironmentToGridDSL.prettyPrint(state.environment)}")
-          else IO.unit
+          IO(logger.debug(s"Current environment:\n${EnvironmentToGridDSL.prettyPrint(state.environment)}"))
       yield ()
 
     /**

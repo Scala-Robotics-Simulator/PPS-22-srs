@@ -17,8 +17,11 @@ import io.github.srs.model.environment.dsl.CreationDSL.*
 import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import com.typesafe.scalalogging.Logger
 
-class SimulationPerformanceTest extends AnyFlatSpec with Matchers {
+class SimulationPerformanceTest extends AnyFlatSpec with Matchers:
+
+  private val logger = Logger(getClass.getName)
   
   "Simulation" should "be able to simulate 30 robots at 10 fps" in :
     val robots: List[Entity] =
@@ -33,7 +36,7 @@ class SimulationPerformanceTest extends AnyFlatSpec with Matchers {
     val _ = (simulation withDuration duration withSeed 42 in env >>>).unsafeRunSync()
     val end = System.currentTimeMillis()
     val totalTime = end - start
-    println(s"Total time for $duration ms of simulation: $totalTime ms")
+    logger.info(s"Total time for $duration ms of simulation: $totalTime ms")
     totalTime should be <= duration.toLong
 
   it should "run the simulation at maximum speed" in :
@@ -48,4 +51,3 @@ class SimulationPerformanceTest extends AnyFlatSpec with Matchers {
     val duration = 100_000
     val res = (simulation withDuration duration withSeed 42 in valEnv >>>).unsafeRunSync().value
     res.simulationSpeed shouldBe SUPERFAST
-}

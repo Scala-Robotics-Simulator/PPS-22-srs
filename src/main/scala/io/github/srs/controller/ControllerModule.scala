@@ -14,9 +14,9 @@ import io.github.srs.model.entity.dynamicentity.behavior.BehaviorContext
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
 import io.github.srs.model.logic.*
 import io.github.srs.utils.EqualityGivenInstances.given
-import io.github.srs.utils.SimulationDefaults.DebugMode
 import cats.implicits.*
 import io.github.srs.utils.random.RNG
+import com.typesafe.scalalogging.Logger
 
 /**
  * Module that defines the controller logic for the Scala Robotics Simulator.
@@ -92,6 +92,8 @@ object ControllerModule:
        */
       private class ControllerImpl(using bundle: LogicsBundle[S]) extends Controller[S]:
 
+        private val logger = Logger(getClass.getName)
+
         /**
          * Starts the controller with the initial state.
          * @param initialState
@@ -130,7 +132,7 @@ object ControllerModule:
                   for
                     nextState <- nextStep(newState, startTime)
                     endTime <- Clock[IO].realTime.map(_.toMillis)
-                    _ <- if DebugMode then IO.println(s"Simulation loop took ${endTime - startTime} ms") else IO.unit
+                    _ <- IO(logger.debug(s"Simulation loop took ${endTime - startTime} ms"))
                     res <- loop(nextState)
                   yield res
             yield result

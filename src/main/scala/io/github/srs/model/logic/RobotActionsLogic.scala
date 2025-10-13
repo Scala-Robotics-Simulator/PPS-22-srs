@@ -17,6 +17,7 @@ import io.github.srs.utils.EqualityGivenInstances.given
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.DefaultMaxRetries
 import io.github.srs.utils.SimulationDefaults.{ BinarySearchDurationThreshold, DebugMode }
 import cats.implicits.*
+import com.typesafe.scalalogging.Logger
 
 /**
  * Logic for handling robot actions proposals.
@@ -43,6 +44,8 @@ trait RobotActionsLogic[S <: ModelModule.State]:
  * Companion object for [[RobotActionsLogic]] containing given instances.
  */
 object RobotActionsLogic:
+
+  private val logger = Logger(getClass.getName)
 
   given RobotActionsLogic[SimulationState] with
 
@@ -146,7 +149,7 @@ object RobotActionsLogic:
             case Right(validEnv) =>
               if DebugMode then
                 moves.foreach { case (_, newR) =>
-                  println(s"[${newR.position._1}, ${newR.position._2}],")
+                  logger.debug(s"[${newR.position._1}, ${newR.position._2}],")
                 }
               validEnv
             case Left(_) =>
