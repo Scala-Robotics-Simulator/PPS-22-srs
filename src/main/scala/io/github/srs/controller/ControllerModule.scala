@@ -4,7 +4,6 @@ import scala.concurrent.duration.{ DurationInt, FiniteDuration, MILLISECONDS }
 import scala.language.postfixOps
 
 import cats.effect.std.Queue
-import cats.effect.unsafe.implicits.global
 import cats.effect.{ Clock, IO }
 import io.github.srs.controller.message.RobotProposal
 import io.github.srs.controller.protocol.Event
@@ -112,12 +111,10 @@ object ControllerModule:
             (svc, release) = service
             server = NettyServerBuilder.forPort(50051).addService(svc).build()
             _ <- IO.println("Starting PongerService") *> IO(server.start())
-            _ <- IO(server).void.start // optional: supervise separately if needed
-            fiber <- IO.never.start // keep alive if you want an always-running task
             _ <- context.view.init(queueSim)
             _ <- runBehavior(queueSim, initialState)
             result <- simulationLoop(initialState, queueSim)
-            _ <- fiber.cancel.guarantee(IO(server.shutdown()) *> IO(release.unsafeRunSync()))
+            _ <- IO(server.shutdownNow().awaitTermination()) *> release
           yield result
 
         /**
