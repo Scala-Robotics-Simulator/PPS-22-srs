@@ -132,7 +132,7 @@ object ControllerModule:
                   for
                     nextState <- nextStep(newState, startTime)
                     endTime <- Clock[IO].realTime.map(_.toMillis)
-                    _ <- IO(logger.debug(s"Simulation loop took ${endTime - startTime} ms"))
+                    _ <- IO.blocking(logger.debug(s"Simulation loop took ${endTime - startTime} ms"))
                     res <- loop(nextState)
                   yield res
             yield result

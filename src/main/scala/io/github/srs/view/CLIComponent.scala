@@ -41,7 +41,7 @@ trait CLIComponent[S <: ModelModule.State] extends Component[S]:
      */
     override def render(state: S): IO[Unit] =
       for _ <-
-          IO(logger.debug(s"Current environment:\n${EnvironmentToGridDSL.prettyPrint(state.environment)}"))
+          IO.blocking(logger.debug(s"Current environment:\n${EnvironmentToGridDSL.prettyPrint(state.environment)}"))
       yield ()
 
     /**
