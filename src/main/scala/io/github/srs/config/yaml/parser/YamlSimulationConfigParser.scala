@@ -85,7 +85,7 @@ object YamlSimulationConfigParser:
         yield Environment()
           |> (env => width.fold(env)(env.withWidth))
           |> (env => height.fold(env)(env.withHeight))
-          |> (_.containing(entities.toSet))
+          |> (_.containing(entities.toList))
         end for
     end match
 

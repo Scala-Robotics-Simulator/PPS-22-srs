@@ -65,14 +65,14 @@ object CreationDSL:
     infix def withHeight(height: Int): Environment = env.copy(height = height)
 
     /**
-     * Adds a set of entities to the environment. This method allows for adding multiple entities at once.
+     * Adds a list of entities to the environment. This method allows for adding multiple entities at once.
      * @param entities
-     *   a set of entities to add to the environment.
+     *   a list of entities to add to the environment.
      * @return
      *   The updated environment with the new entities added.
      */
-    infix def containing(entities: Set[Entity]): Environment =
-      env.copy(entities = env.entities ++ entities)
+    infix def containing(entities: List[Entity]): Environment =
+      env.copy(entities = entities.reverse ::: env.entities)
 
     /**
      * Adds an entity to the environment.
@@ -82,7 +82,7 @@ object CreationDSL:
      *   The updated environment with the new entity added.
      */
     infix def containing(entity: Entity): Environment =
-      env.copy(entities = env.entities + entity)
+      and(entity)
 
     /**
      * Adds an entity to the environment using infix notation.
@@ -92,7 +92,7 @@ object CreationDSL:
      *   The updated environment with the new entity added.
      */
     infix def and(entity: Entity): Environment =
-      env.copy(entities = env.entities + entity)
+      env.copy(entities = entity :: env.entities)
 
     /**
      * Validates the environment with an option to insert boundaries.
@@ -101,9 +101,8 @@ object CreationDSL:
      *   validation fails.
      */
     infix def validate: Validation[ValidEnvironment] =
-      val entities = env.entities.filterNot:
-        case _: Boundary => true
-        case _ => false
+      val entities = env.entities.filterNot { case _: Boundary => true; case _ => false }
+        .sortBy(_.id.toString)
       val boundaries = Boundary.createBoundaries(env.width, env.height)
       for
         width <- bounded(s"$Self width", env.width, MinWidth, MaxWidth, includeMax = true)
@@ -111,7 +110,7 @@ object CreationDSL:
         _ <- bounded(s"$Self entities", entities.size, 0, MaxEntities, includeMax = true)
         entities <- withinBounds(s"$Self entities", entities, width, height)
         entities <- noCollisions(s"$Self entities", entities ++ boundaries)
-        _ <- entities.toList.traverse_(validateEntity)
+        _ <- entities.traverse_(validateEntity)
       yield ValidEnvironment.from(env.copy(entities = entities))
   end extension
 end CreationDSL

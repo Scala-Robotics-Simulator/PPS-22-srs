@@ -29,7 +29,7 @@ object Environment:
       case Boundary(_, _, _, _, _) =>
         true // Boundary entities are not serialized
       case _ => false
-    }.toList.map(_.asJson).asJson
+    }.map(_.asJson).asJson
     if environment.entities.isEmpty then Json.obj(baseFields*)
     else
       Json.obj(

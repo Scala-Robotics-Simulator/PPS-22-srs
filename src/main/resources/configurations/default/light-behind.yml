@@ -11,6 +11,7 @@ environment:
       intensity: 1.0
       attenuation: 1.0
   - robot:
+      id: ebb78596-bbe4-4b97-8ff1-ab77b33e3606
       position: [5.0, 5.0]
       orientation: 0.0    # facing right; light is to the left (≈180°)
       radius: 0.25

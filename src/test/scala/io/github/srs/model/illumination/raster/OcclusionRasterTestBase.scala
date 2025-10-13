@@ -26,7 +26,7 @@ trait OcclusionRasterTestBase extends AnyFlatSpec with Matchers:
   /**
    * Creates a validated test environment with the given entities
    */
-  protected def createTestEnvironment(entities: Set[Entity] = Set.empty): ValidEnvironment =
+  protected def createTestEnvironment(entities: List[Entity] = List.empty): ValidEnvironment =
     (environment withWidth TestEnvWidth withHeight TestEnvHeight containing entities).validate.toOption.value
 
   /**

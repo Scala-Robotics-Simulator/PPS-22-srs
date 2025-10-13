@@ -14,7 +14,7 @@ enum DomainError:
   case NotANumber(field: String, value: Double)
   case Infinite(field: String, value: Double)
   case InvalidCount(field: String, count: Int, min: Int, max: Int)
-  case Collision(field: String, elements: Set[Entity])
+  case Collision(field: String, elements: List[Entity])
 
   case OutsideBounds[A](
       field: String,
@@ -221,22 +221,22 @@ object Validation:
    *   [[Right]] with the original set of entities if there are no collisions, otherwise [[Left]] with a
    *   [[DomainError.Collision]] error containing the colliding entities.
    */
-  def noCollisions(field: String, elements: Set[Entity]): Validation[Set[Entity]] =
+  def noCollisions(field: String, elements: List[Entity]): Validation[List[Entity]] =
     import io.github.srs.utils.collision.Collision.*
-    elements.toSeq
+    elements
       .combinations(2)
       .collectFirst:
-        case Seq(a, b) if a.collidesWith(b) => DomainError.Collision(field, Set(b))
+        case Seq(a, b) if a.collidesWith(b) => DomainError.Collision(field, List(b))
     match
-      case Some(error) => Left[DomainError, Set[Entity]](error)
-      case None => Right[DomainError, Set[Entity]](elements)
+      case Some(error) => Left[DomainError, List[Entity]](error)
+      case None => Right[DomainError, List[Entity]](elements)
 
   def withinBounds(
       field: String,
-      entities: Set[Entity],
+      entities: List[Entity],
       width: Int,
       height: Int,
-  ): Validation[Set[Entity]] =
+  ): Validation[List[Entity]] =
     import io.github.srs.model.entity.Point2D.*
 
     val failures = entities.collectFirst:
@@ -246,7 +246,7 @@ object Validation:
         entity
     failures match
       case Some(entity) =>
-        Left[DomainError, Set[Entity]](
+        Left[DomainError, List[Entity]](
           DomainError.OutsideBounds(
             field,
             entity,
@@ -255,7 +255,7 @@ object Validation:
             e => s"(${e.position.x}, ${e.position.y})",
           ),
         )
-      case None => Right[DomainError, Set[Entity]](entities)
+      case None => Right[DomainError, List[Entity]](entities)
   end withinBounds
 
 end Validation

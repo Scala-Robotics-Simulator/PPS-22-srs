@@ -21,7 +21,7 @@ class GridDSLTest extends AnyFlatSpec with Matchers:
       -- | -- ||
       -- | --
 
-    val expectedEnv = environment withWidth 2 withHeight 2 containing (Set.empty: Set[Entity])
+    val expectedEnv = environment withWidth 2 withHeight 2 containing (List.empty: List[Entity])
     env shouldEqual expectedEnv
 
   it should "create an environment from a grid" in:
