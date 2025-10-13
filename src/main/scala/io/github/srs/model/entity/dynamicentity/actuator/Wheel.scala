@@ -11,13 +11,4 @@ import io.github.srs.utils.SimulationDefaults.DynamicEntity.Actuator.Differentia
  * @param shape
  *   the physical shape of the wheel, assumed to be a circle.
  */
-final case class Wheel(speed: Double = DefaultSpeed, shape: ShapeType.Circle = DefaultShape):
-  /**
-   * Returns a new instance of this wheel with an updated linear speed.
-   *
-   * @param to
-   *   the new linear speed (in meters per second).
-   * @return
-   *   a new [[Wheel]] instance with the updated speed.
-   */
-  def updatedSpeed(to: Double): Wheel = copy(speed = to)
+final case class Wheel(speed: Double = DefaultSpeed, shape: ShapeType.Circle = DefaultShape)
