@@ -17,6 +17,7 @@ environment:
         width: 2.0
         height: 6.0  # Vertical wall blocking direct path
     - robot:
+        id: 7c3f613f-9879-4b79-97e1-3e2069b04f18
         position: [2, 5]
         orientation: 0.0
         radius: 0.25
@@ -25,6 +26,7 @@ environment:
         withLightSensors: true
         behavior: Prioritized
     - robot:
+        id: c6031aff-4887-4d1e-bebe-bcf8f7d03d54
         position: [2, 2]
         orientation: 45.0
         radius: 0.25

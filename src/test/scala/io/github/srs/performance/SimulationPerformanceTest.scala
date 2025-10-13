@@ -21,11 +21,11 @@ import org.scalatest.matchers.should.Matchers
 class SimulationPerformanceTest extends AnyFlatSpec with Matchers {
   
   "Simulation" should "be able to simulate 30 robots at 10 fps" in :
-    val robots: Set[Entity] =
+    val robots: List[Entity] =
       (for
         x <- 0 until 10
         y <- 0 until 3
-      yield robot at Point2D(x + 0.5, y + 0.5) withSpeed 1.0 withBehavior Policy.RandomWalk).toSet
+      yield robot at Point2D(x + 0.5, y + 0.5) withSpeed 1.0 withBehavior Policy.RandomWalk).toList
 
     val env = (environment withWidth 10 withHeight 10 containing robots).validate.toOption.value
     val duration = 100_000

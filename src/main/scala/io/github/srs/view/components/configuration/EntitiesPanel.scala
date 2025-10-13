@@ -83,12 +83,12 @@ class EntitiesPanel(fieldSpecsByType: Map[String, Seq[FieldSpec]]) extends JPane
     }.sequence
 
   /**
-   * Sets the entities in the panel
+   * Lists the entities in the panel
    *
    * @param entities
-   *   a set of entities to be displayed in the panel
+   *   a list of entities to be displayed in the panel
    */
-  def setEntities(entities: Set[Entity]): Unit =
+  def setEntities(entities: List[Entity]): Unit =
     import io.github.srs.model.entity.Point2D.*
     entityListPanel.removeAll()
     entities.foreach(e =>

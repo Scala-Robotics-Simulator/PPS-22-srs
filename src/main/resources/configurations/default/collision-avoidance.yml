@@ -15,6 +15,7 @@ environment:
       width: 3.0
       height: 0.5
   - robot:
+      id: 849417d9-df87-43ac-a62d-972d9b6f5249
       speed: 1.0
       withLightSensors: true
       orientation: 90.0

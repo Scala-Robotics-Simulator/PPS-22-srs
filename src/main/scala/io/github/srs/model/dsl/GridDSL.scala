@@ -30,7 +30,7 @@ final case class EnvironmentBuilder(cells: Vector[Vector[Cell]]):
     environment
       .withWidth(cells.map(_.size).foldLeft(0)(math.max))
       .withHeight(cells.size)
-      .containing(entities.toSet)
+      .containing(entities.toList)
 
 /**
  * Domain-Specific Language (DSL) for creating grid-based environments.

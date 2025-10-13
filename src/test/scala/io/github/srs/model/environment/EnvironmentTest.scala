@@ -34,7 +34,7 @@ class EnvironmentTest extends AnyFlatSpec with Matchers:
   it should "allow adding entities" in:
     val entity1 = createEntity((2.0, 2.0), ShapeType.Circle(1.0), Orientation(0.0))
     val entity2 = createEntity((5.0, 2.0), ShapeType.Circle(1.0), Orientation(90.0))
-    val env = Environment(10, 10, Set(entity1, entity2)).validate
+    val env = Environment(10, 10, List(entity1, entity2)).validate
     inside(env):
       case Right(environment) =>
         val actual = environment.entities.map(e => (e.position, e.shape, e.orientation))
@@ -77,7 +77,7 @@ class EnvironmentTest extends AnyFlatSpec with Matchers:
         10,
         (1 to MaxEntities + 1)
           .map(i => createEntity((i.toDouble, i.toDouble), ShapeType.Circle(1.0), Orientation(0.0)))
-          .toSet,
+          .toList,
       ).validate,
     ):
       case Left(DomainError.OutOfBounds(s"$Self entities", _, _, _)) => succeed
@@ -85,19 +85,19 @@ class EnvironmentTest extends AnyFlatSpec with Matchers:
   it should "detect collisions in circular entities" in:
     val entity1 = createEntity((1.0, 1.0), ShapeType.Circle(1.0), Orientation(0.0))
     val entity2 = createEntity((1.5, 1.5), ShapeType.Circle(1.0), Orientation(90.0))
-    inside(Environment(10, 10, Set(entity1, entity2)).validate):
+    inside(Environment(10, 10, List(entity1, entity2)).validate):
       case Left(error) => error.errorMessage shouldBe s"$Self entities have 1 collision(s), expected none"
 
   it should "detect collisions in rectangular entities" in:
     val entity1 = createEntity((1.0, 1.0), ShapeType.Rectangle(2.0, 2.0), Orientation(0.0))
     val entity2 = createEntity((1.5, 1.5), ShapeType.Rectangle(2.0, 2.0), Orientation(90.0))
-    inside(Environment(10, 10, Set(entity1, entity2)).validate):
+    inside(Environment(10, 10, List(entity1, entity2)).validate):
       case Left(error) => error.errorMessage shouldBe s"$Self entities have 1 collision(s), expected none"
 
   it should "not detect collisions in non-overlapping circular entities" in:
     val entity1 = createEntity((1.0, 1.0), ShapeType.Circle(0.99), Orientation(0.0))
     val entity2 = createEntity((3.0, 3.0), ShapeType.Circle(1.0), Orientation(90.0))
-    val environment = Environment(10, 10, Set(entity1, entity2)).validate
+    val environment = Environment(10, 10, List(entity1, entity2)).validate
     inside(environment):
       case Right(environment) =>
         val actual = environment.entities.map(e => (e.position, e.shape, e.orientation))
@@ -108,7 +108,7 @@ class EnvironmentTest extends AnyFlatSpec with Matchers:
   it should "not detect collisions in non-overlapping rectangular entities" in:
     val entity1 = createEntity((1.0, 1.0), ShapeType.Rectangle(2.0, 2.0), Orientation(0.0))
     val entity2 = createEntity((3.0, 3.0), ShapeType.Rectangle(2.0, 2.0), Orientation(90.0))
-    val environment = Environment(10, 10, Set(entity1, entity2)).validate
+    val environment = Environment(10, 10, List(entity1, entity2)).validate
     inside(environment):
       case Right(environment) =>
         val actual = environment.entities.map(e => (e.position, e.shape, e.orientation))
@@ -119,23 +119,23 @@ class EnvironmentTest extends AnyFlatSpec with Matchers:
   it should "detect collisions in mixed entities" in:
     val circularEntity = createEntity((1.0, 1.0), ShapeType.Circle(1.0), Orientation(0.0))
     val rectangularEntity = createEntity((1.5, 1.5), ShapeType.Rectangle(2.0, 2.0), Orientation(90.0))
-    inside(Environment(10, 10, Set(circularEntity, rectangularEntity)).validate):
+    inside(Environment(10, 10, List(circularEntity, rectangularEntity)).validate):
       case Left(error) => error.errorMessage shouldBe s"$Self entities have 1 collision(s), expected none"
 
   it should "detect collisions between circular and rectangular entities" in:
     val circularEntity = createEntity((1.0, 1.0), ShapeType.Circle(1.0), Orientation(0.0))
     val rectangularEntity = createEntity((1.5, 1.5), ShapeType.Rectangle(2.0, 2.0), Orientation(90.0))
-    inside(Environment(10, 10, Set(rectangularEntity, circularEntity)).validate):
+    inside(Environment(10, 10, List(rectangularEntity, circularEntity)).validate):
       case Left(error) => error.errorMessage shouldBe s"$Self entities have 1 collision(s), expected none"
 
   it should "not detect collisions in mixed entities when they do not overlap" in:
     val circularEntity = createEntity((1.0, 1.0), ShapeType.Circle(0.99), Orientation(0.0))
     val rectangularEntity = createEntity((3.0, 3.0), ShapeType.Rectangle(2.0, 2.0), Orientation(90.0))
-    val environment = Environment(10, 10, Set(circularEntity, rectangularEntity)).validate
+    val environment = Environment(10, 10, List(circularEntity, rectangularEntity)).validate
     inside(environment):
       case Right(environment) =>
         val actual = environment.entities.map(e => (e.position, e.shape, e.orientation))
-        val expected = (Set(
+        val expected = (List(
           circularEntity,
           rectangularEntity,
         ) ++ createBoundaries(10, 10))
@@ -145,37 +145,37 @@ class EnvironmentTest extends AnyFlatSpec with Matchers:
   it should "validate entities within bounds" in:
     val entity1 = createEntity((1.0, 1.0), ShapeType.Circle(0.99), Orientation(0.0))
     val entity2 = createEntity((5.0, 5.0), ShapeType.Circle(1.0), Orientation(90.0))
-    val environment = Environment(10, 10, Set(entity1, entity2)).validate
+    val environment = Environment(10, 10, List(entity1, entity2)).validate
     inside(environment):
       case Right(environment) =>
         val actual = environment.entities.map(e => (e.position, e.shape, e.orientation))
-        val expected = (Set(entity1, entity2) ++ createBoundaries(10, 10))
+        val expected = (List(entity1, entity2) ++ createBoundaries(10, 10))
           .map(e => (e.position, e.shape, e.orientation))
         actual should contain theSameElementsAs expected
 
   it should "not validate entities out of bounds" in:
     val entity1 = createEntity((-1.0, 1.0), ShapeType.Circle(1.0), Orientation(0.0))
     val entity2 = createEntity((5.0, 5.0), ShapeType.Circle(1.0), Orientation(90.0))
-    inside(Environment(10, 10, Set(entity1, entity2)).validate):
+    inside(Environment(10, 10, List(entity1, entity2)).validate):
       case Left(error) =>
         error.errorMessage shouldBe s"$Self entities = (-1.0, 1.0) is outside the bounds (width: [0.0, 10.0], height: [0.0, 10.0])"
 
   it should "not validate entities out of x axis bounds" in:
     val entity1 = createEntity((11.0, 1.0), ShapeType.Circle(1.0), Orientation(0.0))
     val entity2 = createEntity((5.0, 5.0), ShapeType.Circle(1.0), Orientation(90.0))
-    inside(Environment(10, 10, Set(entity1, entity2)).validate):
+    inside(Environment(10, 10, List(entity1, entity2)).validate):
       case Left(_) => succeed
 
   it should "not validate entities out of y axis bounds" in:
     val entity1 = createEntity((1.0, 11.0), ShapeType.Circle(1.0), Orientation(0.0))
     val entity2 = createEntity((5.0, 5.0), ShapeType.Circle(1.0), Orientation(90.0))
-    inside(Environment(10, 10, Set(entity1, entity2)).validate):
+    inside(Environment(10, 10, List(entity1, entity2)).validate):
       case Left(_) => succeed
 
   it should "not validate entities out of bounds with negative coordinates" in:
     val entity1 = createEntity((1.0, -1.0), ShapeType.Circle(1.0), Orientation(0.0))
     val entity2 = createEntity((5.0, 5.0), ShapeType.Circle(1.0), Orientation(90.0))
-    inside(Environment(10, 10, Set(entity1, entity2)).validate):
+    inside(Environment(10, 10, List(entity1, entity2)).validate):
       case Left(_) => succeed
 
 end EnvironmentTest

@@ -151,7 +151,7 @@ object ConfigurationGUI:
         val entities = entitiesPanel.getEntities
         (env, entities) match
           case (Right(env), Right(entities)) =>
-            refreshCanvas(env.copy(entities = entities.toSet)).unsafeRunAsync(_ => ())
+            refreshCanvas(env.copy(entities = entities.toList)).unsafeRunAsync(_ => ())
           case _ => ()
 
     end setupUI
@@ -186,7 +186,7 @@ object ConfigurationGUI:
 
       (simulationResult, environmentResult, entitiesResult) match
         case (Right(simulation), Right(environmentBase), Right(entities)) =>
-          val environment = environmentBase.copy(entities = entities.toSet)
+          val environment = environmentBase.copy(entities = entities.toList)
           Some(SimulationConfig(simulation, environment))
         case _ =>
           val allErrors = Seq(simulationResult, environmentResult, entitiesResult).collect { case Left(errors) =>

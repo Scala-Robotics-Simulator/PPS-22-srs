@@ -36,7 +36,7 @@ final class OcclusionRasterCoreTest extends OcclusionRasterTestBase:
       shape = io.github.srs.model.entity.ShapeType.Circle(0.1),
     )
 
-    val env = createTestEnvironment(Set(obstacle, robot))
+    val env = createTestEnvironment(List(obstacle, robot))
     val staticGrid = OcclusionRaster.rasterizeStatics(env, testDims)
     val dynamicGrid = OcclusionRaster.rasterizeDynamics(env, testDims)
 
@@ -60,7 +60,7 @@ final class OcclusionRasterCoreTest extends OcclusionRasterTestBase:
       illuminationRadius = 1.0,
     )
 
-    val env = createTestEnvironment(Set(light))
+    val env = createTestEnvironment(List(light))
     val grid = OcclusionRaster.rasterizeStatics(env, testDims)
 
     // Light position should remain cleared
@@ -78,7 +78,7 @@ final class OcclusionRasterCoreTest extends OcclusionRasterTestBase:
       height = 0.1,
     )
 
-    val env = createTestEnvironment(Set(edgeObstacle))
+    val env = createTestEnvironment(List(edgeObstacle))
     val grid = OcclusionRaster.rasterizeStatics(env, testDims)
 
     // Should have at least one occluded cell

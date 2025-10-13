@@ -32,7 +32,7 @@ class CreationDSLTest extends AnyFlatSpec with Matchers:
   it should "allow adding a set of entities" in:
     val entity1 = Obstacle(pos = (5.0, 5.0), orient = Orientation(0.0), width = 1.0, height = 1.0)
     val entity2 = Obstacle(pos = (2.0, 2.0), orient = Orientation(0.0), width = 1.0, height = 1.0)
-    val entities: Set[Entity] = Set(entity1, entity2)
+    val entities: List[Entity] = List(entity1, entity2)
     val env = environment containing entities
     env.entities should contain theSameElementsAs Set(entity1, entity2)
 

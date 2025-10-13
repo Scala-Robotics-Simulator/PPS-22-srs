@@ -17,7 +17,7 @@ final class OccludeRasterRectTest extends OcclusionRasterTestBase:
       height = 0.2,
     )
 
-    val env = createTestEnvironment(Set(obstacle))
+    val env = createTestEnvironment(List(obstacle))
     val grid = OcclusionRaster.rasterizeStatics(env, testDims)
 
     // Check that the center is occluded
@@ -39,7 +39,7 @@ final class OccludeRasterRectTest extends OcclusionRasterTestBase:
       height = 0.2,
     )
 
-    val env = createTestEnvironment(Set(obstacle))
+    val env = createTestEnvironment(List(obstacle))
     val grid = OcclusionRaster.rasterizeStatics(env, testDims)
 
     // Center should still be occluded
@@ -54,7 +54,7 @@ final class OccludeRasterRectTest extends OcclusionRasterTestBase:
       height = 0.1,
     )
 
-    val env = createTestEnvironment(Set(obstacle))
+    val env = createTestEnvironment(List(obstacle))
     val grid = OcclusionRaster.rasterizeStatics(env, testDims)
 
     // After 90-degree rotation, dimensions are swapped
@@ -74,7 +74,7 @@ final class OccludeRasterRectTest extends OcclusionRasterTestBase:
       height = 0.05,
     )
 
-    val env = createTestEnvironment(Set(tinyObstacle))
+    val env = createTestEnvironment(List(tinyObstacle))
     val grid = OcclusionRaster.rasterizeStatics(env, testDims)
 
     // Should still occlude at least the center cell
@@ -89,7 +89,7 @@ final class OccludeRasterRectTest extends OcclusionRasterTestBase:
       height = 0.1,
     )
 
-    val env = createTestEnvironment(Set(cellSizedObstacle))
+    val env = createTestEnvironment(List(cellSizedObstacle))
     val grid = OcclusionRaster.rasterizeStatics(env, testDims)
 
     val (cellX, cellY) = worldToCell(2.00, 2.00)
@@ -116,7 +116,7 @@ final class OccludeRasterRectTest extends OcclusionRasterTestBase:
       height = 2.0,
     )
 
-    val env = createTestEnvironment(Set(wideObstacle, tallObstacle))
+    val env = createTestEnvironment(List(wideObstacle, tallObstacle))
     val grid = OcclusionRaster.rasterizeStatics(env, testDims)
 
     // Check a wide obstacle creates a horizontal strip

@@ -21,6 +21,7 @@ import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.{ StdLightSens
 import org.scalatest.OptionValues.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import io.github.srs.utils.EqualityGivenInstances.given_CanEqual_T_T
 
 class YamlManagerTest extends AnyFlatSpec with Matchers:
   given CanEqual[Environment, Environment] = CanEqual.derived
@@ -205,6 +206,11 @@ class YamlManagerTest extends AnyFlatSpec with Matchers:
     val expectedYamlSplit = expectedYaml.split("\n").filter(_.nonEmpty).sorted
     val _ = for i <- yamlContentSplit.indices do yamlContentSplit(i) shouldBe expectedYamlSplit(i)
     val loadedConfig = YamlManager.parse[IO](yamlContent).unsafeRunSync()
-    loadedConfig.toOption.value shouldBe config
+    val loaded = loadedConfig.toOption.value
+
+    val _ = loaded.simulation shouldBe config.simulation
+    val _ = loaded.environment.width shouldBe config.environment.width
+    val _ = loaded.environment.height shouldBe config.environment.height
+    loaded.environment.entities should contain theSameElementsAs config.environment.entities
 
 end YamlManagerTest
