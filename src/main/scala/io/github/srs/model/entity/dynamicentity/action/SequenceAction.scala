@@ -24,11 +24,11 @@ final case class SequenceAction[F[_]: Monad](actions: List[Action[F]]) extends A
    * @param dynamicEntity
    *   the dynamic entity on which the actions will be executed.
    * @param a
-   *   the [[ActionAlg]] to use for executing the actions.
+   *   the [[ActionAlgebra]] to use for executing the actions.
    * @return
    *   an effectful computation that results in the dynamic entity after all actions has been executed.
    */
-  override def run[E <: DynamicEntity](dynamicEntity: E)(using a: ActionAlg[F, E]): F[E] =
+  override def run[E <: DynamicEntity](dynamicEntity: E)(using a: ActionAlgebra[F, E]): F[E] =
     actions.foldLeftM(dynamicEntity)((e, act) => act.run(e))
 
 object SequenceAction:

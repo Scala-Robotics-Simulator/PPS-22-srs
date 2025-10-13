@@ -32,7 +32,7 @@ class NoActionTest extends AnyFlatSpec with Matchers:
 
   given CanEqual[Dummy, Dummy] = CanEqual.derived
 
-  given actionAlg: ActionAlg[Id, Dummy] with
+  given actionAlgebra: ActionAlgebra[Id, Dummy] with
 
     def moveWheels(entity: Dummy, left: Double, right: Double): Dummy =
       val updatedActuators: Seq[DummyActuator] = Seq(DummyActuator())
@@ -53,6 +53,6 @@ class NoActionTest extends AnyFlatSpec with Matchers:
       sensors = Vector.empty[Sensor[Dummy, Environment]],
     )
     val noAction: NoAction[Id] = NoAction[Id]()
-    val updateEntity: Dummy = noAction.run(dynamicEntity)(using actionAlg)
+    val updateEntity: Dummy = noAction.run(dynamicEntity)(using actionAlgebra)
     dynamicEntity should be(updateEntity)
 end NoActionTest

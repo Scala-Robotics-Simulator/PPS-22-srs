@@ -4,7 +4,7 @@ import java.util.UUID
 
 import cats.effect.IO
 import io.github.srs.model.entity.*
-import io.github.srs.model.entity.dynamicentity.action.ActionAlg
+import io.github.srs.model.entity.dynamicentity.action.ActionAlgebra
 import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, DifferentialWheelMotor }
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.withActuators
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor
@@ -33,7 +33,7 @@ final case class Robot(
 
 object Robot:
 
-  given ActionAlg[IO, Robot] with
+  given ActionAlgebra[IO, Robot] with
 
     override def moveWheels(robot: Robot, leftSpeed: Double, rightSpeed: Double): IO[Robot] =
       IO.pure:

@@ -9,7 +9,7 @@ import cats.syntax.foldable.toFoldableOps
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.Point2D.*
 import io.github.srs.model.entity.dynamicentity.Robot
-import io.github.srs.model.entity.dynamicentity.action.{ Action, ActionAlg }
+import io.github.srs.model.entity.dynamicentity.action.{ Action, ActionAlgebra }
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Actuator.DifferentialWheelMotor.DefaultWheel
 import io.github.srs.model.entity.dynamicentity.action.SequenceAction
@@ -118,7 +118,7 @@ object DifferentialWheelMotor:
     def applyMovementActions[F[_]: Monad](
         dt: FiniteDuration,
         action: Action[F],
-    )(using a: ActionAlg[F, Robot]): F[Robot] =
+    )(using a: ActionAlgebra[F, Robot]): F[Robot] =
       action match
         case seq: SequenceAction[F] =>
           seq.actions.foldLeftM(robot) { (r, act) =>
