@@ -6,7 +6,7 @@ import cats.Id
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.action.MovementActionFactory.*
 import io.github.srs.model.entity.dynamicentity.action.SequenceAction.thenDo
-import io.github.srs.model.entity.dynamicentity.action.{ Action, ActionAlg, NoAction }
+import io.github.srs.model.entity.dynamicentity.action.{ Action, ActionAlgebra, NoAction }
 import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor.{ applyMovementActions, move }
 import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotorTestUtils.calculateMovement
 import io.github.srs.model.entity.dynamicentity.actuator.{ DifferentialWheelMotor, Wheel }
@@ -39,7 +39,7 @@ class RobotTest extends AnyFlatSpec with Matchers:
 
   given CanEqual[Orientation, Orientation] = CanEqual.derived
 
-  given actionAlg: ActionAlg[Id, Robot] with
+  given actionAlgebra: ActionAlgebra[Id, Robot] with
 
     def moveWheels(robot: Robot, left: Double, right: Double): Robot =
       robot.copy(

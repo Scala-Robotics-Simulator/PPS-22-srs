@@ -12,7 +12,7 @@ import io.github.srs.model.entity.dynamicentity.DynamicEntity
  * @tparam E
  *   the type of dynamic entity on which the action is performed, extending [[DynamicEntity]].
  */
-trait ActionAlg[F[_], E <: DynamicEntity]:
+trait ActionAlgebra[F[_], E <: DynamicEntity]:
   /**
    * Moves the dynamic entity wheels with the specified speeds.
    * @param e

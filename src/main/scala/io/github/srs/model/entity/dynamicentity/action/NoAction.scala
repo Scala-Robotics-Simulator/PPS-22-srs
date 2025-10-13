@@ -19,5 +19,5 @@ final case class NoAction[F[_]: Monad]() extends Action[F]:
    * @return
    *   a new instance of [[DynamicEntity]] after executing the action (which is the same as the input entity).
    */
-  override def run[E <: DynamicEntity](dynamicEntity: E)(using a: ActionAlg[F, E]): F[E] =
+  override def run[E <: DynamicEntity](dynamicEntity: E)(using a: ActionAlgebra[F, E]): F[E] =
     Monad[F].pure(dynamicEntity)

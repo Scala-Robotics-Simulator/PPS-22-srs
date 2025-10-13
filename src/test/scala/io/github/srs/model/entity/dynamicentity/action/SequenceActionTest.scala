@@ -19,7 +19,7 @@ class SequenceActionTest extends AnyFlatSpec with Matchers:
 
   given CanEqual[Dummy, Dummy] = CanEqual.derived
 
-  given actionAlg: ActionAlg[Id, Dummy] with
+  given actionAlgebra: ActionAlgebra[Id, Dummy] with
 
     def moveWheels(entity: Dummy, left: Double, right: Double): Dummy =
       val updatedActuators: Seq[DummyActuator] = Seq(DummyActuator())

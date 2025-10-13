@@ -17,12 +17,12 @@ import io.github.srs.model.entity.dynamicentity.DynamicEntity
 final case class MovementAction[F[_]] private[action] (leftSpeed: Double, rightSpeed: Double) extends Action[F]:
 
   /**
-   * Runs the movement action using the provided [[ActionAlg]].
+   * Runs the movement action using the provided [[ActionAlgebra]].
    *
    * @param a
-   *   the [[ActionAlg]] to use for executing the movement action.
+   *   the [[ActionAlgebra]] to use for executing the movement action.
    * @return
    *   an effectful computation that results in the dynamic entity after the wheels have been moved.
    */
-  override def run[E <: DynamicEntity](dynamicEntity: E)(using a: ActionAlg[F, E]): F[E] =
+  override def run[E <: DynamicEntity](dynamicEntity: E)(using a: ActionAlgebra[F, E]): F[E] =
     a.moveWheels(dynamicEntity, leftSpeed, rightSpeed)
