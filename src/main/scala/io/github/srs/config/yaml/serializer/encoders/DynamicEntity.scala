@@ -11,11 +11,14 @@ import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.StdProximitySe
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.StdLightSensors
 import io.github.srs.utils.SimulationDefaults.Fields.Entity as EntityFields
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.DynamicEntity.Robot as RobotFields
+import com.typesafe.scalalogging.Logger
 
 /**
  * Encoders for DynamicEntity types.
  */
 object DynamicEntity:
+
+  private val logger = Logger(getClass.getName)
 
   /**
    * Encoder for DynamicEntity types.
@@ -29,7 +32,7 @@ object DynamicEntity:
     val speeds = dwt.map(d => (d.left.speed, d.right.speed))
     speeds match
       case Some(value) if value._1 != value._2 =>
-        println(
+        logger.warn(
           s"WARNING: encoding DifferentialWheelMotor with speeds (${value._1}, ${value._2}) the serializer only isn't able to correctly serialize them and will only use the left speed",
         )
       case _ => ()
@@ -38,7 +41,7 @@ object DynamicEntity:
     val withLightSensors = StdLightSensors.forall(robot.sensors.contains)
 
     if robot.sensors.diff(StdProximitySensors ++ StdLightSensors).sizeIs > 0 then
-      println(
+      logger.warn(
         "WARNING: encoding robot with custom sensors, those will be lost during the serialization",
       )
 
