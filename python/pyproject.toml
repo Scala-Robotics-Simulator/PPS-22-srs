@@ -1,0 +1,39 @@
+[project]
+name = "srs-rl"
+version = "0.0.1"
+description = "Reinforcement learning library for the SRS simulator"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "grpcio>=1.75.1",
+    "grpcio-tools>=1.75.1",
+]
+
+[tool.uv]
+managed = true
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+    "ruff>=0.14.0",
+    "ty>=0.0.1a22",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "N", "B", "A", "COM"]
+ignore = ["E501"]
+extend-select = ["C4", "T20", "S", "RET", "TCH"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]  # Allow assert in tests
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "lf"
+

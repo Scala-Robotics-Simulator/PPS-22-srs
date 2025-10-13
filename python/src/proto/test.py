@@ -6,11 +6,15 @@ Sends ping messages and receives acknowledgments concurrently.
 """
 
 import asyncio
+import logging
 
 import grpc
-
 import ping_pb2
 import ping_pb2_grpc
+
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+
+logger = logging.getLogger(__name__)
 
 
 class PingPongClient:
@@ -36,7 +40,7 @@ class PingPongClient:
 
         # Test connection
         await asyncio.wait_for(self.channel.channel_ready(), timeout=5.0)
-        print(f"✓ Connected to {self.server_address}\n")
+        logger.info(f"✓ Connected to {self.server_address}\n")
 
     async def close(self):
         """Close the connection"""
@@ -44,7 +48,10 @@ class PingPongClient:
             await self.channel.close()
 
     async def send_pings(
-        self, request_queue: asyncio.Queue, count: int, interval: float
+        self,
+        request_queue: asyncio.Queue,
+        count: int,
+        interval: float,
     ):
         """
         Send ping messages to the server
@@ -59,13 +66,13 @@ class PingPongClient:
             ping = ping_pb2.PingPong()
             setattr(ping, "from", self.client_name)
 
-            print(f"→ Sending ping {i+1}/{count}")
+            logger.info(f"→ Sending ping {i+1}/{count}")
             await request_queue.put(ping)
             await asyncio.sleep(interval)
 
         # Signal end of requests
         await request_queue.put(None)
-        print("✓ All pings sent\n")
+        logger.info("✓ All pings sent\n")
 
     async def generate_requests(self, request_queue: asyncio.Queue):
         """
@@ -95,7 +102,9 @@ class PingPongClient:
             async for ack in call:
                 ack_count += 1
                 from_field = getattr(ack, "from")
-                print(f"← Received ACK #{ack_count}: from={from_field}, to={ack.to}")
+                logger.info(
+                    f"← Received ACK #{ack_count}: from={from_field}, to={ack.to}",
+                )
         except asyncio.CancelledError:
             pass  # Normal completion
         except grpc.aio.AioRpcError as e:
@@ -112,8 +121,8 @@ class PingPongClient:
             count: Number of pings to send
             interval: Delay between pings in seconds
         """
-        print(f"Starting ping-pong as '{self.client_name}'")
-        print("-" * 60)
+        logger.info(f"Starting ping-pong as '{self.client_name}'")
+        logger.info("-" * 60)
 
         # Create queue for managing requests
         request_queue = asyncio.Queue()
@@ -129,30 +138,32 @@ class PingPongClient:
         await send_task
         ack_count = await receive_task
 
-        print("-" * 60)
-        print(f"✓ Ping-pong completed! Sent {count} pings, received {ack_count} ACKs")
+        logger.info("-" * 60)
+        logger.info(
+            f"✓ Ping-pong completed! Sent {count} pings, received {ack_count} ACKs",
+        )
 
 
 async def main():
     """Main entry point"""
     # Configuration
-    SERVER_ADDRESS = "localhost:50051"
-    CLIENT_NAME = "PythonClient"
-    PING_COUNT = 5
-    PING_INTERVAL = 1.0  # seconds
+    server_address = "localhost:50051"
+    client_name = "PythonClient"
+    ping_count = 5
+    ping_interval = 1.0  # seconds
 
     # Create and run client
-    client = PingPongClient(SERVER_ADDRESS, CLIENT_NAME)
+    client = PingPongClient(server_address, client_name)
 
     try:
         await client.connect()
-        await client.run(count=PING_COUNT, interval=PING_INTERVAL)
+        await client.run(count=ping_count, interval=ping_interval)
     except asyncio.TimeoutError:
-        print(f"✗ Connection timeout - server at {SERVER_ADDRESS} not responding")
+        logger.info(f"✗ Connection timeout - server at {server_address} not responding")
     except grpc.aio.AioRpcError as e:
-        print(f"✗ RPC failed: {e.code()}: {e.details()}")
+        logger.info(f"✗ RPC failed: {e.code()}: {e.details()}")
     except Exception as e:
-        print(f"✗ Error: {e}")
+        logger.info(f"✗ Error: {e}")
     finally:
         await client.close()
 
@@ -161,4 +172,4 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        print("\n\n✗ Interrupted by user")
+        logger.info("\n\n✗ Interrupted by user")
