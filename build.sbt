@@ -69,6 +69,7 @@ lazy val root = project
       Wart.Overloading,
       Wart.Recursion,
       Wart.ImplicitParameter,
+      Wart.SeqUpdated,
     ),
     jacocoExcludes := Seq(
       "io.github.srs.view.*",

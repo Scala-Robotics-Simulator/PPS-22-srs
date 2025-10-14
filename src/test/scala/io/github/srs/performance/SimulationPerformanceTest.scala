@@ -27,7 +27,7 @@ class SimulationPerformanceTest extends AnyFlatSpec with Matchers:
     val robots: List[Entity] =
       (for
         x <- 0 until 10
-        y <- 0 until 3
+        y <- 0 until 10
       yield robot at Point2D(x + 0.5, y + 0.5) withSpeed 1.0 withBehavior Policy.RandomWalk).toList
 
     val env = (environment withWidth 10 withHeight 10 containing robots).validate.toOption.value
