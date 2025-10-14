@@ -89,11 +89,16 @@ object ValidEnvironment:
      */
     def updateEntity(entity: Entity): Validation[ValidEnvironment] =
       import io.github.srs.utils.collision.Collision.*
+      val pos = env.entities.indexWhere(_.id == entity.id)
       val otherEntities = env.entities.filterNot(_.id == entity.id)
       if otherEntities.forall(!entity.collidesWith(_)) then
-        Right[DomainError, ValidEnvironment](ValidEnvironment.from(env.copy(entities = otherEntities + entity)))
+        val updatedEntities = env.entities.updated(pos, entity)
+        Right[DomainError, ValidEnvironment](
+          ValidEnvironment.from(env.copy(entities = updatedEntities)),
+        )
       else
         Left[DomainError, ValidEnvironment](DomainError.Collision("entity", otherEntities.filter(entity.collidesWith)))
+  end extension
 end ValidEnvironment
 
 export ValidEnvironment.ValidEnvironment
