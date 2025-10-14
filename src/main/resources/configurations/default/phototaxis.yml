@@ -10,6 +10,7 @@ environment:
         height: 0.2
         width: 7.0
     - robot:
+        id: d476203b-578d-4c84-89e3-dda06c3b1ec4
         radius: 0.25
         withProximitySensors: true
         withLightSensors: true
@@ -18,6 +19,7 @@ environment:
         speed: 1.0
         behavior: Phototaxis
     - robot:
+        id: 3d34af5d-35d0-44c6-844d-d8470b5470d4
         withLightSensors: true
         position: [ 3.0, 1.0 ]
         speed: 1.0

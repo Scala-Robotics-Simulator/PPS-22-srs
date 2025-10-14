@@ -5,7 +5,6 @@ import scala.language.postfixOps
 
 import cats.effect.std.Queue
 import cats.effect.{ Clock, IO }
-import cats.syntax.all.*
 import io.github.srs.controller.message.RobotProposal
 import io.github.srs.controller.protocol.Event
 import io.github.srs.model.*
@@ -15,7 +14,9 @@ import io.github.srs.model.entity.dynamicentity.behavior.BehaviorContext
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
 import io.github.srs.model.logic.*
 import io.github.srs.utils.EqualityGivenInstances.given
-import io.github.srs.utils.SimulationDefaults.DebugMode
+import cats.implicits.*
+import io.github.srs.utils.random.RNG
+import com.typesafe.scalalogging.Logger
 
 /**
  * Module that defines the controller logic for the Scala Robotics Simulator.
@@ -91,6 +92,8 @@ object ControllerModule:
        */
       private class ControllerImpl(using bundle: LogicsBundle[S]) extends Controller[S]:
 
+        private val logger = Logger(getClass.getName)
+
         /**
          * Starts the controller with the initial state.
          * @param initialState
@@ -129,7 +132,7 @@ object ControllerModule:
                   for
                     nextState <- nextStep(newState, startTime)
                     endTime <- Clock[IO].realTime.map(_.toMillis)
-                    _ <- if DebugMode then IO.println(s"Simulation loop took ${endTime - startTime} ms") else IO.unit
+                    _ <- IO.blocking(logger.debug(s"Simulation loop took ${endTime - startTime} ms"))
                     res <- loop(nextState)
                   yield res
             yield result
@@ -177,15 +180,22 @@ object ControllerModule:
          *   an [[IO]] task that completes when the behavior has been run.
          */
         private def runBehavior(queue: Queue[IO, Event], state: S): IO[Unit] =
+          val robots = state.environment.entities.collect { case r: Robot => r }.sortBy(_.id.toString)
+
+          def process(remaining: List[Robot], rng: RNG, acc: List[RobotProposal]): IO[(List[RobotProposal], RNG)] =
+            remaining match
+              case Nil => IO.pure((acc.reverse, rng))
+              case robot :: tail =>
+                for
+                  sensorReadings <- robot.senseAll[IO](state.environment)
+                  ctx = BehaviorContext(sensorReadings, rng)
+                  (action, newRng) = robot.behavior.run[IO](ctx)
+                  _ <- queue.offer(Event.Random(newRng))
+                  next <- process(tail, newRng, RobotProposal(robot, action) :: acc)
+                yield next
+
           for
-            proposals <- state.environment.entities.collect { case robot: Robot => robot }.toList.parTraverse { robot =>
-              for
-                sensorReadings <- robot.senseAll[IO](state.environment)
-                ctx = BehaviorContext(sensorReadings, state.simulationRNG)
-                (action, rng) = robot.behavior.run[IO](ctx)
-                _ <- queue.offer(Event.Random(rng))
-              yield RobotProposal(robot, action)
-            }
+            (proposals, _) <- process(robots, state.simulationRNG, Nil)
             _ <- queue.offer(Event.RobotActionProposals(proposals))
           yield ()
 

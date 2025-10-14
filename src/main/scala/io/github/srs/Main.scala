@@ -2,6 +2,9 @@ package io.github.srs
 
 import io.github.srs.view.{ ConfigurationCLI, ConfigurationGUI, ConfigurationView }
 import cats.effect.unsafe.implicits.global
+import com.typesafe.scalalogging.Logger
+
+private val logger = Logger("SRS_main")
 
 @main def main(args: String*): Unit =
   ArgParser.parse(args) match
@@ -21,4 +24,4 @@ import cats.effect.unsafe.implicits.global
       runner.unsafeRunSync()
 
     case None =>
-      println("Failed to parse arguments.")
+      logger.error("Failed to parse arguments.")

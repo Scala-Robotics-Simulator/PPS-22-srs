@@ -16,6 +16,7 @@ import io.github.srs.config.yaml.YamlManager
 import io.github.srs.utils.loader.ResourceFileLister
 import io.github.srs.config.ConfigError
 import io.github.srs.model.environment.Environment
+import com.typesafe.scalalogging.Logger
 
 /**
  * ConfigurationControlsPanel handles the configuration loading, saving, and management controls. It provides buttons
@@ -30,6 +31,8 @@ class ConfigurationControlsPanel(
     onConfigLoaded: SimulationConfig[Environment] => Unit,
     onConfigSave: () => Option[SimulationConfig[Environment]],
 ) extends JPanel(new FlowLayout(FlowLayout.CENTER)):
+
+  private val logger = Logger(getClass.getName)
 
   private val configsPath = "configurations/default"
   private val loadButton = new JButton("Load")
@@ -164,7 +167,7 @@ class ConfigurationControlsPanel(
   private def loadDefaultConfigs(): Unit =
     ResourceFileLister.listConfigurationFilesWithExtension(configsPath, "yml") match
       case Failure(exception) =>
-        println(s"Unable to load configurations: ${exception.getMessage}")
+        logger.error(s"Unable to load configurations: ${exception.getMessage}")
       case Success(files) =>
         val configNames = files.map(_.getFileName.toString.replaceAll("\\.[^.]*$", ""))
         configNames.foreach(configsComboBox.addItem)

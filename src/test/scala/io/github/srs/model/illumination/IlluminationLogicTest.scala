@@ -3,7 +3,7 @@ package io.github.srs.model.illumination
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.OptionValues.*
-import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
+import io.github.srs.model.entity.*
 import io.github.srs.model.entity.staticentity.dsl.LightDsl.*
 import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
 import io.github.srs.model.environment.dsl.CreationDSL.*
@@ -28,8 +28,8 @@ final class IlluminationLogicTest extends AnyFlatSpec with Matchers:
     val IlluminationRadius = 2.0
     val Tol = 1e-9
 
-  private def mkEnv(entities: Seq[io.github.srs.model.entity.Entity]) =
-    (environment withWidth C.EnvW withHeight C.EnvH containing entities.toSet).validate.toOption.value
+  private def mkEnv(entities: List[Entity]) =
+    (environment withWidth C.EnvW withHeight C.EnvH containing entities).validate.toOption.value
 
   "IlluminationLogic" should "compute a light field with correct dimensions" in:
     val l = light
@@ -39,7 +39,7 @@ final class IlluminationLogicTest extends AnyFlatSpec with Matchers:
       .withIntensity(1.0)
       .withAttenuation(1.0)
 
-    val envV = mkEnv(Seq(l))
+    val envV = mkEnv(List(l))
     val field = IlluminationLogic.computeLightField(C.S)(usedFov)(includeDynamic = false)(envV)
     val dims = field.dims
 
@@ -53,7 +53,7 @@ final class IlluminationLogicTest extends AnyFlatSpec with Matchers:
       .withIntensity(1.0)
       .withAttenuation(1.0)
 
-    val envV = mkEnv(Seq(l))
+    val envV = mkEnv(List(l))
     val field = IlluminationLogic.computeLightField(C.S)(usedFov)(includeDynamic = false)(envV)
     val dims = field.dims
 
@@ -69,7 +69,7 @@ final class IlluminationLogicTest extends AnyFlatSpec with Matchers:
       .withIntensity(1.0)
       .withAttenuation(1.0)
 
-    val envV = mkEnv(Seq(l))
+    val envV = mkEnv(List(l))
     val field = IlluminationLogic.computeLightField(C.S)(usedFov)(includeDynamic = false)(envV)
     val dims = field.dims
     val (sx, sy) = Cell.toCellFloor(C.LightPos)(using C.S)
@@ -85,7 +85,7 @@ final class IlluminationLogicTest extends AnyFlatSpec with Matchers:
       .withIntensity(1.0)
       .withAttenuation(1.0)
 
-    val envV = mkEnv(Seq(l))
+    val envV = mkEnv(List(l))
     val field = IlluminationLogic.computeLightField(C.S)(usedFov)(includeDynamic = false)(envV)
     val dims = field.dims
     val (sx, sy) = Cell.toCellFloor(C.LightPos)(using C.S)
@@ -96,7 +96,7 @@ final class IlluminationLogicTest extends AnyFlatSpec with Matchers:
   it should "sum contributions from multiple lights correctly without exceeding 1.0" in:
     val l1 = light.at(C.LightPos).withRadius(0.1).withIlluminationRadius(2.0).withIntensity(1.0).withAttenuation(1.0)
     val l2 = light.at(C.LightPosTwo).withRadius(0.1).withIlluminationRadius(2.0).withIntensity(1.0).withAttenuation(1.0)
-    val envV = mkEnv(Seq(l1, l2))
+    val envV = mkEnv(List(l1, l2))
 
     val f = IlluminationLogic.computeLightField(C.S)(usedFov)(includeDynamic = false)(envV)
 
@@ -107,14 +107,14 @@ final class IlluminationLogicTest extends AnyFlatSpec with Matchers:
   it should "saturate the whole field to [0,1] when multiple lights overlap" in:
     val l1 = light.at(C.LightPos).withRadius(0.1).withIlluminationRadius(2.0).withIntensity(1.0).withAttenuation(1.0)
     val l2 = light.at(C.LightPosTwo).withRadius(0.1).withIlluminationRadius(2.0).withIntensity(1.0).withAttenuation(1.0)
-    val envV = mkEnv(Seq(l1, l2))
+    val envV = mkEnv(List(l1, l2))
 
     val f = IlluminationLogic.computeLightField(C.S)(usedFov)(includeDynamic = false)(envV)
     all(f.data) should (be >= 0.0 and be <= 1.0)
 
   it should "scale intensity correctly" in:
     val l = light.at(C.LightPos).withRadius(0.1).withIlluminationRadius(2.0).withIntensity(0.4).withAttenuation(1.0)
-    val envV = mkEnv(Seq(l))
+    val envV = mkEnv(List(l))
     val f = IlluminationLogic.computeLightField(C.S)(usedFov)(includeDynamic = false)(envV)
 
     val (sx, sy) = Cell.toCellFloor(C.LightPos)(using C.S)
@@ -124,7 +124,7 @@ final class IlluminationLogicTest extends AnyFlatSpec with Matchers:
   it should "toggle dynamic occlusion with includeDynamic flag" in:
     val r = robot.at(C.RobotPos).withShape(ShapeType.Circle(0.2)).withOrientation(Orientation(0.0))
     val l = light.at(C.LightPos).withRadius(0.2).withIlluminationRadius(3.0).withIntensity(1.0).withAttenuation(1.0)
-    val envV = mkEnv(Seq(r, l))
+    val envV = mkEnv(List(r, l))
 
     val withDyn = IlluminationLogic.computeLightField(C.S)(usedFov)(includeDynamic = true)(envV)
     val noDyn = IlluminationLogic.computeLightField(C.S)(usedFov)(includeDynamic = false)(envV)

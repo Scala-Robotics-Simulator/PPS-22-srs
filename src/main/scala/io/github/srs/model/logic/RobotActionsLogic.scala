@@ -1,9 +1,10 @@
 package io.github.srs.model.logic
 
+import java.util.UUID
+
 import scala.concurrent.duration.{ DurationInt, FiniteDuration }
 
 import cats.effect.IO
-import cats.syntax.parallel.catsSyntaxParallelTraverse1
 import io.github.srs.controller.message.RobotProposal
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.action.Action
@@ -15,6 +16,8 @@ import io.github.srs.model.{ ModelModule, SimulationState }
 import io.github.srs.utils.EqualityGivenInstances.given
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.DefaultMaxRetries
 import io.github.srs.utils.SimulationDefaults.{ BinarySearchDurationThreshold, DebugMode }
+import cats.implicits.*
+import com.typesafe.scalalogging.Logger
 
 /**
  * Logic for handling robot actions proposals.
@@ -41,6 +44,8 @@ trait RobotActionsLogic[S <: ModelModule.State]:
  * Companion object for [[RobotActionsLogic]] containing given instances.
  */
 object RobotActionsLogic:
+
+  private val logger = Logger(getClass.getName)
 
   given RobotActionsLogic[SimulationState] with
 
@@ -101,7 +106,7 @@ object RobotActionsLogic:
       end safeMove
 
       /**
-       * Computes the moves for all robot proposals in parallel.
+       * Computes the moves for all robot proposals.
        * @param env
        *   the valid environment.
        * @param proposals
@@ -109,10 +114,12 @@ object RobotActionsLogic:
        * @return
        *   an [[cats.effect.IO]] effect that produces a list of tuples containing the original and updated robots.
        */
-      def computeMovesParallel(env: ValidEnvironment, proposals: List[RobotProposal]): IO[List[(Robot, Robot)]] =
-        proposals.parTraverse:
-          case RobotProposal(robot, action) =>
-            safeMove(env, robot, action, s.dt).map(updatedRobot => (robot, updatedRobot))
+      def computeMoves(env: ValidEnvironment, proposals: List[RobotProposal]): IO[List[(Robot, Robot)]] =
+        proposals
+          .sortBy(_.robot.id.toString)
+          .traverse:
+            case RobotProposal(robot, action) =>
+              safeMove(env, robot, action, s.dt).map(updatedRobot => (robot, updatedRobot))
 
       /**
        * Applies all computed moves to the environment.
@@ -124,14 +131,14 @@ object RobotActionsLogic:
        *   the updated environment with all moves applied.
        */
       def applyAllMoves(env: ValidEnvironment, moves: List[(Robot, Robot)]): Environment =
-        env.copy(entities = env.entities.map {
-          case r: Robot =>
-            moves.collectFirst { case (orig, updated) if r.id == orig.id => updated }.getOrElse(r)
+        val movesMap: Map[UUID, Robot] = moves.map { case (orig, updated) => orig.id -> updated }.toMap
+        val updatedEntities = env.entities.map:
+          case r: Robot => movesMap.getOrElse(r.id, r)
           case e => e
-        })
+        env.copy(entities = updatedEntities)
 
       for
-        moves <- computeMovesParallel(s.environment, proposals)
+        moves <- computeMoves(s.environment, proposals)
 
         finalEnv <- IO:
           val candidate = applyAllMoves(s.environment, moves)
@@ -139,7 +146,7 @@ object RobotActionsLogic:
             case Right(validEnv) =>
               if DebugMode then
                 moves.foreach { case (_, newR) =>
-                  println(s"[${newR.position._1}, ${newR.position._2}],")
+                  logger.debug(s"[${newR.position._1}, ${newR.position._2}],")
                 }
               validEnv
             case Left(_) =>

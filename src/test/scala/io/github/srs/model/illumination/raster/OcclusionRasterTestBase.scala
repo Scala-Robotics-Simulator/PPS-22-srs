@@ -8,11 +8,14 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.OptionValues.*
 import io.github.srs.model.environment.dsl.CreationDSL.*
 import io.github.srs.model.illumination.raster.OpacityValue.{ Cleared, Occluded }
+import com.typesafe.scalalogging.Logger
 
 /**
  * Base trait for OcclusionRaster tests providing common test infrastructure
  */
 trait OcclusionRasterTestBase extends AnyFlatSpec with Matchers:
+
+  private val logger = Logger(getClass.getName)
 
   protected val TestScaleFactor: ScaleFactor = ScaleFactor.validate(10).toOption.value
   protected val TestEnvWidth = 5
@@ -26,7 +29,7 @@ trait OcclusionRasterTestBase extends AnyFlatSpec with Matchers:
   /**
    * Creates a validated test environment with the given entities
    */
-  protected def createTestEnvironment(entities: Set[Entity] = Set.empty): ValidEnvironment =
+  protected def createTestEnvironment(entities: List[Entity] = List.empty): ValidEnvironment =
     (environment withWidth TestEnvWidth withHeight TestEnvHeight containing entities).validate.toOption.value
 
   /**
@@ -50,7 +53,7 @@ trait OcclusionRasterTestBase extends AnyFlatSpec with Matchers:
   def dump(grid: Grid[Double], dims: GridDims): Unit =
     for y <- 0 until dims.heightCells do
       val row = (0 until dims.widthCells).map(x => grid(x)(y).toInt).mkString(",")
-      println(row)
+      logger.debug(row)
 
   /**
    * Converts world coordinates to grid cell coordinates

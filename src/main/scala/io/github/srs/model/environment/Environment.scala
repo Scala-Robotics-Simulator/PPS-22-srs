@@ -37,12 +37,12 @@ trait EnvironmentParameters:
   def height: Int
 
   /**
-   * A set of entities that exist within the environment.
+   * A list of entities that exist within the environment.
    *
    * @return
-   *   a Set of [[io.github.srs.model.entity.Entity]] representing the entities in the environment.
+   *   a List of [[io.github.srs.model.entity.Entity]] representing the entities in the environment.
    */
-  def entities: Set[Entity]
+  def entities: List[Entity]
 
   /**
    * The light field of the environment, representing the illumination conditions.
@@ -55,12 +55,12 @@ trait EnvironmentParameters:
 end EnvironmentParameters
 
 /**
- * Represents an environment with a specific width, height, and a set of entities.
+ * Represents an environment with a specific width, height, and a list of entities.
  */
 final case class Environment(
     override val width: Int = DefaultWidth,
     override val height: Int = DefaultHeight,
-    override val entities: Set[Entity] = DefaultEntities,
+    override val entities: List[Entity] = DefaultEntities,
     private[environment] val _lightMap: Option[LightMap[IO]] = None,
 ) extends EnvironmentParameters:
 
@@ -103,13 +103,13 @@ extension (env: Environment)
   /**
    * A list of static entities in the environment.
    * @return
-   *   A set of robots
+   *   A list of robots
    */
-  def robots: List[Robot] = env.entities.collect { case r: Robot => r }.toList
+  def robots: List[Robot] = env.entities.collect { case r: Robot => r }
 
   /**
    * A list of light entities in the environment.
    * @return
-   *   A set of lights
+   *   A list of lights
    */
-  def lights: List[Light] = env.entities.collect { case l: Light => l }.toList
+  def lights: List[Light] = env.entities.collect { case l: Light => l }

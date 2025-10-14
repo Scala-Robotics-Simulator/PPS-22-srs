@@ -72,7 +72,7 @@ lazy val root = project
     ),
     jacocoExcludes := Seq(
       "io.github.srs.view.*",
-      "io.github.srs.utils.SimulationDefaults.*"
+      "io.github.srs.utils.SimulationDefaults.*",
     ),
     jacocoReportSettings := JacocoReportSettings(
       title = "PR report",
@@ -90,6 +90,7 @@ lazy val root = project
      * Dependencies
      */
     libraryDependencies ++= scalaTestBundle,
+    libraryDependencies ++= loggingBundle,
     libraryDependencies ++= catsBundle,
     libraryDependencies ++= yamlBundle,
     libraryDependencies += parallelCollections,
@@ -103,3 +104,12 @@ Compile / packageBin / packageOptions +=
   Package.ManifestAttributes(
     "Implementation-Title" -> name.value,
   )
+
+assembly / assemblyMergeStrategy := {
+  case PathList("module-info.class") => MergeStrategy.discard
+  case PathList("META-INF", "versions", "9", "module-info.class") => MergeStrategy.discard
+  case x if x.endsWith("/module-info.class") => MergeStrategy.discard
+  case x =>
+    val oldStrategy = (assembly / assemblyMergeStrategy).value
+    oldStrategy(x)
+}

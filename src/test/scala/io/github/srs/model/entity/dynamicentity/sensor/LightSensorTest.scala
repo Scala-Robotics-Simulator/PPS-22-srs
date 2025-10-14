@@ -59,7 +59,7 @@ class LightSensorTest extends AnyFlatSpec with Matchers:
       attenuation = attenuation,
     )
 
-  private def createEnvironment(entities: Set[Entity], width: Int = 20, height: Int = 20): Environment =
+  private def createEnvironment(entities: List[Entity], width: Int = 20, height: Int = 20): Environment =
     (environment
       withWidth width
       withHeight height
@@ -68,49 +68,49 @@ class LightSensorTest extends AnyFlatSpec with Matchers:
 
   private def getSensorReading(
       sensor: LightSensor[DynamicEntity, Environment],
-      entities: Set[Entity],
+      entities: List[Entity],
   ): Double =
-    val environment = createEnvironment(entities + robot)
+    val environment = createEnvironment(robot :: entities)
     sensor.sense[IO](robot, environment).unsafeRunSync()
 
   "LightSensor" should "sense correctly an environment without light" in:
-    val reading = getSensorReading(sensor, Set.empty)
+    val reading = getSensorReading(sensor, List.empty)
     reading should be(0.0)
 
   it should "sense correctly a nearby light" in:
     import Point2D.*
     val light = createLight(robot.position + (0.6, 0))
-    val reading = getSensorReading(sensor, Set(light))
+    val reading = getSensorReading(sensor, List(light))
     reading should be > 0.95
 
   it should "read a lower value for a distant light" in:
     import Point2D.*
     val light = createLight(robot.position + (3.0, 0))
-    val reading = getSensorReading(sensor, Set(light))
+    val reading = getSensorReading(sensor, List(light))
     reading should be < 0.6
 
   it should "read a lower value for a light with lower intensity" in:
     import Point2D.*
     val light = createLight(robot.position + (0.6, 0), intensity = 0.5)
-    val reading = getSensorReading(sensor, Set(light))
+    val reading = getSensorReading(sensor, List(light))
     reading should be < 0.9
 
   it should "read a lower value from the diagonal sensor pointing to a light" in:
     import Point2D.*
     val light = createLight(robot.position + (0.6, 0))
-    val reading = getSensorReading(pointingNorthEastSensor, Set(light))
+    val reading = getSensorReading(pointingNorthEastSensor, List(light))
     reading should be < 0.95
 
   it should "not see the light from the diagonal sensor pointing away from a light" in:
     import Point2D.*
     val light = createLight(robot.position + (0.6, 0))
-    val reading = getSensorReading(pointingSouthWestSensor, Set(light))
+    val reading = getSensorReading(pointingSouthWestSensor, List(light))
     reading should be(0.0)
 
   it should "not see the light from the sensor pointing away from a light" in:
     import Point2D.*
     val light = createLight(robot.position + (0.6, 0))
-    val reading = getSensorReading(pointingBackwardSensor, Set(light))
+    val reading = getSensorReading(pointingBackwardSensor, List(light))
     reading should be(0.0)
 
 end LightSensorTest

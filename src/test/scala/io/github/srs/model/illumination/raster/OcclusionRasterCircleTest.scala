@@ -16,7 +16,7 @@ final class OcclusionRasterCircleTest extends OcclusionRasterTestBase:
       orientation = Orientation(0),
     )
 
-    val env = createTestEnvironment(Set(robot))
+    val env = createTestEnvironment(List(robot))
     val grid = OcclusionRaster.rasterizeDynamics(env, testDims)
 
     // Center should be occluded
@@ -40,7 +40,7 @@ final class OcclusionRasterCircleTest extends OcclusionRasterTestBase:
       orientation = Orientation(0),
     )
 
-    val env = createTestEnvironment(Set(tinyRobot))
+    val env = createTestEnvironment(List(tinyRobot))
     val grid = OcclusionRaster.rasterizeDynamics(env, testDims)
 
     // Should not occlude any cells (too small)
@@ -57,7 +57,7 @@ final class OcclusionRasterCircleTest extends OcclusionRasterTestBase:
       orientation = Orientation(0),
     )
 
-    val env = createTestEnvironment(Set(largeRobot))
+    val env = createTestEnvironment(List(largeRobot))
     val grid = OcclusionRaster.rasterizeDynamics(env, testDims)
 
     // Should occlude a circular region
@@ -82,7 +82,7 @@ final class OcclusionRasterCircleTest extends OcclusionRasterTestBase:
       orientation = Orientation(0),
     )
 
-    val env = createTestEnvironment(Set(robot))
+    val env = createTestEnvironment(List(robot))
     val grid = OcclusionRaster.rasterizeDynamics(env, testDims)
 
     val (cellX, cellY) = worldToCell(2.0, 2.0)
@@ -106,7 +106,7 @@ final class OcclusionRasterCircleTest extends OcclusionRasterTestBase:
       orientation = Orientation(0),
     )
 
-    val env = createTestEnvironment(Set(robot1, robot2))
+    val env = createTestEnvironment(List(robot1, robot2))
     val grid = OcclusionRaster.rasterizeDynamics(env, testDims)
 
     // Both robot positions should be occluded
@@ -127,7 +127,7 @@ final class OcclusionRasterCircleTest extends OcclusionRasterTestBase:
       orientation = Orientation(0),
     )
 
-    val env = createTestEnvironment(Set(edgeRobot))
+    val env = createTestEnvironment(List(edgeRobot))
     val grid = OcclusionRaster.rasterizeDynamics(env, testDims)
 
     // Should occlude cells near the edge
@@ -150,7 +150,7 @@ final class OcclusionRasterCircleTest extends OcclusionRasterTestBase:
       orientation = Orientation(0),
     )
 
-    val env = createTestEnvironment(Set(smallRobot, largeRobot))
+    val env = createTestEnvironment(List(smallRobot, largeRobot))
     val grid = OcclusionRaster.rasterizeDynamics(env, testDims)
 
     // Small robot should not occlude

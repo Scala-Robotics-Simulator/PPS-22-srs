@@ -14,6 +14,8 @@ object Dependencies {
   private val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion
   private val scalactic = "org.scalactic" %% "scalactic" % scalaTestVersion % "test"
   val scalaTestJUnit5 = "org.scalatestplus" %% "junit-5-10" % "3.2.19.1" % "test"
+  val logback = "ch.qos.logback" % "logback-classic" % "1.5.19"
+  val scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % "3.9.6"
   val squidLib = "com.squidpony" % "squidlib-util" % squidLibVersion
   val catsCore = "org.typelevel" %% "cats-core" % "2.13.0"
   val catsEffect = "org.typelevel" %% "cats-effect" % "3.7-4972921"
@@ -27,6 +29,7 @@ object Dependencies {
    * Bundles
    */
   val scalaTestBundle: Seq[ModuleID] = Seq(scalaTest, scalactic)
+  val loggingBundle: Seq[ModuleID] = Seq(logback, scalaLogging)
   val catsBundle: Seq[ModuleID] = Seq(catsCore, catsEffect)
   val yamlBundle: Seq[ModuleID] = Seq(scalaYaml, circeYaml, circeGeneric)
 }

@@ -22,6 +22,7 @@ import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.{ StdLightSens
 import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior
 import io.github.srs.model.entity.dynamicentity.behavior.Policy
 import io.github.srs.model.environment.Environment
+import io.github.srs.utils.EqualityGivenInstances.given_CanEqual_T_T
 
 class YamlConfigManagerTest extends AnyFlatSpec with Matchers:
   given CanEqual[Sensor[?, ?], Sensor[?, ?]] = CanEqual.derived
@@ -112,6 +113,9 @@ class YamlConfigManagerTest extends AnyFlatSpec with Matchers:
     val _ = for i <- yamlContentSplit.indices do yamlContentSplit(i) shouldBe expectedYamlSplit(i)
     val loadedConfig = manager.load.unsafeRunSync().toOption.value
 
-    loadedConfig shouldBe config
+    val _ = loadedConfig.simulation shouldBe config.simulation
+    val _ = loadedConfig.environment.width shouldBe config.environment.width
+    val _ = loadedConfig.environment.height shouldBe config.environment.height
+    loadedConfig.environment.entities should contain theSameElementsAs config.environment.entities
 
 end YamlConfigManagerTest
