@@ -66,7 +66,7 @@ class PingPongClient:
             ping = ping_pb2.PingPong()
             setattr(ping, "from", self.client_name)
 
-            logger.info(f"→ Sending ping {i+1}/{count}")
+            logger.info(f"→ Sending ping {i + 1}/{count}")
             await request_queue.put(ping)
             await asyncio.sleep(interval)
 
