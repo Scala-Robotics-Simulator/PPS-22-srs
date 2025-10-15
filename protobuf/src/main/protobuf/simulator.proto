@@ -1,0 +1,83 @@
+syntax = "proto3";
+
+package io.github.srs.protos;
+
+message SimulatorRequest {
+  oneof request {
+    InitRequest init = 1;
+    ResetRequest reset = 2;
+    StepRequest step = 3;
+    CloseRequest close = 4;
+  }
+}
+
+message InitRequest {
+  string config = 1; // YAML string
+}
+
+message ResetRequest {
+  optional int32 seed = 1;
+  map<string, string> options = 2;
+}
+
+message ContinuousAction {
+  double left_wheel = 1;  // Range: [-1.0, 1.0]
+  double right_wheel = 2; // Range: [-1.0, 1.0]
+}
+
+message StepRequest { map<string, ContinuousAction> actions = 1; }
+
+message CloseRequest {}
+
+message SimulatorResponse {
+  oneof response {
+    InitResponse init = 1;
+    ResetResponse reset = 2;
+    StepResponse step = 3;
+    CloseResponse close = 4;
+    ErrorResponse error = 5;
+  }
+}
+
+message InitResponse {
+  bool ok = 1;
+  optional string message = 2;
+}
+
+message Observation {
+  repeated double values = 1; // Fixed size: 16 values
+}
+
+message ResetResponse {
+  map<string, Observation> observations = 1;
+  map<string, string> info = 2;
+}
+
+message StepResponse {
+  map<string, Observation> observations = 1;
+  map<string, double> rewards = 2;
+  map<string, bool> terminateds = 3;
+  map<string, bool> truncateds = 4;
+  map<string, string> info = 5;
+}
+
+message CloseResponse {
+  bool ok = 1;
+  optional string message = 2;
+}
+
+message ErrorResponse {
+  string message = 1;
+  ErrorCode code = 2;
+}
+
+enum ErrorCode {
+  UNKNOWN = 0;
+  INVALID_CONFIG = 1;
+  AGENT_NOT_FOUND = 2;
+  INVALID_ACTION = 3;
+}
+
+service Simulator {
+  rpc Interact(stream SimulatorRequest) returns (stream SimulatorResponse) {}
+}
