@@ -44,11 +44,11 @@ object BaseSimulationState:
    * @return
    *   the initial state of the simulation
    */
-  def from(cfg: SimulationConfig[ValidEnvironment]): ModelModule.BaseState =
+  def from(cfg: SimulationConfig[ValidEnvironment]): BaseSimulationState =
     val rng = SimpleRNG(cfg.simulation.seed.getOrElse(42))
     from(cfg, rng)
 
-  def from(cfg: SimulationConfig[ValidEnvironment], rng: RNG): ModelModule.BaseState =
+  def from(cfg: SimulationConfig[ValidEnvironment], rng: RNG): BaseSimulationState =
     BaseSimulationState(
       simulationTime = cfg.simulation.duration.map(FiniteDuration(_, MILLISECONDS)),
       simulationRNG = rng,
