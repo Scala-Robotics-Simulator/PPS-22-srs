@@ -3,11 +3,12 @@ package io.github.srs.config.yaml.parser
 import java.util.UUID
 
 import io.github.srs.config.{ ConfigError, ConfigResult }
-import io.github.srs.model.entity.dynamicentity.behavior.Policy
+import io.github.srs.model.entity.dynamicentity.robot.behavior.Policy
 
 /**
  * A trait for decoding configuration values from a map. It provides methods to decode various types of values, such as
  * Int, Long, Double, Boolean, String and List.
+ *
  * @tparam A
  *   the type of value to decode
  */

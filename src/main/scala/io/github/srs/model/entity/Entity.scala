@@ -5,8 +5,8 @@ import io.github.srs.model.validation.Validation
 import io.github.srs.model.validation.DomainError
 import io.github.srs.model.entity.staticentity.StaticEntity
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
-import io.github.srs.model.entity.dynamicentity.Robot
-import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.validate
+import io.github.srs.model.entity.dynamicentity.robot.dsl.RobotDsl.validate
+import io.github.srs.model.entity.dynamicentity.robot.Robot
 import io.github.srs.model.entity.staticentity.dsl.ObstacleDsl.validate
 import io.github.srs.model.entity.staticentity.dsl.LightDsl.validate
 import io.github.srs.model.entity.staticentity.dsl.BoundaryDsl.validate

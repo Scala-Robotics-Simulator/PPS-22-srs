@@ -3,7 +3,8 @@ package io.github.srs.config.yaml.serializer.encoders
 import io.circe.syntax.*
 import io.circe.{ Encoder, Json }
 import io.github.srs.model.entity.Entity
-import io.github.srs.model.entity.dynamicentity.{ DynamicEntity, Robot }
+import io.github.srs.model.entity.dynamicentity.DynamicEntity
+import io.github.srs.model.entity.dynamicentity.robot.Robot
 import io.github.srs.model.entity.staticentity.StaticEntity
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.DynamicEntity.Robot as RobotFields
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Obstacle as ObstacleFields

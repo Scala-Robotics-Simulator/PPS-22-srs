@@ -3,7 +3,7 @@ package io.github.srs.model.environment
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import io.github.srs.model.entity.Entity
-import io.github.srs.model.entity.dynamicentity.Robot
+import io.github.srs.model.entity.dynamicentity.robot.Robot
 import io.github.srs.model.entity.staticentity.StaticEntity.Light
 import io.github.srs.model.illumination.LightMap
 import io.github.srs.model.illumination.model.LightField

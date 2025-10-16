@@ -3,10 +3,11 @@ package io.github.srs.model.entity.dynamicentity.behavior.behaviors
 import cats.Id
 import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.action.MovementActionFactory.moveForward
-import io.github.srs.model.entity.dynamicentity.behavior.BehaviorContext
-import io.github.srs.model.entity.dynamicentity.sensor.{ Sensor, SensorReading, SensorReadings }
+import io.github.srs.model.entity.dynamicentity.robot.behavior.BehaviorContext
+import io.github.srs.model.entity.dynamicentity.robot.behavior.behaviors.AlwaysForwardBehavior
+import io.github.srs.model.entity.dynamicentity.sensor.{Sensor, SensorReading, SensorReadings}
 import io.github.srs.model.environment.Environment
-import io.github.srs.utils.random.{ RNG, SimpleRNG }
+import io.github.srs.utils.random.{RNG, SimpleRNG}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 

@@ -2,7 +2,7 @@ package io.github.srs.view.state
 
 import java.awt.image.BufferedImage
 
-import io.github.srs.model.entity.dynamicentity.Robot
+import io.github.srs.model.entity.dynamicentity.robot.Robot
 import io.github.srs.model.environment.{ robots, Environment }
 
 /**

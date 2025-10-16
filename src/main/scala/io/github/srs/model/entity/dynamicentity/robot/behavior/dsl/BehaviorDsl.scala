@@ -1,19 +1,19 @@
-package io.github.srs.model.entity.dynamicentity.behavior.dsl
+package io.github.srs.model.entity.dynamicentity.robot.behavior.dsl
 
 import scala.annotation.targetName
 
 import cats.data.Kleisli
 import io.github.srs.model.entity.dynamicentity.*
-import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.{ Behavior, Condition, PartialBehavior }
+import io.github.srs.model.entity.dynamicentity.robot.behavior.BehaviorTypes.{Behavior, Condition, PartialBehavior}
 
 /**
  * # Behavior DSL (pure)
  *
  * Minimal DSL to build decision logic:
  *
- *   - [[io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.PartialBehavior]] = `Kleisli[Option, I, A]` – a
+ *   - [[BehaviorTypes.PartialBehavior]] = `Kleisli[Option, I, A]` – a
  *     partial decision (“may produce”).
- *   - [[io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior]] = `Kleisli[Id, I, A]` – a total
+ *   - [[BehaviorTypes.Behavior]] = `Kleisli[Id, I, A]` – a total
  *     decision (“always produces”).
  *
  * Partial behaviors compose **left-biased** (the first `Some` wins) and are finalized into total behaviors via
@@ -46,8 +46,8 @@ object BehaviorDsl:
      * @param act
      *   action to produce when the condition holds (lazy)
      * @return
-     *   a [[io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.PartialBehavior]] that yields `Some(act)`
-     *   if `cond(i)` is true, else `None`
+     * a [[BehaviorTypes.PartialBehavior]] that yields `Some(act)`
+     * if `cond(i)` is true, else `None`
      */
     @targetName("implies")
     infix def ==>(act: => A): PartialBehavior[I, A] =
@@ -63,8 +63,8 @@ object BehaviorDsl:
      * @param r2
      *   fallback partial behavior to try when `r1` defers
      * @return
-     *   a [[io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.PartialBehavior]] that prefers `r1` over
-     *   `r2`
+     * a [[BehaviorTypes.PartialBehavior]] that prefers `r1` over
+     * `r2`
      */
     @targetName("orElsePartial")
     infix def |(r2: PartialBehavior[I, A]): PartialBehavior[I, A] =
@@ -78,8 +78,8 @@ object BehaviorDsl:
      * @param fallback
      *   default action to use when no rule fires (lazy)
      * @return
-     *   a total [[io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior]] that always produces an
-     *   action
+     * a total [[BehaviorTypes.Behavior]] that always produces an
+     * action
      */
     def orElse(fallback: => A): Behavior[I, A] =
       Kleisli(i => r1.run(i).getOrElse(fallback))
@@ -90,8 +90,8 @@ object BehaviorDsl:
      * @param fallback
      *   default action to use when no rule fires (lazy)
      * @return
-     *   a total [[io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior]] that always produces an
-     *   action
+     * a total [[BehaviorTypes.Behavior]] that always produces an
+     * action
      */
     def default(fallback: => A): Behavior[I, A] = orElse(fallback)
 
@@ -103,8 +103,8 @@ object BehaviorDsl:
      * @param p
      *   additional predicate on the same input
      * @return
-     *   a [[io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.PartialBehavior]] that runs only if `p`
-     *   holds
+     * a [[BehaviorTypes.PartialBehavior]] that runs only if `p`
+     * holds
      */
     def onlyIf(p: Condition[I]): PartialBehavior[I, A] =
       Kleisli(i => if p(i) then r1.run(i) else None)

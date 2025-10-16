@@ -1,8 +1,8 @@
 package io.github.srs.model.entity.dynamicentity.actuator.dsl
 
-import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.actuator.dsl.DifferentialWheelMotorDsl.validateDifferentialWheelMotor
 import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, DifferentialWheelMotor }
+import io.github.srs.model.entity.dynamicentity.robot.Robot
 import io.github.srs.model.validation.Validation
 
 /**

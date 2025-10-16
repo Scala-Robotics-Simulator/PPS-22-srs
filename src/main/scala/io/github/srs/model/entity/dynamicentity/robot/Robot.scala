@@ -1,17 +1,18 @@
-package io.github.srs.model.entity.dynamicentity
+package io.github.srs.model.entity.dynamicentity.robot
 
 import java.util.UUID
 
 import cats.effect.IO
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.action.ActionAlgebra
-import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, DifferentialWheelMotor }
-import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.withActuators
+import io.github.srs.model.entity.dynamicentity.actuator.{Actuator, DifferentialWheelMotor}
+import io.github.srs.model.entity.dynamicentity.robot.dsl.RobotDsl.withActuators
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor
+import io.github.srs.model.entity.dynamicentity.DynamicEntity
+import io.github.srs.model.entity.dynamicentity.robot.behavior.Policy
 import io.github.srs.model.environment.Environment
 import io.github.srs.utils.EqualityGivenInstances.given
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.*
-import io.github.srs.model.entity.dynamicentity.behavior.Policy
 
 /**
  * Represents a robot entity in the simulation.

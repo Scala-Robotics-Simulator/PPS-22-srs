@@ -1,4 +1,4 @@
-package io.github.srs.model.entity.dynamicentity.behavior
+package io.github.srs.model.entity.dynamicentity.robot.behavior
 
 import cats.Id
 import cats.data.Kleisli

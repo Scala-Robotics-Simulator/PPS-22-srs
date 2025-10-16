@@ -12,8 +12,7 @@ import io.github.srs.utils.chaining.Pipe.given
 import io.github.srs.view.components.FieldSpec
 import io.github.srs.view.components.FormPanel
 import io.github.srs.model.entity.Entity
-import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
-import io.github.srs.model.entity.dynamicentity.Robot
+import io.github.srs.model.entity.dynamicentity.robot.dsl.RobotDsl.*
 import io.github.srs.model.entity.staticentity.StaticEntity
 import io.github.srs.model.entity.staticentity.dsl.ObstacleDsl.*
 import io.github.srs.model.entity.staticentity.dsl.LightDsl.*
@@ -25,7 +24,8 @@ import io.github.srs.utils.SimulationDefaults.Fields.Entity as EntityFields
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.DynamicEntity.Robot as RobotFields
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Obstacle as ObstacleFields
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Light as LightFields
-import io.github.srs.model.entity.dynamicentity.behavior.Policy
+import io.github.srs.model.entity.dynamicentity.robot.Robot
+import io.github.srs.model.entity.dynamicentity.robot.behavior.Policy
 
 /**
  * EntityRow is a JPanel that represents a single entity in the configuration view. It allows users to select the type

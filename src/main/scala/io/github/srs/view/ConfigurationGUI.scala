@@ -6,7 +6,7 @@ import javax.swing.*
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import io.github.srs.config.{ ConfigError, SimulationConfig }
-import io.github.srs.model.entity.dynamicentity.behavior.Policy
+import io.github.srs.model.entity.dynamicentity.robot.behavior.Policy
 import io.github.srs.model.environment.{ Environment, ValidEnvironment }
 import io.github.srs.model.environment.dsl.CreationDSL.*
 import io.github.srs.model.validation.DomainError

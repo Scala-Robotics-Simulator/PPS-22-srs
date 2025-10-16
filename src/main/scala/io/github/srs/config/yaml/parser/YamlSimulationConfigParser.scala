@@ -6,8 +6,7 @@ import io.github.srs.config.yaml.parser.collection.CustomMap.*
 import io.github.srs.config.{ ConfigError, ConfigResult, SimulationConfig }
 import io.github.srs.model.Simulation
 import io.github.srs.model.entity.*
-import io.github.srs.model.entity.dynamicentity.Robot
-import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
+import io.github.srs.model.entity.dynamicentity.robot.dsl.RobotDsl.*
 import io.github.srs.model.entity.staticentity.dsl.LightDsl.*
 import io.github.srs.model.entity.staticentity.dsl.ObstacleDsl.*
 import io.github.srs.model.environment.dsl.CreationDSL.*
@@ -19,7 +18,8 @@ import io.github.srs.utils.SimulationDefaults.Fields.Entity as EntityFields
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.DynamicEntity.Robot as RobotFields
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Obstacle as ObstacleFields
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Light as LightFields
-import io.github.srs.model.entity.dynamicentity.behavior.Policy
+import io.github.srs.model.entity.dynamicentity.robot.Robot
+import io.github.srs.model.entity.dynamicentity.robot.behavior.Policy
 import io.github.srs.model.environment.Environment
 
 /**

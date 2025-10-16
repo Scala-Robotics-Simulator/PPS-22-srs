@@ -1,7 +1,7 @@
 package io.github.srs.model.illumination.raster
 
+import io.github.srs.model.entity.dynamicentity.robot.Robot
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
-import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.illumination.raster.OpacityValue.{ Cleared, Occluded }
 
 /**

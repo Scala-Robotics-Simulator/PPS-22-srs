@@ -8,9 +8,9 @@ import io.github.srs.config.ConfigError.MissingField
 import io.github.srs.config.yaml.YamlManager
 import io.github.srs.model.Simulation
 import io.github.srs.model.entity.ShapeType.Circle
-import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor
-import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
+import io.github.srs.model.entity.dynamicentity.robot.dsl.RobotDsl.*
+import io.github.srs.model.entity.dynamicentity.robot.Robot
 import io.github.srs.model.entity.staticentity.dsl.LightDsl.*
 import io.github.srs.model.entity.staticentity.dsl.ObstacleDsl.*
 import io.github.srs.model.entity.{ Orientation, Point2D }

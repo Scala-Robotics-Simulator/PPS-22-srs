@@ -5,7 +5,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.OptionValues.*
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.staticentity.dsl.LightDsl.*
-import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
+import io.github.srs.model.entity.dynamicentity.robot.dsl.RobotDsl.*
 import io.github.srs.model.environment.dsl.CreationDSL.*
 import io.github.srs.model.illumination.engine.{ FovEngine, SquidLibFovEngine }
 import io.github.srs.model.illumination.model.{ Cell, GridDims, ScaleFactor }

@@ -9,7 +9,7 @@ import org.scalatest.matchers.should.Matchers
  */
 final class BehaviorTypesTest extends AnyFlatSpec with Matchers:
 
-  import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.*
+  import io.github.srs.model.entity.dynamicentity.robot.behavior.BehaviorTypes.*
 
   "Behavior alias" should "handle numeric input" in:
     val b: Behavior[Int, String] = Kleisli((i: Int) => (i * 2).toString)

@@ -4,8 +4,9 @@ import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.actuator.Actuator
-import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
-import io.github.srs.model.entity.dynamicentity.{ DynamicEntity, Robot }
+import io.github.srs.model.entity.dynamicentity.robot.dsl.RobotDsl.*
+import io.github.srs.model.entity.dynamicentity.DynamicEntity
+import io.github.srs.model.entity.dynamicentity.robot.Robot
 import io.github.srs.model.entity.staticentity.StaticEntity.Light
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.environment.dsl.CreationDSL.*

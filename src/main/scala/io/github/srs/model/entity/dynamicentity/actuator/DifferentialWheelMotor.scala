@@ -8,11 +8,11 @@ import cats.syntax.functor.toFunctorOps
 import cats.syntax.foldable.toFoldableOps
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.Point2D.*
-import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.action.{ Action, ActionAlgebra }
-import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
+import io.github.srs.model.entity.dynamicentity.robot.dsl.RobotDsl.*
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Actuator.DifferentialWheelMotor.DefaultWheel
 import io.github.srs.model.entity.dynamicentity.action.SequenceAction
+import io.github.srs.model.entity.dynamicentity.robot.Robot
 
 /**
  * WheelMotor is an actuator that controls the movement of a robot.

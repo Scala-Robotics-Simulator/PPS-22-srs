@@ -9,11 +9,11 @@ import io.github.srs.model.entity.Entity
 import io.github.srs.config.ConfigResult
 import io.github.srs.config.yaml.parser.collection.CustomSeq.sequence
 import io.github.srs.model.entity.staticentity.StaticEntity
-import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.StdProximitySensors
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.StdLightSensors
 import io.github.srs.model.entity.ShapeType
+import io.github.srs.model.entity.dynamicentity.robot.Robot
 import io.github.srs.utils.SimulationDefaults.Fields.Entity as EntityFields
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.DynamicEntity.Robot as RobotFields
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Light as LightFields

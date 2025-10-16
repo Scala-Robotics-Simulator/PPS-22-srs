@@ -3,7 +3,6 @@ package io.github.srs.model.entity.dynamicentity.actuator
 import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
 
 import cats.Id
-import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor.move
 import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotorTestUtils.calculateMovement
 import io.github.srs.model.entity.dynamicentity.actuator.Wheel
@@ -11,7 +10,8 @@ import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
+import io.github.srs.model.entity.dynamicentity.robot.dsl.RobotDsl.*
+import io.github.srs.model.entity.dynamicentity.robot.Robot
 
 class DifferentialWheelMotorTest extends AnyFlatSpec with Matchers:
 

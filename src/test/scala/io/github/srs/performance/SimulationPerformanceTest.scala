@@ -8,8 +8,7 @@ import io.github.srs.model.Simulation.*
 import io.github.srs.model.SimulationConfig.SimulationSpeed.SUPERFAST
 import io.github.srs.model.dsl.Cell.*
 import io.github.srs.model.dsl.GridDSL.{*, given}
-import io.github.srs.model.entity.dynamicentity.behavior.Policy
-import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
+import io.github.srs.model.entity.dynamicentity.robot.dsl.RobotDsl.*
 import io.github.srs.model.entity.{Entity, Point2D}
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.environment.ValidEnvironment.ValidEnvironment
@@ -18,6 +17,7 @@ import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import com.typesafe.scalalogging.Logger
+import io.github.srs.model.entity.dynamicentity.robot.behavior.Policy
 
 class SimulationPerformanceTest extends AnyFlatSpec with Matchers:
 

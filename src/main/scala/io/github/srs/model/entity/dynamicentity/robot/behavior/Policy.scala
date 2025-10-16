@@ -1,8 +1,8 @@
-package io.github.srs.model.entity.dynamicentity.behavior
+package io.github.srs.model.entity.dynamicentity.robot.behavior
 
 import cats.Monad
 import io.github.srs.model.entity.dynamicentity.action.Action
-import io.github.srs.model.entity.dynamicentity.behavior.behaviors.*
+import io.github.srs.model.entity.dynamicentity.robot.behavior.behaviors.*
 import io.github.srs.utils.random.RNG
 
 /**

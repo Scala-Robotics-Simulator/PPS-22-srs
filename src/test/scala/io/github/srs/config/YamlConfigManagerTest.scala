@@ -7,8 +7,7 @@ import cats.effect.unsafe.implicits.global
 import fs2.io.file.{ Files, Path }
 import io.github.srs.model.Simulation
 import io.github.srs.model.entity.ShapeType.Circle
-import io.github.srs.model.entity.dynamicentity.Robot
-import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
+import io.github.srs.model.entity.dynamicentity.robot.dsl.RobotDsl.*
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor
 import io.github.srs.model.entity.staticentity.dsl.LightDsl.*
 import io.github.srs.model.entity.staticentity.dsl.ObstacleDsl.*
@@ -19,8 +18,9 @@ import org.scalatest.OptionValues.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.{ StdLightSensors, StdProximitySensors }
-import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior
-import io.github.srs.model.entity.dynamicentity.behavior.Policy
+import io.github.srs.model.entity.dynamicentity.robot.behavior.BehaviorTypes.Behavior
+import io.github.srs.model.entity.dynamicentity.robot.Robot
+import io.github.srs.model.entity.dynamicentity.robot.behavior.Policy
 import io.github.srs.model.environment.Environment
 import io.github.srs.utils.EqualityGivenInstances.given_CanEqual_T_T
 
