@@ -29,8 +29,7 @@ object ObstacleAvoidanceBehavior:
    * @tparam F
    *   The effect type.
    * @return
-   * A [[BehaviorCommon.Decision]] that computes the
-   * action based on proximity sensor readings.
+   *   A [[BehaviorCommon.Decision]] that computes the action based on proximity sensor readings.
    */
   def decision[F[_]: Monad]: Decision[F] =
     Kleisli.ask[Id, BehaviorContext].map { ctx =>

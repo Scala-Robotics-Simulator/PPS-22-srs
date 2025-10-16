@@ -8,8 +8,8 @@ import io.github.srs.model.entity.dynamicentity.robot.behavior.BehaviorContext
 import io.github.srs.model.entity.dynamicentity.robot.behavior.behaviors.*
 import io.github.srs.model.entity.dynamicentity.sensor.*
 import io.github.srs.model.environment.Environment
-import io.github.srs.utils.SimulationDefaults.Behaviors.Prioritized.{DangerDist, LightThreshold}
-import io.github.srs.utils.random.{RNG, SimpleRNG}
+import io.github.srs.utils.SimulationDefaults.Behaviors.Prioritized.{ DangerDist, LightThreshold }
+import io.github.srs.utils.random.{ RNG, SimpleRNG }
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 

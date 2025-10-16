@@ -23,8 +23,7 @@ object RandomWalkBehavior:
    * @tparam F
    *   The effect type.
    * @return
-   * A [[BehaviorCommon.Decision]] that computes the
-   * action based on random values.
+   *   A [[BehaviorCommon.Decision]] that computes the action based on random values.
    */
   def decision[F[_]: Monad]: Decision[F] =
     Kleisli.ask[Id, BehaviorContext].map { ctx =>

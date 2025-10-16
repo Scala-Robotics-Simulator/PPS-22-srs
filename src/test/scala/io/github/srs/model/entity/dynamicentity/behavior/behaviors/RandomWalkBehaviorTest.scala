@@ -1,13 +1,13 @@
 package io.github.srs.model.entity.dynamicentity.behavior.behaviors
 
 import cats.Id
-import io.github.srs.model.entity.dynamicentity.action.{Action, MovementAction}
+import io.github.srs.model.entity.dynamicentity.action.{ Action, MovementAction }
 import io.github.srs.model.entity.dynamicentity.robot.behavior.BehaviorContext
 import io.github.srs.model.entity.dynamicentity.robot.behavior.behaviors.RandomWalkBehavior
-import io.github.srs.model.entity.dynamicentity.sensor.{Sensor, SensorReading, SensorReadings}
+import io.github.srs.model.entity.dynamicentity.sensor.{ Sensor, SensorReading, SensorReadings }
 import io.github.srs.model.environment.Environment
-import io.github.srs.utils.SimulationDefaults.DynamicEntity.{MaxSpeed, MinSpeed}
-import io.github.srs.utils.random.{RNG, SimpleRNG}
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.{ MaxSpeed, MinSpeed }
+import io.github.srs.utils.random.{ RNG, SimpleRNG }
 import org.scalatest.Inside.inside
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers

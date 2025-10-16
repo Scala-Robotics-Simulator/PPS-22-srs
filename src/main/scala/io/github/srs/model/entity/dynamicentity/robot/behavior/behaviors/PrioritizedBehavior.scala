@@ -26,8 +26,7 @@ object PrioritizedBehavior:
    * @tparam F
    *   The effect type.
    * @return
-   * A [[BehaviorCommon.Decision]] that computes the
-   * action based on prioritized conditions.
+   *   A [[BehaviorCommon.Decision]] that computes the action based on prioritized conditions.
    */
   def decision[F[_]: Monad]: Decision[F] =
 
