@@ -26,7 +26,7 @@ import io.github.srs.utils.SimulationDefaults.{ BinarySearchDurationThreshold, D
  * @tparam S
  *   the type of the simulation state.
  */
-trait RobotActionsLogic[S <: ModelModule.State]:
+trait RobotActionsLogic[S <: ModelModule.BaseState]:
 
   /**
    * Handles motion for *autonomous* dynamic entities (i.e. robots with internal policy).

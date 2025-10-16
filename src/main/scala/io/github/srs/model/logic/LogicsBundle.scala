@@ -1,6 +1,6 @@
 package io.github.srs.model.logic
 
-import io.github.srs.model.ModelModule.State
+import io.github.srs.model.ModelModule.BaseState
 import io.github.srs.model.SimulationState
 import io.github.srs.model.logic.StatusLogic.given
 import io.github.srs.model.logic.TimeLogic.given
@@ -12,7 +12,7 @@ import io.github.srs.model.logic.RobotActionsLogic.given
  * @tparam S
  *   the type of the state.
  */
-trait LogicsBundle[S <: State]:
+trait LogicsBundle[S <: BaseState]:
   def tickLogic: TickLogic[S]
   def randomLogic: RandomLogic[S]
   def pauseLogic: PauseLogic[S]

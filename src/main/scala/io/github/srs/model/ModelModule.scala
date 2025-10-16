@@ -13,10 +13,9 @@ import io.github.srs.utils.random.RNG
 object ModelModule:
 
   /**
-   * State trait that defines the base state for the simulation.
+   * Base state trait used for the simulation when running in Reinforcement Learning mode.
    */
-  trait State:
-
+  trait BaseState:
     /**
      * The total simulation time for the simulation.
      */
@@ -33,22 +32,31 @@ object ModelModule:
     def dt: FiniteDuration
 
     /**
-     * The current simulation speed.
-     */
-    def simulationSpeed: SimulationSpeed
-
-    /**
      * The random number generator used for the simulation.
      */
     def simulationRNG: RNG
 
     /**
+     * The environment in which the simulation is running.
+     */
+    def environment: ValidEnvironment
+
+  end BaseState
+
+  /**
+   * State trait that defines the base state for the simulation.
+   */
+  trait State extends BaseState:
+
+    /**
+     * The current simulation speed.
+     */
+    def simulationSpeed: SimulationSpeed
+
+    /**
      * The current simulation status.
      */
     def simulationStatus: SimulationStatus
-
-    def environment: ValidEnvironment
-  end State
 
   /**
    * Trait representing the core model logic for updating the simulation state.
