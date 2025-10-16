@@ -3,12 +3,12 @@ package io.github.srs.utils
 import java.awt.Color
 import java.util.UUID
 
-import scala.concurrent.duration.{ DurationInt, FiniteDuration }
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
 
 import cats.effect.unsafe.implicits.global
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.Robot
-import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, Wheel as ActWheel }
+import io.github.srs.model.entity.dynamicentity.actuator.{Actuator, Wheel as ActWheel}
 import io.github.srs.model.entity.dynamicentity.behavior.Policy
 import io.github.srs.model.entity.dynamicentity.sensor.*
 import io.github.srs.model.environment.Environment
@@ -256,6 +256,18 @@ object SimulationDefaults:
       object ProximitySensor:
         val DefaultOffset: Double = 0.0
         val DefaultRange: Double = 1.0
+
+    object Agent:
+      val DefaultId: UUID = UUID.fromString("00000000-0000-0000-0000-000000000003")
+      val DefaultPosition: Point2D = (0.0, 0.0)
+      val DefaultShape: ShapeType.Circle = ShapeType.Circle(0.25)
+      val DefaultOrientation: Orientation = Orientation(0.0)
+      val DefaultActuators: Seq[Actuator[Agent]] = Seq.empty
+      val DefaultSensors: Vector[Sensor[Agent, Environment]] = Vector.empty
+      val MinRadius: Double = 0.01
+      val MaxRadius: Double = 0.5
+
+    end Agent
 
     object Robot:
 

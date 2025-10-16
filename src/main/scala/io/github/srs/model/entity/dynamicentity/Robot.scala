@@ -28,7 +28,7 @@ final case class Robot(
     override val orientation: Orientation = DefaultOrientation,
     override val actuators: Seq[Actuator[Robot]] = DefaultActuators,
     override val sensors: Vector[Sensor[Robot, Environment]] = DefaultSensors,
-    override val behavior: Policy = DefaultPolicy,
+    behavior: Policy = DefaultPolicy,
 ) extends DynamicEntity
 
 object Robot:
