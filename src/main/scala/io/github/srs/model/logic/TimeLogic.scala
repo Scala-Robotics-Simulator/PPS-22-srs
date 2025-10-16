@@ -11,7 +11,7 @@ import io.github.srs.model.{ ModelModule, SimulationState }
  * @tparam S
  *   the type of the simulation state.
  */
-trait TickLogic[S <: ModelModule.State]:
+trait TickLogic[S <: ModelModule.BaseState]:
   /**
    * Updates the simulation state by advancing the elapsed time by the given delta duration.
    * @param s

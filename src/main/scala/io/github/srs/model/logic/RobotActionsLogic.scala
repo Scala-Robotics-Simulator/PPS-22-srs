@@ -24,7 +24,7 @@ import com.typesafe.scalalogging.Logger
  * @tparam S
  *   the type of the simulation state.
  */
-trait RobotActionsLogic[S <: ModelModule.State]:
+trait RobotActionsLogic[S <: ModelModule.BaseState]:
 
   /**
    * Handles a list of robot action proposals and updates the simulation state accordingly.

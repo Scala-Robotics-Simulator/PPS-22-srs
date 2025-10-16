@@ -9,7 +9,7 @@ import io.github.srs.utils.random.RNG
  * @tparam S
  *   the type of the model state.
  */
-trait RandomLogic[S <: ModelModule.State]:
+trait RandomLogic[S <: ModelModule.BaseState]:
   /**
    * Generate a new random state based on the current state and RNG.
    * @param s
