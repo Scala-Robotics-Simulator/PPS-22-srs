@@ -39,7 +39,7 @@ class SequenceActionTest extends AnyFlatSpec with Matchers:
       override val shape: ShapeType,
       override val orientation: Orientation,
       override val actuators: Seq[DummyActuator],
-      override val sensors: Vector[Sensor[Dummy, Environment]]
+      override val sensors: Vector[Sensor[Dummy, Environment]],
   ) extends DynamicEntity:
     def act[F[_]: Monad](): F[Dummy] = Monad[F].pure(this)
 

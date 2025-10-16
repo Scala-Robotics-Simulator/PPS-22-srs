@@ -5,7 +5,7 @@ import java.util.UUID
 import cats.effect.IO
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.action.ActionAlgebra
-import io.github.srs.model.entity.dynamicentity.actuator.{Actuator, DifferentialWheelMotor}
+import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, DifferentialWheelMotor }
 import io.github.srs.model.entity.dynamicentity.robot.dsl.RobotDsl.withActuators
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor
 import io.github.srs.model.entity.dynamicentity.DynamicEntity

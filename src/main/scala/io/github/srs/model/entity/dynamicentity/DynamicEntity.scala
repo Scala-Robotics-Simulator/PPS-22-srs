@@ -22,4 +22,3 @@ trait DynamicEntity extends Entity:
    *   the sequence of sensors.
    */
   def sensors: Vector[Sensor[? <: DynamicEntity, ? <: Environment]]
-end DynamicEntity

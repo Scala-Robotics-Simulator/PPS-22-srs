@@ -18,8 +18,7 @@ object AlwaysForwardBehavior:
    * @tparam F
    *   The effect type.
    * @return
-   * A [[BehaviorCommon.Decision]] that always returns a
-   * forward movement action.
+   *   A [[BehaviorCommon.Decision]] that always returns a forward movement action.
    */
   def decision[F[_]]: Decision[F] =
     Kleisli.ask[Id, BehaviorContext].map { ctx =>

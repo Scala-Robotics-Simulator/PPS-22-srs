@@ -1,18 +1,18 @@
 package io.github.srs.model.entity.dynamicentity
 
-import scala.concurrent.duration.{FiniteDuration, MILLISECONDS}
+import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
 
 import cats.Id
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.action.MovementActionFactory.*
 import io.github.srs.model.entity.dynamicentity.action.SequenceAction.thenDo
-import io.github.srs.model.entity.dynamicentity.action.{Action, ActionAlgebra, NoAction}
-import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor.{applyMovementActions, move}
+import io.github.srs.model.entity.dynamicentity.action.{ Action, ActionAlgebra, NoAction }
+import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor.{ applyMovementActions, move }
 import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotorTestUtils.calculateMovement
-import io.github.srs.model.entity.dynamicentity.actuator.{DifferentialWheelMotor, Wheel}
+import io.github.srs.model.entity.dynamicentity.actuator.{ DifferentialWheelMotor, Wheel }
 import io.github.srs.model.entity.dynamicentity.robot.dsl.RobotDsl.*
 import io.github.srs.model.entity.dynamicentity.robot.Robot
-import io.github.srs.model.entity.dynamicentity.sensor.{ProximitySensor, Sensor, SensorReading}
+import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, Sensor, SensorReading }
 import io.github.srs.model.environment.Environment
 import org.scalatest.Inside.inside
 import org.scalatest.OptionValues.convertOptionToValuable
