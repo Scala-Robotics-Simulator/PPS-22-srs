@@ -11,6 +11,7 @@ import io.github.srs.model.validation.{ DomainError, Validation }
 import io.github.srs.utils.EqualityGivenInstances.given_CanEqual_T_T
 import io.github.srs.utils.SimulationDefaults.Environment.*
 import io.github.srs.utils.SimulationDefaults.LightMapConfigs
+import io.github.srs.model.environment.dsl.CreationDSL.environment
 
 /**
  * Represents the environment in which entities exist.
@@ -76,6 +77,8 @@ object ValidEnvironment:
     env
 
   given Conversion[ValidEnvironment, Environment] = identity
+
+  def empty: ValidEnvironment = ValidEnvironment.from(environment)
 
   extension (env: ValidEnvironment)
 
