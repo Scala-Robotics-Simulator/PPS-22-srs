@@ -79,6 +79,7 @@ lazy val root = project
       Wart.ImplicitParameter,
       Wart.SeqUpdated,
       Wart.Nothing,
+      Wart.Var,
     ),
     jacocoExcludes := Seq(
       "io.github.srs.view.*",
