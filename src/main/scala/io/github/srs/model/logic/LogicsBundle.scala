@@ -33,3 +33,6 @@ given simulationStateLogicsBundle: LogicsBundle[SimulationState] with
   val resumeLogic: ResumeLogic[SimulationState] = summon[ResumeLogic[SimulationState]]
   val stopLogic: StopLogic[SimulationState] = summon[StopLogic[SimulationState]]
   val robotActionsLogic: RobotActionsLogic[SimulationState] = summon[RobotActionsLogic[SimulationState]]
+
+trait RLLogicsBundle[S <: BaseState] extends BaseLogicsBunldle[S]:
+  def stateLogic: StateLogic[S]
