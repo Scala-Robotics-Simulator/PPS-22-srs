@@ -1,9 +1,8 @@
-package io.github.srs.model.entity.dynamicentity.dsl
+package io.github.srs.model.entity.dynamicentity.robot.dsl
 
 import java.util.UUID
 
 import cats.syntax.all.*
-import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.actuator.dsl.ActuatorDsl.validateActuator
 import io.github.srs.model.entity.dynamicentity.sensor.dsl.SensorDsl.validateSensor
 import io.github.srs.model.entity.dynamicentity.actuator.dsl.DifferentialWheelMotorDsl.{ differentialWheelMotor, ws }
@@ -14,7 +13,8 @@ import io.github.srs.model.environment.Environment
 import io.github.srs.model.validation.Validation
 import io.github.srs.model.validation.Validation.*
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.*
-import io.github.srs.model.entity.dynamicentity.behavior.Policy
+import io.github.srs.model.entity.dynamicentity.robot.Robot
+import io.github.srs.model.entity.dynamicentity.robot.behavior.Policy
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.DynamicEntity.Robot.Self
 
 /**

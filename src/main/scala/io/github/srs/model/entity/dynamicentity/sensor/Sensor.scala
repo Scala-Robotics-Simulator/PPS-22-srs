@@ -2,7 +2,8 @@ package io.github.srs.model.entity.dynamicentity.sensor
 
 import cats.Monad
 import cats.syntax.all.*
-import io.github.srs.model.entity.dynamicentity.{ DynamicEntity, Robot }
+import io.github.srs.model.entity.dynamicentity.DynamicEntity
+import io.github.srs.model.entity.dynamicentity.robot.Robot
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.illumination.model.ScaleFactor

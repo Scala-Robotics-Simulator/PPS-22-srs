@@ -1,15 +1,16 @@
-package io.github.srs.model.entity.dynamicentity.behavior.behaviors
+package io.github.srs.model.entity.dynamicentity.robot.behavior.behaviors
 
 import cats.{ Id, Monad }
 import cats.data.Kleisli
 import io.github.srs.model.entity.dynamicentity.action.Action
-import io.github.srs.model.entity.dynamicentity.behavior.BehaviorContext
-import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.{ Behavior, Condition }
-import io.github.srs.model.entity.dynamicentity.behavior.behaviors.BehaviorCommon.*
+import io.github.srs.model.entity.dynamicentity.robot.behavior.BehaviorTypes.{ Behavior, Condition }
+import io.github.srs.model.entity.dynamicentity.robot.behavior.BehaviorContext
 import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings.*
 import io.github.srs.utils.SimulationDefaults.Behaviors
-import io.github.srs.model.entity.dynamicentity.behavior.dsl.BehaviorDsl.*
+import io.github.srs.model.entity.dynamicentity.robot.behavior.dsl.BehaviorDsl.*
 import io.github.srs.utils.random.RNG
+
+import BehaviorCommon.*
 
 /**
  * A behavior that prioritizes obstacle avoidance, then phototaxis, then random walk.
@@ -25,8 +26,8 @@ object PrioritizedBehavior:
    * @tparam F
    *   The effect type.
    * @return
-   *   A [[io.github.srs.model.entity.dynamicentity.behavior.behaviors.BehaviorCommon.Decision]] that computes the
-   *   action based on prioritized conditions.
+   * A [[BehaviorCommon.Decision]] that computes the
+   * action based on prioritized conditions.
    */
   def decision[F[_]: Monad]: Decision[F] =
 

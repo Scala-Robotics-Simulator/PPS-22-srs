@@ -2,10 +2,10 @@ package io.github.srs.utils
 
 import cats.Id
 import io.github.srs.model.ModelModule
-import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings
 import io.github.srs.model.entity.Point2D.*
 import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor
+import io.github.srs.model.entity.dynamicentity.robot.Robot
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
 import io.github.srs.model.environment.Environment
 

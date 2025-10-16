@@ -7,10 +7,10 @@ import io.github.srs.>>>
 import io.github.srs.model.Simulation.*
 import io.github.srs.model.dsl.Cell.*
 import io.github.srs.model.dsl.GridDSL.{*, given}
-import io.github.srs.model.entity.dynamicentity.Robot
-import io.github.srs.model.entity.dynamicentity.behavior.Policy
-import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
+import io.github.srs.model.entity.dynamicentity.robot.dsl.RobotDsl.*
 import io.github.srs.model.entity.Point2D
+import io.github.srs.model.entity.dynamicentity.robot.Robot
+import io.github.srs.model.entity.dynamicentity.robot.behavior.Policy
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.environment.ValidEnvironment.ValidEnvironment
 import io.github.srs.model.environment.dsl.CreationDSL.*

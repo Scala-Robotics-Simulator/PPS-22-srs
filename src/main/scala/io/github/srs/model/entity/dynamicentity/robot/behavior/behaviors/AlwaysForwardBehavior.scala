@@ -1,9 +1,10 @@
-package io.github.srs.model.entity.dynamicentity.behavior.behaviors
+package io.github.srs.model.entity.dynamicentity.robot.behavior.behaviors
 
 import cats.Id
 import cats.data.Kleisli
-import io.github.srs.model.entity.dynamicentity.behavior.BehaviorContext
-import io.github.srs.model.entity.dynamicentity.behavior.behaviors.BehaviorCommon.*
+import io.github.srs.model.entity.dynamicentity.robot.behavior.BehaviorContext
+
+import BehaviorCommon.*
 
 /**
  * A [[io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.Behavior]] that always makes the entity move
@@ -17,8 +18,8 @@ object AlwaysForwardBehavior:
    * @tparam F
    *   The effect type.
    * @return
-   *   A [[io.github.srs.model.entity.dynamicentity.behavior.behaviors.BehaviorCommon.Decision]] that always returns a
-   *   forward movement action.
+   * A [[BehaviorCommon.Decision]] that always returns a
+   * forward movement action.
    */
   def decision[F[_]]: Decision[F] =
     Kleisli.ask[Id, BehaviorContext].map { ctx =>

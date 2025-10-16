@@ -3,12 +3,13 @@ package io.github.srs.model.entity.dynamicentity.behavior.behaviors
 import cats.Id
 import io.github.srs.model.entity.Orientation
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
-import io.github.srs.model.entity.dynamicentity.action.{ Action, MovementAction, MovementActionFactory }
-import io.github.srs.model.entity.dynamicentity.behavior.BehaviorContext
-import io.github.srs.model.entity.dynamicentity.sensor.{ LightSensor, SensorReading, SensorReadings }
+import io.github.srs.model.entity.dynamicentity.action.{Action, MovementAction, MovementActionFactory}
+import io.github.srs.model.entity.dynamicentity.robot.behavior.BehaviorContext
+import io.github.srs.model.entity.dynamicentity.robot.behavior.behaviors.PhototaxisBehavior
+import io.github.srs.model.entity.dynamicentity.sensor.{LightSensor, SensorReading, SensorReadings}
 import io.github.srs.model.environment.Environment
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.MinSpeed
-import io.github.srs.utils.random.{ RNG, SimpleRNG }
+import io.github.srs.utils.random.{RNG, SimpleRNG}
 import org.scalatest.Inside.inside
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers

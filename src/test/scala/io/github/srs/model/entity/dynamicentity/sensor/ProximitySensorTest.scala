@@ -7,9 +7,10 @@ import scala.language.postfixOps
 import cats.Id
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.actuator.Actuator
-import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
+import io.github.srs.model.entity.dynamicentity.robot.dsl.RobotDsl.*
 import io.github.srs.model.entity.dynamicentity.sensor.dsl.ProximitySensorDsl.*
-import io.github.srs.model.entity.dynamicentity.{ DynamicEntity, Robot }
+import io.github.srs.model.entity.dynamicentity.DynamicEntity
+import io.github.srs.model.entity.dynamicentity.robot.Robot
 import io.github.srs.model.entity.staticentity.StaticEntity.Obstacle
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.environment.dsl.CreationDSL.*

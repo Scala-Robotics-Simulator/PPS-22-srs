@@ -6,7 +6,7 @@ import io.github.srs.model.validation.DomainError
 import org.scalatest.Inside.inside
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import io.github.srs.model.entity.dynamicentity.dsl.RobotDsl.*
+import io.github.srs.model.entity.dynamicentity.robot.dsl.RobotDsl.*
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.DynamicEntity.Robot.Self
 
 class RobotValidationTest extends AnyFlatSpec with Matchers:

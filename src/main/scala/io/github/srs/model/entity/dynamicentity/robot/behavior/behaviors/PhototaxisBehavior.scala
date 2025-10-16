@@ -1,15 +1,16 @@
-package io.github.srs.model.entity.dynamicentity.behavior.behaviors
+package io.github.srs.model.entity.dynamicentity.robot.behavior.behaviors
 
 import cats.data.Kleisli
 import cats.{ Id, Monad }
 import io.github.srs.model.entity.Orientation
 import io.github.srs.model.entity.dynamicentity.action.MovementActionFactory
-import io.github.srs.model.entity.dynamicentity.behavior.BehaviorContext
-import io.github.srs.model.entity.dynamicentity.behavior.behaviors.BehaviorCommon.*
+import io.github.srs.model.entity.dynamicentity.robot.behavior.BehaviorContext
 import io.github.srs.model.entity.dynamicentity.sensor.LightReadings
 import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings.*
 import io.github.srs.utils.SimulationDefaults.Behaviors.Phototaxis.*
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.{ MaxSpeed, MinSpeed }
+
+import BehaviorCommon.*
 
 /**
  * A behavior that moves towards the strongest light source based on light sensor readings.
@@ -25,8 +26,8 @@ object PhototaxisBehavior:
    * @tparam F
    *   The effect type.
    * @return
-   *   A [[io.github.srs.model.entity.dynamicentity.behavior.behaviors.BehaviorCommon.Decision]] that computes the
-   *   action based on light sensor readings.
+   * A [[BehaviorCommon.Decision]] that computes the
+   * action based on light sensor readings.
    */
   def decision[F[_]: Monad]: Decision[F] =
     Kleisli.ask[Id, BehaviorContext].map { ctx =>

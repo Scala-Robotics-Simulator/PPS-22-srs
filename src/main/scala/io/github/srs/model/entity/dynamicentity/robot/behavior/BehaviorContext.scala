@@ -1,4 +1,4 @@
-package io.github.srs.model.entity.dynamicentity.behavior
+package io.github.srs.model.entity.dynamicentity.robot.behavior
 
 import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings
 import io.github.srs.utils.random.RNG

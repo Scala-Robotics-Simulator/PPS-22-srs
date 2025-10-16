@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicReference
 import javax.swing.JPanel
 
 import io.github.srs.model.entity.Point2D.*
-import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.staticentity.StaticEntity
 import io.github.srs.model.entity.{ Point2D, ShapeType }
 import io.github.srs.model.environment.Environment
@@ -19,6 +18,7 @@ import io.github.srs.utils.SimulationDefaults.DynamicEntity.Sensor.ProximitySens
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
 import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings.proximityReadings
 import cats.Id
+import io.github.srs.model.entity.dynamicentity.robot.Robot
 
 /**
  * Canvas component responsible for rendering the simulation environment. Supports static layer caching for improved

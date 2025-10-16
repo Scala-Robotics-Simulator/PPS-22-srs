@@ -11,7 +11,7 @@ import cats.effect.unsafe.implicits.global
 import io.github.srs.controller.protocol.Event
 import io.github.srs.model.ModelModule
 import io.github.srs.model.entity.Point2D.*
-import io.github.srs.model.entity.dynamicentity.Robot
+import io.github.srs.model.entity.dynamicentity.robot.Robot
 import io.github.srs.model.environment.Environment
 import io.github.srs.utils.SimulationDefaults.UI
 import io.github.srs.view.ViewModule.{ Component, Requirements, View }

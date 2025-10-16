@@ -5,13 +5,13 @@ import scala.language.postfixOps
 import io.circe.syntax.*
 import io.circe.{ Encoder, Json }
 import io.github.srs.config.yaml.serializer.encoders.given
-import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.StdProximitySensors
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.StdLightSensors
 import io.github.srs.utils.SimulationDefaults.Fields.Entity as EntityFields
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.DynamicEntity.Robot as RobotFields
 import com.typesafe.scalalogging.Logger
+import io.github.srs.model.entity.dynamicentity.robot.Robot
 
 /**
  * Encoders for DynamicEntity types.

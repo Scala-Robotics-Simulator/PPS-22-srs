@@ -1,9 +1,9 @@
 package io.github.srs.model.entity.dynamicentity.behavior
 
 import cats.data.Kleisli
-import io.github.srs.model.entity.dynamicentity.behavior.BehaviorTypes.{ Behavior, Condition, PartialBehavior }
+import io.github.srs.model.entity.dynamicentity.robot.behavior.BehaviorTypes.{Behavior, Condition, PartialBehavior}
+import io.github.srs.model.entity.dynamicentity.robot.behavior.dsl.BehaviorDsl.*
 import org.scalatest.flatspec.AnyFlatSpec
-import io.github.srs.model.entity.dynamicentity.behavior.dsl.BehaviorDsl.*
 import org.scalatest.matchers.should.Matchers
 
 /**

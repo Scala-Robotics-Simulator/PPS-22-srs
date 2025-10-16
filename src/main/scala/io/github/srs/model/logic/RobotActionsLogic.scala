@@ -6,7 +6,6 @@ import scala.concurrent.duration.{ DurationInt, FiniteDuration }
 
 import cats.effect.IO
 import io.github.srs.controller.message.RobotProposal
-import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor.applyMovementActions
 import io.github.srs.model.environment.Environment
@@ -18,9 +17,11 @@ import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.DefaultMaxRetr
 import io.github.srs.utils.SimulationDefaults.{ BinarySearchDurationThreshold, DebugMode }
 import cats.implicits.*
 import com.typesafe.scalalogging.Logger
+import io.github.srs.model.entity.dynamicentity.robot.Robot
 
 /**
  * Logic for handling robot actions proposals.
+ *
  * @tparam S
  *   the type of the simulation state.
  */
