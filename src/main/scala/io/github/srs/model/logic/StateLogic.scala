@@ -7,4 +7,4 @@ import io.github.srs.utils.random.RNG
 
 trait StateLogic[S <: ModelModule.BaseState]:
   def createState(cfg: SimulationConfig[ValidEnvironment]): S
-  def createState(cfg: SimulationConfig[ValidEnvironment], rng: RNG): S
+  def updateState(state: S, rng: RNG): S
