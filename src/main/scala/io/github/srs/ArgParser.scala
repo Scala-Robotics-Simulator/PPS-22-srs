@@ -23,6 +23,9 @@ object ArgParser:
     OParser.sequence(
       programName("Scala Robotics Simulator"),
       head(appTitle),
+      opt[Unit]("rl")
+        .action((_, c) => c.copy(reinforcementLearning = true))
+        .text("Run as a Server for reinforcement leaning purposes"),
       opt[Unit]("headless")
         .action((_, c) => c.copy(headless = true))
         .text("Run in CLI headless mode (no GUI)"),

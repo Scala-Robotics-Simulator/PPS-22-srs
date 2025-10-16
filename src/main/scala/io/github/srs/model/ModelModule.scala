@@ -126,6 +126,12 @@ object ModelModule:
          * @inheritdoc
          */
         override def update(s: S)(using updateLogic: S => IO[S]): IO[S] = updateLogic(s)
+
+        /**
+         * @inheritdoc
+         */
+        override def update(s: S)(using updateLogic: S => S): S = updateLogic(s)
+    end Model
   end Component
 
   /**

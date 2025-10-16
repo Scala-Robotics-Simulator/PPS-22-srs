@@ -5,13 +5,9 @@ import scala.concurrent.duration.FiniteDuration
 import cats.effect.IO
 import io.github.srs.model.SimulationConfig.{ SimulationSpeed, SimulationStatus }
 import io.github.srs.model.{ ModelModule, SimulationState }
+import io.github.srs.model.BaseSimulationState
 
-/**
- * Logic for handling simulation time updates.
- * @tparam S
- *   the type of the simulation state.
- */
-trait TickLogic[S <: ModelModule.BaseState]:
+trait BaseTickLogic[S <: ModelModule.BaseState]:
   /**
    * Updates the simulation state by advancing the elapsed time by the given delta duration.
    * @param s
@@ -23,6 +19,13 @@ trait TickLogic[S <: ModelModule.BaseState]:
    */
   def tick(s: S, delta: FiniteDuration): IO[S]
 
+/**
+ * Logic for handling simulation time updates.
+ * @tparam S
+ *   the type of the simulation state.
+ */
+trait TickLogic[S <: ModelModule.BaseState] extends BaseTickLogic[S]:
+
   /**
    * Updates the simulation state by changing the simulation speed.
    * @param s
@@ -33,8 +36,6 @@ trait TickLogic[S <: ModelModule.BaseState]:
    *   an [[cats.effect.IO]] effect that produces the updated simulation state with the new simulation speed.
    */
   def tickSpeed(s: S, speed: SimulationSpeed): IO[S]
-
-end TickLogic
 
 /**
  * Companion object for [[TickLogic]] containing given instances.
@@ -55,3 +56,13 @@ object TimeLogic:
 
     def tickSpeed(s: SimulationState, speed: SimulationSpeed): IO[SimulationState] = IO.pure:
       s.copy(simulationSpeed = speed)
+
+  given BaseTickLogic[BaseSimulationState] with
+
+    def tick(s: BaseSimulationState, delta: FiniteDuration): IO[BaseSimulationState] = IO.pure:
+      val updatedElapsed = s.elapsedTime + delta
+
+      s.copy(
+        elapsedTime = updatedElapsed,
+      )
+end TimeLogic
