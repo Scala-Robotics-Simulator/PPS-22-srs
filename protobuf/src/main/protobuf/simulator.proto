@@ -58,7 +58,7 @@ message StepResponse {
   map<string, double> rewards = 2;
   map<string, bool> terminateds = 3;
   map<string, bool> truncateds = 4;
-  map<string, string> info = 5;
+  map<string, string> infos = 5;
 }
 
 message CloseResponse {
