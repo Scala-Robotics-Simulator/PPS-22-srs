@@ -77,6 +77,20 @@ object ModelModule:
      */
     def update(s: S)(using f: S => IO[S]): IO[S]
 
+    /**
+     * Updates the state of the simulation using the provided function.
+     *
+     * @param s
+     *   the current state of the simulation.
+     * @param f
+     *   the function that takes the current state and returns a new state.
+     * @return
+     *   the updated state.
+     */
+    def update(s: S)(using f: S => S): S
+
+  end Model
+
   /**
    * Provider trait that defines the interface for providing a model.
    *
