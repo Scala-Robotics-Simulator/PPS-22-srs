@@ -1,6 +1,11 @@
 import Dependencies.*
 
 val scala3Version = "3.7.3"
+enablePlugins(JavaAppPackaging)
+dockerBaseImage := "openjdk:21"
+dockerRepository := Some("ghcr.io/scala-robotics-simulator")
+dockerExposedPorts ++= Seq(50051)
+dockerCmd := Seq("--rl")
 
 lazy val protobuf = project
   .in(file("protobuf"))
@@ -17,6 +22,8 @@ lazy val root = project
     scalaVersion := scala3Version,
     organization := "io.github.scala-robotics-simulator",
     description := "A robotics simulator written in scala.",
+    version := "latest",
+    versionScheme := Some("SemVer"),
     homepage := Some(
       url(
         "https://github.com/Scala-Robotics-Simulator/PPS-22-srs",
