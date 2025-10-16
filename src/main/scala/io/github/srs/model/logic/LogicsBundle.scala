@@ -1,24 +1,27 @@
 package io.github.srs.model.logic
 
-import io.github.srs.model.ModelModule.BaseState
+import io.github.srs.model.ModelModule.State
 import io.github.srs.model.SimulationState
 import io.github.srs.model.logic.StatusLogic.given
 import io.github.srs.model.logic.TimeLogic.given
 import io.github.srs.model.logic.RandomLogic.given
 import io.github.srs.model.logic.RobotActionsLogic.given
+import io.github.srs.model.ModelModule.BaseState
+
+trait BaseLogicsBunldle[S <: BaseState]:
+  def tickLogic: TickLogic[S]
+  def randomLogic: RandomLogic[S]
+  def robotActionsLogic: RobotActionsLogic[S]
 
 /**
  * A bundle of all logic traits for a given state type.
  * @tparam S
  *   the type of the state.
  */
-trait LogicsBundle[S <: BaseState]:
-  def tickLogic: TickLogic[S]
-  def randomLogic: RandomLogic[S]
+trait LogicsBundle[S <: State] extends BaseLogicsBunldle[S]:
   def pauseLogic: PauseLogic[S]
   def resumeLogic: ResumeLogic[S]
   def stopLogic: StopLogic[S]
-  def robotActionsLogic: RobotActionsLogic[S]
 
 /**
  * Companion object for [[LogicsBundle]] containing given instances.
