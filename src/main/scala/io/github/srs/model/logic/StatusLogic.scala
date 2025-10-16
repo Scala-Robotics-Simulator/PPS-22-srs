@@ -9,7 +9,7 @@ import cats.effect.IO
  * @tparam S
  *   the type of the simulation state.
  */
-trait PauseLogic[S <: ModelModule.BaseState]:
+trait PauseLogic[S <: ModelModule.State]:
   /**
    * Pauses the simulation by updating its status.
    * @param s
@@ -25,7 +25,7 @@ trait PauseLogic[S <: ModelModule.BaseState]:
  * @tparam S
  *   the type of the simulation state.
  */
-trait ResumeLogic[S <: ModelModule.BaseState]:
+trait ResumeLogic[S <: ModelModule.State]:
   /**
    * Resumes the simulation by updating its status.
    * @param s
@@ -41,7 +41,7 @@ trait ResumeLogic[S <: ModelModule.BaseState]:
  * @tparam S
  *   the type of the simulation state.
  */
-trait StopLogic[S <: ModelModule.BaseState]:
+trait StopLogic[S <: ModelModule.State]:
   /**
    * Stops the simulation by updating its status.
    * @param s

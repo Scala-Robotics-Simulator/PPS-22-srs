@@ -64,7 +64,7 @@ object ModelModule:
    * @tparam S
    *   the type of the simulation state, which must extend [[State]].
    */
-  trait Model[S <: State]:
+  trait Model[S <: BaseState]:
     /**
      * Updates the state of the simulation using the provided function.
      *
@@ -83,7 +83,7 @@ object ModelModule:
    * @tparam S
    *   the type of the state, which must extend [[State]].
    */
-  trait Provider[S <: State]:
+  trait Provider[S <: BaseState]:
     val model: Model[S]
 
   /**
@@ -92,7 +92,7 @@ object ModelModule:
    * @tparam S
    *   the type of the simulation state, which must extend [[State]].
    */
-  trait Component[S <: State]:
+  trait Component[S <: BaseState]:
 
     object Model:
 
@@ -120,5 +120,5 @@ object ModelModule:
    * @tparam S
    *   the type of the state, which must extend [[State]].
    */
-  trait Interface[S <: State] extends Provider[S] with Component[S]
+  trait Interface[S <: BaseState] extends Provider[S] with Component[S]
 end ModelModule
