@@ -8,11 +8,6 @@ import com.typesafe.scalalogging.Logger
 
 /**
  * Small module that runs a gRPC server for the RL service.
- *
- * The server component is intentionally minimal: it accepts a concrete implementation of the generated `RLFs2Grpc`
- * service (provided by `RLServiceModule`) and exposes a `Server` that will start a Netty-based gRPC server on a
- * configured port. This module keeps responsibilities limited to wiring and lifecycle; business logic belongs in the
- * service implementation.
  */
 object RLServerModule:
 
