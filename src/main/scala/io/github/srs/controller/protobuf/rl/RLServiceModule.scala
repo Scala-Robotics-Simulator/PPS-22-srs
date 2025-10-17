@@ -8,11 +8,6 @@ import io.grpc.*
 
 /**
  * Module that exposes a simple RL gRPC service used by the RL controller feature.
- *
- * The module provides a lightweight, test-friendly implementation of the generated `RLFs2Grpc` service that accepts
- * streaming RL requests and produces streaming RL responses. The current implementation is a stub that returns basic,
- * empty responses for Init/Reset/Step/Close requests and an Error response for unknown messages. This module is
- * intentionally small so it can be swapped with a production implementation later.
  */
 object RLServiceModule:
 
