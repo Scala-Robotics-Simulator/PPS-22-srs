@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package io.github.srs.protos;
 
-message SimulatorRequest {
+message RLRequest {
   oneof request {
     InitRequest init = 1;
     ResetRequest reset = 2;
@@ -29,7 +29,7 @@ message StepRequest { map<string, ContinuousAction> actions = 1; }
 
 message CloseRequest {}
 
-message SimulatorResponse {
+message RLResponse {
   oneof response {
     InitResponse init = 1;
     ResetResponse reset = 2;
@@ -78,6 +78,6 @@ enum ErrorCode {
   INVALID_ACTION = 3;
 }
 
-service Simulator {
-  rpc Interact(stream SimulatorRequest) returns (stream SimulatorResponse) {}
+service RL {
+  rpc Interact(stream RLRequest) returns (stream RLResponse) {}
 }

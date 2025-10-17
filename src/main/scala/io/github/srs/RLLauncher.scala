@@ -7,11 +7,18 @@ import io.github.srs.model.BaseSimulationState
 import io.github.srs.model.ModelModule
 import io.github.srs.model.logic.rlLogicsBundle
 import cats.effect.IO
+import io.github.srs.controller.protobuf.rl.RLServiceModule
+import io.github.srs.controller.protobuf.rl.RLServerModule
+import io.github.srs.controller.protobuf.rl.RLServerModule.Server
 
 object RLLauncher
     extends ModelModule.Interface[BaseSimulationState]
-    with RLControllerModule.Interface[BaseSimulationState]:
-  val model: Model[BaseSimulationState] = Model()
-  val controller: Controller[BaseSimulationState] = Controller()
+    with RLControllerModule.Interface[BaseSimulationState]
+    with RLServiceModule.Interface[BaseSimulationState]
+    with RLServerModule.Interface[BaseSimulationState]:
+  val model = Model()
+  val controller = Controller()
+  val service = Service()
+  val server = Server(50051)
 
-  def run: IO[Unit] = controller.start
+  def run: IO[Unit] = server.run

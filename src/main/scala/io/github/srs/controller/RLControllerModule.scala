@@ -10,7 +10,6 @@ import io.github.srs.model.entity.dynamicentity.action.Action
 import cats.Id
 import io.github.srs.model.Simulation.simulation
 import io.github.srs.model.logic.RLLogicsBundle
-import cats.effect.IO
 
 object RLControllerModule:
 
@@ -18,14 +17,6 @@ object RLControllerModule:
    * Controller trait defines the interface for a Reinforcement Learning controller.
    */
   trait Controller[S <: ModelModule.BaseState]:
-
-    /**
-     * Starts the controller, performing any necessary initialization or setup.
-     *
-     * @return
-     *   an [[cats.effect.IO]] effect representing the start operation.
-     */
-    def start: IO[Unit]
 
     /**
      * The type of the response returned after each simulation step.
@@ -87,9 +78,6 @@ object RLControllerModule:
 
         type StepResponse = String
         type Image = String
-
-        override def start: IO[Unit] =
-          IO.println("Starting RL Controller") *> IO.never
 
         private var initialState: S =
           bundle.stateLogic.createState(SimulationConfig(simulation, ValidEnvironment.empty))
