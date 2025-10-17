@@ -39,6 +39,9 @@ $output
     fi
 }
 
+# Run python lint checks
+run_check "python checks" "cd python && source .venv/bin/activate && uv run ruff check && uv run ruff format --check && uv run pytest && cd .."
+
 # Run scalafmt check
 run_check "scalafmt" "sbt scalafmtCheckAll"
 
