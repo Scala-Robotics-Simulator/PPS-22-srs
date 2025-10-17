@@ -17,4 +17,5 @@ final case class AppArgs(
     path: Option[String] = None,
     simulationTime: Option[Long] = None,
     seed: Option[Long] = None,
+    reinforcementLearning: Boolean = false,
 )

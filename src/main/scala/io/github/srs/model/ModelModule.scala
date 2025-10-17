@@ -13,10 +13,9 @@ import io.github.srs.utils.random.RNG
 object ModelModule:
 
   /**
-   * State trait that defines the base state for the simulation.
+   * Base state trait used for the simulation when running in Reinforcement Learning mode.
    */
-  trait State:
-
+  trait BaseState:
     /**
      * The total simulation time for the simulation.
      */
@@ -33,22 +32,31 @@ object ModelModule:
     def dt: FiniteDuration
 
     /**
-     * The current simulation speed.
-     */
-    def simulationSpeed: SimulationSpeed
-
-    /**
      * The random number generator used for the simulation.
      */
     def simulationRNG: RNG
 
     /**
+     * The environment in which the simulation is running.
+     */
+    def environment: ValidEnvironment
+
+  end BaseState
+
+  /**
+   * State trait that defines the base state for the simulation.
+   */
+  trait State extends BaseState:
+
+    /**
+     * The current simulation speed.
+     */
+    def simulationSpeed: SimulationSpeed
+
+    /**
      * The current simulation status.
      */
     def simulationStatus: SimulationStatus
-
-    def environment: ValidEnvironment
-  end State
 
   /**
    * Trait representing the core model logic for updating the simulation state.
@@ -56,7 +64,7 @@ object ModelModule:
    * @tparam S
    *   the type of the simulation state, which must extend [[State]].
    */
-  trait Model[S <: State]:
+  trait Model[S <: BaseState]:
     /**
      * Updates the state of the simulation using the provided function.
      *
@@ -69,13 +77,27 @@ object ModelModule:
      */
     def update(s: S)(using f: S => IO[S]): IO[S]
 
+    /**
+     * Updates the state of the simulation using the provided function.
+     *
+     * @param s
+     *   the current state of the simulation.
+     * @param f
+     *   the function that takes the current state and returns a new state.
+     * @return
+     *   the updated state.
+     */
+    def update(s: S)(using f: S => S): S
+
+  end Model
+
   /**
    * Provider trait that defines the interface for providing a model.
    *
    * @tparam S
    *   the type of the state, which must extend [[State]].
    */
-  trait Provider[S <: State]:
+  trait Provider[S <: BaseState]:
     val model: Model[S]
 
   /**
@@ -84,7 +106,7 @@ object ModelModule:
    * @tparam S
    *   the type of the simulation state, which must extend [[State]].
    */
-  trait Component[S <: State]:
+  trait Component[S <: BaseState]:
 
     object Model:
 
@@ -104,6 +126,12 @@ object ModelModule:
          * @inheritdoc
          */
         override def update(s: S)(using updateLogic: S => IO[S]): IO[S] = updateLogic(s)
+
+        /**
+         * @inheritdoc
+         */
+        override def update(s: S)(using updateLogic: S => S): S = updateLogic(s)
+    end Model
   end Component
 
   /**
@@ -112,5 +140,5 @@ object ModelModule:
    * @tparam S
    *   the type of the state, which must extend [[State]].
    */
-  trait Interface[S <: State] extends Provider[S] with Component[S]
+  trait Interface[S <: BaseState] extends Provider[S] with Component[S]
 end ModelModule
