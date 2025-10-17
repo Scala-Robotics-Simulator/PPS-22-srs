@@ -7,7 +7,8 @@ message RLRequest {
     InitRequest init = 1;
     ResetRequest reset = 2;
     StepRequest step = 3;
-    CloseRequest close = 4;
+    RenderRequest render = 4;
+    CloseRequest close = 5;
   }
 }
 
@@ -27,6 +28,11 @@ message ContinuousAction {
 
 message StepRequest { map<string, ContinuousAction> actions = 1; }
 
+message RenderRequest {
+  optional int32 width = 1;
+  optional int32 height = 2;
+}
+
 message CloseRequest {}
 
 message RLResponse {
@@ -34,8 +40,9 @@ message RLResponse {
     InitResponse init = 1;
     ResetResponse reset = 2;
     StepResponse step = 3;
-    CloseResponse close = 4;
-    ErrorResponse error = 5;
+    RenderResponse render = 4;
+    CloseResponse close = 5;
+    ErrorResponse error = 6;
   }
 }
 
@@ -59,6 +66,14 @@ message StepResponse {
   map<string, bool> terminateds = 3;
   map<string, bool> truncateds = 4;
   map<string, string> infos = 5;
+}
+
+message RenderResponse {
+  bytes image = 1;
+  string format = 2;
+  int32 width = 3;
+  int32 height = 4;
+  int32 channels = 5;
 }
 
 message CloseResponse {

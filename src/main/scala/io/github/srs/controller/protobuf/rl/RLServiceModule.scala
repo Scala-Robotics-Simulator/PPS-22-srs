@@ -5,6 +5,7 @@ import io.github.srs.model.ModelModule
 import io.github.srs.controller.RLControllerModule
 import io.github.srs.protos.rl.*
 import io.grpc.*
+import com.google.protobuf.ByteString
 
 /**
  * Module that exposes a simple RL gRPC service used by the RL controller feature.
@@ -110,6 +111,21 @@ object RLServiceModule:
                     terminateds = Map.empty,
                     truncateds = Map.empty,
                     infos = Map.empty,
+                  ),
+                ),
+              )
+
+            case RLRequest(RLRequest.Request.Render(RenderRequest(w, h, _)), _) =>
+              val width = w.getOrElse(800)
+              val height = h.getOrElse(600)
+              RLResponse(
+                response = RLResponse.Response.Render(
+                  RenderResponse(
+                    image = ByteString.EMPTY,
+                    format = "png",
+                    width = width,
+                    height = height,
+                    channels = 3,
                   ),
                 ),
               )
