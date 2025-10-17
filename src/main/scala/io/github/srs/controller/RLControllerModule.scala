@@ -10,23 +10,42 @@ import io.github.srs.model.entity.dynamicentity.action.Action
 import cats.Id
 import io.github.srs.model.Simulation.simulation
 import io.github.srs.model.logic.RLLogicsBundle
+import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings
 
 object RLControllerModule:
+
+  /**
+   * The resonse after each simulation step.
+   */
+  case class StepResponse private (
+      observations: Map[DynamicEntity, SensorReadings],
+      rewards: Map[DynamicEntity, Double],
+      terminateds: Map[DynamicEntity, Boolean],
+      truncateds: Map[DynamicEntity, Boolean],
+      infos: Map[DynamicEntity, String],
+  )
 
   /**
    * Controller trait defines the interface for a Reinforcement Learning controller.
    */
   trait Controller[S <: ModelModule.BaseState]:
 
-    /**
-     * The type of the response returned after each simulation step.
-     */
     type StepResponse
 
     /**
      * The type of the image used for rendering the simulation on the RL client.
      */
     type Image
+
+    /**
+     * The initial state of the controller.
+     */
+    def initialState: S
+
+    /**
+     * The current state of the controller.
+     */
+    def state: S
 
     /**
      * Initializes the controller with the given simulation configuration.
@@ -79,20 +98,24 @@ object RLControllerModule:
         type StepResponse = String
         type Image = String
 
-        private var initialState: S =
+        var _initialState: S =
           bundle.stateLogic.createState(SimulationConfig(simulation, ValidEnvironment.empty))
 
-        private var state: S = initialState
+        var _state: S = initialState
+
+        override def initialState: S = _initialState
+
+        override def state: S = _state
 
         override def init(config: SimulationConfig[ValidEnvironment]): Unit =
-          initialState = bundle.stateLogic.createState(config)
-          state = initialState
+          _initialState = bundle.stateLogic.createState(config)
+          _state = _initialState
 
         override def reset(rng: RNG): Unit =
-          state = context.model.update(state)(using _ => bundle.stateLogic.updateState(initialState, rng))
+          _state = context.model.update(state)(using _ => bundle.stateLogic.updateState(initialState, rng))
 
         override def step(actions: Map[DynamicEntity, Action[Id]]): StepResponse =
-          state = context.model.update(state)(using s => bundle.tickLogic.tick(s, state.dt)).unsafeRunSync()
+          _state = context.model.update(state)(using s => bundle.tickLogic.tick(s, state.dt)).unsafeRunSync()
           "Called step"
 
         override def render(): Image = "This is an image"
