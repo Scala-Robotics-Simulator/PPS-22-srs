@@ -1,6 +1,9 @@
 import matplotlib.pyplot as plt
 
-def plot_learning_history(learning_history, fig_size=(15, 5), show=True, save_path=None):
+
+def plot_learning_history(
+    learning_history, fig_size=(15, 5), show=True, save_path=None
+):
     """
     Plot the learning process for Q-Learning (or multi-agent) agents.
 
@@ -16,19 +19,19 @@ def plot_learning_history(learning_history, fig_size=(15, 5), show=True, save_pa
         If provided, saves the plot to this path.
     """
     steps = [len(episode) for episode in learning_history]
-    total_rewards = [episode[-1]['total_reward'] for episode in learning_history]
+    total_rewards = [episode[-1]["total_reward"] for episode in learning_history]
 
     fig, ax1 = plt.subplots(figsize=fig_size)
 
-    ax1.plot(range(len(steps)), steps, color='orange')
-    ax1.tick_params(axis='y', labelcolor='orange')
-    ax1.set_xlabel('Episodes')
-    ax1.set_ylabel('Steps', color='orange')
+    ax1.plot(range(len(steps)), steps, color="orange")
+    ax1.tick_params(axis="y", labelcolor="orange")
+    ax1.set_xlabel("Episodes")
+    ax1.set_ylabel("Steps", color="orange")
 
     ax2 = ax1.twinx()
-    ax2.plot(range(len(total_rewards)), total_rewards, color='#1f77b4')
-    ax2.tick_params(axis='y', labelcolor='#1f77b4')
-    ax2.set_ylabel('Total reward', color='#1f77b4')
+    ax2.plot(range(len(total_rewards)), total_rewards, color="#1f77b4")
+    ax2.tick_params(axis="y", labelcolor="#1f77b4")
+    ax2.set_ylabel("Total reward", color="#1f77b4")
 
     fig.tight_layout()
 

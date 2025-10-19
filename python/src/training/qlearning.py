@@ -1,13 +1,13 @@
 import numpy as np
 from tqdm import trange
 
-from python.src.agents.qagent import QAgent
+from agent.qagent import QAgent
 
 
 class QLearning:
     """
-    Implementation of the Q-Learning algorithm for OpenAI Gym environments.
-    
+    Implementation of the Q-Learning algorithm for OpenAI Gymnasium environments.
+
     Parameters
     ----------
     env : gym.Env
@@ -18,18 +18,19 @@ class QLearning:
         Total number of training episodes.
     episode_max_steps : int, optional (default=200)
         Maximum number of steps per episode.
-    
+
     Attributes
     ----------
     learning_history : list
         List to store the history of learning episodes if record_history is enabled.
     """
+
     def __init__(
         self,
         env,
         agent: QAgent,
-        episode_count=2000,
-        episode_max_steps=200,
+        episode_count: int = 2000,
+        episode_max_steps: int = 200,
     ):
         self.env = env
         self.agent = agent
@@ -38,9 +39,15 @@ class QLearning:
 
         self.learning_history = []
 
-    def train(self, record_history=False):
+    def train(self, record_history: bool = False):
         """Trains the agent using the Q-learning algorithm over a specified number of episodes and optionally records
-        the learning history."""
+        the learning history.
+
+        Parameters
+        ----------
+        record_history: bool
+            Optionally records the learning history.
+        """
         rewards_per_episode = []
 
         for ep in trange(self.episode_count, desc="Training", unit="ep"):
@@ -61,15 +68,17 @@ class QLearning:
                 frame = self.env.render() if self.env.render_mode == "ansi" else None
 
                 if record_history:
-                    episode_history.append({
-                        "frame": frame,
-                        "state": state,
-                        "action": action,
-                        "reward": reward,
-                        'total_reward': total_reward,
-                        "next_state": next_state,
-                        "done": done,
-                    })
+                    episode_history.append(
+                        {
+                            "frame": frame,
+                            "state": state,
+                            "action": action,
+                            "reward": reward,
+                            "total_reward": total_reward,
+                            "next_state": next_state,
+                            "done": done,
+                        }
+                    )
 
                 state = next_state
                 step_count += 1
@@ -82,7 +91,7 @@ class QLearning:
 
         return rewards_per_episode
 
-    def evaluate(self, test_episode_count=1000):
+    def evaluate(self, test_episode_count: int = 1000):
         """Evaluates the trained agent over a specified number of episodes, returning the average number of steps and total reward.
 
         Parameters
@@ -98,7 +107,9 @@ class QLearning:
         """
 
         if np.all(self.agent.Q == 0):
-            raise ValueError("Cannot evaluate agent before training. Please call train() first.")
+            raise ValueError(
+                "Cannot evaluate agent before training. Please call train() first."
+            )
 
         sum_steps = 0
         sum_total_reward = 0
@@ -124,7 +135,7 @@ class QLearning:
         avg_steps = sum_steps / test_episode_count
         avg_total_reward = sum_total_reward / test_episode_count
 
-        print(f'Average number of steps per episode: {avg_steps:.1f}')
-        print(f'Average total reward per episode: {avg_total_reward:.1f}')
+        print(f"Average number of steps per episode: {avg_steps:.1f}")
+        print(f"Average total reward per episode: {avg_total_reward:.1f}")
 
         return avg_steps, avg_total_reward
