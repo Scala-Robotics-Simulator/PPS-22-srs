@@ -3,7 +3,7 @@ name = "srs-rl"
 version = "0.0.1"
 description = "Reinforcement learning library for the SRS simulator"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.10, <3.13"
 dependencies = [
     "grpcio>=1.75.1",
     "grpcio-tools>=1.75.1",
