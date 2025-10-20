@@ -3,7 +3,6 @@ package io.github.srs.model.entity.dynamicentity.actuator
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
 import io.github.srs.model.entity.dynamicentity.agent.Agent
 import io.github.srs.model.entity.dynamicentity.robot.Robot
-import io.github.srs.model.entity.dynamicentity.robot.dsl.RobotDsl.*
 import io.github.srs.model.entity.{Orientation, Point2D}
 
 trait Kinematics[E <: DynamicEntity]:
@@ -26,4 +25,4 @@ given Kinematics[Robot] with
   def radius(e: Robot): Double = e.shape.radius
 
   def withPose(e: Robot, pos: Point2D, orientation: Orientation): Robot =
-    (e at pos withOrientation orientation)
+    e.copy(position = pos, orientation = orientation)
