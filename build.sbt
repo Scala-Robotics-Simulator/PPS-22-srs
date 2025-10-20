@@ -122,6 +122,7 @@ lazy val root = project
   )
   .enablePlugins(JacocoCoverallsPlugin)
   .dependsOn(protobuf)
+  .aggregate(protobuf)
 
 Compile / packageBin / packageOptions +=
   Package.ManifestAttributes(
