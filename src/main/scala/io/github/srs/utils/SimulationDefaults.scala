@@ -2,17 +2,19 @@ package io.github.srs.utils
 
 import java.awt.Color
 import java.util.UUID
-import scala.concurrent.duration.{DurationInt, FiniteDuration}
+
+import scala.concurrent.duration.{ DurationInt, FiniteDuration }
+
+import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import io.github.srs.model.entity.*
-import io.github.srs.model.entity.dynamicentity.actuator.{Actuator, Wheel as ActWheel}
-import io.github.srs.model.entity.dynamicentity.sensor.*
-import io.github.srs.model.environment.Environment
-import cats.effect.IO
+import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, Wheel as ActWheel }
 import io.github.srs.model.entity.dynamicentity.agent.Agent
-import io.github.srs.model.entity.dynamicentity.agent.reward.{NoReward, RewardModel}
+import io.github.srs.model.entity.dynamicentity.agent.reward.{ NoReward, RewardModel }
 import io.github.srs.model.entity.dynamicentity.robot.Robot
 import io.github.srs.model.entity.dynamicentity.robot.behavior.Policy
+import io.github.srs.model.entity.dynamicentity.sensor.*
+import io.github.srs.model.environment.Environment
 import io.github.srs.model.illumination.LightMap
 import io.github.srs.model.illumination.engine.SquidLibFovEngine
 import io.github.srs.model.illumination.model.ScaleFactor
@@ -268,6 +270,30 @@ object SimulationDefaults:
       val MaxRadius: Double = 0.5
       val DefaultReward: RewardModel[Agent] = NoReward()
 
+      val StdProximitySensors: Vector[Sensor[Agent, Environment]] = Vector(
+        ProximitySensor(Orientation(0.0)),
+        ProximitySensor(Orientation(45.0)),
+        ProximitySensor(Orientation(90.0)),
+        ProximitySensor(Orientation(135.0)),
+        ProximitySensor(Orientation(180.0)),
+        ProximitySensor(Orientation(225.0)),
+        ProximitySensor(Orientation(270.0)),
+        ProximitySensor(Orientation(315.0)),
+      )
+
+      val StdLightSensors: Vector[Sensor[Agent, Environment]] = Vector(
+        LightSensor(Orientation(0.0)),
+        LightSensor(Orientation(45.0)),
+        LightSensor(Orientation(90.0)),
+        LightSensor(Orientation(135.0)),
+        LightSensor(Orientation(180.0)),
+        LightSensor(Orientation(225.0)),
+        LightSensor(Orientation(270.0)),
+        LightSensor(Orientation(315.0)),
+      )
+
+    end Agent
+
     object Robot:
 
       val DefaultMaxRetries = 10
@@ -359,6 +385,15 @@ object SimulationDefaults:
           val WithProximitySensors: String = "withProximitySensors"
           val WithLightSensors: String = "withLightSensors"
           val Behavior: String = "behavior"
+
+        object Agent:
+          val Self: String = "agent"
+          val Radius: String = "radius"
+          val Speed: String = "speed"
+          val WithProximitySensors: String = "withProximitySensors"
+          val WithLightSensors: String = "withLightSensors"
+          val RewardModel: String = "rewardModel"
+
     end Entity
   end Fields
 

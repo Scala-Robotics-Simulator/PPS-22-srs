@@ -7,7 +7,7 @@ import io.github.srs.model.environment.Environment
 /**
  * Default placeholder reward model. Returns zero for every transition — suitable as a neutral fallback.
  */
-class NoReward extends RewardModel[Agent]:
+final case class NoReward() extends RewardModel[Agent]:
 
   override def evaluate(
       prev: Environment,
