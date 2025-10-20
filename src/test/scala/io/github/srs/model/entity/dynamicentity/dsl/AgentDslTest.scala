@@ -1,14 +1,15 @@
 package io.github.srs.model.entity.dynamicentity.dsl
 
-import scala.concurrent.duration.{FiniteDuration, MILLISECONDS}
+import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
+
 import io.github.srs.model.entity.dynamicentity.action.Action
-import io.github.srs.model.entity.dynamicentity.actuator.{Actuator, DifferentialWheelMotor, Wheel}
+import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, DifferentialWheelMotor, Wheel }
 import io.github.srs.model.entity.dynamicentity.agent.Agent
 import io.github.srs.model.entity.dynamicentity.agent.reward.RewardModel
-import io.github.srs.model.entity.dynamicentity.sensor.{ProximitySensor, Sensor}
-import io.github.srs.model.entity.{Orientation, Point2D, ShapeType}
+import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, Sensor }
+import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.environment.Environment
-import io.github.srs.utils.SimulationDefaults.DynamicEntity.Agent.{StdLightSensors, StdProximitySensors}
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.Agent.{ StdLightSensors, StdProximitySensors }
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -151,7 +152,8 @@ class AgentDslTest extends AnyFlatSpec with Matchers:
     val pos = Point2D(3.0, 4.0)
     val shape: ShapeType.Circle = ShapeType.Circle(0.3)
     val orientation = Orientation(180.0)
-    val entity = agent at pos withShape shape withOrientation orientation containing wheelMotor withSensor sensor withReward testReward
+    val entity =
+      agent at pos withShape shape withOrientation orientation containing wheelMotor withSensor sensor withReward testReward
 
     val _ = entity.position shouldBe pos
     val _ = entity.shape shouldBe shape

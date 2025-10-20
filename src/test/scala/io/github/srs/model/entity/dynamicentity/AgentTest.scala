@@ -134,9 +134,8 @@ class AgentTest extends AnyFlatSpec with Matchers:
     inside((defaultAgent containing proximitySensor).validate):
       case Right(a) =>
         val environment = Environment(10, 10)
-        val sensedData = a.sensors.map(sensor =>
-          SensorReading(sensor, sensor.sense[IO](a, environment).unsafeRunSync())
-        )
+        val sensedData =
+          a.sensors.map(sensor => SensorReading(sensor, sensor.sense[IO](a, environment).unsafeRunSync()))
         sensedData.should(
           contain.only(
             SensorReading(

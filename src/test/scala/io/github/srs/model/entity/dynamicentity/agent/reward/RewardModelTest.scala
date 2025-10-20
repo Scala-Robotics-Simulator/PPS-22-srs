@@ -68,7 +68,7 @@ class RewardModelTest extends AnyFlatSpec with Matchers:
     val stepCountReward = new StatefulReward[Agent, Int]:
       protected var state: Int = 0
 
-      protected override def compute(
+      override protected def compute(
           prev: Environment,
           curr: Environment,
           entity: Agent,
@@ -91,7 +91,7 @@ class RewardModelTest extends AnyFlatSpec with Matchers:
     val decayingReward = new StatefulReward[Agent, Double]:
       protected var state: Double = 10.0
 
-      protected override def compute(
+      override protected def compute(
           prev: Environment,
           curr: Environment,
           entity: Agent,
