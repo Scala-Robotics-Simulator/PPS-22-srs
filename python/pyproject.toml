@@ -11,7 +11,7 @@ dependencies = [
     "matplotlib>=3.8.0",
     "gymnasium>=0.30.0",
     "tqdm>=4.67.1",
-    "tensorflow>=2.15.0",
+    "tensorflow>=2.20.0",
     "imageio>=2.31.4",
     "pygame>=2.6.1",
 ]
