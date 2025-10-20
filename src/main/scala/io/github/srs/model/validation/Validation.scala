@@ -212,6 +212,54 @@ object Validation:
     }
 
   /**
+   * Ensures the count of elements matching a predicate in a sequence is within a specified range.
+   *
+   * @param field
+   *   the name of the field being validated (for error reporting).
+   * @param elements
+   *   the sequence of elements to validate.
+   * @param predicate
+   *   a function that returns true for elements to be counted.
+   * @param min
+   *   the minimum count of matching elements (inclusive).
+   * @param max
+   *   the maximum count of matching elements (inclusive).
+   * @tparam A
+   *   the type of elements in the sequence.
+   * @return
+   *   [[Right]] with the original sequence if the count is within bounds, otherwise [[Left]] with a
+   *   [[DomainError.InvalidCount]] error.
+   */
+  def validateCountWith[A](
+      field: String,
+      elements: Seq[A],
+      predicate: A => Boolean,
+      min: Int,
+      max: Int,
+  ): Validation[Seq[A]] =
+    val count = elements.count(predicate)
+    if count >= min && count <= max then Right(elements)
+    else Left(DomainError.InvalidCount(field, count, min, max))
+
+  /**
+   * Validates that a count is within a specified range.
+   *
+   * @param field
+   *   the name of the field being validated (for error reporting).
+   * @param count
+   *   the count value to validate.
+   * @param min
+   *   the minimum count (inclusive).
+   * @param max
+   *   the maximum count (inclusive).
+   * @return
+   *   [[Right]] with Unit if the count is within bounds, otherwise [[Left]] with a [[DomainError.InvalidCount]] error.
+   */
+  def validateCount(field: String, count: Int, min: Int, max: Int): Validation[Unit] =
+    if count >= min && count <= max then Right(())
+    else Left(DomainError.InvalidCount(field, count, min, max))
+
+  /**
    * Checks if there are no collisions among a set of entities.
    * @param field
    *   the name of the field being validated (for error reporting).
