@@ -1,10 +1,11 @@
-import logging
 import os
 import random
 
 import numpy as np
 
-logger = logging.getLogger(__name__)
+from utils.log import Logger
+
+logger = Logger(__name__)
 
 
 def set_global_seed(seed=None, env=None, tensorflow_deterministic=False, verbose=False):
@@ -24,7 +25,7 @@ def set_global_seed(seed=None, env=None, tensorflow_deterministic=False, verbose
     """
     if seed is None:
         if verbose:
-            logging.info("[set_global_seed] No seed provided, skipping.")
+            logger.info("[set_global_seed] No seed provided, skipping.")
         return
 
     os.environ["PYTHONHASHSEED"] = str(seed)
@@ -37,7 +38,7 @@ def set_global_seed(seed=None, env=None, tensorflow_deterministic=False, verbose
     _seed_gymnasium(seed=seed, env=env, verbose=verbose)
 
     if verbose:
-        logging.info(f"[set_global_seed] All available seeds set to {seed}.")
+        logger.info(f"[set_global_seed] All available seeds set to {seed}.")
 
 
 def _seed_tensorflow(seed, verbose=False):
@@ -54,19 +55,24 @@ def _seed_tensorflow(seed, verbose=False):
         import tensorflow as tf
     except ImportError:
         if verbose:
-            logging.warning("[set_global_seed] TensorFlow not installed, skipping.")
+            logger.warning("[set_global_seed] TensorFlow not installed, skipping.")
         return
 
     tf.random.set_seed(seed)
     try:
-        tf.config.experimental.enable_op_determinism(True)
+        import inspect
+        sig = inspect.signature(tf.config.experimental.enable_op_determinism)
+        if len(sig.parameters) == 0:
+            tf.config.experimental.enable_op_determinism()
+        else:
+            tf.config.experimental.enable_op_determinism(True)
     except Exception as e:
         logger.warning(
             f"[set_global_seed] Could not enable TensorFlow op determinism: {e}"
         )
 
     if verbose:
-        logging.info("[set_global_seed] TensorFlow seed set.")
+        logger.info("[set_global_seed] TensorFlow seed set.")
 
 
 def _seed_gymnasium(seed, env, verbose=False):
@@ -90,9 +96,9 @@ def _seed_gymnasium(seed, env, verbose=False):
         if hasattr(env.observation_space, "seed"):
             env.observation_space.seed(seed)
         if verbose:
-            logging.info("[set_global_seed] Gymnasium environment seed set.")
+            logger.info("[set_global_seed] Gymnasium environment seed set.")
     except Exception as e:
         if verbose:
-            logging.warning(
+            logger.warning(
                 f"[set_global_seed] Warning: could not seed environment ({e})"
             )

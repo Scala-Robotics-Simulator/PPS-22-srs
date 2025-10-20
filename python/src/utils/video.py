@@ -1,4 +1,3 @@
-import logging
 import os
 import shutil
 import subprocess
@@ -7,7 +6,9 @@ import uuid
 import cv2
 import numpy as np
 
-logger = logging.getLogger(__name__)
+from utils.log import Logger
+
+logger = Logger(__name__)
 
 
 def create_mp4_video_from_frames(frames: np.ndarray, fps: int) -> str:
