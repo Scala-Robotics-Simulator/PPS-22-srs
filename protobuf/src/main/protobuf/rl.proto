@@ -52,7 +52,8 @@ message InitResponse {
 }
 
 message Observation {
-  repeated double values = 1; // Fixed size: 16 values
+  repeated double proximity_values = 1; // Fixed size: 8 values
+  repeated double light_values = 2;     // Fixed size: 8 values
 }
 
 message ResetResponse {

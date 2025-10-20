@@ -1,11 +1,17 @@
 package io.github.srs.controller.protobuf.rl
 
+import scala.annotation.unused
+
+import cats.effect.unsafe.implicits.global
 import cats.effect.IO
 import io.github.srs.model.ModelModule
 import io.github.srs.controller.RLControllerModule
 import io.github.srs.protos.rl.*
 import io.grpc.*
 import com.google.protobuf.ByteString
+import io.github.srs.config.yaml.YamlManager
+import io.github.srs.model.environment.dsl.CreationDSL.validate
+import io.github.srs.utils.random.SimpleRNG
 
 /**
  * Module that exposes a simple RL gRPC service used by the RL controller feature.
@@ -91,27 +97,21 @@ object RLServiceModule:
             case RLRequest(RLRequest.Request.Init(InitRequest(config, _)), _) =>
               RLResponse(
                 response = RLResponse.Response.Init(
-                  InitResponse(ok = true, message = None),
+                  manageInitRequest(config),
                 ),
               )
 
-            case RLRequest(RLRequest.Request.Reset(_), _) =>
+            case RLRequest(RLRequest.Request.Reset(ResetRequest(seed, options, _)), _) =>
               RLResponse(
                 response = RLResponse.Response.Reset(
-                  ResetResponse(observations = Map.empty, info = Map.empty),
+                  manageResetRequest(seed, options),
                 ),
               )
 
-            case RLRequest(RLRequest.Request.Step(_), _) =>
+            case RLRequest(RLRequest.Request.Step(StepRequest(actions, _)), _) =>
               RLResponse(
                 response = RLResponse.Response.Step(
-                  StepResponse(
-                    observations = Map.empty,
-                    rewards = Map.empty,
-                    terminateds = Map.empty,
-                    truncateds = Map.empty,
-                    infos = Map.empty,
-                  ),
+                  manageStepRequest(actions),
                 ),
               )
 
@@ -120,13 +120,7 @@ object RLServiceModule:
               val height = h.getOrElse(600)
               RLResponse(
                 response = RLResponse.Response.Render(
-                  RenderResponse(
-                    image = ByteString.EMPTY,
-                    format = "png",
-                    width = width,
-                    height = height,
-                    channels = 3,
-                  ),
+                  manageRenderRequest(width, height),
                 ),
               )
 
@@ -143,6 +137,51 @@ object RLServiceModule:
                   ErrorResponse(message = "Unknown request", code = ErrorCode.UNKNOWN),
                 ),
               )
+
+        private def manageInitRequest(@unused config: String): InitResponse =
+          val simulationConfig = YamlManager.parse[IO](config).unsafeRunSync()
+          simulationConfig match
+            case Left(errors) => InitResponse(ok = false, message = Some(errors.mkString("\n")))
+            case Right(config) =>
+              config.environment.validate match
+                case Left(error) => InitResponse(ok = false, message = Some(error.toString))
+                case Right(env) =>
+                  context.controller.init(config.simulation in env)
+                  InitResponse(ok = true, message = None)
+
+        private def manageResetRequest(@unused seed: Option[Int], @unused options: Map[String, String]): ResetResponse =
+          import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings.*
+          val rng = seed match
+            case Some(seed) => SimpleRNG(seed)
+            case None => context.controller.initialState.simulationRNG
+          val (obs, deInfos) = context.controller.reset(rng)
+          val observations = obs.map { (ent, readings) =>
+            ent.id.toString -> Observation(
+              proximityValues = readings.proximityReadings.map(_.value),
+              lightValues = readings.lightReadings.map(_.value),
+            )
+          }
+          val infos = deInfos.map { (ent, info) => ent.id.toString -> info }
+
+          ResetResponse(observations = observations, info = infos)
+
+        private def manageStepRequest(@unused actions: Map[String, ContinuousAction]): StepResponse =
+          StepResponse(
+            observations = Map.empty,
+            rewards = Map.empty,
+            terminateds = Map.empty,
+            truncateds = Map.empty,
+            infos = Map.empty,
+          )
+
+        private def manageRenderRequest(width: Int, height: Int): RenderResponse =
+          RenderResponse(
+            image = ByteString.EMPTY,
+            format = "png",
+            width = width,
+            height = height,
+            channels = 3,
+          )
 
       end ServiceImpl
 
