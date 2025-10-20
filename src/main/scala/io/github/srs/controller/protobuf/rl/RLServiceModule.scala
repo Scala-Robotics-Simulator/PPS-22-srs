@@ -2,8 +2,10 @@ package io.github.srs.controller.protobuf.rl
 
 import scala.annotation.unused
 
+import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings.*
 import cats.effect.unsafe.implicits.global
 import cats.effect.IO
+import cats.Id
 import io.github.srs.model.ModelModule
 import io.github.srs.controller.RLControllerModule
 import io.github.srs.protos.rl.*
@@ -12,6 +14,9 @@ import com.google.protobuf.ByteString
 import io.github.srs.config.yaml.YamlManager
 import io.github.srs.model.environment.dsl.CreationDSL.validate
 import io.github.srs.utils.random.SimpleRNG
+import io.github.srs.model.entity.dynamicentity.DynamicEntity
+import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings
+import io.github.srs.model.entity.dynamicentity.action.MovementActionFactory
 
 /**
  * Module that exposes a simple RL gRPC service used by the RL controller feature.
@@ -138,7 +143,7 @@ object RLServiceModule:
                 ),
               )
 
-        private def manageInitRequest(@unused config: String): InitResponse =
+        private def manageInitRequest(config: String): InitResponse =
           val simulationConfig = YamlManager.parse[IO](config).unsafeRunSync()
           simulationConfig match
             case Left(errors) => InitResponse(ok = false, message = Some(errors.mkString("\n")))
@@ -150,28 +155,32 @@ object RLServiceModule:
                   InitResponse(ok = true, message = None)
 
         private def manageResetRequest(seed: Option[Int], @unused options: Map[String, String]): ResetResponse =
-          import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings.*
           val rng = seed match
             case Some(seed) => SimpleRNG(seed)
             case None => context.controller.initialState.simulationRNG
           val (obs, deInfos) = context.controller.reset(rng)
-          val observations = obs.map { (ent, readings) =>
-            ent.id.toString -> Observation(
-              proximityValues = readings.proximityReadings.map(_.value),
-              lightValues = readings.lightReadings.map(_.value),
-            )
-          }
+          val observations = obs.map(_.toObservationPair)
           val infos = deInfos.map { (ent, info) => ent.id.toString -> info }
 
           ResetResponse(observations = observations, info = infos)
 
-        private def manageStepRequest(@unused actions: Map[String, ContinuousAction]): StepResponse =
+        private def manageStepRequest(actions: Map[String, ContinuousAction]): StepResponse =
+          val agentActions = for
+            (id, ca) <- actions
+            // TODO: use agent instead of robot
+            agent <- context.controller.state.environment.entities.collect:
+              case r: DynamicEntity if r.id.toString == id => r
+            action <- MovementActionFactory.customMove[Id](ca.leftWheel, ca.rightWheel).toOption
+          yield agent -> action
+          val stepResponse: io.github.srs.controller.RLControllerModule.StepResponse =
+            context.controller.step(agentActions)
+
           StepResponse(
-            observations = Map.empty,
-            rewards = Map.empty,
-            terminateds = Map.empty,
-            truncateds = Map.empty,
-            infos = Map.empty,
+            observations = stepResponse.observations.map(_.toObservationPair),
+            rewards = stepResponse.rewards.map(_.to),
+            terminateds = stepResponse.terminateds.map(_.to),
+            truncateds = stepResponse.truncateds.map(_.to),
+            infos = stepResponse.infos.map(_.to),
           )
 
         private def manageRenderRequest(width: Int, height: Int): RenderResponse =
@@ -184,10 +193,27 @@ object RLServiceModule:
             channels = 3,
           )
 
+        extension [A](self: (DynamicEntity, A))
+
+          def to: (String, A) =
+            val (de, a) = self
+            de.id.toString -> a
+
+          def to[B](f: A => B): (String, B) =
+            val (de, a) = self
+            de.id.toString -> f(a)
+
+        extension (self: (DynamicEntity, SensorReadings))
+
+          def toObservationPair: (String, Observation) =
+            self.to(readings =>
+              Observation(
+                proximityValues = readings.proximityReadings.map(_.value),
+                lightValues = readings.lightReadings.map(_.value),
+              ),
+            )
       end ServiceImpl
-
     end Service
-
   end Component
 
   /**

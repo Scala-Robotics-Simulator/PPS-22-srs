@@ -23,7 +23,7 @@ object RLControllerModule:
   /**
    * The resonse after each simulation step.
    */
-  case class StepResponse private (
+  case class StepResponse private[RLControllerModule] (
       observations: Observations,
       rewards: Map[DynamicEntity, Double],
       terminateds: Map[DynamicEntity, Boolean],
@@ -35,8 +35,6 @@ object RLControllerModule:
    * Controller trait defines the interface for a Reinforcement Learning controller.
    */
   trait Controller[S <: ModelModule.BaseState]:
-
-    type StepResponse
 
     /**
      * The type of the image used for rendering the simulation on the RL client.
@@ -106,8 +104,6 @@ object RLControllerModule:
 
       private class ControllerImpl(using bundle: RLLogicsBundle[S]) extends Controller[S]:
 
-        type StepResponse = String
-
         var _initialState: S =
           bundle.stateLogic.createState(SimulationConfig(simulation, ValidEnvironment.empty))
 
@@ -131,9 +127,16 @@ object RLControllerModule:
           }.unzip match
             case (obsList, infosList) => (obsList.toMap, infosList.toMap)
 
+        // TODO: Use agent instead of DynamicEntity
         override def step(actions: Map[DynamicEntity, Action[Id]]): StepResponse =
           _state = context.model.update(state)(using s => bundle.tickLogic.tick(s, state.dt)).unsafeRunSync()
-          "Called step"
+          StepResponse(
+            observations = Map.empty,
+            rewards = Map.empty,
+            terminateds = Map.empty,
+            truncateds = Map.empty,
+            infos = Map.empty,
+          )
 
         override def render(width: Int, height: Int): Image =
           EnvironmentRenderer.renderToPNG(state.environment, width, height)
