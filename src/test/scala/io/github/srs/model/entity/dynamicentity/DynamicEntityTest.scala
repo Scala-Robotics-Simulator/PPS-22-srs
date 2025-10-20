@@ -1,16 +1,15 @@
 package io.github.srs.model.entity.dynamicentity
 
-import java.util.UUID
-
-import scala.concurrent.duration.FiniteDuration
-
 import cats.Monad
-import io.github.srs.model.entity.dynamicentity.actuator.Actuator
+import io.github.srs.model.entity.dynamicentity.actuator.{Actuator, Kinematics}
 import io.github.srs.model.entity.dynamicentity.sensor.*
-import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
+import io.github.srs.model.entity.{Orientation, Point2D, ShapeType}
 import io.github.srs.model.environment.Environment
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+
+import java.util.UUID
+import scala.concurrent.duration.FiniteDuration
 
 class DynamicEntityTest extends AnyFlatSpec with Matchers:
 
@@ -37,7 +36,9 @@ class DynamicEntityTest extends AnyFlatSpec with Matchers:
     def act[F[_]: Monad](): F[Dummy] = Monad[F].pure(this)
 
   class DummyActuator extends Actuator[Dummy]:
-    override def act[F[_]: Monad](dt: FiniteDuration, entity: Dummy): F[Dummy] = Monad[F].pure(entity)
+
+    override def act[F[_]: Monad](dt: FiniteDuration, entity: Dummy)(using Kinematics[Dummy]): F[Dummy] =
+      Monad[F].pure(entity)
 
   "DynamicEntity" should "support having no actuators" in:
     val entity = new Dummy(

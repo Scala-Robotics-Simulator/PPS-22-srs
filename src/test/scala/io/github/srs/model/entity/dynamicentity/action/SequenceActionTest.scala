@@ -1,18 +1,17 @@
 package io.github.srs.model.entity.dynamicentity.action
 
-import java.util.UUID
-
-import scala.concurrent.duration.FiniteDuration
-
-import cats.{ Id, Monad }
+import cats.{Id, Monad}
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
-import io.github.srs.model.entity.dynamicentity.action.MovementActionFactory.{ moveForward, turnRight }
-import io.github.srs.model.entity.dynamicentity.actuator.Actuator
+import io.github.srs.model.entity.dynamicentity.action.MovementActionFactory.{moveForward, turnRight}
+import io.github.srs.model.entity.dynamicentity.actuator.{Actuator, Kinematics}
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor
-import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
+import io.github.srs.model.entity.{Orientation, Point2D, ShapeType}
 import io.github.srs.model.environment.Environment
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+
+import java.util.UUID
+import scala.concurrent.duration.FiniteDuration
 
 class SequenceActionTest extends AnyFlatSpec with Matchers:
 
@@ -21,17 +20,19 @@ class SequenceActionTest extends AnyFlatSpec with Matchers:
   given actionAlgebra: ActionAlgebra[Id, Dummy] with
 
     def moveWheels(entity: Dummy, left: Double, right: Double): Dummy =
-      val updatedActuators: Seq[DummyActuator] = Seq(DummyActuator())
       Dummy(
         position = entity.position,
         shape = entity.shape,
         orientation = entity.orientation,
-        actuators = updatedActuators,
+        actuators = entity.actuators,
         sensors = entity.sensors,
       )
 
-  case class DummyActuator() extends Actuator[Dummy]:
-    override def act[F[_]: Monad](dt: FiniteDuration, entity: Dummy): F[Dummy] = Monad[F].pure(entity)
+
+  class DummyActuator extends Actuator[Dummy]:
+
+    override def act[F[_]: Monad](dt: FiniteDuration, entity: Dummy)(using Kinematics[Dummy]): F[Dummy] =
+      Monad[F].pure(entity)
 
   case class Dummy(
       override val id: UUID = UUID.randomUUID(),
