@@ -57,7 +57,7 @@ class RLControllerTest
   "RLController" should "correcly reset the simulation" in:
     val _ = controller.step(Map.empty)
     val state = controller.state
-    controller.reset(rng = SimpleRNG(420))
+    val (_, _) = controller.reset(rng = SimpleRNG(420))
     val _ = controller.state.elapsedTime should not equal (state.elapsedTime)
     controller.state.simulationRNG should not equal (controller.initialState.simulationRNG)
 

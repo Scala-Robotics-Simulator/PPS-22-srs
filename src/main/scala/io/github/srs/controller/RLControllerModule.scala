@@ -11,18 +11,23 @@ import cats.Id
 import io.github.srs.model.Simulation.simulation
 import io.github.srs.model.logic.RLLogicsBundle
 import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings
+import io.github.srs.model.entity.dynamicentity.Robot
+import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
 
 object RLControllerModule:
+
+  type Observations = Map[DynamicEntity, SensorReadings]
+  type Infos = Map[DynamicEntity, String]
 
   /**
    * The resonse after each simulation step.
    */
   case class StepResponse private (
-      observations: Map[DynamicEntity, SensorReadings],
+      observations: Observations,
       rewards: Map[DynamicEntity, Double],
       terminateds: Map[DynamicEntity, Boolean],
       truncateds: Map[DynamicEntity, Boolean],
-      infos: Map[DynamicEntity, String],
+      infos: Infos,
   )
 
   /**
@@ -61,7 +66,7 @@ object RLControllerModule:
      * @param rng
      *   the random number generator to use for reproducibility in the next run.
      */
-    def reset(rng: RNG): Unit
+    def reset(rng: RNG): (Observations, Infos)
 
     /**
      * Performs a simulation step using the provided actions for each agent.
@@ -111,8 +116,15 @@ object RLControllerModule:
           _initialState = bundle.stateLogic.createState(config)
           _state = _initialState
 
-        override def reset(rng: RNG): Unit =
+        override def reset(rng: RNG): (Observations, Infos) =
           _state = context.model.update(state)(using _ => bundle.stateLogic.updateState(initialState, rng))
+          state.environment.entities.collect {
+            // TODO: will be agent
+            case r: Robot => (r, r.senseAll[Id](state.environment), "")
+          }.map { case (robot, readings, info) =>
+            (robot -> readings, robot -> info)
+          }.unzip match
+            case (obsList, infosList) => (obsList.toMap, infosList.toMap)
 
         override def step(actions: Map[DynamicEntity, Action[Id]]): StepResponse =
           _state = context.model.update(state)(using s => bundle.tickLogic.tick(s, state.dt)).unsafeRunSync()
