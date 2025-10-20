@@ -26,7 +26,7 @@ object DynamicEntity:
    *   An Encoder that serializes DynamicEntity instances to JSON.
    */
   given Encoder[Robot] = (robot: Robot) =>
-    val dwt = robot.actuators.collectFirst { case dwt: DifferentialWheelMotor =>
+    val dwt = robot.actuators.collectFirst { case dwt: DifferentialWheelMotor[Robot] =>
       dwt
     }
     val speeds = dwt.map(d => (d.left.speed, d.right.speed))

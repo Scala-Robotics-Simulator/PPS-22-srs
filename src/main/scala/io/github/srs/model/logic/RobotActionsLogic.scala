@@ -1,23 +1,23 @@
 package io.github.srs.model.logic
 
-import java.util.UUID
-
-import scala.concurrent.duration.{ DurationInt, FiniteDuration }
-
 import cats.effect.IO
+import cats.implicits.*
+import com.typesafe.scalalogging.Logger
 import io.github.srs.controller.message.RobotProposal
 import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor.applyMovementActions
+import io.github.srs.model.entity.dynamicentity.actuator.{DifferentialWheelMotor, given_Kinematics_Robot}
+import io.github.srs.model.entity.dynamicentity.robot.Robot
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.environment.ValidEnvironment.ValidEnvironment
 import io.github.srs.model.environment.dsl.CreationDSL.validate
-import io.github.srs.model.{ ModelModule, SimulationState }
+import io.github.srs.model.{ModelModule, SimulationState}
 import io.github.srs.utils.EqualityGivenInstances.given
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.DefaultMaxRetries
-import io.github.srs.utils.SimulationDefaults.{ BinarySearchDurationThreshold, DebugMode }
-import cats.implicits.*
-import com.typesafe.scalalogging.Logger
-import io.github.srs.model.entity.dynamicentity.robot.Robot
+import io.github.srs.utils.SimulationDefaults.{BinarySearchDurationThreshold, DebugMode}
+
+import java.util.UUID
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
 
 /**
  * Logic for handling robot actions proposals.
@@ -97,11 +97,21 @@ object RobotActionsLogic:
             IO.pure(best.getOrElse(robot))
           else
             val mid = low + (high - low) / 2
-            robot.applyMovementActions[cats.effect.IO](mid, action).flatMap { candidate =>
-              env.updateEntity(candidate) match
-                case Right(_) => binarySearch(mid, high, Some(candidate), attempts + 1)
-                case Left(_) => binarySearch(low, mid, best, attempts + 1)
-            }
+            val maybeMotor = robot.actuators.collectFirst:
+              case m: DifferentialWheelMotor[Robot] => m
+            
+            maybeMotor match
+              case None =>
+                IO.pure(robot) // no movement possible
+
+              case Some(motor) =>
+                motor
+                  .applyMovementActions(robot, mid, action)
+                  .flatMap { candidate =>
+                    env.updateEntity(candidate) match
+                      case Right(_) => binarySearch(mid, high, Some(candidate), attempts + 1)
+                      case Left(_) => binarySearch(low, mid, best, attempts + 1)
+                  }
 
         binarySearch(0.nanos, maxDt, None, 0)
       end safeMove

@@ -2,16 +2,15 @@ package io.github.srs.utils
 
 import java.awt.Color
 import java.util.UUID
-
-import scala.concurrent.duration.{ DurationInt, FiniteDuration }
-
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import cats.effect.unsafe.implicits.global
 import io.github.srs.model.entity.*
-import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, Wheel as ActWheel }
+import io.github.srs.model.entity.dynamicentity.actuator.{Actuator, Wheel as ActWheel}
 import io.github.srs.model.entity.dynamicentity.sensor.*
 import io.github.srs.model.environment.Environment
 import cats.effect.IO
 import io.github.srs.model.entity.dynamicentity.agent.Agent
+import io.github.srs.model.entity.dynamicentity.agent.reward.{NoReward, RewardModel}
 import io.github.srs.model.entity.dynamicentity.robot.Robot
 import io.github.srs.model.entity.dynamicentity.robot.behavior.Policy
 import io.github.srs.model.illumination.LightMap
@@ -267,6 +266,7 @@ object SimulationDefaults:
       val DefaultSensors: Vector[Sensor[Agent, Environment]] = Vector.empty
       val MinRadius: Double = 0.01
       val MaxRadius: Double = 0.5
+      val DefaultReward: RewardModel[Agent] = NoReward()
 
     object Robot:
 

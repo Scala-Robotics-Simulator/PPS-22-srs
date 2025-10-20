@@ -1,11 +1,11 @@
 package io.github.srs.model.entity.dynamicentity.agent
 
 import java.util.UUID
-
 import io.github.srs.model.entity.dynamicentity.actuator.Actuator
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
-import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
+import io.github.srs.model.entity.dynamicentity.agent.reward.RewardModel
+import io.github.srs.model.entity.{Orientation, Point2D, ShapeType}
 import io.github.srs.model.environment.Environment
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Agent as AgentDefaults
 
@@ -32,6 +32,7 @@ final case class Agent(
     override val orientation: Orientation = AgentDefaults.DefaultOrientation,
     override val actuators: Seq[Actuator[Agent]] = AgentDefaults.DefaultActuators,
     override val sensors: Vector[Sensor[Agent, Environment]] = AgentDefaults.DefaultSensors,
+    reward: RewardModel[Agent] = AgentDefaults.DefaultReward,
 ) extends DynamicEntity
 
 object Agent:
@@ -61,8 +62,9 @@ object Agent:
       orientation: Orientation = AgentDefaults.DefaultOrientation,
       actuators: Seq[Actuator[Agent]] = AgentDefaults.DefaultActuators,
       sensors: Vector[Sensor[Agent, Environment]] = AgentDefaults.DefaultSensors,
+      reward: RewardModel[Agent] = AgentDefaults.DefaultReward,
   ): Agent =
-    new Agent(id, position, shape, orientation, actuators, sensors)
+    new Agent(id, position, shape, orientation, actuators, sensors, reward)
 
   /**
    * Extractor method for the [[Agent]] .

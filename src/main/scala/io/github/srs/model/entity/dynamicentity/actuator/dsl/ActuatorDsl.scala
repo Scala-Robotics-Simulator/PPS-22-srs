@@ -1,8 +1,7 @@
 package io.github.srs.model.entity.dynamicentity.actuator.dsl
 
-import io.github.srs.model.entity.dynamicentity.actuator.dsl.DifferentialWheelMotorDsl.validateDifferentialWheelMotor
-import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, DifferentialWheelMotor }
-import io.github.srs.model.entity.dynamicentity.robot.Robot
+import io.github.srs.model.entity.dynamicentity.DynamicEntity
+import io.github.srs.model.entity.dynamicentity.actuator.{Actuator, DifferentialWheelMotor}
 import io.github.srs.model.validation.Validation
 
 /**
@@ -18,18 +17,11 @@ object ActuatorDsl:
    * @return
    *   [[Right]] if the actuator is valid, or [[Left]] with a validation error.
    */
-  def validateActuator(actuator: Actuator[Robot]): Validation[Actuator[Robot]] =
-    actuator.validate
+  def validateActuator[E <: DynamicEntity](actuator: Actuator[E]): Validation[Actuator[E]] =
+    actuator match
+      case dwm: DifferentialWheelMotor[E] =>
+        DifferentialWheelMotorDsl.validateDifferentialWheelMotor(dwm)
+      case other =>
+        Right(other)
 
-  extension (actuator: Actuator[Robot])
-
-    /**
-     * Validates the actuator to ensure it meets the domain constraints.
-     *
-     * @return
-     *   [[Right]] if the actuator is valid, or [[Left]] with a validation error.
-     */
-    def validate: Validation[Actuator[Robot]] =
-      actuator match
-        case dwm: DifferentialWheelMotor => validateDifferentialWheelMotor(dwm)
 end ActuatorDsl

@@ -39,7 +39,7 @@ object Robot:
     override def moveWheels(robot: Robot, leftSpeed: Double, rightSpeed: Double): IO[Robot] =
       IO.pure:
         val updatedActuators = robot.actuators.map:
-          case dwm: DifferentialWheelMotor =>
+          case dwm: DifferentialWheelMotor[Robot] =>
             DifferentialWheelMotor(
               left = dwm.left.copy(speed = leftSpeed),
               right = dwm.right.copy(speed = rightSpeed),
