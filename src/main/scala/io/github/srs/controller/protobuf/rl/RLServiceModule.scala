@@ -149,7 +149,7 @@ object RLServiceModule:
                   context.controller.init(config.simulation in env)
                   InitResponse(ok = true, message = None)
 
-        private def manageResetRequest(@unused seed: Option[Int], @unused options: Map[String, String]): ResetResponse =
+        private def manageResetRequest(seed: Option[Int], @unused options: Map[String, String]): ResetResponse =
           import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings.*
           val rng = seed match
             case Some(seed) => SimpleRNG(seed)
