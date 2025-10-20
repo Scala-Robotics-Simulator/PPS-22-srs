@@ -1,7 +1,8 @@
 package io.github.srs.model.entity.dynamicentity
 
 import io.github.srs.model.entity.*
-import io.github.srs.model.entity.dynamicentity.actuator.{ DifferentialWheelMotor, Wheel }
+import io.github.srs.model.entity.dynamicentity.actuator.{DifferentialWheelMotor, Wheel}
+import io.github.srs.model.entity.dynamicentity.robot.Robot
 import io.github.srs.model.validation.DomainError
 import org.scalatest.Inside.inside
 import org.scalatest.flatspec.AnyFlatSpec
@@ -11,7 +12,7 @@ import io.github.srs.utils.SimulationDefaults.Fields.Entity.DynamicEntity.Robot.
 
 class RobotValidationTest extends AnyFlatSpec with Matchers:
 
-  val wheelMotor: DifferentialWheelMotor =
+  val wheelMotor: DifferentialWheelMotor[Robot] =
     DifferentialWheelMotor(Wheel(1.0, ShapeType.Circle(0.5)), Wheel(1.0, ShapeType.Circle(0.5)))
 
   it should "not support having multiple WheelMotor Actuators" in:

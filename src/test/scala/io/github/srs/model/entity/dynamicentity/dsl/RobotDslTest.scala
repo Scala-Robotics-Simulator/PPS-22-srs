@@ -1,18 +1,18 @@
 package io.github.srs.model.entity.dynamicentity.dsl
 
-import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
-
 import cats.effect.IO
 import io.github.srs.model.entity.dynamicentity.action.Action
-import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, DifferentialWheelMotor, Wheel }
-import io.github.srs.model.entity.dynamicentity.robot.behavior.BehaviorTypes.Behavior
+import io.github.srs.model.entity.dynamicentity.actuator.{Actuator, DifferentialWheelMotor, Wheel}
 import io.github.srs.model.entity.dynamicentity.robot.Robot
-import io.github.srs.model.entity.dynamicentity.robot.behavior.{ BehaviorContext, Policy }
-import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, Sensor }
-import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
+import io.github.srs.model.entity.dynamicentity.robot.behavior.BehaviorTypes.Behavior
+import io.github.srs.model.entity.dynamicentity.robot.behavior.{BehaviorContext, Policy}
+import io.github.srs.model.entity.dynamicentity.sensor.{ProximitySensor, Sensor}
+import io.github.srs.model.entity.{Orientation, Point2D, ShapeType}
 import io.github.srs.model.environment.Environment
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+
+import scala.concurrent.duration.{FiniteDuration, MILLISECONDS}
 
 class RobotDslTest extends AnyFlatSpec with Matchers:
   given CanEqual[ShapeType.Circle, ShapeType.Circle] = CanEqual.derived
@@ -27,10 +27,10 @@ class RobotDslTest extends AnyFlatSpec with Matchers:
   val dt: FiniteDuration = FiniteDuration(100, MILLISECONDS)
   val wheelRadius: Double = 0.5
 
-  val wheelMotor: DifferentialWheelMotor =
+  val wheelMotor: DifferentialWheelMotor[Robot] =
     DifferentialWheelMotor(Wheel(1.0, ShapeType.Circle(wheelRadius)), Wheel(1.0, ShapeType.Circle(wheelRadius)))
 
-  val wheelMotor2: DifferentialWheelMotor =
+  val wheelMotor2: DifferentialWheelMotor[Robot] =
     DifferentialWheelMotor(Wheel(0.5, ShapeType.Circle(wheelRadius)), Wheel(0.2, ShapeType.Circle(wheelRadius)))
 
   val sensor: Sensor[Robot, Environment] = ProximitySensor(Orientation(0.0), 3.0)

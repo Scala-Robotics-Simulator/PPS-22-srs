@@ -100,7 +100,7 @@ class YamlManagerTest extends AnyFlatSpec with Matchers:
                 robot.actuators.headOption match
                   case Some(actuator) =>
                     actuator match
-                      case d: DifferentialWheelMotor =>
+                      case d: DifferentialWheelMotor[Robot] =>
                         val _ = d.left.speed should be(1.0)
                         val _ = d.right.speed should be(1.0)
                       case _ => fail("Expected a DifferentialWheelMotor actuator")

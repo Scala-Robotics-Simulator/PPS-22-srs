@@ -26,7 +26,7 @@ class RobotTest extends AnyFlatSpec with Matchers:
   val deltaTime: FiniteDuration = FiniteDuration(100, MILLISECONDS)
   val shape: ShapeType.Circle = ShapeType.Circle(0.5)
 
-  val wheelMotor: DifferentialWheelMotor =
+  val wheelMotor: DifferentialWheelMotor[Robot] =
     DifferentialWheelMotor(Wheel(1.0, ShapeType.Circle(0.5)), Wheel(1.0, ShapeType.Circle(0.5)))
 
   val proximitySensor: Sensor[Robot, Environment] =
