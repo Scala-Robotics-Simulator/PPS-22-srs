@@ -1,8 +1,7 @@
 import random
-import numpy as np
 from collections import deque
 
-from python.src.training.dqnetwork import DQNetwork
+import numpy as np
 
 
 class DQAgent:

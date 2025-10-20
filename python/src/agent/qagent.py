@@ -61,8 +61,7 @@ class QAgent:
         """
         if np.random.rand() < self.epsilon:
             return self.env.action_space.sample()
-        else:
-            return np.argmax(self.Q[state])
+        return np.argmax(self.Q[state])
 
     def update_q(
         self, state: int, action: int, reward: float, next_state: int, done: bool

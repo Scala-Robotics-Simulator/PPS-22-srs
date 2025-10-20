@@ -1,9 +1,8 @@
 import numpy as np
-from tensorflow import keras
-from keras.models import Sequential
-from keras.utils import plot_model
 from keras.layers import Dense, Input
+from keras.models import Sequential
 from keras.optimizers import Adam
+from keras.utils import plot_model
 
 
 class DQNetwork:
