@@ -187,7 +187,7 @@ object RobotDsl:
      *   [[Right]] if the robot is valid, or [[Left]] with a validation error message if it is not.
      */
     def validate: Validation[Robot] =
-      val dwmCount: Int = robot.actuators.count { case _: DifferentialWheelMotor[?] => true; case _ => false }
+      val dwmCount = robot.actuators.collect { case _: DifferentialWheelMotor[?] => () }.size
       import Point2D.*
       for
         x <- notNaN(s"$Self x", robot.position.x)
@@ -196,9 +196,7 @@ object RobotDsl:
         _ <- notInfinite(s"$Self y", y)
         _ <- bounded(s"$Self radius", robot.shape.radius, MinRadius, MaxRadius, includeMax = true)
         _ <- notNaN(s"$Self degrees", robot.orientation.degrees)
-        _ <-
-          if dwmCount <= 1 then Right(robot)
-          else Left(io.github.srs.model.validation.DomainError.InvalidCount(s"$Self actuators", dwmCount, 0, 1))
+        _ <- validateCount(s"$Self actuators", dwmCount, 0, 1)
         _ <- robot.actuators.traverse_(validateActuator)
         _ <- robot.sensors.traverse_(validateSensor)
       yield robot
