@@ -13,6 +13,7 @@ import io.github.srs.model.logic.RLLogicsBundle
 import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings
 import io.github.srs.model.entity.dynamicentity.Robot
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
+import io.github.srs.view.rendering.EnvironmentRenderer
 
 object RLControllerModule:
 
@@ -40,7 +41,7 @@ object RLControllerModule:
     /**
      * The type of the image used for rendering the simulation on the RL client.
      */
-    type Image
+    type Image = Array[Byte]
 
     /**
      * The initial state of the controller.
@@ -81,10 +82,15 @@ object RLControllerModule:
     /**
      * Renders the current state of the simulation to an image for the RL client.
      *
+     * @param width
+     *   the width of the rendered image.
+     * @param height
+     *   the height of the rendered image.
+     *
      * @return
      *   an image representing the current state of the simulation.
      */
-    def render(): Image
+    def render(width: Int, height: Int): Image
   end Controller
 
   trait Provider[S <: ModelModule.BaseState]:
@@ -101,7 +107,6 @@ object RLControllerModule:
       private class ControllerImpl(using bundle: RLLogicsBundle[S]) extends Controller[S]:
 
         type StepResponse = String
-        type Image = String
 
         var _initialState: S =
           bundle.stateLogic.createState(SimulationConfig(simulation, ValidEnvironment.empty))
@@ -130,7 +135,8 @@ object RLControllerModule:
           _state = context.model.update(state)(using s => bundle.tickLogic.tick(s, state.dt)).unsafeRunSync()
           "Called step"
 
-        override def render(): Image = "This is an image"
+        override def render(width: Int, height: Int): Image =
+          EnvironmentRenderer.renderToPNG(state.environment, width, height)
       end ControllerImpl
     end Controller
   end Component

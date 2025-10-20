@@ -175,8 +175,9 @@ object RLServiceModule:
           )
 
         private def manageRenderRequest(width: Int, height: Int): RenderResponse =
+          val imageBytes = context.controller.render(width, height)
           RenderResponse(
-            image = ByteString.EMPTY,
+            image = ByteString.copyFrom(imageBytes),
             format = "png",
             width = width,
             height = height,
