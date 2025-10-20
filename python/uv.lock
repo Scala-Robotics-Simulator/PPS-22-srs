@@ -1599,7 +1599,7 @@ requires-dist = [
     { name = "matplotlib", specifier = ">=3.8.0" },
     { name = "numpy", specifier = ">=1.27.0" },
     { name = "pygame", specifier = ">=2.6.1" },
-    { name = "tensorflow", specifier = ">=2.15.0" },
+    { name = "tensorflow", specifier = ">=2.20.0" },
     { name = "tqdm", specifier = ">=4.67.1" },
 ]
 
