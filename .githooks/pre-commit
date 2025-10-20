@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+set -e
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+YELLOW='\033[0;33m'
+NC='\033[0m'
+
+echo -e "${BLUE}Running pre-commit checks...${NC}"
+
+# Detect modified Scala files
+scala_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.scala$' || true)
+
+if [ -z "$scala_files" ]; then
+    echo -e "${YELLOW}No Scala files changed. Skipping checks.${NC}"
+    exit 0
+fi
+
+errors=0
+error_messages=""
+
+run_check() {
+    local name="$1"
+    local cmd="$2"
+
+    echo -e "\n${YELLOW}Running $name...${NC}"
+    output=$(eval "$cmd" 2>&1) || {
+        echo -e "${RED}✗ $name failed${NC}"
+        error_messages+="
+${RED}[$name Error]${NC}
+$output
+"
+        errors=$((errors + 1))
+        return 1
+    }
+    echo -e "${GREEN}✓ $name passed${NC}"
+}
+
+run_check "scalafmt" "sbt scalafmtCheckAll"
+run_check "scalafix" "sbt 'scalafixAll --check'"
+run_check "tests" "sbt test"
+
+if [ $errors -gt 0 ]; then
+    echo -e "\n${RED}Failed with $errors errors:${NC}"
+    echo -e "$error_messages"
+    echo -e "\n${YELLOW}Commit aborted.${NC}"
+    exit 1
+else
+    echo -e "\n${GREEN}All checks passed.${NC}"
+fi
+
