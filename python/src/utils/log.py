@@ -10,6 +10,7 @@ class Logger:
     name : str
         Name of the class to be used in the logger.
     """
+
     def __init__(self, name, level=logging.INFO):
         self.logger = logging.getLogger(name)
         if not self.logger.handlers:
