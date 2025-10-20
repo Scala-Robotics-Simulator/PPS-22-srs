@@ -11,6 +11,7 @@ from utils.log import Logger
 
 logger = Logger(__name__)
 
+
 class DQLearning:
     """
     Implementation of the Deep Q-Learning algorithm for OpenAI Gymnasium environments.

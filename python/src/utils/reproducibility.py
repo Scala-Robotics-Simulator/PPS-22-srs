@@ -61,6 +61,7 @@ def _seed_tensorflow(seed, verbose=False):
     tf.random.set_seed(seed)
     try:
         import inspect
+
         sig = inspect.signature(tf.config.experimental.enable_op_determinism)
         if len(sig.parameters) == 0:
             tf.config.experimental.enable_op_determinism()
