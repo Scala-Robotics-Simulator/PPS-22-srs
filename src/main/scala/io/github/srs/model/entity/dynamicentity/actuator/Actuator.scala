@@ -13,16 +13,12 @@ import io.github.srs.model.entity.dynamicentity.DynamicEntity
  */
 trait Actuator[E <: DynamicEntity]:
 
+
   /**
-   * Performs an action on the entity after a specified duration.
+   * Apply the actuator effect for a given time delta.
    *
-   * @param dt
-   *   the duration after which the action is performed.
-   * @param entity
-   *   the dynamic entity on which the action is performed.
-   * @tparam F
-   *   the effect type in which the action is performed, a Monad.
-   * @return
-   *   the updated entity after the action is performed.
+   * @param dt     the timestep for which the actuation is applied
+   * @param entity the entity being actuated
+   * @param kin    typeclass providing pose-update semantics
    */
-  def act[F[_]: Monad](dt: FiniteDuration, entity: E): F[E]
+  def act[F[_]: Monad](dt: FiniteDuration, entity: E)(using kin: Kinematics[E]): F[E]

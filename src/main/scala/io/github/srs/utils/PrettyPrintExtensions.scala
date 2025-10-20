@@ -22,7 +22,7 @@ object PrettyPrintExtensions:
       if r.actuators.isEmpty then "None"
       else
         r.actuators.map {
-          case m: DifferentialWheelMotor =>
+          case m: DifferentialWheelMotor[Robot] =>
             s"DifferentialWheelMotor -> Left: ${m.left.speed}, Right: ${m.right.speed}"
           case a =>
             s"${a.getClass.getSimpleName}"

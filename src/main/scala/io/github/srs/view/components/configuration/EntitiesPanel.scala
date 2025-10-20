@@ -101,7 +101,7 @@ class EntitiesPanel(fieldSpecsByType: Map[String, Seq[FieldSpec]]) extends JPane
             EntityFields.Y -> robot.position.y.toString,
             EntityFields.Orientation -> robot.orientation.degrees.toString,
             RobotFields.Radius -> robot.shape.radius.toString,
-            RobotFields.Speed -> robot.actuators.collectFirst { case dwt: DifferentialWheelMotor =>
+            RobotFields.Speed -> robot.actuators.collectFirst { case dwt: DifferentialWheelMotor[Robot] =>
               dwt.left.speed.toString
             }.getOrElse(""),
             RobotFields.WithProximitySensors -> StdProximitySensors.forall(robot.sensors.contains),

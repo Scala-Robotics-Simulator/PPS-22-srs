@@ -160,10 +160,16 @@ object RobotDsl:
       containing(sensor)
 
     infix def withSpeed(speed: Double): Robot =
-      val dfw =
-        robot.actuators.collectFirst { case dfw: DifferentialWheelMotor => dfw }.getOrElse(differentialWheelMotor)
-      val updatedDfw = dfw.ws(speed)
-      val updatedActuators = robot.actuators.filterNot(_.equals(dfw)) :+ updatedDfw
+      val dfwOpt: Option[DifferentialWheelMotor[Robot]] =
+        robot.actuators.collectFirst { case m: DifferentialWheelMotor[Robot] => m }
+
+      val dfw: DifferentialWheelMotor[Robot] =
+        dfwOpt.getOrElse(differentialWheelMotor[Robot])
+
+      val updatedDfw: DifferentialWheelMotor[Robot] = dfw.ws(speed)
+      val updatedActuators: Seq[Actuator[Robot]] =
+        robot.actuators.filterNot(_ eq dfw) :+ updatedDfw
+
       robot.withActuators(updatedActuators)
 
     def withProximitySensors: Robot =
@@ -181,6 +187,7 @@ object RobotDsl:
      *   [[Right]] if the robot is valid, or [[Left]] with a validation error message if it is not.
      */
     def validate: Validation[Robot] =
+      val dwmCount: Int = robot.actuators.count { case _: DifferentialWheelMotor[?] => true; case _ => false }
       import Point2D.*
       for
         x <- notNaN(s"$Self x", robot.position.x)
@@ -189,7 +196,9 @@ object RobotDsl:
         _ <- notInfinite(s"$Self y", y)
         _ <- bounded(s"$Self radius", robot.shape.radius, MinRadius, MaxRadius, includeMax = true)
         _ <- notNaN(s"$Self degrees", robot.orientation.degrees)
-        _ <- validateCountOfType[DifferentialWheelMotor](s"$Self actuators", robot.actuators, 0, 1)
+        _ <-
+          if dwmCount <= 1 then Right(robot)
+          else Left(io.github.srs.model.validation.DomainError.InvalidCount(s"$Self actuators", dwmCount, 0, 1))
         _ <- robot.actuators.traverse_(validateActuator)
         _ <- robot.sensors.traverse_(validateSensor)
       yield robot
