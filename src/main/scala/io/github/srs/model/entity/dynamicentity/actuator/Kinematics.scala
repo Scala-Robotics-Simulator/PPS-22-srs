@@ -3,7 +3,7 @@ package io.github.srs.model.entity.dynamicentity.actuator
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
 import io.github.srs.model.entity.dynamicentity.agent.Agent
 import io.github.srs.model.entity.dynamicentity.robot.Robot
-import io.github.srs.model.entity.{Orientation, Point2D}
+import io.github.srs.model.entity.{ Orientation, Point2D }
 
 /**
  * Provides kinematic operations for a dynamic entity.
@@ -12,7 +12,7 @@ import io.github.srs.model.entity.{Orientation, Point2D}
  * and reuse them across different entity types.
  *
  * @tparam E
- * The type of the dynamic entity this kinematics instance operates on.
+ *   The type of the dynamic entity this kinematics instance operates on.
  */
 trait Kinematics[E <: DynamicEntity]:
   def position(e: E): Point2D

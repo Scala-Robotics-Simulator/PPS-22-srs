@@ -1,5 +1,7 @@
 package io.github.srs.model.entity.dynamicentity.actuator
 
+import scala.concurrent.duration.FiniteDuration
+
 import cats.Monad
 import cats.syntax.flatMap.*
 import cats.syntax.foldable.*
@@ -7,10 +9,8 @@ import cats.syntax.functor.*
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.Point2D.*
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
-import io.github.srs.model.entity.dynamicentity.action.{Action, ActionAlgebra, SequenceAction}
+import io.github.srs.model.entity.dynamicentity.action.{ Action, ActionAlgebra, SequenceAction }
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Actuator.DifferentialWheelMotor.DefaultWheel
-
-import scala.concurrent.duration.FiniteDuration
 
 /**
  * Actuator for differential wheel motors.

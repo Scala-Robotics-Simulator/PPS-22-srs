@@ -1,20 +1,20 @@
 package io.github.srs.model.entity.dynamicentity.agent
 
-import cats.effect.IO
-
 import java.util.UUID
+
+import cats.effect.IO
 import io.github.srs.model.entity.dynamicentity.actuator.Actuator
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
 import io.github.srs.model.entity.dynamicentity.action.ActionAlgebra
 import io.github.srs.model.entity.dynamicentity.agent.reward.RewardModel
-import io.github.srs.model.entity.{Orientation, Point2D, ShapeType}
+import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.environment.Environment
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Agent as AgentDefaults
 
 /**
- * An `[[Agent]]` is a controllable dynamic entity with **no internal policy**.
- * Its actions originate from an *external controller*.
+ * An `[[Agent]]` is a controllable dynamic entity with **no internal policy**. Its actions originate from an *external
+ * controller*.
  *
  * @param id
  *   The unique identifier for this agent. Defaults to a randomly generated UUID.
@@ -91,6 +91,7 @@ object Agent:
     Some((agent.id, agent.position, agent.shape, agent.orientation, agent.actuators, agent.sensors))
 
   given ActionAlgebra[IO, Agent] with
+
     override def moveWheels(agent: Agent, leftSpeed: Double, rightSpeed: Double): IO[Agent] =
       IO.pure:
         val updatedActuators = agent.actuators.map:
