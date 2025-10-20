@@ -15,7 +15,7 @@ import io.github.srs.model.entity.dynamicentity.robot.Robot
 object DifferentialWheelMotorTestUtils:
 
   def calculateMovement(dt: FiniteDuration, robot: Robot): (Point2D, Orientation) =
-    robot.actuators.collectFirst { case wm: DifferentialWheelMotor => wm } match
+    robot.actuators.collectFirst { case wm: DifferentialWheelMotor[Robot] => wm } match
       case Some(wm) =>
         import Point2D.*
         val wheelDistance = robot.shape.radius * 2
