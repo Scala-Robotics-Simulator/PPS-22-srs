@@ -1,21 +1,20 @@
 package io.github.srs.model.entity.dynamicentity.agent.dsl
 
+import java.util.UUID
+
 import cats.syntax.all.*
-import io.github.srs.model.entity.dynamicentity.DynamicEntity
 import io.github.srs.model.entity.dynamicentity.actuator.dsl.ActuatorDsl.validateActuator
-import io.github.srs.model.entity.dynamicentity.actuator.dsl.DifferentialWheelMotorDsl.{differentialWheelMotor, ws}
-import io.github.srs.model.entity.dynamicentity.actuator.{Actuator, DifferentialWheelMotor}
+import io.github.srs.model.entity.dynamicentity.actuator.dsl.DifferentialWheelMotorDsl.{ differentialWheelMotor, ws }
+import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, DifferentialWheelMotor }
 import io.github.srs.model.entity.dynamicentity.agent.Agent
 import io.github.srs.model.entity.dynamicentity.agent.reward.RewardModel
-import io.github.srs.model.entity.dynamicentity.sensor.{ProximitySensor, Sensor}
-import io.github.srs.model.entity.{Orientation, Point2D, ShapeType}
+import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, Sensor }
+import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.validation.Validation.*
-import io.github.srs.model.validation.{DomainError, Validation}
+import io.github.srs.model.validation.{ DomainError, Validation }
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Agent.*
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.DynamicEntity.Agent.Self
-
-import java.util.UUID
 
 /**
  * The DSL for creating and configuring an Agent entity.
@@ -50,8 +49,8 @@ object AgentDsl:
    */
   def validateSensor(sensor: Sensor[Agent, Environment]): Validation[Sensor[Agent, Environment]] =
     sensor match
-      case p: ProximitySensor[DynamicEntity, Environment] @unchecked =>
-        io.github.srs.model.entity.dynamicentity.sensor.dsl.ProximitySensorDsl.validateProximitySensor(p)
+      case p: ProximitySensor[?, ?] =>
+        io.github.srs.model.entity.dynamicentity.sensor.dsl.ProximitySensorDsl.validate(p)
       case s => Right[DomainError, Sensor[Agent, Environment]](s)
 
   /** Creates a new Agent with default properties. */

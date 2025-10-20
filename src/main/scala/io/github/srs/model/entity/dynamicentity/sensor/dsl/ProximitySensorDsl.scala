@@ -17,8 +17,8 @@ object ProximitySensorDsl:
   /** Creates a new ProximitySensor with default properties. */
   def proximitySensor: ProximitySensor[DynamicEntity, Environment] = ProximitySensor()
 
-  /** Extension methods for ProximitySensor to allow DSL-like configuration. */
-  extension (sensor: ProximitySensor[DynamicEntity, Environment])
+  /** Generic extension methods for ProximitySensor with any entity type. */
+  extension [E <: DynamicEntity, Env <: Environment](sensor: ProximitySensor[E, Env])
 
     /**
      * Sets the range of the proximity sensor.
@@ -27,7 +27,7 @@ object ProximitySensorDsl:
      * @return
      *   a new [[ProximitySensor]] instance with the updated range.
      */
-    infix def withRange(range: Double): ProximitySensor[DynamicEntity, Environment] =
+    infix def withRange(range: Double): ProximitySensor[E, Env] =
       sensor.copy(range = range)
 
     /**
@@ -37,14 +37,15 @@ object ProximitySensorDsl:
      * @return
      *   a new [[ProximitySensor]] instance with the updated offset.
      */
-    infix def withOffset(offset: Orientation): ProximitySensor[DynamicEntity, Environment] =
+    infix def withOffset(offset: Orientation): ProximitySensor[E, Env] =
       sensor.copy(offset = offset)
 
     /**
      * Validates the properties of a sensor.
      */
-    def validate: Validation[ProximitySensor[DynamicEntity, Environment]] =
+    def validate: Validation[ProximitySensor[E, Env]] =
       for _ <- PositiveDouble(sensor.range).validate
       yield sensor
   end extension
+
 end ProximitySensorDsl
