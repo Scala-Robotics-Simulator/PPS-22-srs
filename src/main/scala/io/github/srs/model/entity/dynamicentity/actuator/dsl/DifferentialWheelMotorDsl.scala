@@ -1,10 +1,10 @@
 package io.github.srs.model.entity.dynamicentity.actuator.dsl
 
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
-import io.github.srs.model.entity.dynamicentity.actuator.{DifferentialWheelMotor, Wheel}
+import io.github.srs.model.entity.dynamicentity.actuator.{ DifferentialWheelMotor, Wheel }
 import io.github.srs.model.validation.Validation
 import io.github.srs.model.validation.Validation.bounded
-import io.github.srs.utils.SimulationDefaults.DynamicEntity.Actuator.DifferentialWheelMotor.Wheel.{MaxSpeed, MinSpeed}
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.Actuator.DifferentialWheelMotor.Wheel.{ MaxSpeed, MinSpeed }
 
 /**
  * DSL for creating and configuring a [[DifferentialWheelMotor]]. Provides methods to set the speed of the motor.
@@ -31,8 +31,7 @@ object DifferentialWheelMotorDsl:
   def differentialWheelMotor[E <: DynamicEntity]: DifferentialWheelMotor[E] =
     DifferentialWheelMotor[E](Wheel(), Wheel())
 
-
-  extension[E <: DynamicEntity](motor: DifferentialWheelMotor[E])
+  extension [E <: DynamicEntity](motor: DifferentialWheelMotor[E])
 
     /**
      * Sets the speed of both wheels of the differential motor.
@@ -55,7 +54,6 @@ object DifferentialWheelMotorDsl:
      */
     infix def withSpeed(speed: Double): DifferentialWheelMotor[E] =
       motor.withLeftSpeed(speed).withRightSpeed(speed)
-
 
     /**
      * Sets the speed of the left wheel of the differential motor.

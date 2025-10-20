@@ -1,23 +1,24 @@
 package io.github.srs.model.logic
 
+import java.util.UUID
+
+import scala.concurrent.duration.{ DurationInt, FiniteDuration }
+
 import cats.effect.IO
 import cats.implicits.*
 import com.typesafe.scalalogging.Logger
 import io.github.srs.controller.message.RobotProposal
 import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor.applyMovementActions
-import io.github.srs.model.entity.dynamicentity.actuator.{DifferentialWheelMotor, given_Kinematics_Robot}
+import io.github.srs.model.entity.dynamicentity.actuator.{ given_Kinematics_Robot, DifferentialWheelMotor }
 import io.github.srs.model.entity.dynamicentity.robot.Robot
 import io.github.srs.model.environment.Environment
 import io.github.srs.model.environment.ValidEnvironment.ValidEnvironment
 import io.github.srs.model.environment.dsl.CreationDSL.validate
-import io.github.srs.model.{ModelModule, SimulationState}
+import io.github.srs.model.{ ModelModule, SimulationState }
 import io.github.srs.utils.EqualityGivenInstances.given
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.DefaultMaxRetries
-import io.github.srs.utils.SimulationDefaults.{BinarySearchDurationThreshold, DebugMode}
-
-import java.util.UUID
-import scala.concurrent.duration.{DurationInt, FiniteDuration}
+import io.github.srs.utils.SimulationDefaults.{ BinarySearchDurationThreshold, DebugMode }
 
 /**
  * Logic for handling robot actions within the simulation.
@@ -99,7 +100,7 @@ object RobotActionsLogic:
             val mid = low + (high - low) / 2
             val maybeMotor = robot.actuators.collectFirst:
               case m: DifferentialWheelMotor[Robot] => m
-            
+
             maybeMotor match
               case None =>
                 IO.pure(robot) // no movement possible

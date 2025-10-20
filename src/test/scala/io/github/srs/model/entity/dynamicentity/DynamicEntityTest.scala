@@ -1,15 +1,16 @@
 package io.github.srs.model.entity.dynamicentity
 
+import java.util.UUID
+
+import scala.concurrent.duration.FiniteDuration
+
 import cats.Monad
-import io.github.srs.model.entity.dynamicentity.actuator.{Actuator, Kinematics}
+import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, Kinematics }
 import io.github.srs.model.entity.dynamicentity.sensor.*
-import io.github.srs.model.entity.{Orientation, Point2D, ShapeType}
+import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.environment.Environment
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-
-import java.util.UUID
-import scala.concurrent.duration.FiniteDuration
 
 class DynamicEntityTest extends AnyFlatSpec with Matchers:
 

@@ -1,17 +1,18 @@
 package io.github.srs.model.entity.dynamicentity.action
 
-import cats.{Id, Monad}
+import java.util.UUID
+
+import scala.concurrent.duration.FiniteDuration
+
+import cats.{ Id, Monad }
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
-import io.github.srs.model.entity.dynamicentity.action.MovementActionFactory.{moveForward, turnRight}
-import io.github.srs.model.entity.dynamicentity.actuator.{Actuator, Kinematics}
+import io.github.srs.model.entity.dynamicentity.action.MovementActionFactory.{ moveForward, turnRight }
+import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, Kinematics }
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor
-import io.github.srs.model.entity.{Orientation, Point2D, ShapeType}
+import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.environment.Environment
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-
-import java.util.UUID
-import scala.concurrent.duration.FiniteDuration
 
 class SequenceActionTest extends AnyFlatSpec with Matchers:
 
@@ -27,7 +28,6 @@ class SequenceActionTest extends AnyFlatSpec with Matchers:
         actuators = entity.actuators,
         sensors = entity.sensors,
       )
-
 
   class DummyActuator extends Actuator[Dummy]:
 
