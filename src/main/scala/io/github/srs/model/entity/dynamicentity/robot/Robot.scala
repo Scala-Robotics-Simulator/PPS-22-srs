@@ -15,12 +15,24 @@ import io.github.srs.utils.EqualityGivenInstances.given
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.*
 
 /**
- * Represents a robot entity in the simulation.
+ * A [[Robot]] is an *autonomous* dynamic entity: its movement decisions are produced
+ * sensors and invokes the policy to produce an [[Action]], which is then translated
+ * into motion via the differential wheel actuator.
  *
+ * @param id
+ * the unique identifier of the robot. Defaults to a random UUID.
+ * @param position
+ * the current position of the robot in a two-dimensional space. Defaults to `DefaultPosition`.
  * @param shape
- *   the geometric shape of the robot, defined as a circle.
+ * the geometric shape of the robot. Defaults to `DefaultShape`.
+ * @param orientation
+ * the current orientation of the robot in degrees. Defaults to `DefaultOrientation`.
  * @param actuators
- *   the sequence of actuators that control the robot.
+ * the actuators attached to the robot, enabling it to interact with its environment. Defaults to `DefaultActuators`.
+ * @param sensors
+ * the sensors equipped on the robot, allowing it to sense the environment. Defaults to `DefaultSensors`.
+ * @param behavior
+ * the behavior policy defining the robot's actions based on contextual information. Defaults to `DefaultPolicy`.
  */
 final case class Robot(
     override val id: UUID = UUID.randomUUID(),

@@ -13,7 +13,9 @@ import io.github.srs.utils.SimulationDefaults.DynamicEntity.Actuator.Differentia
 import scala.concurrent.duration.FiniteDuration
 
 /**
- * A differential wheel motor actuator for dynamic entities.
+ * Actuator for differential wheel motors.
+ * @tparam E
+ *   The type of dynamic entity this motor is associated with.
  */
 trait DifferentialWheelMotor[E <: DynamicEntity] extends Actuator[E]:
   def left: Wheel
@@ -21,19 +23,30 @@ trait DifferentialWheelMotor[E <: DynamicEntity] extends Actuator[E]:
 
 object DifferentialWheelMotor:
 
-  /** Factory */
   def apply[E <: DynamicEntity](
       left: Wheel = DefaultWheel,
       right: Wheel = DefaultWheel,
   ): DifferentialWheelMotor[E] =
     DifferentialWheelMotorImpl(left, right)
 
-  /** Concrete implementation */
   private case class DifferentialWheelMotorImpl[E <: DynamicEntity](
       left: Wheel,
       right: Wheel,
   ) extends DifferentialWheelMotor[E]:
 
+    /**
+     * Applies the actuator effect for a given time delta, updating the position and orientation of the dynamic entity
+     * based on its kinematics and the motion influenced by the differential wheel motor.
+     *
+     * @param dt
+     *   the time duration for which the actuation is applied
+     * @param entity
+     *   the dynamic entity being actuated
+     * @param kin
+     *   the typeclass providing kinematic operations and pose-update semantics for the entity
+     * @return
+     *   a monadic effect containing the updated entity with its new pose
+     */
     override def act[F[_]: Monad](
         dt: FiniteDuration,
         entity: E,
@@ -55,11 +68,16 @@ object DifferentialWheelMotor:
 
   extension [E <: DynamicEntity](motor: DifferentialWheelMotor[E])
 
-    /** Applies kinematics using this specific motor */
+    /**
+     * Ergonomic variant of `act` method to directly apply the motor's effect to a dynamic entity over a specified
+     * duration.
+     */
     def applyTo[F[_]: Monad](entity: E, dt: FiniteDuration)(using kin: Kinematics[E]): F[E] =
       motor.act(dt, entity)
 
-    /** Action + movement logic (no iteration through actuators, motor is already known) */
+    /**
+     * Applies a sequence of movement actions to a dynamic entity over a specified duration.
+     */
     def applyMovementActions[F[_]: Monad](
         entity: E,
         dt: FiniteDuration,

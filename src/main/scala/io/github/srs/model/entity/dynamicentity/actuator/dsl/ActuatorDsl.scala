@@ -5,17 +5,17 @@ import io.github.srs.model.entity.dynamicentity.actuator.{Actuator, Differential
 import io.github.srs.model.validation.Validation
 
 /**
- * DSL for creating and configuring an [[Actuator]] for a [[Robot]]. Provides methods to validate actuators.
+ * Provides a Domain-Specific Language (DSL) for working with actuators, including validation logic.
  */
 object ActuatorDsl:
 
   /**
-   * Validates an Actuator to ensure it meets the domain constraints.
+   * Validates the given actuator to ensure it meets the domain or type-specific constraints.
    *
    * @param actuator
-   *   the Actuator to validate.
+   * the actuator to validate, which may include various types such as DifferentialWheelMotor.
    * @return
-   *   [[Right]] if the actuator is valid, or [[Left]] with a validation error.
+   * a [[Right]] containing the actuator if it is valid, or a [[Left]] with a validation error if invalid.
    */
   def validateActuator[E <: DynamicEntity](actuator: Actuator[E]): Validation[Actuator[E]] =
     actuator match

@@ -13,7 +13,8 @@ import io.github.srs.model.environment.Environment
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Agent as AgentDefaults
 
 /**
- * Represents an agent in the simulation environment.
+ * An `[[Agent]]` is a controllable dynamic entity with **no internal policy**.
+ * Its actions originate from an *external controller*.
  *
  * @param id
  *   The unique identifier for this agent. Defaults to a randomly generated UUID.
