@@ -3,7 +3,6 @@ package io.github.srs.model.entity.dynamicentity.actuator
 import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
 
 import cats.Id
-import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor.move
 import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotorTestUtils.calculateMovement
 import io.github.srs.model.entity.dynamicentity.actuator.Wheel
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
@@ -35,8 +34,8 @@ class DifferentialWheelMotorTest extends AnyFlatSpec with Matchers:
         orientation = initialOrientation,
         actuators = Seq(wheelMotor),
       ).validate.toOption.value
-    val movedRobot: Robot = robot.move[Id](deltaTime)
 
+    val movedRobot: Robot = wheelMotor.applyTo[Id](robot, deltaTime)
     val expectedMovement: (Point2D, Orientation) = calculateMovement(deltaTime, robot)
     movedRobot.position shouldBe expectedMovement._1
 
@@ -54,8 +53,9 @@ class DifferentialWheelMotorTest extends AnyFlatSpec with Matchers:
         orientation = initialOrientation,
         actuators = Seq(wheelMotor),
       ).validate.toOption.value
-    val movedRobot: Robot = robot.move[Id](deltaTime)
 
+    val movedRobot: Robot = wheelMotor.applyTo[Id](robot, deltaTime)
     val expectedMovement: (Point2D, Orientation) = calculateMovement(deltaTime, robot)
     movedRobot.orientation.degrees shouldBe expectedMovement._2.degrees
+
 end DifferentialWheelMotorTest

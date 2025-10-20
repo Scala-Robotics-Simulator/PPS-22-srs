@@ -9,27 +9,27 @@ import io.github.srs.model.entity.dynamicentity.actuator.DifferentialKinematics.
   computeWheelVelocities,
 }
 import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor
-import io.github.srs.model.entity.dynamicentity.robot.dsl.RobotDsl.{ at, withOrientation }
 import io.github.srs.model.entity.dynamicentity.robot.Robot
+import io.github.srs.model.entity.Point2D.*
 
 object DifferentialWheelMotorTestUtils:
 
   def calculateMovement(dt: FiniteDuration, robot: Robot): (Point2D, Orientation) =
     robot.actuators.collectFirst { case wm: DifferentialWheelMotor[Robot] => wm } match
       case Some(wm) =>
-        import Point2D.*
         val wheelDistance = robot.shape.radius * 2
         val theta = robot.orientation.toRadians
 
-        val expectedRobot = (
-          computeWheelVelocities
-            andThen computeVelocities(wheelDistance)
-            andThen computePositionAndOrientation(theta, dt)
-            andThen { case (dx, dy, newOrientation) =>
-              val newPos = Point2D(robot.position.x + dx, robot.position.y + dy)
-              robot at newPos withOrientation newOrientation
-            }
-        )(wm)
-        (expectedRobot.position, expectedRobot.orientation)
-      case None => (robot.position, robot.orientation)
+        val (dx, dy, newOrientation) =
+          (computeWheelVelocities    // wheel speed * wheel radius
+            andThen computeVelocities(wheelDistance) // -> linear v, angular ω
+            andThen computePositionAndOrientation(theta, dt) // -> dx, dy, new θ
+            )(wm)
+
+        val newPos = Point2D(robot.position.x + dx, robot.position.y + dy)
+        (newPos, newOrientation)
+
+      case None =>
+        (robot.position, robot.orientation)
+
 end DifferentialWheelMotorTestUtils
