@@ -1,9 +1,15 @@
-import time, statistics, numpy as np
-from tqdm import trange
+import logging
+import statistics
+import time
+
+import numpy as np
 import pygame
+from tqdm import trange
 
 from agent.dqagent import DQAgent
 from training.dqnetwork import DQNetwork
+
+logger = logging.getLogger(__name__)
 
 
 class DQLearning:
@@ -95,7 +101,7 @@ class DQLearning:
             )
             train_rewards.append(episode_reward)
 
-            print(
+            logging.info(
                 f"Episode: {n} | Steps: {step_count}[{train_step_count}] | "
                 f"Epsilon: {episode_epsilon:.3f} | Time: {episode_time:.2f}s | "
                 f"Reward: {episode_reward:.1f} | MovingAvg: {moving_avg_reward:.1f}"
@@ -150,7 +156,13 @@ class DQLearning:
         # for other actions, use the action model Q values
         # in this way, loss function will be 0 for other actions
         for i, (a, r, new_state_q_values, done) in enumerate(
-            zip(action_batch, reward_batch, target_new_state_q_values, done_batch)
+            zip(
+                action_batch,
+                reward_batch,
+                target_new_state_q_values,
+                done_batch,
+                strict=False,
+            )
         ):
             if not done:
                 target_value = r + gamma * np.amax(new_state_q_values)
@@ -213,7 +225,7 @@ class DQLearning:
 
                 clock.tick(fps)
 
-            print(f"Episode {ep + 1}/{episodes} - Reward: {total_reward}")
+            logging.info(f"Episode {ep + 1}/{episodes} - Reward: {total_reward}")
 
         self.env.close()
         pygame.quit()

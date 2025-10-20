@@ -1,7 +1,11 @@
+import logging
+
 import numpy as np
 from tqdm import trange
 
 from agent.qagent import QAgent
+
+logger = logging.getLogger(__name__)
 
 
 class QLearning:
@@ -50,7 +54,7 @@ class QLearning:
         """
         rewards_per_episode = []
 
-        for ep in trange(self.episode_count, desc="Training", unit="ep"):
+        for _ep in trange(self.episode_count, desc="Training", unit="ep"):
             state, _ = self.env.reset()
             done = False
             total_reward = 0
@@ -135,7 +139,7 @@ class QLearning:
         avg_steps = sum_steps / test_episode_count
         avg_total_reward = sum_total_reward / test_episode_count
 
-        print(f"Average number of steps per episode: {avg_steps:.1f}")
-        print(f"Average total reward per episode: {avg_total_reward:.1f}")
+        logging.info(f"Average number of steps per episode: {avg_steps:.1f}")
+        logging.info(f"Average total reward per episode: {avg_total_reward:.1f}")
 
         return avg_steps, avg_total_reward

@@ -1,6 +1,10 @@
-import numpy as np
-import random
+import logging
 import os
+import random
+
+import numpy as np
+
+logger = logging.getLogger(__name__)
 
 
 def set_global_seed(seed=None, env=None, tensorflow_deterministic=False, verbose=False):
@@ -16,11 +20,11 @@ def set_global_seed(seed=None, env=None, tensorflow_deterministic=False, verbose
     tensorflow_deterministic : bool
         If True, sets TensorFlow to operate in a deterministic mode.
     verbose: bool
-        If True, prints out information about the seeding process.
+        If True, logging.infos out information about the seeding process.
     """
     if seed is None:
         if verbose:
-            print("[set_global_seed] No seed provided, skipping.")
+            logging.info("[set_global_seed] No seed provided, skipping.")
         return
 
     os.environ["PYTHONHASHSEED"] = str(seed)
@@ -33,7 +37,7 @@ def set_global_seed(seed=None, env=None, tensorflow_deterministic=False, verbose
     _seed_gymnasium(seed=seed, env=env, verbose=verbose)
 
     if verbose:
-        print(f"[set_global_seed] All available seeds set to {seed}.")
+        logging.info(f"[set_global_seed] All available seeds set to {seed}.")
 
 
 def _seed_tensorflow(seed, verbose=False):
@@ -44,23 +48,25 @@ def _seed_tensorflow(seed, verbose=False):
     seed : int
         The seed value.
     verbose: bool
-        If True, prints out information about the seeding process.
+        If True, logging.infos out information about the seeding process.
     """
     try:
         import tensorflow as tf
     except ImportError:
         if verbose:
-            print("[set_global_seed] TensorFlow not installed, skipping.")
+            logging.warning("[set_global_seed] TensorFlow not installed, skipping.")
         return
 
     tf.random.set_seed(seed)
     try:
         tf.config.experimental.enable_op_determinism(True)
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning(
+            f"[set_global_seed] Could not enable TensorFlow op determinism: {e}"
+        )
 
     if verbose:
-        print("[set_global_seed] TensorFlow seed set.")
+        logging.info("[set_global_seed] TensorFlow seed set.")
 
 
 def _seed_gymnasium(seed, env, verbose=False):
@@ -73,7 +79,7 @@ def _seed_gymnasium(seed, env, verbose=False):
     env : gym.Env or None
         Optional Gymnasium or Gym environment to seed.
     verbose: bool
-        If True, prints out information about the seeding process.
+        If True, logging.infos out information about the seeding process.
     """
     if env is None:
         return
@@ -84,7 +90,9 @@ def _seed_gymnasium(seed, env, verbose=False):
         if hasattr(env.observation_space, "seed"):
             env.observation_space.seed(seed)
         if verbose:
-            print("[set_global_seed] Gymnasium environment seed set.")
+            logging.info("[set_global_seed] Gymnasium environment seed set.")
     except Exception as e:
         if verbose:
-            print(f"[set_global_seed] Warning: could not seed environment ({e})")
+            logging.warning(
+                f"[set_global_seed] Warning: could not seed environment ({e})"
+            )
