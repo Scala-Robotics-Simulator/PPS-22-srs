@@ -20,7 +20,7 @@ import java.util.UUID
 import scala.concurrent.duration.{DurationInt, FiniteDuration}
 
 /**
- * Logic for handling robot actions proposals.
+ * Logic for handling robot actions within the simulation.
  *
  * @tparam S
  *   the type of the simulation state.
@@ -28,7 +28,7 @@ import scala.concurrent.duration.{DurationInt, FiniteDuration}
 trait RobotActionsLogic[S <: ModelModule.State]:
 
   /**
-   * Handles a list of robot action proposals and updates the simulation state accordingly.
+   * Handles motion for *autonomous* dynamic entities (i.e. robots with internal policy).
    * @param s
    *   the current simulation state.
    * @param proposals
