@@ -1,4 +1,3 @@
-import logging
 import statistics
 import time
 
@@ -8,9 +7,9 @@ from tqdm import trange
 
 from agent.dqagent import DQAgent
 from training.dqnetwork import DQNetwork
+from utils.log import Logger
 
-logger = logging.getLogger(__name__)
-
+logger = Logger(__name__)
 
 class DQLearning:
     """
@@ -101,7 +100,7 @@ class DQLearning:
             )
             train_rewards.append(episode_reward)
 
-            logging.info(
+            logger.info(
                 f"Episode: {n} | Steps: {step_count}[{train_step_count}] | "
                 f"Epsilon: {episode_epsilon:.3f} | Time: {episode_time:.2f}s | "
                 f"Reward: {episode_reward:.1f} | MovingAvg: {moving_avg_reward:.1f}"
@@ -200,7 +199,6 @@ class DQLearning:
             total_reward = 0
 
             while not done and running:
-                # Handle quit events
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         running = False
@@ -208,14 +206,12 @@ class DQLearning:
                 q_values = self.dqn_action_model.predict(state[np.newaxis], verbose=0)
                 action = np.argmax(q_values[0])
 
-                # Step environment
                 next_state, reward, terminated, truncated, _ = self.env.step(action)
                 done = terminated or truncated
                 total_reward += reward
                 state = next_state
 
-                # Render RGB array
-                rgb_array = self.env.render()  # (H, W, 3)
+                rgb_array = self.env.render()
                 surface = pygame.surfarray.make_surface(
                     np.transpose(rgb_array, (1, 0, 2))
                 )
@@ -225,7 +221,7 @@ class DQLearning:
 
                 clock.tick(fps)
 
-            logging.info(f"Episode {ep + 1}/{episodes} - Reward: {total_reward}")
+            logger.info(f"Episode {ep + 1}/{episodes} - Reward: {total_reward}")
 
         self.env.close()
         pygame.quit()
