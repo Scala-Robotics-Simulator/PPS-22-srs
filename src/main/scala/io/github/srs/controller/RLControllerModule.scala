@@ -133,7 +133,7 @@ object RLControllerModule:
             actions.map { (agent, action) =>
               DynamicEntityProposal(agent.copy(lastAction = Some(action)), action)
             }.toList.sortBy(_.entity.id)
-          val prevEnv = state.environment
+          val prevState = state
           _state = context.model
             .update(state)(using
               s => bundle.dynamicEntityActionsLogic.handleDynamicEntityActionsProposals(s, actionsList),
@@ -144,7 +144,7 @@ object RLControllerModule:
             .unsafeRunSync()
           StepResponse(
             observations = state.environment.getObservations,
-            rewards = state.environment.getRewards(prevEnv),
+            rewards = state.environment.getRewards(prevState.environment),
             terminateds = Map.empty,
             truncateds = Map.empty,
             infos = state.environment.getInfos,
@@ -156,6 +156,13 @@ object RLControllerModule:
           EnvironmentRenderer.renderToPNG(state.environment, width, height)
       end ControllerImpl
     end Controller
+
+    extension (s: ModelModule.BaseState)
+
+      def getTerminations(prev: ModelModule.BaseState): Terminateds =
+        s.environment.entities.collect { case a: Agent =>
+          a -> a.termination.evaluate(prev, s, a, a.lastAction.getOrElse(NoAction[IO]()))
+        }.toMap
 
     extension (env: ValidEnvironment)
 
