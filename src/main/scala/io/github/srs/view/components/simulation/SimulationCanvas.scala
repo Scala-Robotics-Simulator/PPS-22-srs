@@ -7,16 +7,10 @@ import java.util.concurrent.atomic.AtomicReference
 import javax.swing.JPanel
 
 import io.github.srs.model.entity.Point2D.*
-import io.github.srs.model.entity.staticentity.StaticEntity
-import io.github.srs.model.entity.{ Point2D, ShapeType }
 import io.github.srs.model.entity.ShapeType
 import io.github.srs.model.environment.Environment
 import io.github.srs.view.rendering.{ EnvironmentDrawing, Viewport }
 import io.github.srs.view.state.SimulationViewState
-import io.github.srs.utils.SimulationDefaults.DynamicEntity.Sensor.ProximitySensor.DefaultRange
-import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
-import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings.proximityReadings
-import cats.Id
 import io.github.srs.model.entity.dynamicentity.robot.Robot
 
 /**
