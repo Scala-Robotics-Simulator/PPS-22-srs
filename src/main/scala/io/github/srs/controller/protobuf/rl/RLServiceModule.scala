@@ -17,6 +17,7 @@ import io.github.srs.utils.random.SimpleRNG
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
 import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings
 import io.github.srs.model.entity.dynamicentity.action.MovementActionFactory
+import io.github.srs.model.entity.dynamicentity.agent.Agent
 
 /**
  * Module that exposes a simple RL gRPC service used by the RL controller feature.
@@ -167,9 +168,8 @@ object RLServiceModule:
         private def manageStepRequest(actions: Map[String, ContinuousAction]): StepResponse =
           val agentActions = for
             (id, ca) <- actions
-            // TODO: use agent instead of robot
             agent <- context.controller.state.environment.entities.collect:
-              case r: DynamicEntity if r.id.toString == id => r
+              case a: Agent if a.id.toString == id => a
             action <- MovementActionFactory.customMove[Id](ca.leftWheel, ca.rightWheel).toOption
           yield agent -> action
           val stepResponse: io.github.srs.controller.RLControllerModule.StepResponse =

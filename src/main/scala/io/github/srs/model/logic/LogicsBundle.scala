@@ -5,14 +5,14 @@ import io.github.srs.model.SimulationState
 import io.github.srs.model.logic.StatusLogic.given
 import io.github.srs.model.logic.TimeLogic.given
 import io.github.srs.model.logic.RandomLogic.given
-import io.github.srs.model.logic.RobotActionsLogic.given
+import io.github.srs.model.logic.DynamicEntityActionsLogic.given
 import io.github.srs.model.ModelModule.BaseState
 import io.github.srs.model.BaseSimulationState
 
 trait BaseLogicsBunldle[S <: BaseState]:
   def tickLogic: BaseTickLogic[S]
   def randomLogic: RandomLogic[S]
-  // def robotActionsLogic: RobotActionsLogic[S]
+  // def robotActionsLogic: DynamicEntityActionsLogic[S]
 
 /**
  * A bundle of all logic traits for a given state type.
@@ -24,7 +24,7 @@ trait LogicsBundle[S <: State] extends BaseLogicsBunldle[S]:
   def pauseLogic: PauseLogic[S]
   def resumeLogic: ResumeLogic[S]
   def stopLogic: StopLogic[S]
-  def robotActionsLogic: RobotActionsLogic[S]
+  def dynamicEntityActionsLogic: DynamicEntityActionsLogic[S]
 
 /**
  * Companion object for [[LogicsBundle]] containing given instances.
@@ -35,7 +35,9 @@ given simulationStateLogicsBundle: LogicsBundle[SimulationState] with
   val pauseLogic: PauseLogic[SimulationState] = summon[PauseLogic[SimulationState]]
   val resumeLogic: ResumeLogic[SimulationState] = summon[ResumeLogic[SimulationState]]
   val stopLogic: StopLogic[SimulationState] = summon[StopLogic[SimulationState]]
-  val robotActionsLogic: RobotActionsLogic[SimulationState] = summon[RobotActionsLogic[SimulationState]]
+
+  val dynamicEntityActionsLogic: DynamicEntityActionsLogic[SimulationState] =
+    summon[DynamicEntityActionsLogic[SimulationState]]
 
 trait RLLogicsBundle[S <: BaseState] extends BaseLogicsBunldle[S]:
   def stateLogic: StateLogic[S]
@@ -43,5 +45,7 @@ trait RLLogicsBundle[S <: BaseState] extends BaseLogicsBunldle[S]:
 given rlLogicsBundle: RLLogicsBundle[BaseSimulationState] with
   val tickLogic: BaseTickLogic[BaseSimulationState] = summon[BaseTickLogic[BaseSimulationState]]
   val randomLogic: RandomLogic[BaseSimulationState] = summon[RandomLogic[BaseSimulationState]]
-  // val robotActionsLogic: RobotActionsLogic[BaseSimulationState] = summon[RobotActionsLogic[BaseSimulationState]]
+
+  // val robotActionsLogic: DynamicEntityActionsLogic[BaseSimulationState] =
+  //   summon[DynamicEntityActionsLogic[BaseSimulationState]]
   val stateLogic: StateLogic[BaseSimulationState] = summon[StateLogic[BaseSimulationState]]

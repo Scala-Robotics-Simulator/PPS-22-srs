@@ -9,6 +9,7 @@ import io.github.srs.model.environment.Environment
 import io.github.srs.model.illumination.model.ScaleFactor
 import io.github.srs.utils.Ray.intersectRay
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Sensor.ProximitySensor as ProximitySensorDefaults
+import io.github.srs.model.entity.dynamicentity.agent.Agent
 
 /**
  * Represents the range of a sensor.
@@ -232,3 +233,18 @@ object Sensor:
     def senseAll[F[_]: Monad](env: Environment): F[SensorReadings] =
       r.sensors.traverse: sensor =>
         sensor.sense(r, env).map(reading => SensorReading(sensor, reading))
+
+  extension (a: Agent)
+
+    /**
+     * Senses all sensors of the agent in the given environment.
+     *
+     * @param env
+     *   the environment in which to sense.
+     * @return
+     *   a vector of sensor readings.
+     */
+    def senseAll[F[_]: Monad](env: Environment): F[SensorReadings] =
+      a.sensors.traverse: sensor =>
+        sensor.sense(a, env).map(reading => SensorReading(sensor, reading))
+end Sensor

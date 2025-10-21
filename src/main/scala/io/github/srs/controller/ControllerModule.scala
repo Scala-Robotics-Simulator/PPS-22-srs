@@ -5,7 +5,7 @@ import scala.language.postfixOps
 
 import cats.effect.std.Queue
 import cats.effect.{ Clock, IO }
-import io.github.srs.controller.message.RobotProposal
+import io.github.srs.controller.message.DynamicEntityProposal
 import io.github.srs.controller.protocol.Event
 import io.github.srs.model.*
 import io.github.srs.model.SimulationConfig.SimulationStatus.*
@@ -181,7 +181,7 @@ object ControllerModule:
         /**
          * Runs the behavior of all robots in the environment and collects their action proposals.
          * @param queue
-         *   the queue to which the proposals will be offered through the [[Event.RobotActionProposals]] event.
+         *   the queue to which the proposals will be offered through the [[Event.DynamicEntityActionProposals]] event.
          * @param state
          *   the current state of the simulation.
          * @return
@@ -190,7 +190,11 @@ object ControllerModule:
         private def runBehavior(queue: Queue[IO, Event], state: S): IO[Unit] =
           val robots = state.environment.entities.collect { case r: Robot => r }.sortBy(_.id.toString)
 
-          def process(remaining: List[Robot], rng: RNG, acc: List[RobotProposal]): IO[(List[RobotProposal], RNG)] =
+          def process(
+              remaining: List[Robot],
+              rng: RNG,
+              acc: List[DynamicEntityProposal],
+          ): IO[(List[DynamicEntityProposal], RNG)] =
             remaining match
               case Nil => IO.pure((acc.reverse, rng))
               case robot :: tail =>
@@ -199,13 +203,15 @@ object ControllerModule:
                   ctx = BehaviorContext(sensorReadings, rng)
                   (action, newRng) = robot.behavior.run[IO](ctx)
                   _ <- queue.offer(Event.Random(newRng))
-                  next <- process(tail, newRng, RobotProposal(robot, action) :: acc)
+                  next <- process(tail, newRng, DynamicEntityProposal(robot, action) :: acc)
                 yield next
 
           for
             (proposals, _) <- process(robots, state.simulationRNG, Nil)
-            _ <- queue.offer(Event.RobotActionProposals(proposals))
+            _ <- queue.offer(Event.DynamicEntityActionProposals(proposals))
           yield ()
+
+        end runBehavior
 
         /**
          * Processes tick events, adjusting the tick speed based on the elapsed time since the last tick.
@@ -269,8 +275,10 @@ object ControllerModule:
               context.model.update(state)(using s => bundle.resumeLogic.resume(s))
             case Event.Stop =>
               context.model.update(state)(using s => bundle.stopLogic.stop(s))
-            case Event.RobotActionProposals(proposals) =>
-              context.model.update(state)(using s => bundle.robotActionsLogic.handleRobotActionsProposals(s, proposals))
+            case Event.DynamicEntityActionProposals(proposals) =>
+              context.model.update(state)(using
+                s => bundle.dynamicEntityActionsLogic.handleDynamicEntityActionsProposals(s, proposals),
+              )
 
       end ControllerImpl
 
