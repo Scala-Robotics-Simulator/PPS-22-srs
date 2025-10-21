@@ -18,8 +18,8 @@ import io.github.srs.model.environment.Environment
 import io.github.srs.model.illumination.LightMap
 import io.github.srs.model.illumination.engine.SquidLibFovEngine
 import io.github.srs.model.illumination.model.ScaleFactor
-import io.github.srs.model.entity.dynamicentity.agent.termination.TerminationModel
-import io.github.srs.model.entity.dynamicentity.agent.termination.NeverTerminate
+import io.github.srs.model.entity.dynamicentity.agent.termination.{ NeverTerminate, TerminationModel }
+import io.github.srs.model.entity.dynamicentity.agent.truncation.{ NeverTruncate, TruncationModel }
 
 object SimulationDefaults:
 
@@ -274,6 +274,7 @@ object SimulationDefaults:
       val MaxRadius: Double = 0.5
       val DefaultReward: RewardModel[Agent] = NoReward()
       val DefaultTermination: TerminationModel[Agent] = NeverTerminate()
+      val DefaultTruncation: TruncationModel[Agent] = NeverTruncate()
 
       val StdProximitySensors: Vector[Sensor[Agent, Environment]] = Vector(
         ProximitySensor(Orientation(0.0)),

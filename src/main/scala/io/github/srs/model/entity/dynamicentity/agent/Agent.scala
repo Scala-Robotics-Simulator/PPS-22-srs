@@ -13,6 +13,7 @@ import io.github.srs.model.environment.Environment
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Agent as AgentDefaults
 import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.agent.termination.TerminationModel
+import io.github.srs.model.entity.dynamicentity.agent.truncation.TruncationModel
 
 /**
  * An `[[Agent]]` is a controllable dynamic entity with **no internal policy**. Its actions originate from an *external
@@ -40,6 +41,7 @@ final case class Agent(
     override val sensors: Vector[Sensor[Agent, Environment]] = AgentDefaults.DefaultSensors,
     reward: RewardModel[Agent] = AgentDefaults.DefaultReward,
     termination: TerminationModel[Agent] = AgentDefaults.DefaultTermination,
+    truncation: TruncationModel[Agent] = AgentDefaults.DefaultTruncation,
     lastAction: Option[Action[IO]] = None,
 ) extends DynamicEntity
 
@@ -72,9 +74,10 @@ object Agent:
       sensors: Vector[Sensor[Agent, Environment]] = AgentDefaults.DefaultSensors,
       reward: RewardModel[Agent] = AgentDefaults.DefaultReward,
       termination: TerminationModel[Agent] = AgentDefaults.DefaultTermination,
+      truncation: TruncationModel[Agent] = AgentDefaults.DefaultTruncation,
       action: Option[Action[IO]] = None,
   ): Agent =
-    new Agent(id, position, shape, orientation, actuators, sensors, reward, termination, action)
+    new Agent(id, position, shape, orientation, actuators, sensors, reward, termination, truncation, action)
 
   /**
    * Extractor method for the [[Agent]] .
