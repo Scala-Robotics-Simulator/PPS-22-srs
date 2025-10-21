@@ -1,7 +1,5 @@
 package io.github.srs.controller
 
-import scala.annotation.unused
-
 import cats.effect.unsafe.implicits.global
 import io.github.srs.model.ModelModule
 import io.github.srs.config.SimulationConfig
@@ -17,6 +15,7 @@ import io.github.srs.view.rendering.EnvironmentRenderer
 import io.github.srs.model.entity.dynamicentity.agent.Agent
 import io.github.srs.controller.message.DynamicEntityProposal
 import cats.effect.IO
+import io.github.srs.utils.random.SimpleRNG
 
 object RLControllerModule:
 
@@ -122,29 +121,44 @@ object RLControllerModule:
 
         override def reset(rng: RNG): (Observations, Infos) =
           _state = context.model.update(state)(using _ => bundle.stateLogic.updateState(initialState, rng))
-          state.environment.entities.collect { case a: Agent =>
-            (a, a.senseAll[Id](state.environment), "")
-          }.map { case (agent, readings, info) =>
-            (agent -> readings, agent -> info)
-          }.unzip match
-            case (obsList, infosList) => (obsList.toMap, infosList.toMap)
+          (state.environment.createObservations, state.environment.createInfos)
 
         override def step(actions: Map[Agent, Action[IO]]): StepResponse =
           _state = context.model.update(state)(using s => bundle.tickLogic.tick(s, state.dt)).unsafeRunSync()
-          @unused val actionsList =
+          val actionsList =
             actions.map { (agent, action) => DynamicEntityProposal(agent, action) }.toList.sortBy(_.entity.id)
+          _state = context.model
+            .update(state)(using
+              s => bundle.dynamicEntityActionsLogic.handleDynamicEntityActionsProposals(s, actionsList),
+            )
+            .unsafeRunSync()
+          _state = context.model
+            .update(state)(using s => bundle.randomLogic.random(s, SimpleRNG(s.simulationRNG.nextLong._1)))
+            .unsafeRunSync()
           StepResponse(
-            observations = Map.empty,
+            observations = state.environment.createObservations,
             rewards = Map.empty,
             terminateds = Map.empty,
             truncateds = Map.empty,
-            infos = Map.empty,
+            infos = state.environment.createInfos,
           )
 
         override def render(width: Int, height: Int): Image =
           EnvironmentRenderer.renderToPNG(state.environment, width, height)
       end ControllerImpl
     end Controller
+
+    extension (env: ValidEnvironment)
+
+      def createObservations: Observations =
+        env.entities.collect { case a: Agent =>
+          a -> a.senseAll[Id](env)
+        }.toMap
+
+      def createInfos: Infos =
+        env.entities.collect { case a: Agent =>
+          a -> ""
+        }.toMap
   end Component
 
   trait Interface[S <: ModelModule.BaseState] extends Provider[S] with Component[S]:
