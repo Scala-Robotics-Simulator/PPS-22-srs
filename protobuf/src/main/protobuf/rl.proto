@@ -7,8 +7,7 @@ message InitRequest {
 }
 
 message ResetRequest {
-  optional int32 seed = 1;
-  map<string, string> options = 2;
+  int32 seed = 1;
 }
 
 message ContinuousAction {
@@ -37,7 +36,7 @@ message Observation {
 
 message ResetResponse {
   map<string, Observation> observations = 1;
-  map<string, string> info = 2;
+  map<string, string> infos = 2;
 }
 
 message StepResponse {
