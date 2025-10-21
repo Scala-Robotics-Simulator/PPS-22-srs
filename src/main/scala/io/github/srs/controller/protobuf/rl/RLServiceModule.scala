@@ -5,7 +5,6 @@ import scala.annotation.unused
 import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings.*
 import cats.effect.unsafe.implicits.global
 import cats.effect.IO
-import cats.Id
 import io.github.srs.model.ModelModule
 import io.github.srs.controller.RLControllerModule
 import io.github.srs.protos.rl.*
@@ -170,7 +169,7 @@ object RLServiceModule:
             (id, ca) <- actions
             agent <- context.controller.state.environment.entities.collect:
               case a: Agent if a.id.toString == id => a
-            action <- MovementActionFactory.customMove[Id](ca.leftWheel, ca.rightWheel).toOption
+            action <- MovementActionFactory.customMove[IO](ca.leftWheel, ca.rightWheel).toOption
           yield agent -> action
           val stepResponse: io.github.srs.controller.RLControllerModule.StepResponse =
             context.controller.step(agentActions)

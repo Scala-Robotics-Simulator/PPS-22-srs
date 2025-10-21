@@ -1,5 +1,7 @@
 package io.github.srs.controller
 
+import scala.annotation.unused
+
 import cats.effect.unsafe.implicits.global
 import io.github.srs.model.ModelModule
 import io.github.srs.config.SimulationConfig
@@ -13,6 +15,8 @@ import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
 import io.github.srs.view.rendering.EnvironmentRenderer
 import io.github.srs.model.entity.dynamicentity.agent.Agent
+import io.github.srs.controller.message.DynamicEntityProposal
+import cats.effect.IO
 
 object RLControllerModule:
 
@@ -74,7 +78,7 @@ object RLControllerModule:
      * @return
      *   a response containing the results of the simulation step.
      */
-    def step(actions: Map[Agent, Action[Id]]): StepResponse
+    def step(actions: Map[Agent, Action[IO]]): StepResponse
 
     /**
      * Renders the current state of the simulation to an image for the RL client.
@@ -125,8 +129,10 @@ object RLControllerModule:
           }.unzip match
             case (obsList, infosList) => (obsList.toMap, infosList.toMap)
 
-        override def step(actions: Map[Agent, Action[Id]]): StepResponse =
+        override def step(actions: Map[Agent, Action[IO]]): StepResponse =
           _state = context.model.update(state)(using s => bundle.tickLogic.tick(s, state.dt)).unsafeRunSync()
+          @unused val actionsList =
+            actions.map { (agent, action) => DynamicEntityProposal(agent, action) }.toList.sortBy(_.entity.id)
           StepResponse(
             observations = Map.empty,
             rewards = Map.empty,
