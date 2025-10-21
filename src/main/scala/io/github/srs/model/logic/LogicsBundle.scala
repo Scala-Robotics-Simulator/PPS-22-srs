@@ -12,7 +12,7 @@ import io.github.srs.model.BaseSimulationState
 trait BaseLogicsBunldle[S <: BaseState]:
   def tickLogic: BaseTickLogic[S]
   def randomLogic: RandomLogic[S]
-  // def robotActionsLogic: DynamicEntityActionsLogic[S]
+  def dynamicEntityActionsLogic: DynamicEntityActionsLogic[S]
 
 /**
  * A bundle of all logic traits for a given state type.
@@ -46,6 +46,6 @@ given rlLogicsBundle: RLLogicsBundle[BaseSimulationState] with
   val tickLogic: BaseTickLogic[BaseSimulationState] = summon[BaseTickLogic[BaseSimulationState]]
   val randomLogic: RandomLogic[BaseSimulationState] = summon[RandomLogic[BaseSimulationState]]
 
-  // val robotActionsLogic: DynamicEntityActionsLogic[BaseSimulationState] =
-  //   summon[DynamicEntityActionsLogic[BaseSimulationState]]
+  def dynamicEntityActionsLogic: DynamicEntityActionsLogic[BaseSimulationState] =
+    summon[DynamicEntityActionsLogic[BaseSimulationState]]
   val stateLogic: StateLogic[BaseSimulationState] = summon[StateLogic[BaseSimulationState]]
