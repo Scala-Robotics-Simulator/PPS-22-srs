@@ -2,16 +2,6 @@ syntax = "proto3";
 
 package io.github.srs.protos;
 
-message RLRequest {
-  oneof request {
-    InitRequest init = 1;
-    ResetRequest reset = 2;
-    StepRequest step = 3;
-    RenderRequest render = 4;
-    CloseRequest close = 5;
-  }
-}
-
 message InitRequest {
   string config = 1; // YAML string
 }
@@ -34,17 +24,6 @@ message RenderRequest {
 }
 
 message CloseRequest {}
-
-message RLResponse {
-  oneof response {
-    InitResponse init = 1;
-    ResetResponse reset = 2;
-    StepResponse step = 3;
-    RenderResponse render = 4;
-    CloseResponse close = 5;
-    ErrorResponse error = 6;
-  }
-}
 
 message InitResponse {
   bool ok = 1;
@@ -95,5 +74,9 @@ enum ErrorCode {
 }
 
 service RL {
-  rpc Interact(stream RLRequest) returns (stream RLResponse) {}
+  rpc Init(InitRequest) returns (InitResponse) {}
+  rpc Reset(ResetRequest) returns (ResetResponse) {}
+  rpc Step(StepRequest) returns (StepResponse) {}
+  rpc Render(RenderRequest) returns (RenderResponse) {}
+  rpc Close(CloseRequest) returns (CloseResponse) {}
 }

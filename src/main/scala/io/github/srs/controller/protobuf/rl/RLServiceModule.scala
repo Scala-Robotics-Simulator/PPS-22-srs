@@ -26,7 +26,7 @@ object RLServiceModule:
   /**
    * Marker trait for the RL service implementation.
    *
-   * Concrete implementations must also implement the generated `RLFs2Grpc` interface for serving gRPC streams.
+   * Concrete implementations must also implement the generated `RLFs2Grpc` interface for serving gRPC.
    */
   trait Service
 
@@ -51,8 +51,7 @@ object RLServiceModule:
    * Component that builds the RL gRPC service implementation.
    *
    * The component depends on `Requirements` so it can access controller state when a richer implementation is wired in.
-   * The default `Service` simply pattern matches incoming `RLRequest` messages and returns static / empty responses. It
-   * is suitable for local testing and integration.
+   * The service implements separate RPC methods for each RL operation (init, reset, step, render, close).
    *
    * @tparam S
    *   the concrete simulation state type used by the controller wiring.
@@ -72,76 +71,83 @@ object RLServiceModule:
       def apply(): Service & RLFs2Grpc[IO, Metadata] = new ServiceImpl
 
       /**
-       * Private, minimal service implementation.
+       * Private service implementation.
        *
-       *   - `interact` accepts a stream of `RLRequest` and maps each request to an `RLResponse`. The current responses
-       *     are empty placeholders. A production implementation should inspect the request and interact with the
-       *     controller/state accordingly.
+       * Implements each RPC method separately:
+       *   - `init` initializes the simulation with a YAML config
+       *   - `reset` resets the environment with an optional seed
+       *   - `step` executes actions and returns observations, rewards, etc.
+       *   - `render` generates a rendered image of the environment
+       *   - `close` cleans up resources
        */
       private class ServiceImpl extends Service with RLFs2Grpc[IO, Metadata]:
 
         /**
-         * Handle a streaming RL interaction.
-         *
-         * The method transforms the incoming stream of `RLRequest` messages into a stream of `RLResponse`. Supported
-         * request kinds (Init, Reset, Step, Close) produce simple placeholder responses. Any unknown request produces
-         * an Error response.
+         * Initialize the simulation environment.
          *
          * @param request
-         *   stream of incoming RL requests
+         *   contains the YAML configuration string
          * @param ctx
          *   gRPC metadata for the call
          * @return
-         *   stream of RL responses corresponding to each request
+         *   response indicating success or failure with optional error message
          */
-        override def interact(
-            request: fs2.Stream[IO, RLRequest],
-            ctx: Metadata,
-        ): fs2.Stream[IO, RLResponse] =
-          request.map:
-            case RLRequest(RLRequest.Request.Init(InitRequest(config, _)), _) =>
-              RLResponse(
-                response = RLResponse.Response.Init(
-                  manageInitRequest(config),
-                ),
-              )
+        override def init(request: InitRequest, ctx: Metadata): IO[InitResponse] =
+          IO(manageInitRequest(request.config))
 
-            case RLRequest(RLRequest.Request.Reset(ResetRequest(seed, options, _)), _) =>
-              RLResponse(
-                response = RLResponse.Response.Reset(
-                  manageResetRequest(seed, options),
-                ),
-              )
+        /**
+         * Reset the environment to initial state.
+         *
+         * @param request
+         *   contains optional seed and options
+         * @param ctx
+         *   gRPC metadata for the call
+         * @return
+         *   response with observations and info for all agents
+         */
+        override def reset(request: ResetRequest, ctx: Metadata): IO[ResetResponse] =
+          IO(manageResetRequest(request.seed, request.options))
 
-            case RLRequest(RLRequest.Request.Step(StepRequest(actions, _)), _) =>
-              RLResponse(
-                response = RLResponse.Response.Step(
-                  manageStepRequest(actions),
-                ),
-              )
+        /**
+         * Execute a step in the environment.
+         *
+         * @param request
+         *   contains actions for each agent
+         * @param ctx
+         *   gRPC metadata for the call
+         * @return
+         *   response with observations, rewards, terminateds, truncateds, and infos
+         */
+        override def step(request: StepRequest, ctx: Metadata): IO[StepResponse] =
+          IO(manageStepRequest(request.actions))
 
-            case RLRequest(RLRequest.Request.Render(RenderRequest(w, h, _)), _) =>
-              val width = w.getOrElse(800)
-              val height = h.getOrElse(600)
-              RLResponse(
-                response = RLResponse.Response.Render(
-                  manageRenderRequest(width, height),
-                ),
-              )
+        /**
+         * Render the current environment state.
+         *
+         * @param request
+         *   contains optional width and height
+         * @param ctx
+         *   gRPC metadata for the call
+         * @return
+         *   response with rendered image as bytes
+         */
+        override def render(request: RenderRequest, ctx: Metadata): IO[RenderResponse] =
+          val width = request.width.getOrElse(800)
+          val height = request.height.getOrElse(600)
+          IO(manageRenderRequest(width, height))
 
-            case RLRequest(RLRequest.Request.Close(_), _) =>
-              RLResponse(
-                response = RLResponse.Response.Close(
-                  CloseResponse(ok = true, message = None),
-                ),
-              )
-
-            case _ =>
-              RLResponse(
-                response = RLResponse.Response.Error(
-                  ErrorResponse(message = "Unknown request", code = ErrorCode.UNKNOWN),
-                ),
-              )
+        /**
+         * Close and cleanup the environment.
+         *
+         * @param request
+         *   empty close request
+         * @param ctx
+         *   gRPC metadata for the call
+         * @return
+         *   response indicating success
+         */
+        override def close(request: CloseRequest, ctx: Metadata): IO[CloseResponse] =
+          IO(CloseResponse(ok = true, message = None))
 
         private def manageInitRequest(config: String): InitResponse =
           val simulationConfig = YamlManager.parse[IO](config).unsafeRunSync()
