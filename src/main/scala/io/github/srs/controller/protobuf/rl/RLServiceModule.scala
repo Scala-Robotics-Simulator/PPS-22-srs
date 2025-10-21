@@ -1,7 +1,5 @@
 package io.github.srs.controller.protobuf.rl
 
-import scala.annotation.unused
-
 import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings.*
 import cats.effect.unsafe.implicits.global
 import cats.effect.IO
@@ -106,7 +104,7 @@ object RLServiceModule:
          *   response with observations and info for all agents
          */
         override def reset(request: ResetRequest, ctx: Metadata): IO[ResetResponse] =
-          IO(manageResetRequest(request.seed, request.options))
+          IO(manageResetRequest(request.seed))
 
         /**
          * Execute a step in the environment.
@@ -160,15 +158,13 @@ object RLServiceModule:
                   context.controller.init(config.simulation in env)
                   InitResponse(ok = true, message = None)
 
-        private def manageResetRequest(seed: Option[Int], @unused options: Map[String, String]): ResetResponse =
-          val rng = seed match
-            case Some(seed) => SimpleRNG(seed)
-            case None => context.controller.initialState.simulationRNG
+        private def manageResetRequest(seed: Int): ResetResponse =
+          val rng = SimpleRNG(Int.int2long(seed))
           val (obs, deInfos) = context.controller.reset(rng)
           val observations = obs.map(_.toObservationPair)
           val infos = deInfos.map { (ent, info) => ent.id.toString -> info }
 
-          ResetResponse(observations = observations, info = infos)
+          ResetResponse(observations = observations, infos = infos)
 
         private def manageStepRequest(actions: Map[String, ContinuousAction]): StepResponse =
           val agentActions = for

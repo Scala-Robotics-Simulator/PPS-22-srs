@@ -1,5 +1,9 @@
-
+import logging
 from pathlib import Path
+
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+logger = logging.getLogger(__name__)
+
 
 def get_yaml_path(*subpaths):
     """
@@ -14,6 +18,7 @@ def get_yaml_path(*subpaths):
     project_root = Path(__file__).resolve().parents[3]
     return project_root.joinpath(*subpaths)
 
+
 def read_file(path: str) -> str:
     """
     Reads the contents of a file and returns it as a string.
@@ -25,12 +30,11 @@ def read_file(path: str) -> str:
         str: The contents of the file as a string.
     """
     try:
-        with open(path, "r", encoding="utf-8") as file:
-            content = file.read()
-        return content
+        with open(path, encoding="utf-8") as file:
+            return file.read()
     except FileNotFoundError:
-        print(f"Error: the file '{path}' was not found.")
+        logger.error(f"Error: the file '{path}' was not found.")
         return ""
     except Exception as e:
-        print(f"Error while reading the file: {e}")
+        logger.error(f"Error while reading the file: {e}")
         return ""
