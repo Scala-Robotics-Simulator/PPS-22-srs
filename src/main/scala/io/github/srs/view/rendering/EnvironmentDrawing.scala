@@ -4,7 +4,7 @@ import java.awt.*
 import java.awt.geom.Ellipse2D
 
 import io.github.srs.model.entity.Point2D.*
-import io.github.srs.model.entity.dynamicentity.Robot
+import io.github.srs.model.entity.dynamicentity.robot.Robot
 import io.github.srs.model.entity.staticentity.StaticEntity
 import io.github.srs.model.entity.{ Point2D, ShapeType }
 import io.github.srs.model.environment.Environment

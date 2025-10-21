@@ -11,7 +11,7 @@ import cats.Id
 import io.github.srs.model.Simulation.simulation
 import io.github.srs.model.logic.RLLogicsBundle
 import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings
-import io.github.srs.model.entity.dynamicentity.Robot
+import io.github.srs.model.entity.dynamicentity.robot.Robot
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
 import io.github.srs.view.rendering.EnvironmentRenderer
 
