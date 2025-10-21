@@ -41,3 +41,24 @@ given Kinematics[Robot] with
 
   def withPose(e: Robot, pos: Point2D, orientation: Orientation): Robot =
     e.copy(position = pos, orientation = orientation)
+
+/**
+ * Provides kinematic operations for the general [[DynamicEntity]] type by delegating to the specific implementations
+ */
+given Kinematics[DynamicEntity] with
+
+  def position(e: DynamicEntity): Point2D = e match
+    case r: Robot => summon[Kinematics[Robot]].position(r)
+    case a: Agent => summon[Kinematics[Agent]].position(a)
+
+  def orientation(e: DynamicEntity): Orientation = e match
+    case r: Robot => summon[Kinematics[Robot]].orientation(r)
+    case a: Agent => summon[Kinematics[Agent]].orientation(a)
+
+  def radius(e: DynamicEntity): Double = e match
+    case r: Robot => summon[Kinematics[Robot]].radius(r)
+    case a: Agent => summon[Kinematics[Agent]].radius(a)
+
+  def withPose(e: DynamicEntity, pos: Point2D, orientation: Orientation): DynamicEntity = e match
+    case r: Robot => summon[Kinematics[Robot]].withPose(r, pos, orientation)
+    case a: Agent => summon[Kinematics[Agent]].withPose(a, pos, orientation)

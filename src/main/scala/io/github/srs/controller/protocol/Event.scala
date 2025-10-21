@@ -2,7 +2,7 @@ package io.github.srs.controller.protocol
 
 import scala.concurrent.duration.FiniteDuration
 
-import io.github.srs.controller.message.RobotProposal
+import io.github.srs.controller.message.DynamicEntityProposal
 import io.github.srs.model.SimulationConfig.SimulationSpeed
 import io.github.srs.utils.random.RNG
 
@@ -47,9 +47,9 @@ enum Event:
   case Random(rng: RNG)
 
   /**
-   * Event representing a proposal for robot actions.
+   * Event representing a proposal for dynamic entity actions.
    * @param proposals
-   *   the list of [[io.github.srs.controller.message.RobotProposal]] to be processed.
+   *   the list of [[io.github.srs.controller.message.DynamicEntityProposal]] to be processed.
    */
-  case RobotActionProposals(proposals: List[RobotProposal])
+  case DynamicEntityActionProposals(proposals: List[DynamicEntityProposal])
 end Event

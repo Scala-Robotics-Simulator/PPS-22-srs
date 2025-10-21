@@ -237,6 +237,8 @@ object SimulationDefaults:
   end StaticEntity
 
   object DynamicEntity:
+    val DefaultMaxRetries = 10
+
     val ZeroSpeed: Double = 0.0
     val MinSpeed: Double = -1.0
     val MaxSpeed: Double = 1.0
@@ -295,8 +297,6 @@ object SimulationDefaults:
     end Agent
 
     object Robot:
-
-      val DefaultMaxRetries = 10
 
       val DefaultId: UUID = UUID.fromString("00000000-0000-0000-0000-000000000002")
       val DefaultPosition: Point2D = (0.0, 0.0)

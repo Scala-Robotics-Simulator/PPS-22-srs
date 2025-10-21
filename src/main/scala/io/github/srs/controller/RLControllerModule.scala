@@ -5,29 +5,28 @@ import io.github.srs.model.ModelModule
 import io.github.srs.config.SimulationConfig
 import io.github.srs.model.environment.ValidEnvironment
 import io.github.srs.utils.random.RNG
-import io.github.srs.model.entity.dynamicentity.DynamicEntity
 import io.github.srs.model.entity.dynamicentity.action.Action
 import cats.Id
 import io.github.srs.model.Simulation.simulation
 import io.github.srs.model.logic.RLLogicsBundle
 import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings
-import io.github.srs.model.entity.dynamicentity.robot.Robot
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
 import io.github.srs.view.rendering.EnvironmentRenderer
+import io.github.srs.model.entity.dynamicentity.agent.Agent
 
 object RLControllerModule:
 
-  type Observations = Map[DynamicEntity, SensorReadings]
-  type Infos = Map[DynamicEntity, String]
+  type Observations = Map[Agent, SensorReadings]
+  type Infos = Map[Agent, String]
 
   /**
    * The resonse after each simulation step.
    */
   case class StepResponse private[RLControllerModule] (
       observations: Observations,
-      rewards: Map[DynamicEntity, Double],
-      terminateds: Map[DynamicEntity, Boolean],
-      truncateds: Map[DynamicEntity, Boolean],
+      rewards: Map[Agent, Double],
+      terminateds: Map[Agent, Boolean],
+      truncateds: Map[Agent, Boolean],
       infos: Infos,
   )
 
@@ -75,7 +74,7 @@ object RLControllerModule:
      * @return
      *   a response containing the results of the simulation step.
      */
-    def step(actions: Map[DynamicEntity, Action[Id]]): StepResponse
+    def step(actions: Map[Agent, Action[Id]]): StepResponse
 
     /**
      * Renders the current state of the simulation to an image for the RL client.
@@ -119,16 +118,14 @@ object RLControllerModule:
 
         override def reset(rng: RNG): (Observations, Infos) =
           _state = context.model.update(state)(using _ => bundle.stateLogic.updateState(initialState, rng))
-          state.environment.entities.collect {
-            // TODO: will be agent
-            case r: Robot => (r, r.senseAll[Id](state.environment), "")
-          }.map { case (robot, readings, info) =>
-            (robot -> readings, robot -> info)
+          state.environment.entities.collect { case a: Agent =>
+            (a, a.senseAll[Id](state.environment), "")
+          }.map { case (agent, readings, info) =>
+            (agent -> readings, agent -> info)
           }.unzip match
             case (obsList, infosList) => (obsList.toMap, infosList.toMap)
 
-        // TODO: Use agent instead of DynamicEntity
-        override def step(actions: Map[DynamicEntity, Action[Id]]): StepResponse =
+        override def step(actions: Map[Agent, Action[Id]]): StepResponse =
           _state = context.model.update(state)(using s => bundle.tickLogic.tick(s, state.dt)).unsafeRunSync()
           StepResponse(
             observations = Map.empty,
