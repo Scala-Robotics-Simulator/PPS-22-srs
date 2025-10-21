@@ -17,6 +17,10 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.BeforeAndAfterEach
 import io.github.srs.utils.random.SimpleRNG
+import io.github.srs.model.entity.dynamicentity.agent.Agent
+import io.github.srs.model.entity.Point2D.*
+import io.github.srs.model.entity.dynamicentity.action.MovementActionFactory
+import cats.effect.IO
 
 class RLControllerTest
     extends AnyFlatSpec
@@ -29,7 +33,7 @@ class RLControllerTest
 
   private val config = simulation withDuration 1000 withSeed 42 in
     (-- | -- | -- | -- | -- ||
-      R | -- | -- | -- | -- ||
+      AG | -- | -- | -- | -- ||
       -- | -- | -- | -- | -- ||
       -- | -- | -- | -- | -- ||
       -- | -- | -- | -- | --).validate.toOption.value
@@ -40,7 +44,7 @@ class RLControllerTest
   "RLController" should "correctly load a configuration" in:
     val env: Environment =
       -- | -- | -- | -- | -- ||
-        R | -- | -- | -- | -- ||
+        AG | -- | -- | -- | -- ||
         -- | -- | -- | -- | -- ||
         -- | -- | -- | -- | -- ||
         -- | -- | -- | -- | --
@@ -61,8 +65,15 @@ class RLControllerTest
     val _ = controller.state.elapsedTime should not equal (state.elapsedTime)
     controller.state.simulationRNG should not equal (controller.initialState.simulationRNG)
 
-  "RLController" should "correcly update time when calling step" in:
+  "RLController" should "correcly update when calling step" in:
+    val agent = controller.state.environment.entities.collectFirst { case a: Agent => a }.value
+    val initialRng = controller.state.simulationRNG
     val _ = controller.state.elapsedTime should equal(controller.initialState.elapsedTime)
-    val _ = controller.step(Map.empty)
+    val _ = controller.step(Map(agent -> MovementActionFactory.moveForward[IO]))
+    val updatedAgent = controller.state.environment.entities.collectFirst { case a: Agent => a }.value
+    val _ = updatedAgent.id should equal(agent.id)
+    val _ = updatedAgent.position.x should be > agent.position.x
+    val _ = updatedAgent.position.y should equal(agent.position.y)
+    val _ = controller.state.simulationRNG should not equal (initialRng)
     controller.state.elapsedTime should not equal (controller.initialState.elapsedTime)
 end RLControllerTest

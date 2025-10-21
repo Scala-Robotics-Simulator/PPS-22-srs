@@ -10,6 +10,7 @@ import io.github.srs.model.entity.staticentity.dsl.ObstacleDsl.*
 import io.github.srs.model.entity.{ Entity, Point2D }
 import io.github.srs.utils.EqualityGivenInstances.given
 import io.github.srs.utils.SimulationDefaults.GridDSL.{ IncrementToCenterPos, ObstacleSize }
+import io.github.srs.model.entity.dynamicentity.agent.dsl.AgentDsl.*
 
 /**
  * Represents a cell in the grid-based DSL for defining environments.
@@ -19,6 +20,7 @@ enum Cell:
   case Obstacle
   case Light
   case Robot(policy: Policy)
+  case Agent
 
   /**
    * Converts the cell to a set of entities at the given position.
@@ -44,6 +46,13 @@ enum Cell:
           .withProximitySensors
           .withLightSensors
           .withBehavior(policy),
+      )
+    case Cell.Agent =>
+      Set(
+        (agent at (pos + IncrementToCenterPos))
+          .withSpeed(1.0)
+          .withProximitySensors
+          .withLightSensors,
       )
 
 end Cell
@@ -109,6 +118,14 @@ object Cell:
    *   the robot cell.
    */
   infix def M: Cell = Cell.Robot(Policy.Prioritized)
+
+  /**
+   * Represents an agent cell in the grid.
+   *
+   * @return
+   *   the agent cell.
+   */
+  infix def AG: Cell = Cell.Agent
 
   /**
    * Returns a symbol representing the given policy.

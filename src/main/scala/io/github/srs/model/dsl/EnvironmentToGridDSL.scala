@@ -67,6 +67,7 @@ object EnvironmentToGridDSL:
         case Cell.Light => "**"
         case Cell.Obstacle => "X "
         case Cell.Empty => "--"
+        case Cell.Agent => "AG"
       }.mkString(" | ")
     }
       .mkString(" ||\n")
