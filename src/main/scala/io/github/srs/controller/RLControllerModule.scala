@@ -16,20 +16,24 @@ import io.github.srs.model.entity.dynamicentity.agent.Agent
 import io.github.srs.controller.message.DynamicEntityProposal
 import cats.effect.IO
 import io.github.srs.utils.random.SimpleRNG
+import io.github.srs.model.entity.dynamicentity.action.NoAction
 
 object RLControllerModule:
 
   type Observations = Map[Agent, SensorReadings]
   type Infos = Map[Agent, String]
+  type Rewards = Map[Agent, Double]
+  type Terminateds = Map[Agent, Boolean]
+  type Truncateds = Map[Agent, Boolean]
 
   /**
    * The resonse after each simulation step.
    */
   case class StepResponse private[RLControllerModule] (
       observations: Observations,
-      rewards: Map[Agent, Double],
-      terminateds: Map[Agent, Boolean],
-      truncateds: Map[Agent, Boolean],
+      rewards: Rewards,
+      terminateds: Terminateds,
+      truncateds: Truncateds,
       infos: Infos,
   )
 
@@ -121,12 +125,15 @@ object RLControllerModule:
 
         override def reset(rng: RNG): (Observations, Infos) =
           _state = context.model.update(state)(using _ => bundle.stateLogic.updateState(initialState, rng))
-          (state.environment.createObservations, state.environment.createInfos)
+          (state.environment.getObservations, state.environment.getInfos)
 
         override def step(actions: Map[Agent, Action[IO]]): StepResponse =
           _state = context.model.update(state)(using s => bundle.tickLogic.tick(s, state.dt)).unsafeRunSync()
           val actionsList =
-            actions.map { (agent, action) => DynamicEntityProposal(agent, action) }.toList.sortBy(_.entity.id)
+            actions.map { (agent, action) =>
+              DynamicEntityProposal(agent.copy(lastAction = Some(action)), action)
+            }.toList.sortBy(_.entity.id)
+          val prevEnv = state.environment
           _state = context.model
             .update(state)(using
               s => bundle.dynamicEntityActionsLogic.handleDynamicEntityActionsProposals(s, actionsList),
@@ -136,12 +143,14 @@ object RLControllerModule:
             .update(state)(using s => bundle.randomLogic.random(s, SimpleRNG(s.simulationRNG.nextLong._1)))
             .unsafeRunSync()
           StepResponse(
-            observations = state.environment.createObservations,
-            rewards = Map.empty,
+            observations = state.environment.getObservations,
+            rewards = state.environment.getRewards(prevEnv),
             terminateds = Map.empty,
             truncateds = Map.empty,
-            infos = state.environment.createInfos,
+            infos = state.environment.getInfos,
           )
+
+        end step
 
         override def render(width: Int, height: Int): Image =
           EnvironmentRenderer.renderToPNG(state.environment, width, height)
@@ -150,12 +159,17 @@ object RLControllerModule:
 
     extension (env: ValidEnvironment)
 
-      def createObservations: Observations =
+      def getObservations: Observations =
         env.entities.collect { case a: Agent =>
           a -> a.senseAll[Id](env)
         }.toMap
 
-      def createInfos: Infos =
+      def getRewards(prev: ValidEnvironment): Rewards =
+        env.entities.collect { case a: Agent =>
+          a -> a.reward.evaluate(prev, env, a, a.lastAction.getOrElse(NoAction[IO]()))
+        }.toMap
+
+      def getInfos: Infos =
         env.entities.collect { case a: Agent =>
           a -> ""
         }.toMap
