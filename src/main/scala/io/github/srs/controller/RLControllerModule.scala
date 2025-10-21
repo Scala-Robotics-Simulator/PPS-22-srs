@@ -145,8 +145,8 @@ object RLControllerModule:
           StepResponse(
             observations = state.environment.getObservations,
             rewards = state.environment.getRewards(prevState.environment),
-            terminateds = Map.empty,
-            truncateds = Map.empty,
+            terminateds = state.getTerminations(prevState),
+            truncateds = state.getTruncations(prevState),
             infos = state.environment.getInfos,
           )
 
@@ -162,6 +162,11 @@ object RLControllerModule:
       def getTerminations(prev: ModelModule.BaseState): Terminateds =
         s.environment.entities.collect { case a: Agent =>
           a -> a.termination.evaluate(prev, s, a, a.lastAction.getOrElse(NoAction[IO]()))
+        }.toMap
+
+      def getTruncations(prev: ModelModule.BaseState): Truncateds =
+        s.environment.entities.collect { case a: Agent =>
+          a -> a.truncation.evaluate(prev, s, a, a.lastAction.getOrElse(NoAction[IO]()))
         }.toMap
 
     extension (env: ValidEnvironment)
