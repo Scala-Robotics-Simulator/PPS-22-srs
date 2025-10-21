@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Configuration
-PROTO_FILE="ping.proto"
+PROTO_FILE="rl.proto"
 PROTO_DIR="../protobuf/src/main/protobuf/"
 OUTPUT_DIR="./src/proto/"
 

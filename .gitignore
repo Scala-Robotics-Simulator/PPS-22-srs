@@ -43,5 +43,5 @@ flake.lock
 # Python
 env/
 __pycache__/
-python/*_pb2*.py
+*_pb2*.py
 
