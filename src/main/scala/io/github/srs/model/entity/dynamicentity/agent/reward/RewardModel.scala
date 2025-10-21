@@ -23,7 +23,6 @@ trait RewardModel[E]:
  * @tparam S
  *   The type of the state maintained by the reward model.
  */
-@SuppressWarnings(Array("org.wartremover.warts.Var"))
 trait StatefulReward[E, S] extends RewardModel[E]:
   protected var state: S
 
