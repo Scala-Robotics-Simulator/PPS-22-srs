@@ -21,6 +21,7 @@ import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.{ StdLightSens
 import io.github.srs.model.entity.dynamicentity.robot.behavior.BehaviorTypes.Behavior
 import io.github.srs.model.entity.dynamicentity.robot.Robot
 import io.github.srs.model.entity.dynamicentity.robot.behavior.Policy
+import io.github.srs.model.entity.dynamicentity.agent.dsl.AgentDsl.*
 import io.github.srs.model.environment.Environment
 import io.github.srs.utils.EqualityGivenInstances.given_CanEqual_T_T
 
@@ -104,6 +105,53 @@ class YamlConfigManagerTest extends AnyFlatSpec with Matchers:
         |""".stripMargin
 
     val path = Path.fromNioPath(JNIOFiles.createTempFile("test", ".yml"))
+    val manager = YamlConfigManager[IO](path)
+    manager.save(config).unsafeRunSync()
+    val yamlContent = Files[IO].readAll(path).through(fs2.text.utf8.decode).compile.string.unsafeRunSync()
+    // Normalize the YAML content as the serialization may not preserve the order of keys
+    val yamlContentSplit = yamlContent.split("\n").filter(_.nonEmpty).sorted
+    val expectedYamlSplit = expectedYaml.split("\n").filter(_.nonEmpty).sorted
+    val _ = for i <- yamlContentSplit.indices do yamlContentSplit(i) shouldBe expectedYamlSplit(i)
+    val loadedConfig = manager.load.unsafeRunSync().toOption.value
+
+    val _ = loadedConfig.simulation shouldBe config.simulation
+    val _ = loadedConfig.environment.width shouldBe config.environment.width
+    val _ = loadedConfig.environment.height shouldBe config.environment.height
+    loadedConfig.environment.entities should contain theSameElementsAs config.environment.entities
+
+  "YamlConfigManager" should "save and load agent configuration correctly" in:
+    val agentId = java.util.UUID.fromString("c6031aff-4887-4d1e-bebe-bcf8f7d03d54")
+    val orientation = Orientation(45.0)
+    val a = (agent withId agentId at (2.0, 2.0) withOrientation orientation withSpeed 1.0 withShape Circle(
+      0.25,
+    )).withProximitySensors.withLightSensors
+
+    val env = environment containing a
+
+    val config = SimulationConfig(
+      simulation = Simulation(seed = Some(42)),
+      environment = env,
+    )
+
+    val expectedYaml =
+      """simulation:
+        |  seed: 42
+        |environment:
+        |  width: 10
+        |  height: 10
+        |  entities:
+        |  - agent:
+        |      id: c6031aff-4887-4d1e-bebe-bcf8f7d03d54
+        |      orientation: 45.0
+        |      radius: 0.25
+        |      position: [2.0, 2.0]
+        |      speed: 1.0
+        |      withProximitySensors: true
+        |      withLightSensors: true
+        |      reward: NoReward
+        |""".stripMargin
+
+    val path = Path.fromNioPath(JNIOFiles.createTempFile("test-agent", ".yml"))
     val manager = YamlConfigManager[IO](path)
     manager.save(config).unsafeRunSync()
     val yamlContent = Files[IO].readAll(path).through(fs2.text.utf8.decode).compile.string.unsafeRunSync()

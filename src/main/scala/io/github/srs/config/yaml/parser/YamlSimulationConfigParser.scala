@@ -16,10 +16,14 @@ import io.github.srs.utils.SimulationDefaults.Fields.Simulation as SimulationFie
 import io.github.srs.utils.SimulationDefaults.Fields.Environment as EnvironmentFields
 import io.github.srs.utils.SimulationDefaults.Fields.Entity as EntityFields
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.DynamicEntity.Robot as RobotFields
+import io.github.srs.utils.SimulationDefaults.Fields.Entity.DynamicEntity.Agent as AgentFields
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Obstacle as ObstacleFields
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Light as LightFields
 import io.github.srs.model.entity.dynamicentity.robot.Robot
 import io.github.srs.model.entity.dynamicentity.robot.behavior.Policy
+import io.github.srs.model.entity.dynamicentity.agent.Agent
+import io.github.srs.model.entity.dynamicentity.agent.reward.Reward
+import io.github.srs.model.entity.dynamicentity.agent.dsl.AgentDsl.*
 import io.github.srs.model.environment.Environment
 
 /**
@@ -102,6 +106,7 @@ object YamlSimulationConfigParser:
       case Some((ObstacleFields.Self, v: Map[String, Any] @unchecked)) => parseObstacle(v)
       case Some((LightFields.Self, v: Map[String, Any] @unchecked)) => parseLight(v)
       case Some((RobotFields.Self, v: Map[String, Any] @unchecked)) => YamlSimulationConfigParser.parseRobot(v)
+      case Some((AgentFields.Self, v: Map[String, Any] @unchecked)) => YamlSimulationConfigParser.parseAgent(v)
       case Some((key, _)) => Left[Seq[ConfigError], Entity](Seq(ConfigError.ParsingError(s"Unknown entity type: $key")))
       case None => Left[Seq[ConfigError], Entity](Seq(ConfigError.ParsingError("Empty entity map")))
 
@@ -139,6 +144,35 @@ object YamlSimulationConfigParser:
       |> (r => if prox.getOrElse(false) then r.withProximitySensors else r)
       |> (r => if light.getOrElse(false) then r.withLightSensors else r)
       |> (r => behavior.fold(r)(b => r.withBehavior(b)))
+
+  /**
+   * Parses an agent entity from the given map.
+   * @note
+   *   This method currently does not support custom reward models and wheel actuators beyond speed configuration.
+   * @param map
+   *   the map containing agent parameters
+   * @return
+   *   a `ConfigResult` containing the parsed `Agent` or the errors encountered during parsing.
+   */
+  private def parseAgent(map: Map[String, Any]): ConfigResult[Entity] =
+    for
+      id <- getOptional[UUID](EntityFields.Id, map)
+      pos <- get[List[Double]](EntityFields.Position, map)
+      position <- parsePosition(pos)
+      orient <- getOptional[Double](EntityFields.Orientation, map)
+      radius <- getOptional[Double](AgentFields.Radius, map)
+      speed <- getOptional[Double](AgentFields.Speed, map)
+      prox <- getOptional[Boolean](AgentFields.WithProximitySensors, map)
+      light <- getOptional[Boolean](AgentFields.WithLightSensors, map)
+      reward <- getOptional[Reward](AgentFields.Reward, map)
+    yield Agent().at(position)
+      |> (a => id.fold(a)(a.withId))
+      |> (a => orient.fold(a)(o => a.withOrientation(Orientation(o))))
+      |> (a => radius.fold(a)(radius => a.withShape(ShapeType.Circle(radius))))
+      |> (a => speed.fold(a)(s => a.withSpeed(s)))
+      |> (a => if prox.getOrElse(false) then a.withProximitySensors else a)
+      |> (a => if light.getOrElse(false) then a.withLightSensors else a)
+      |> (a => reward.fold(a)(r => a.withReward(r.toRewardModel)))
 
   /**
    * Parses an obstacle entity from the given map.

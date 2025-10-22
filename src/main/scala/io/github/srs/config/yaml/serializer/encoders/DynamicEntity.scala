@@ -6,12 +6,16 @@ import io.circe.syntax.*
 import io.circe.{ Encoder, Json }
 import io.github.srs.config.yaml.serializer.encoders.given
 import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor
-import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.StdProximitySensors
-import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.StdLightSensors
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.StdProximitySensors as RobotStdProximitySensors
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.Robot.StdLightSensors as RobotStdLightSensors
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.Agent.StdProximitySensors as AgentStdProximitySensors
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.Agent.StdLightSensors as AgentStdLightSensors
 import io.github.srs.utils.SimulationDefaults.Fields.Entity as EntityFields
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.DynamicEntity.Robot as RobotFields
+import io.github.srs.utils.SimulationDefaults.Fields.Entity.DynamicEntity.Agent as AgentFields
 import com.typesafe.scalalogging.Logger
 import io.github.srs.model.entity.dynamicentity.robot.Robot
+import io.github.srs.model.entity.dynamicentity.agent.Agent
 
 /**
  * Encoders for DynamicEntity types.
@@ -37,10 +41,10 @@ object DynamicEntity:
         )
       case _ => ()
 
-    val withProximitySensors = StdProximitySensors.forall(robot.sensors.contains)
-    val withLightSensors = StdLightSensors.forall(robot.sensors.contains)
+    val withProximitySensors = RobotStdProximitySensors.forall(robot.sensors.contains)
+    val withLightSensors = RobotStdLightSensors.forall(robot.sensors.contains)
 
-    if robot.sensors.diff(StdProximitySensors ++ StdLightSensors).sizeIs > 0 then
+    if robot.sensors.diff(RobotStdProximitySensors ++ RobotStdLightSensors).sizeIs > 0 then
       logger.warn(
         "WARNING: encoding robot with custom sensors, those will be lost during the serialization",
       )
@@ -57,6 +61,40 @@ object DynamicEntity:
       )
       .deepMerge(
         speeds.map(RobotFields.Speed -> _._1.asJson).toList.toMap.asJson,
+      )
+
+  given Encoder[Agent] = (agent: Agent) =>
+    val dwt = agent.actuators.collectFirst { case dwt: DifferentialWheelMotor[Agent] =>
+      dwt
+    }
+    val speeds = dwt.map(d => (d.left.speed, d.right.speed))
+    speeds match
+      case Some(value) if value._1 != value._2 =>
+        logger.warn(
+          s"WARNING: encoding DifferentialWheelMotor with speeds (${value._1}, ${value._2}) the serializer isn't able to correctly serialize them and will only use the left speed",
+        )
+      case _ => ()
+
+    val withProximitySensors = AgentStdProximitySensors.forall(agent.sensors.contains)
+    val withLightSensors = AgentStdLightSensors.forall(agent.sensors.contains)
+
+    if agent.sensors.diff(AgentStdProximitySensors ++ AgentStdLightSensors).sizeIs > 0 then
+      logger.warn(
+        "WARNING: encoding agent with custom sensors, those will be lost during the serialization",
+      )
+
+    Json
+      .obj(
+        EntityFields.Id -> agent.id.asJson,
+        EntityFields.Position -> agent.position.asJson,
+        AgentFields.Radius -> agent.shape.radius.asJson,
+        EntityFields.Orientation -> agent.orientation.degrees.asJson,
+        AgentFields.WithProximitySensors -> withProximitySensors.asJson,
+        AgentFields.WithLightSensors -> withLightSensors.asJson,
+        AgentFields.Reward -> "NoReward".asJson,
+      )
+      .deepMerge(
+        speeds.map(AgentFields.Speed -> _._1.asJson).toList.toMap.asJson,
       )
 
 end DynamicEntity

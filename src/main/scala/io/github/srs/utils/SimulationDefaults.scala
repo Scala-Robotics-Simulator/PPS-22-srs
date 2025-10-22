@@ -396,7 +396,7 @@ object SimulationDefaults:
           val Speed: String = "speed"
           val WithProximitySensors: String = "withProximitySensors"
           val WithLightSensors: String = "withLightSensors"
-          val RewardModel: String = "rewardModel"
+          val Reward: String = "reward"
 
     end Entity
   end Fields

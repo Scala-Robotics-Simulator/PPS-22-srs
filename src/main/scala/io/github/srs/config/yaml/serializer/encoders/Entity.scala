@@ -5,8 +5,10 @@ import io.circe.{ Encoder, Json }
 import io.github.srs.model.entity.Entity
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
 import io.github.srs.model.entity.dynamicentity.robot.Robot
+import io.github.srs.model.entity.dynamicentity.agent.Agent
 import io.github.srs.model.entity.staticentity.StaticEntity
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.DynamicEntity.Robot as RobotFields
+import io.github.srs.utils.SimulationDefaults.Fields.Entity.DynamicEntity.Agent as AgentFields
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Obstacle as ObstacleFields
 import io.github.srs.utils.SimulationDefaults.Fields.Entity.StaticEntity.Light as LightFields
 
@@ -31,6 +33,8 @@ object Entity:
       e match
         case r: Robot =>
           Json.obj(RobotFields.Self -> r.asJson)
+        case a: Agent =>
+          Json.obj(AgentFields.Self -> a.asJson)
     case e: StaticEntity =>
       e match
         case o: StaticEntity.Obstacle =>
