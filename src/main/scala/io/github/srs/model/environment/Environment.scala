@@ -12,6 +12,7 @@ import io.github.srs.utils.EqualityGivenInstances.given_CanEqual_T_T
 import io.github.srs.utils.SimulationDefaults.Environment.*
 import io.github.srs.utils.SimulationDefaults.LightMapConfigs
 import io.github.srs.model.environment.dsl.CreationDSL.environment
+import io.github.srs.model.entity.dynamicentity.DynamicEntity
 
 /**
  * Represents the environment in which entities exist.
@@ -114,6 +115,8 @@ extension (env: Environment)
    *   A list of robots
    */
   def robots: List[Robot] = env.entities.collect { case r: Robot => r }
+
+  def dynamicEntities: List[DynamicEntity] = env.entities.collect { case de: DynamicEntity => de }
 
   /**
    * A list of light entities in the environment.

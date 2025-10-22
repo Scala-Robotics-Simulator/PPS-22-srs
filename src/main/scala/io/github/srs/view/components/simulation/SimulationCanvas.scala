@@ -12,6 +12,8 @@ import io.github.srs.model.environment.Environment
 import io.github.srs.view.rendering.{ EnvironmentDrawing, Viewport }
 import io.github.srs.view.state.SimulationViewState
 import io.github.srs.model.entity.dynamicentity.robot.Robot
+import io.github.srs.model.entity.dynamicentity.DynamicEntity
+import io.github.srs.model.entity.dynamicentity.agent.Agent
 
 /**
  * Canvas component responsible for rendering the simulation environment. Supports static layer caching for improved
@@ -58,7 +60,7 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
       ensureStaticLayer(env)
       state.get.staticLayer.foreach(g.drawImage(_, 0, 0, this))
       g match
-        case g2: Graphics2D => drawRobots(g2, env, viewport(env), currentState.selectedRobotId)
+        case g2: Graphics2D => drawDynamicEntities(g2, env, viewport(env), currentState.selectedRobotId)
         case _ => ()
     }
 
@@ -146,18 +148,22 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
    * @param selectedId
    *   Optional ID of the selected robot
    */
-  override protected def drawRobot(
+  override protected def drawDynamicEntity(
       g: Graphics2D,
-      robot: Robot,
+      de: DynamicEntity,
       env: Environment,
       vp: Viewport,
       selectedId: Option[String],
   ): Unit =
-    robot.shape match
+    val shape = de match
+      case r: Robot => r.shape
+      case a: Agent => a.shape
+
+    shape match
       case ShapeType.Circle(radius) =>
-        val isSelected = selectedId.contains(robot.id.toString)
-        drawRobotBody(g, robot, radius, vp, isSelected)
-        drawRobotDirection(g, robot, radius, vp)
-        if !insideConfiguration then drawSensorLines(g, robot, radius, env, vp)
+        val isSelected = selectedId.contains(de.id.toString)
+        drawDynamicEntityBody(g, de, radius, vp, isSelected)
+        drawDynamicEntityDirection(g, de, radius, vp)
+        if !insideConfiguration then drawSensorLines(g, de, radius, env, vp)
 
 end SimulationCanvas
