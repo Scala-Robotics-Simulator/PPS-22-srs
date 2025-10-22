@@ -149,6 +149,8 @@ class YamlConfigManagerTest extends AnyFlatSpec with Matchers:
         |      withProximitySensors: true
         |      withLightSensors: true
         |      reward: NoReward
+        |      termination: NeverTerminate
+        |      truncation: NeverTruncate
         |""".stripMargin
 
     val path = Path.fromNioPath(JNIOFiles.createTempFile("test-agent", ".yml"))

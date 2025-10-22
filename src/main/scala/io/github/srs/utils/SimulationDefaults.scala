@@ -397,6 +397,8 @@ object SimulationDefaults:
           val WithProximitySensors: String = "withProximitySensors"
           val WithLightSensors: String = "withLightSensors"
           val Reward: String = "reward"
+          val Termination: String = "termination"
+          val Truncation: String = "truncation"
 
     end Entity
   end Fields

@@ -229,6 +229,8 @@ class YamlManagerTest extends AnyFlatSpec with Matchers:
         |        withProximitySensors: true
         |        withLightSensors: true
         |        reward: NoReward
+        |        termination: NeverTerminate
+        |        truncation: NeverTruncate
         |""".stripMargin
 
     val res = YamlManager.parse[IO](yamlContent).unsafeRunSync()
@@ -288,6 +290,8 @@ class YamlManagerTest extends AnyFlatSpec with Matchers:
         |      withProximitySensors: true
         |      withLightSensors: true
         |      reward: NoReward
+        |      termination: NeverTerminate
+        |      truncation: NeverTruncate
         |""".stripMargin
 
     val yamlContent = YamlManager.toYaml[IO](config).unsafeRunSync()
@@ -302,5 +306,50 @@ class YamlManagerTest extends AnyFlatSpec with Matchers:
     val _ = loaded.environment.width shouldBe config.environment.width
     val _ = loaded.environment.height shouldBe config.environment.height
     loaded.environment.entities should contain theSameElementsAs config.environment.entities
+
+  it should "parse an agent with reward, termination, and truncation" in:
+    val yamlContent =
+      """
+        |environment:
+        |  entities:
+        |    - agent:
+        |        position: [1.0, 1.0]
+        |        reward: NoReward
+        |        termination: NeverTerminate
+        |        truncation: NeverTruncate
+        |""".stripMargin
+
+    val res = YamlManager.parse[IO](yamlContent).unsafeRunSync()
+    res match
+      case Left(errors) => fail(s"Parsing failed with errors: ${errors.mkString(", ")}")
+      case Right(config) =>
+        config.environment.entities.headOption match
+          case Some(agent: Agent) =>
+            val _ = agent.reward shouldBe a[io.github.srs.model.entity.dynamicentity.agent.reward.NoReward]
+            val _ =
+              agent.termination shouldBe a[io.github.srs.model.entity.dynamicentity.agent.termination.NeverTerminate]
+            val _ = agent.truncation shouldBe a[io.github.srs.model.entity.dynamicentity.agent.truncation.NeverTruncate]
+          case _ => fail("Expected an Agent entity")
+
+  it should "parse an agent without explicit reward, termination, and truncation (using defaults)" in:
+    val yamlContent =
+      """
+        |environment:
+        |  entities:
+        |    - agent:
+        |        position: [1.0, 1.0]
+        |""".stripMargin
+
+    val res = YamlManager.parse[IO](yamlContent).unsafeRunSync()
+    res match
+      case Left(errors) => fail(s"Parsing failed with errors: ${errors.mkString(", ")}")
+      case Right(config) =>
+        config.environment.entities.headOption match
+          case Some(agent: Agent) =>
+            val _ = agent.reward shouldBe a[io.github.srs.model.entity.dynamicentity.agent.reward.NoReward]
+            val _ =
+              agent.termination shouldBe a[io.github.srs.model.entity.dynamicentity.agent.termination.NeverTerminate]
+            val _ = agent.truncation shouldBe a[io.github.srs.model.entity.dynamicentity.agent.truncation.NeverTruncate]
+          case _ => fail("Expected an Agent entity")
 
 end YamlManagerTest

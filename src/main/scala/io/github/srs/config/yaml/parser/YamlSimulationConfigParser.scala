@@ -23,6 +23,8 @@ import io.github.srs.model.entity.dynamicentity.robot.Robot
 import io.github.srs.model.entity.dynamicentity.robot.behavior.Policy
 import io.github.srs.model.entity.dynamicentity.agent.Agent
 import io.github.srs.model.entity.dynamicentity.agent.reward.Reward
+import io.github.srs.model.entity.dynamicentity.agent.termination.Termination
+import io.github.srs.model.entity.dynamicentity.agent.truncation.Truncation
 import io.github.srs.model.entity.dynamicentity.agent.dsl.AgentDsl.*
 import io.github.srs.model.environment.Environment
 
@@ -165,6 +167,8 @@ object YamlSimulationConfigParser:
       prox <- getOptional[Boolean](AgentFields.WithProximitySensors, map)
       light <- getOptional[Boolean](AgentFields.WithLightSensors, map)
       reward <- getOptional[Reward](AgentFields.Reward, map)
+      termination <- getOptional[Termination](AgentFields.Termination, map)
+      truncation <- getOptional[Truncation](AgentFields.Truncation, map)
     yield Agent().at(position)
       |> (a => id.fold(a)(a.withId))
       |> (a => orient.fold(a)(o => a.withOrientation(Orientation(o))))
@@ -173,6 +177,8 @@ object YamlSimulationConfigParser:
       |> (a => if prox.getOrElse(false) then a.withProximitySensors else a)
       |> (a => if light.getOrElse(false) then a.withLightSensors else a)
       |> (a => reward.fold(a)(r => a.withReward(r.toRewardModel)))
+      |> (a => termination.fold(a)(t => a.withTermination(t.toTerminationModel)))
+      |> (a => truncation.fold(a)(t => a.withTruncation(t.toTruncationModel)))
 
   /**
    * Parses an obstacle entity from the given map.

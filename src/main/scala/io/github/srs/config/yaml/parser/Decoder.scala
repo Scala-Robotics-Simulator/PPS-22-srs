@@ -5,6 +5,8 @@ import java.util.UUID
 import io.github.srs.config.{ ConfigError, ConfigResult }
 import io.github.srs.model.entity.dynamicentity.robot.behavior.Policy
 import io.github.srs.model.entity.dynamicentity.agent.reward.Reward
+import io.github.srs.model.entity.dynamicentity.agent.termination.Termination
+import io.github.srs.model.entity.dynamicentity.agent.truncation.Truncation
 
 /**
  * A trait for decoding configuration values from a map. It provides methods to decode various types of values, such as
@@ -119,6 +121,36 @@ object Decoder:
               Seq(ConfigError.ParsingError(s"Unable to find reward: $name")),
             )
       yield reward
+
+  given Decoder[Termination] with
+
+    def decode(field: String, value: Any): ConfigResult[Termination] =
+      for
+        name <- summon[Decoder[String]].decode(field, value)
+        maybeTermination = Termination.values.collectFirst:
+          case t: Termination if t.toString == name => t
+        termination <- maybeTermination match
+          case Some(value) => Right[Seq[ConfigError], Termination](value)
+          case None =>
+            Left[Seq[ConfigError], Termination](
+              Seq(ConfigError.ParsingError(s"Unable to find termination: $name")),
+            )
+      yield termination
+
+  given Decoder[Truncation] with
+
+    def decode(field: String, value: Any): ConfigResult[Truncation] =
+      for
+        name <- summon[Decoder[String]].decode(field, value)
+        maybeTruncation = Truncation.values.collectFirst:
+          case t: Truncation if t.toString == name => t
+        truncation <- maybeTruncation match
+          case Some(value) => Right[Seq[ConfigError], Truncation](value)
+          case None =>
+            Left[Seq[ConfigError], Truncation](
+              Seq(ConfigError.ParsingError(s"Unable to find truncation: $name")),
+            )
+      yield truncation
 
   given [A](using decoder: Decoder[A]): Decoder[List[A]] with
 
