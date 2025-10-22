@@ -49,7 +49,7 @@ object EnvironmentRenderer extends EnvironmentDrawing:
     drawGrid(g, env, vp)
     drawLabels(g, env, vp)
     drawStaticEntities(g, env, vp)
-    drawRobots(g, env, vp)
+    drawDynamicEntities(g, env, vp)
 
     g.dispose()
     img

@@ -4,7 +4,6 @@ import java.awt.*
 import java.awt.geom.Ellipse2D
 
 import io.github.srs.model.entity.Point2D.*
-import io.github.srs.model.entity.dynamicentity.robot.Robot
 import io.github.srs.model.entity.staticentity.StaticEntity
 import io.github.srs.model.entity.{ Point2D, ShapeType }
 import io.github.srs.model.environment.Environment
@@ -14,6 +13,9 @@ import io.github.srs.utils.SimulationDefaults.DynamicEntity.Sensor.ProximitySens
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
 import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings.proximityReadings
 import cats.Id
+import io.github.srs.model.entity.dynamicentity.DynamicEntity
+import io.github.srs.model.entity.dynamicentity.agent.Agent
+import io.github.srs.model.entity.dynamicentity.robot.Robot
 
 /**
  * Viewport configuration for world-to-screen transformation.
@@ -288,9 +290,14 @@ trait EnvironmentDrawing:
    * @param selectedId
    *   Optional ID of the selected robot
    */
-  protected def drawRobots(g: Graphics2D, env: Environment, vp: Viewport, selectedId: Option[String] = None): Unit =
-    import io.github.srs.model.environment.robots
-    env.robots.foreach(robot => drawRobot(g, robot, env, vp, selectedId))
+  protected def drawDynamicEntities(
+      g: Graphics2D,
+      env: Environment,
+      vp: Viewport,
+      selectedId: Option[String] = None,
+  ): Unit =
+    import io.github.srs.model.environment.dynamicEntities
+    env.dynamicEntities.foreach(de => drawDynamicEntity(g, de, env, vp, selectedId))
 
   /**
    * Draws a single robot with body, direction indicator, and sensors.
@@ -306,19 +313,23 @@ trait EnvironmentDrawing:
    * @param selectedId
    *   Optional ID of the selected robot
    */
-  protected def drawRobot(
+  protected def drawDynamicEntity(
       g: Graphics2D,
-      robot: Robot,
+      de: DynamicEntity,
       env: Environment,
       vp: Viewport,
       selectedId: Option[String],
   ): Unit =
-    robot.shape match
+    val shape = de match
+      case a: Agent => a.shape
+      case r: Robot => r.shape
+
+    shape match
       case ShapeType.Circle(radius) =>
-        val isSelected = selectedId.contains(robot.id.toString)
-        drawRobotBody(g, robot, radius, vp, isSelected)
-        drawRobotDirection(g, robot, radius, vp)
-        drawSensorLines(g, robot, radius, env, vp)
+        val isSelected = selectedId.contains(de.id.toString)
+        drawDynamicEntityBody(g, de, radius, vp, isSelected)
+        drawDynamicEntityDirection(g, de, radius, vp)
+        drawSensorLines(g, de, radius, env, vp)
 
   /**
    * Draws the robot's circular body with gradient and border.
@@ -334,9 +345,9 @@ trait EnvironmentDrawing:
    * @param isSelected
    *   True if this robot is currently selected
    */
-  protected def drawRobotBody(
+  protected def drawDynamicEntityBody(
       g: Graphics2D,
-      robot: Robot,
+      de: DynamicEntity,
       radius: Double,
       vp: Viewport,
       isSelected: Boolean,
@@ -344,37 +355,37 @@ trait EnvironmentDrawing:
     import SimulationDefaults.DynamicEntity.Robot.{ NormalStroke, SelectionStroke }
     import SimulationDefaults.UI.{ Colors, Strokes }
 
-    val x = vp.offsetX + (robot.position.x - radius) * vp.scale
-    val y = vp.offsetY + (robot.position.y - radius) * vp.scale
+    val x = vp.offsetX + (de.position.x - radius) * vp.scale
+    val y = vp.offsetY + (de.position.y - radius) * vp.scale
     val d = 2 * radius * vp.scale
 
-    val robotShape = new Ellipse2D.Double(x, y, d, d)
+    val deShape = new Ellipse2D.Double(x, y, d, d)
 
     val colors =
       if isSelected then (Colors.robotSelected, Colors.robotSelectedDark, Colors.robotSelectedBorder)
       else (Colors.robotDefault, Colors.robotDefaultDark, Colors.robotDefaultBorder)
 
     val gradient = new RadialGradientPaint(
-      (vp.offsetX + robot.position.x * vp.scale).toFloat,
-      (vp.offsetY + robot.position.y * vp.scale).toFloat,
+      (vp.offsetX + de.position.x * vp.scale).toFloat,
+      (vp.offsetY + de.position.y * vp.scale).toFloat,
       (radius * vp.scale).toFloat,
       Array(RobotBody.GradientFractionStart, RobotBody.GradientFractionEnd),
       Array(colors._1, colors._2),
     )
 
     g.setPaint(gradient)
-    g.fill(robotShape)
+    g.fill(deShape)
 
     g.setColor(Colors.robotShadow)
     g.setStroke(new BasicStroke(Strokes.RobotShadowStroke))
-    g.draw(robotShape)
+    g.draw(deShape)
 
     g.setColor(colors._3)
     val strokeWidth = if isSelected then SelectionStroke else NormalStroke
     g.setStroke(new BasicStroke(strokeWidth))
-    g.draw(robotShape)
+    g.draw(deShape)
 
-  end drawRobotBody
+  end drawDynamicEntityBody
 
   /**
    * Draws an arrow indicating the robot's orientation.
@@ -388,12 +399,12 @@ trait EnvironmentDrawing:
    * @param vp
    *   Viewport configuration
    */
-  protected def drawRobotDirection(g: Graphics2D, robot: Robot, radius: Double, vp: Viewport): Unit =
+  protected def drawDynamicEntityDirection(g: Graphics2D, de: DynamicEntity, radius: Double, vp: Viewport): Unit =
     import SimulationDefaults.DynamicEntity.Robot.*
 
-    val cx = (vp.offsetX + robot.position.x * vp.scale).toInt
-    val cy = (vp.offsetY + robot.position.y * vp.scale).toInt
-    val angle = robot.orientation.toRadians
+    val cx = (vp.offsetX + de.position.x * vp.scale).toInt
+    val cy = (vp.offsetY + de.position.y * vp.scale).toInt
+    val angle = de.orientation.toRadians
     val length = radius * ArrowLengthFactor * vp.scale
     val width = math.max(MinArrowWidth.toDouble, radius * vp.scale * ArrowWidthFactor)
 
@@ -417,21 +428,23 @@ trait EnvironmentDrawing:
    */
   protected def drawSensorLines(
       g: Graphics2D,
-      robot: Robot,
+      de: DynamicEntity,
       radius: Double,
       env: Environment,
       vp: Viewport,
   ): Unit =
-    val cx = (vp.offsetX + robot.position.x * vp.scale).toInt
-    val cy = (vp.offsetY + robot.position.y * vp.scale).toInt
+    val cx = (vp.offsetX + de.position.x * vp.scale).toInt
+    val cy = (vp.offsetY + de.position.y * vp.scale).toInt
     val scaledRadius = radius * vp.scale
 
-    val readings = robot.senseAll[Id](env).proximityReadings
+    val readings = de match
+      case r: Robot => r.senseAll[Id](env).proximityReadings
+      case a: Agent => a.senseAll[Id](env).proximityReadings
 
     readings.foreach { reading =>
       val sensor = reading.sensor
       val value = reading.value
-      val sensorAngle = sensor.offset.toRadians + robot.orientation.toRadians
+      val sensorAngle = sensor.offset.toRadians + de.orientation.toRadians
 
       val startX = cx + (scaledRadius * math.cos(sensorAngle)).toInt
       val startY = cy + (scaledRadius * math.sin(sensorAngle)).toInt
