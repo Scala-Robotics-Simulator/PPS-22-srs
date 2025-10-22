@@ -16,6 +16,9 @@ import io.github.srs.utils.SimulationDefaults.Fields.Entity.DynamicEntity.Agent 
 import com.typesafe.scalalogging.Logger
 import io.github.srs.model.entity.dynamicentity.robot.Robot
 import io.github.srs.model.entity.dynamicentity.agent.Agent
+import io.github.srs.model.entity.dynamicentity.agent.reward.NoReward
+import io.github.srs.model.entity.dynamicentity.agent.termination.NeverTerminate
+import io.github.srs.model.entity.dynamicentity.agent.truncation.NeverTruncate
 
 /**
  * Encoders for DynamicEntity types.
@@ -83,6 +86,18 @@ object DynamicEntity:
         "WARNING: encoding agent with custom sensors, those will be lost during the serialization",
       )
 
+    val rewardName = agent.reward match
+      case _: NoReward => "NoReward"
+      case _ => "NoReward"
+
+    val terminationName = agent.termination match
+      case _: NeverTerminate => "NeverTerminate"
+      case _ => "NeverTerminate"
+
+    val truncationName = agent.truncation match
+      case _: NeverTruncate => "NeverTruncate"
+      case _ => "NeverTruncate"
+
     Json
       .obj(
         EntityFields.Id -> agent.id.asJson,
@@ -91,7 +106,9 @@ object DynamicEntity:
         EntityFields.Orientation -> agent.orientation.degrees.asJson,
         AgentFields.WithProximitySensors -> withProximitySensors.asJson,
         AgentFields.WithLightSensors -> withLightSensors.asJson,
-        AgentFields.Reward -> "NoReward".asJson,
+        AgentFields.Reward -> rewardName.asJson,
+        AgentFields.Termination -> terminationName.asJson,
+        AgentFields.Truncation -> truncationName.asJson,
       )
       .deepMerge(
         speeds.map(AgentFields.Speed -> _._1.asJson).toList.toMap.asJson,
