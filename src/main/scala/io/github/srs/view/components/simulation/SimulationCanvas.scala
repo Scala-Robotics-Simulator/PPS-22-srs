@@ -154,6 +154,7 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
       env: Environment,
       vp: Viewport,
       selectedId: Option[String],
+      includeId: Boolean,
   ): Unit =
     val shape = de match
       case r: Robot => r.shape
@@ -162,7 +163,7 @@ class SimulationCanvas(private val insideConfiguration: Boolean = false) extends
     shape match
       case ShapeType.Circle(radius) =>
         val isSelected = selectedId.contains(de.id.toString)
-        drawDynamicEntityBody(g, de, radius, vp, isSelected)
+        drawDynamicEntityBody(g, de, radius, vp, isSelected, includeId)
         drawDynamicEntityDirection(g, de, radius, vp)
         if !insideConfiguration then drawSensorLines(g, de, radius, env, vp)
 
