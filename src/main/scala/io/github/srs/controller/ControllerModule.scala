@@ -6,17 +6,17 @@ import scala.language.postfixOps
 import cats.effect.std.Queue
 import cats.effect.{ Clock, IO }
 import cats.implicits.*
-import com.typesafe.scalalogging.Logger
 import io.github.srs.controller.message.DynamicEntityProposal
 import io.github.srs.controller.protocol.Event
 import io.github.srs.model.*
 import io.github.srs.model.SimulationConfig.SimulationStatus.*
-import io.github.srs.model.entity.dynamicentity.robot.Robot
-import io.github.srs.model.entity.dynamicentity.robot.behavior.BehaviorContext
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
 import io.github.srs.model.logic.*
 import io.github.srs.utils.EqualityGivenInstances.given
 import io.github.srs.utils.random.RNG
+import com.typesafe.scalalogging.Logger
+import io.github.srs.model.entity.dynamicentity.robot.Robot
+import io.github.srs.model.entity.dynamicentity.robot.behavior.BehaviorContext
 
 /**
  * Module that defines the controller logic for the Scala Robotics Simulator.
