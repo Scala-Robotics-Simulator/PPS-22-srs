@@ -295,9 +295,10 @@ trait EnvironmentDrawing:
       env: Environment,
       vp: Viewport,
       selectedId: Option[String] = None,
+      includeId: Boolean = false,
   ): Unit =
     import io.github.srs.model.environment.dynamicEntities
-    env.dynamicEntities.foreach(de => drawDynamicEntity(g, de, env, vp, selectedId))
+    env.dynamicEntities.foreach(de => drawDynamicEntity(g, de, env, vp, selectedId, includeId))
 
   /**
    * Draws a single robot with body, direction indicator, and sensors.
@@ -319,6 +320,7 @@ trait EnvironmentDrawing:
       env: Environment,
       vp: Viewport,
       selectedId: Option[String],
+      includeId: Boolean,
   ): Unit =
     val shape = de match
       case a: Agent => a.shape
@@ -327,7 +329,7 @@ trait EnvironmentDrawing:
     shape match
       case ShapeType.Circle(radius) =>
         val isSelected = selectedId.contains(de.id.toString)
-        drawDynamicEntityBody(g, de, radius, vp, isSelected)
+        drawDynamicEntityBody(g, de, radius, vp, isSelected, includeId)
         drawDynamicEntityDirection(g, de, radius, vp)
         drawSensorLines(g, de, radius, env, vp)
 
@@ -351,6 +353,7 @@ trait EnvironmentDrawing:
       radius: Double,
       vp: Viewport,
       isSelected: Boolean,
+      includeId: Boolean,
   ): Unit =
     import SimulationDefaults.DynamicEntity.Robot.{ NormalStroke, SelectionStroke }
     import SimulationDefaults.UI.{ Colors, Strokes }
@@ -384,6 +387,28 @@ trait EnvironmentDrawing:
     val strokeWidth = if isSelected then SelectionStroke else NormalStroke
     g.setStroke(new BasicStroke(strokeWidth))
     g.draw(deShape)
+
+    if includeId then
+      de match
+        case a: DynamicEntity =>
+          val id = a.id.toString.takeRight(2)
+          val centerX = vp.offsetX + de.position.x * vp.scale
+          val centerY = vp.offsetY + de.position.y * vp.scale
+
+          val fontSize = (radius * vp.scale * 0.9).toInt.max(10)
+          val font = new Font("SansSerif", Font.BOLD, fontSize)
+          g.setFont(font)
+
+          val fm = g.getFontMetrics
+          val textWidth = fm.stringWidth(id)
+          val textHeight = fm.getAscent
+
+          g.setColor(Color.BLACK)
+          g.drawString(id, (centerX - textWidth / 2 + 1).toInt, (centerY + textHeight / 4 + 1).toInt)
+
+          g.setColor(Color.WHITE)
+          g.drawString(id, (centerX - textWidth / 2).toInt, (centerY + textHeight / 4).toInt)
+    end if
 
   end drawDynamicEntityBody
 
