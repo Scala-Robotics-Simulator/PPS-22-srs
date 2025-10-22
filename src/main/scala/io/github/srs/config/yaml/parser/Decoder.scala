@@ -4,6 +4,7 @@ import java.util.UUID
 
 import io.github.srs.config.{ ConfigError, ConfigResult }
 import io.github.srs.model.entity.dynamicentity.robot.behavior.Policy
+import io.github.srs.model.entity.dynamicentity.agent.reward.Reward
 
 /**
  * A trait for decoding configuration values from a map. It provides methods to decode various types of values, such as
@@ -103,6 +104,21 @@ object Decoder:
               Seq(ConfigError.ParsingError(s"Unable to find behavior: $name")),
             )
       yield behavior
+
+  given Decoder[Reward] with
+
+    def decode(field: String, value: Any): ConfigResult[Reward] =
+      for
+        name <- summon[Decoder[String]].decode(field, value)
+        maybeReward = Reward.values.collectFirst:
+          case r: Reward if r.toString == name => r
+        reward <- maybeReward match
+          case Some(value) => Right[Seq[ConfigError], Reward](value)
+          case None =>
+            Left[Seq[ConfigError], Reward](
+              Seq(ConfigError.ParsingError(s"Unable to find reward: $name")),
+            )
+      yield reward
 
   given [A](using decoder: Decoder[A]): Decoder[List[A]] with
 

@@ -11,6 +11,8 @@ import io.github.srs.model.entity.ShapeType.Circle
 import io.github.srs.model.entity.dynamicentity.actuator.DifferentialWheelMotor
 import io.github.srs.model.entity.dynamicentity.robot.dsl.RobotDsl.*
 import io.github.srs.model.entity.dynamicentity.robot.Robot
+import io.github.srs.model.entity.dynamicentity.agent.dsl.AgentDsl.*
+import io.github.srs.model.entity.dynamicentity.agent.Agent
 import io.github.srs.model.entity.staticentity.dsl.LightDsl.*
 import io.github.srs.model.entity.staticentity.dsl.ObstacleDsl.*
 import io.github.srs.model.entity.{ Orientation, Point2D }
@@ -198,6 +200,94 @@ class YamlManagerTest extends AnyFlatSpec with Matchers:
         |      withProximitySensors: true
         |      withLightSensors: true
         |      behavior: AlwaysForward
+        |""".stripMargin
+
+    val yamlContent = YamlManager.toYaml[IO](config).unsafeRunSync()
+    // Normalize the YAML content as the serialization may not preserve the order of keys
+    val yamlContentSplit = yamlContent.split("\n").filter(_.nonEmpty).sorted
+    val expectedYamlSplit = expectedYaml.split("\n").filter(_.nonEmpty).sorted
+    val _ = for i <- yamlContentSplit.indices do yamlContentSplit(i) shouldBe expectedYamlSplit(i)
+    val loadedConfig = YamlManager.parse[IO](yamlContent).unsafeRunSync()
+    val loaded = loadedConfig.toOption.value
+
+    val _ = loaded.simulation shouldBe config.simulation
+    val _ = loaded.environment.width shouldBe config.environment.width
+    val _ = loaded.environment.height shouldBe config.environment.height
+    loaded.environment.entities should contain theSameElementsAs config.environment.entities
+
+  it should "parse an agent with sensors" in:
+    val yamlContent =
+      """
+        |environment:
+        |  entities:
+        |    - agent:
+        |        id: c6031aff-4887-4d1e-bebe-bcf8f7d03d54
+        |        position: [2.0, 2.0]
+        |        orientation: 45.0
+        |        radius: 0.25
+        |        speed: 1.0
+        |        withProximitySensors: true
+        |        withLightSensors: true
+        |        reward: NoReward
+        |""".stripMargin
+
+    val res = YamlManager.parse[IO](yamlContent).unsafeRunSync()
+    res match
+      case Left(errors) => fail(s"Parsing failed with errors: ${errors.mkString(", ")}")
+      case Right(config) =>
+        val _ = config.environment.entities.size shouldBe 1
+        config.environment.entities.headOption match
+          case Some(entity) =>
+            entity match
+              case agent: Agent =>
+                val _ = agent.position shouldBe Point2D(2.0, 2.0)
+                val _ = agent.orientation.degrees shouldBe 45.0
+                val _ = agent.shape.radius shouldBe 0.25
+                val _ = agent.actuators.size shouldBe 1
+                agent.actuators.headOption match
+                  case Some(actuator) =>
+                    actuator match
+                      case d: DifferentialWheelMotor[Agent] =>
+                        val _ = d.left.speed should be(1.0)
+                        val _ = d.right.speed should be(1.0)
+                      case _ => fail("Expected a DifferentialWheelMotor actuator")
+                  case None => fail("Expected at least one actuator")
+                agent.sensors should be(
+                  SimulationDefaults.DynamicEntity.Agent.StdProximitySensors ++ SimulationDefaults.DynamicEntity.Agent.StdLightSensors,
+                )
+              case _ => fail("Expected an Agent entity")
+          case _ => fail("Expected an Agent entity")
+        end match
+    end match
+
+  it should "convert a SimulationConfig with agent to YAML and parse it back" in:
+    val agentId = java.util.UUID.fromString("c6031aff-4887-4d1e-bebe-bcf8f7d03d54")
+    val orientation = Orientation(45.0)
+    val a = (agent withId agentId at (2.0, 2.0) withOrientation orientation withSpeed 1.0 withShape Circle(
+      0.25,
+    )).withProximitySensors.withLightSensors
+
+    val env = environment containing a
+
+    val config = SimulationConfig(
+      simulation = Simulation(),
+      environment = env,
+    )
+
+    val expectedYaml =
+      """environment:
+        |  width: 10
+        |  height: 10
+        |  entities:
+        |  - agent:
+        |      id: c6031aff-4887-4d1e-bebe-bcf8f7d03d54
+        |      orientation: 45.0
+        |      radius: 0.25
+        |      position: [2.0, 2.0]
+        |      speed: 1.0
+        |      withProximitySensors: true
+        |      withLightSensors: true
+        |      reward: NoReward
         |""".stripMargin
 
     val yamlContent = YamlManager.toYaml[IO](config).unsafeRunSync()
