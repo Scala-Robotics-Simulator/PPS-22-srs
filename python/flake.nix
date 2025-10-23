@@ -53,6 +53,18 @@
             from = pkgs.python312Packages.pygame;
             prev = prev.pygame;
           };
+          jupyter = hacks.nixpkgsPrebuilt {
+            from = pkgs.python312Packages.jupyter;
+            prev = prev.jupyter;
+          };
+          jupyterlab = hacks.nixpkgsPrebuilt {
+            from = pkgs.python312Packages.jupyterlab;
+            prev = prev.jupyterlab;
+          };
+          notebook = hacks.nixpkgsPrebuilt {
+            from = pkgs.python312Packages.notebook;
+            prev = prev.notebook;
+          };
         };
 
         # 4. Construct the Final Python Package Set
@@ -90,7 +102,7 @@
           version = thisProjectAsNixPkg.version;
           src = ./.; # Source of your main script
 
-          nativeBuildInputs = [pkgs.makeWrapper];
+          nativeBuildInputs = [pkgs.makeWrapper pkgs.python312Packages.jupyter pkgs.python312Packages.notebook pkgs.jupyter];
           buildInputs = [appPythonEnv]; # Runtime Python environment
 
           installPhase = ''

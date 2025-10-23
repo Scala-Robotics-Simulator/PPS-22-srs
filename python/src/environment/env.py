@@ -1,7 +1,11 @@
 import asyncio
+import sys
 from typing import TYPE_CHECKING
 
 import grpc
+import gymnasium.spaces as spaces
+import numpy as np
+
 from python.src.proto.rl_client import RLClient
 from python.src.utils.log import Logger
 
@@ -17,7 +21,7 @@ class Env:
     def __init__(self) -> None:
         self.client = None
         self.action_space = None
-        self.observation_space = None
+        self.observation_space = spaces.MultiDiscrete([8, 11, 8, 11])
         self.metadata = None
         self.render_mode = None
         self.spec = None
@@ -57,6 +61,27 @@ class Env:
         """
         await self.client.init(yaml_config)
 
+    def _extract_state(self, proximity_values, light_values):
+
+        # find max values and indices
+        idx1 = int(np.argmin(proximity_values))
+        idx2 = int(np.argmax(light_values))
+        val1 = round(float(proximity_values[idx1]), 1)
+        val2 = round(float(light_values[idx2]), 1)
+
+        return self._encode_observation(idx1, val1, idx2, val2)
+
+    def _encode_observation(self, idx1, val1, idx2, val2):
+        v1 = int(val1 * 10)
+        v2 = int(val2 * 10)
+        return ((idx1 * 11 + v1) * 8 + idx2) * 11 + v2
+
+    def _encode_observations(self, observations):
+        return {
+            k: self._extract_state(v.proximity_values, v.light_values)
+            for k, v in observations.items()
+        }
+
     async def reset(self, seed: int) -> tuple[dict, dict]:
         """Reset the environment to an initial state
 
@@ -65,7 +90,8 @@ class Env:
         seed : int
             The seed for random number generation.
         """
-        return await self.client.reset(seed)
+        observations, infos = await self.client.reset(seed)
+        return self._encode_observations(observations), infos
 
     async def step(self, actions: dict) -> tuple[dict, dict, dict, dict, dict]:
         """Take a step in the environment with the given actions
@@ -80,7 +106,16 @@ class Env:
         tuple[dict, dict, dict, dict, dict]
             A tuple containing observations, rewards, terminateds, truncateds, and infos.
         """
-        return await self.client.step(actions)
+        observations, rewards, terminateds, truncateds, infos = await self.client.step(
+            actions
+        )
+        return (
+            self._encode_observations(observations),
+            rewards,
+            terminateds,
+            truncateds,
+            infos,
+        )
 
     async def render(self, width: int = 800, height: int = 600) -> "np.ndarray":
         """Render the current state of the environment

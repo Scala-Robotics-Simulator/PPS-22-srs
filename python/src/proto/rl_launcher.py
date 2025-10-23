@@ -2,6 +2,7 @@ import asyncio
 
 import numpy as np
 import pygame
+
 from python.src.environment.env import Env
 from python.src.utils.log import Logger
 from python.src.utils.reader import get_yaml_path, read_file
@@ -53,6 +54,8 @@ async def main():
         observations, rewards, terminateds, truncateds, infos = await env.step(
             actions=actions
         )
+
+        logger.info(observations)
 
         rgb_array = await env.render()
 

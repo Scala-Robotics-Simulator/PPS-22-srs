@@ -52,9 +52,7 @@ class RLClient:
             logger.warning(f"✗ Initialization failed: {response.message}")
         return response.ok, response.message
 
-    async def step(
-        self, actions: dict[str, dict]
-    ) -> tuple[
+    async def step(self, actions: dict[str, dict]) -> tuple[
         dict[str, dict],
         dict[str, float],
         dict[str, bool],
@@ -70,7 +68,7 @@ class RLClient:
         """
         request = rl_pb2.StepRequest(actions=actions)
         response = await self.stub.Step(request)
-        logger.info(
+        logger.debug(
             f"✓ Step taken: observations={response.observations}, rewards={response.rewards}, terminateds={response.terminateds}, truncateds={response.truncateds}, infos={response.infos}"
         )
         return (
@@ -111,7 +109,7 @@ class RLClient:
         """
         request = rl_pb2.ResetRequest(seed=seed)
         response = await self.stub.Reset(request)
-        logger.info(
+        logger.debug(
             f"✓ Environment reset: observations={response.observations}, infos={response.infos}"
         )
         return response.observations, response.infos
