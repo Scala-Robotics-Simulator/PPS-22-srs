@@ -1,6 +1,8 @@
 package io.github.srs.model.entity.dynamicentity.agent.termination
 
 import io.github.srs.model.entity.dynamicentity.agent.Agent
+import io.github.srs.model.entity.dynamicentity.action.Action
+import io.github.srs.model.ModelModule.BaseState
 
 /**
  * An enumeration of available termination models for agents.
@@ -12,14 +14,22 @@ enum Termination(val name: String) derives CanEqual:
   case NeverTerminate extends Termination("NeverTerminate")
 
   /**
-   * Converts the enum case to its corresponding [[TerminationModel]] instance.
+   * Evaluates whether the agent should terminate based on the state transition and action.
    *
+   * @param prev
+   *   the previous state
+   * @param current
+   *   the current state
+   * @param entity
+   *   the agent being evaluated
+   * @param action
+   *   the action that was taken
    * @return
-   *   the [[TerminationModel]] implementation for this termination type
+   *   true if the agent should terminate, false otherwise
    */
-  def toTerminationModel: TerminationModel[Agent] =
+  def evaluate(prev: BaseState, current: BaseState, entity: Agent, action: Action[?]): Boolean =
     this match
-      case NeverTerminate => io.github.srs.model.entity.dynamicentity.agent.termination.NeverTerminate()
+      case NeverTerminate => false
 
   /**
    * String representation of the termination type.
@@ -27,3 +37,5 @@ enum Termination(val name: String) derives CanEqual:
    *   name of the termination
    */
   override def toString: String = name
+
+end Termination

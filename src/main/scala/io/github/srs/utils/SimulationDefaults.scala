@@ -10,7 +10,7 @@ import cats.effect.unsafe.implicits.global
 import io.github.srs.model.entity.*
 import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, Wheel as ActWheel }
 import io.github.srs.model.entity.dynamicentity.agent.Agent
-import io.github.srs.model.entity.dynamicentity.agent.reward.{ NoReward, RewardModel }
+import io.github.srs.model.entity.dynamicentity.agent.reward.Reward
 import io.github.srs.model.entity.dynamicentity.robot.Robot
 import io.github.srs.model.entity.dynamicentity.robot.behavior.Policy
 import io.github.srs.model.entity.dynamicentity.sensor.*
@@ -18,8 +18,8 @@ import io.github.srs.model.environment.Environment
 import io.github.srs.model.illumination.LightMap
 import io.github.srs.model.illumination.engine.SquidLibFovEngine
 import io.github.srs.model.illumination.model.ScaleFactor
-import io.github.srs.model.entity.dynamicentity.agent.termination.{ NeverTerminate, TerminationModel }
-import io.github.srs.model.entity.dynamicentity.agent.truncation.{ NeverTruncate, TruncationModel }
+import io.github.srs.model.entity.dynamicentity.agent.termination.Termination
+import io.github.srs.model.entity.dynamicentity.agent.truncation.Truncation
 
 object SimulationDefaults:
 
@@ -272,9 +272,9 @@ object SimulationDefaults:
       val DefaultSensors: Vector[Sensor[Agent, Environment]] = Vector.empty
       val MinRadius: Double = 0.01
       val MaxRadius: Double = 0.5
-      val DefaultReward: RewardModel[Agent] = NoReward()
-      val DefaultTermination: TerminationModel[Agent] = NeverTerminate()
-      val DefaultTruncation: TruncationModel[Agent] = NeverTruncate()
+      val DefaultReward: Reward = Reward.NoReward
+      val DefaultTermination: Termination = Termination.NeverTerminate
+      val DefaultTruncation: Truncation = Truncation.NeverTruncate
 
       val StdProximitySensors: Vector[Sensor[Agent, Environment]] = Vector(
         ProximitySensor(Orientation(0.0)),

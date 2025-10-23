@@ -325,10 +325,11 @@ class YamlManagerTest extends AnyFlatSpec with Matchers:
       case Right(config) =>
         config.environment.entities.headOption match
           case Some(agent: Agent) =>
-            val _ = agent.reward shouldBe a[io.github.srs.model.entity.dynamicentity.agent.reward.NoReward]
+            val _ = agent.reward shouldBe io.github.srs.model.entity.dynamicentity.agent.reward.Reward.NoReward
             val _ =
-              agent.termination shouldBe a[io.github.srs.model.entity.dynamicentity.agent.termination.NeverTerminate]
-            val _ = agent.truncation shouldBe a[io.github.srs.model.entity.dynamicentity.agent.truncation.NeverTruncate]
+              agent.termination shouldBe io.github.srs.model.entity.dynamicentity.agent.termination.Termination.NeverTerminate
+            val _ =
+              agent.truncation shouldBe io.github.srs.model.entity.dynamicentity.agent.truncation.Truncation.NeverTruncate
           case _ => fail("Expected an Agent entity")
 
   it should "parse an agent without explicit reward, termination, and truncation (using defaults)" in:
@@ -346,10 +347,11 @@ class YamlManagerTest extends AnyFlatSpec with Matchers:
       case Right(config) =>
         config.environment.entities.headOption match
           case Some(agent: Agent) =>
-            val _ = agent.reward shouldBe a[io.github.srs.model.entity.dynamicentity.agent.reward.NoReward]
+            val _ = agent.reward shouldBe io.github.srs.model.entity.dynamicentity.agent.reward.Reward.NoReward
             val _ =
-              agent.termination shouldBe a[io.github.srs.model.entity.dynamicentity.agent.termination.NeverTerminate]
-            val _ = agent.truncation shouldBe a[io.github.srs.model.entity.dynamicentity.agent.truncation.NeverTruncate]
+              agent.termination shouldBe io.github.srs.model.entity.dynamicentity.agent.termination.Termination.NeverTerminate
+            val _ =
+              agent.truncation shouldBe io.github.srs.model.entity.dynamicentity.agent.truncation.Truncation.NeverTruncate
           case _ => fail("Expected an Agent entity")
 
 end YamlManagerTest

@@ -7,9 +7,9 @@ import io.github.srs.model.entity.dynamicentity.actuator.dsl.ActuatorDsl.validat
 import io.github.srs.model.entity.dynamicentity.actuator.dsl.DifferentialWheelMotorDsl.{ differentialWheelMotor, ws }
 import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, DifferentialWheelMotor }
 import io.github.srs.model.entity.dynamicentity.agent.Agent
-import io.github.srs.model.entity.dynamicentity.agent.reward.RewardModel
-import io.github.srs.model.entity.dynamicentity.agent.termination.TerminationModel
-import io.github.srs.model.entity.dynamicentity.agent.truncation.TruncationModel
+import io.github.srs.model.entity.dynamicentity.agent.reward.Reward
+import io.github.srs.model.entity.dynamicentity.agent.termination.Termination
+import io.github.srs.model.entity.dynamicentity.agent.truncation.Truncation
 import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, Sensor }
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.environment.Environment
@@ -193,13 +193,13 @@ object AgentDsl:
     def withLightSensors: Agent =
       agent.withSensors(StdLightSensors)
 
-    infix def withReward(reward: RewardModel[Agent]): Agent =
+    infix def withReward(reward: Reward): Agent =
       agent.copy(reward = reward)
 
-    infix def withTermination(termination: TerminationModel[Agent]): Agent =
+    infix def withTermination(termination: Termination): Agent =
       agent.copy(termination = termination)
 
-    infix def withTruncation(truncation: TruncationModel[Agent]): Agent =
+    infix def withTruncation(truncation: Truncation): Agent =
       agent.copy(truncation = truncation)
 
     /**

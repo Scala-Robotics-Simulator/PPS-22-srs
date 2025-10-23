@@ -2,10 +2,9 @@ package io.github.srs.model.entity.dynamicentity.dsl
 
 import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
 
-import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.actuator.{ Actuator, DifferentialWheelMotor, Wheel }
 import io.github.srs.model.entity.dynamicentity.agent.Agent
-import io.github.srs.model.entity.dynamicentity.agent.reward.RewardModel
+import io.github.srs.model.entity.dynamicentity.agent.reward.Reward
 import io.github.srs.model.entity.dynamicentity.sensor.{ ProximitySensor, Sensor }
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.environment.Environment
@@ -18,7 +17,6 @@ class AgentDslTest extends AnyFlatSpec with Matchers:
   given CanEqual[Orientation, Orientation] = CanEqual.derived
   given CanEqual[Actuator[Agent], Actuator[Agent]] = CanEqual.derived
   given CanEqual[Sensor[Agent, Environment], Sensor[Agent, Environment]] = CanEqual.derived
-  given CanEqual[RewardModel[Agent], RewardModel[Agent]] = CanEqual.derived
   given CanEqual[java.util.UUID, java.util.UUID] = CanEqual.derived
 
   import io.github.srs.model.entity.dynamicentity.agent.dsl.AgentDsl.*
@@ -36,8 +34,7 @@ class AgentDslTest extends AnyFlatSpec with Matchers:
 
   val sensor2: Sensor[Agent, Environment] = ProximitySensor(Orientation(90.0), 3.0)
 
-  val testReward: RewardModel[Agent] = new RewardModel[Agent]:
-    override def evaluate(prev: Environment, current: Environment, entity: Agent, action: Action[?]): Double = 1.0
+  val testReward: Reward = Reward.NoReward
 
   "Agent DSL" should "create an agent with default properties" in:
     import io.github.srs.utils.SimulationDefaults.DynamicEntity.Agent.*
