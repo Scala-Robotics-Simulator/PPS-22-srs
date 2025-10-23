@@ -118,7 +118,6 @@ lazy val root = project
     libraryDependencies += fs2Io,
     libraryDependencies += scopt,
     libraryDependencies += grpc,
-    Test / parallelExecution := false,
   )
   .enablePlugins(JacocoCoverallsPlugin)
   .dependsOn(protobuf)
