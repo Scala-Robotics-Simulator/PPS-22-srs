@@ -21,9 +21,7 @@ async def main():
     try:
         await client.connect()
 
-        config_path = get_yaml_path(
-            "resources", "configurations", "phototaxis.yml"
-        )
+        config_path = get_yaml_path("resources", "configurations", "phototaxis.yml")
         config = read_file(config_path)
         logger.info(config)
 
@@ -53,7 +51,7 @@ async def main():
                 "00000000-0000-0000-0000-000000000002": {
                     "left_wheel": -1.0,
                     "right_wheel": -1.0,
-                }
+                },
             }
 
             observations, rewards, terminateds, truncateds, infos = await client.step(
@@ -62,9 +60,7 @@ async def main():
 
             rgb_array = await client.render()
 
-            surface = pygame.surfarray.make_surface(
-                np.transpose(rgb_array, (1, 0, 2))
-            )
+            surface = pygame.surfarray.make_surface(np.transpose(rgb_array, (1, 0, 2)))
             screen.blit(surface, (0, 0))
             pygame.display.flip()
 
