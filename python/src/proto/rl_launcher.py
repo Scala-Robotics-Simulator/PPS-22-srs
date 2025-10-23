@@ -1,13 +1,12 @@
 import asyncio
-import logging
 
 import numpy as np
 import pygame
 from python.src.environment.env import Env
+from python.src.utils.log import Logger
 from python.src.utils.reader import get_yaml_path, read_file
 
-logging.basicConfig(level=logging.INFO, format="%(message)s")
-logger = logging.getLogger(__name__)
+logger = Logger(__name__)
 
 
 async def main():
