@@ -21,4 +21,4 @@ object RLLauncher
   val service = Service()
   val server = Server(50051)
 
-  def run: IO[Unit] = server.run
+  def run: IO[Unit] = IO.println("Starting rl-server") *> server.run
