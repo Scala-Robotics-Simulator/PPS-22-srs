@@ -5,21 +5,18 @@ import scala.language.postfixOps
 
 import cats.effect.std.Queue
 import cats.effect.{ Clock, IO }
+import cats.implicits.*
+import com.typesafe.scalalogging.Logger
 import io.github.srs.controller.message.DynamicEntityProposal
 import io.github.srs.controller.protocol.Event
 import io.github.srs.model.*
 import io.github.srs.model.SimulationConfig.SimulationStatus.*
+import io.github.srs.model.entity.dynamicentity.robot.Robot
+import io.github.srs.model.entity.dynamicentity.robot.behavior.BehaviorContext
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
 import io.github.srs.model.logic.*
 import io.github.srs.utils.EqualityGivenInstances.given
-import cats.implicits.*
 import io.github.srs.utils.random.RNG
-import com.typesafe.scalalogging.Logger
-import io.github.srs.protos.ping.PongerFs2Grpc
-import io.github.srs.controller.protobuf.ping.PongerService
-import io.github.srs.model.entity.dynamicentity.robot.Robot
-import io.github.srs.model.entity.dynamicentity.robot.behavior.BehaviorContext
-import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder
 
 /**
  * Module that defines the controller logic for the Scala Robotics Simulator.
@@ -107,14 +104,9 @@ object ControllerModule:
         override def start(initialState: S): IO[S] =
           for
             queueSim <- Queue.unbounded[IO, Event]
-            service <- PongerFs2Grpc.bindServiceResource(new PongerService).allocated
-            (svc, release) = service
-            server = NettyServerBuilder.forPort(50051).addService(svc).build()
-            _ <- IO.println("Starting PongerService") *> IO(server.start())
             _ <- context.view.init(queueSim)
             _ <- runBehavior(queueSim, initialState)
             result <- simulationLoop(initialState, queueSim)
-            _ <- IO(server.shutdownNow().awaitTermination()) *> release
           yield result
 
         /**

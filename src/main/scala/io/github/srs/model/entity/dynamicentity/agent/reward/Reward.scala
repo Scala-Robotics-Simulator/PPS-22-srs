@@ -1,6 +1,8 @@
 package io.github.srs.model.entity.dynamicentity.agent.reward
 
 import io.github.srs.model.entity.dynamicentity.agent.Agent
+import io.github.srs.model.entity.dynamicentity.action.Action
+import io.github.srs.model.environment.Environment
 
 /**
  * An enumeration of available reward models for agents.
@@ -12,14 +14,22 @@ enum Reward(val name: String) derives CanEqual:
   case NoReward extends Reward("NoReward")
 
   /**
-   * Converts the enum case to its corresponding [[RewardModel]] instance.
+   * Evaluates the reward for the given state transition and action.
    *
+   * @param prev
+   *   the previous environment state
+   * @param current
+   *   the current environment state
+   * @param entity
+   *   the agent being evaluated
+   * @param action
+   *   the action that was taken
    * @return
-   *   the [[RewardModel]] implementation for this reward type
+   *   the reward value for this transition
    */
-  def toRewardModel: RewardModel[Agent] =
+  def evaluate(prev: Environment, current: Environment, entity: Agent, action: Action[?]): Double =
     this match
-      case NoReward => io.github.srs.model.entity.dynamicentity.agent.reward.NoReward()
+      case NoReward => 0.0
 
   /**
    * String representation of the reward type.
@@ -27,3 +37,5 @@ enum Reward(val name: String) derives CanEqual:
    *   name of the reward
    */
   override def toString: String = name
+
+end Reward

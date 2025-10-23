@@ -7,13 +7,13 @@ import io.github.srs.model.entity.dynamicentity.actuator.Actuator
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
 import io.github.srs.model.entity.dynamicentity.action.ActionAlgebra
-import io.github.srs.model.entity.dynamicentity.agent.reward.RewardModel
+import io.github.srs.model.entity.dynamicentity.agent.reward.Reward
 import io.github.srs.model.entity.{ Orientation, Point2D, ShapeType }
 import io.github.srs.model.environment.Environment
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Agent as AgentDefaults
 import io.github.srs.model.entity.dynamicentity.action.Action
-import io.github.srs.model.entity.dynamicentity.agent.termination.TerminationModel
-import io.github.srs.model.entity.dynamicentity.agent.truncation.TruncationModel
+import io.github.srs.model.entity.dynamicentity.agent.termination.Termination
+import io.github.srs.model.entity.dynamicentity.agent.truncation.Truncation
 
 /**
  * An `[[Agent]]` is a controllable dynamic entity with **no internal policy**. Its actions originate from an *external
@@ -39,9 +39,9 @@ final case class Agent(
     override val orientation: Orientation = AgentDefaults.DefaultOrientation,
     override val actuators: Seq[Actuator[Agent]] = AgentDefaults.DefaultActuators,
     override val sensors: Vector[Sensor[Agent, Environment]] = AgentDefaults.DefaultSensors,
-    reward: RewardModel[Agent] = AgentDefaults.DefaultReward,
-    termination: TerminationModel[Agent] = AgentDefaults.DefaultTermination,
-    truncation: TruncationModel[Agent] = AgentDefaults.DefaultTruncation,
+    reward: Reward = AgentDefaults.DefaultReward,
+    termination: Termination = AgentDefaults.DefaultTermination,
+    truncation: Truncation = AgentDefaults.DefaultTruncation,
     lastAction: Option[Action[IO]] = None,
 ) extends DynamicEntity
 
@@ -72,9 +72,9 @@ object Agent:
       orientation: Orientation = AgentDefaults.DefaultOrientation,
       actuators: Seq[Actuator[Agent]] = AgentDefaults.DefaultActuators,
       sensors: Vector[Sensor[Agent, Environment]] = AgentDefaults.DefaultSensors,
-      reward: RewardModel[Agent] = AgentDefaults.DefaultReward,
-      termination: TerminationModel[Agent] = AgentDefaults.DefaultTermination,
-      truncation: TruncationModel[Agent] = AgentDefaults.DefaultTruncation,
+      reward: Reward = AgentDefaults.DefaultReward,
+      termination: Termination = AgentDefaults.DefaultTermination,
+      truncation: Truncation = AgentDefaults.DefaultTruncation,
       action: Option[Action[IO]] = None,
   ): Agent =
     new Agent(id, position, shape, orientation, actuators, sensors, reward, termination, truncation, action)

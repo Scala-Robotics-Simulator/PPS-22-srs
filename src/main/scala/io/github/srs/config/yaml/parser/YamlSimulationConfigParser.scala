@@ -176,9 +176,9 @@ object YamlSimulationConfigParser:
       |> (a => speed.fold(a)(s => a.withSpeed(s)))
       |> (a => if prox.getOrElse(false) then a.withProximitySensors else a)
       |> (a => if light.getOrElse(false) then a.withLightSensors else a)
-      |> (a => reward.fold(a)(r => a.withReward(r.toRewardModel)))
-      |> (a => termination.fold(a)(t => a.withTermination(t.toTerminationModel)))
-      |> (a => truncation.fold(a)(t => a.withTruncation(t.toTruncationModel)))
+      |> (a => reward.fold(a)(a.withReward))
+      |> (a => termination.fold(a)(a.withTermination))
+      |> (a => truncation.fold(a)(a.withTruncation))
 
   /**
    * Parses an obstacle entity from the given map.
