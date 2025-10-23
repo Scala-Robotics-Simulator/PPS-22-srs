@@ -1,5 +1,6 @@
 import asyncio
 import io
+import logging
 
 import grpc
 import numpy as np
