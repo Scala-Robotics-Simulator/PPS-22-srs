@@ -10,6 +10,7 @@ import io.github.srs.model.environment.Environment
 import cats.Id
 import com.typesafe.scalalogging.Logger
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Agent.CollisionAvoidance.CollisionTriggerDistance
+import io.github.srs.model.entity.dynamicentity.action.MovementAction
 
 /**
  * Reward model focused on obstacle avoidance.
@@ -27,12 +28,12 @@ final case class ObstacleAvoidance() extends RewardModel[Agent]:
   ): Double =
     logger.debug(s"number of ticks: $state")
     val currentMin =
-      entity.senseAll[Id](current).proximityReadings.foldLeft(0.0)((acc, sr) => min(acc, sr.value))
+      entity.senseAll[Id](current).proximityReadings.foldLeft(1.0)((acc, sr) => min(acc, sr.value))
     val prevAgent =
       prev.entities.collectFirst { case a: Agent if a.id.toString == entity.id.toString => a }.getOrElse(entity)
 
     val prevMin =
-      prevAgent.senseAll[Id](prev).proximityReadings.foldLeft(0.0)((acc, sr) => min(acc, sr.value))
+      prevAgent.senseAll[Id](prev).proximityReadings.foldLeft(1.0)((acc, sr) => min(acc, sr.value))
 
     logger.debug(s"previous min proximity: $prevMin")
     logger.debug(s"current min proximity: $currentMin")
@@ -42,7 +43,13 @@ final case class ObstacleAvoidance() extends RewardModel[Agent]:
     val rClear = pow(5, currentMin / 0.2)
     logger.debug(s"clearance reward: $rClear")
     val rColl = if currentMin < CollisionTriggerDistance then -100.0 else 0.0
-    val reward = rSurv + rClear + rColl
+    val rMove = action match
+      case MovementAction(1.0, 1.0) => 10
+      case MovementAction(-1.0, 1.0) => 3
+      case MovementAction(1.0, -1.0) => 3
+      case _ => 0
+
+    val reward = rSurv + rClear + rColl + rMove
 
     state = state + 1
     reward

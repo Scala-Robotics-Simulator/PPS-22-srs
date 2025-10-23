@@ -5,8 +5,8 @@ import grpc
 import numpy as np
 from PIL import Image
 
-import rl_pb2
-import rl_pb2_grpc
+import proto.rl_pb2 as rl_pb2
+import proto.rl_pb2_grpc as rl_pb2_grpc
 from utils.log import Logger
 
 logger = Logger(__name__)
@@ -52,9 +52,7 @@ class RLClient:
             logger.warning(f"✗ Initialization failed: {response.message}")
         return response.ok, response.message
 
-    async def step(
-        self, actions: dict[str, dict]
-    ) -> tuple[
+    async def step(self, actions: dict[str, dict]) -> tuple[
         dict[str, dict],
         dict[str, float],
         dict[str, bool],
@@ -92,7 +90,7 @@ class RLClient:
         """
         request = rl_pb2.RenderRequest(width=width, height=height)
         response = await self.stub.Render(request)
-        logger.info(
+        logger.debug(
             f"✓ Rendered {response.format} image: {response.width}x{response.height}"
         )
 
