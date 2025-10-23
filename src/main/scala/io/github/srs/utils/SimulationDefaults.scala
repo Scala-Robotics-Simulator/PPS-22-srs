@@ -298,6 +298,9 @@ object SimulationDefaults:
         LightSensor(Orientation(315.0)),
       )
 
+      object CollisionAvoidance:
+        val CollisionTriggerDistance: Double = 0.005
+
     end Agent
 
     object Robot:
