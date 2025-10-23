@@ -42,7 +42,7 @@ class QLearning:
 
         self.learning_history = []
 
-    def train(self, record_history: bool = False):
+    async def train(self, record_history: bool = False):
         """Trains the agent using the Q-learning algorithm over a specified number of episodes and optionally records
         the learning history.
 
