@@ -37,10 +37,9 @@ node_modules/
 # Nix
 .direnv/
 .envrc
-flake.nix
-flake.lock
 
 # Python
+.venv/
 env/
 __pycache__/
 *_pb2*.py
