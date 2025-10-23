@@ -29,6 +29,10 @@ class Logger:
         """Logs a warning message."""
         self.logger.warning(message)
 
+    def debug(self, message):
+        """Logs a debug message."""
+        self.logger.debug(message)
+
     def error(self, message):
         """Logs an error message."""
         self.logger.error(message)
