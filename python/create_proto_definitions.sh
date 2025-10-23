@@ -3,7 +3,7 @@
 # Configuration
 PROTO_FILE="rl.proto"
 PROTO_DIR="../protobuf/src/main/protobuf/"
-OUTPUT_DIR="./src/"
+OUTPUT_DIR="./src/proto/"
 
 # Derived names
 PROTO_NAME="${PROTO_FILE%.proto}"
