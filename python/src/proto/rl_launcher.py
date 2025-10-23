@@ -2,7 +2,6 @@ import asyncio
 
 import numpy as np
 import pygame
-
 from python.src.environment.env import Env
 from python.src.utils.log import Logger
 from python.src.utils.reader import get_yaml_path, read_file

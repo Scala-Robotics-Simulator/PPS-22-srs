@@ -52,7 +52,9 @@ class RLClient:
             logger.warning(f"✗ Initialization failed: {response.message}")
         return response.ok, response.message
 
-    async def step(self, actions: dict[str, dict]) -> tuple[
+    async def step(
+        self, actions: dict[str, dict]
+    ) -> tuple[
         dict[str, dict],
         dict[str, float],
         dict[str, bool],

@@ -14,9 +14,6 @@ dependencies = [
     "tensorflow>=2.20.0",
     "imageio>=2.31.4",
     "pygame>=2.6.1",
-    "notebook>=7.4.7",
-    "jupyter>=1.1.1",
-    "jupyterlab>=4.4.10",
 ]
 
 [tool.uv]

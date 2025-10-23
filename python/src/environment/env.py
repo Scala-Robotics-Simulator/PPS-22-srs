@@ -1,16 +1,10 @@
 import asyncio
-import sys
-from typing import TYPE_CHECKING
 
 import grpc
 import gymnasium.spaces as spaces
 import numpy as np
-
 from python.src.proto.rl_client import RLClient
 from python.src.utils.log import Logger
-
-if TYPE_CHECKING:
-    import numpy as np
 
 logger = Logger(__name__)
 
@@ -62,7 +56,6 @@ class Env:
         await self.client.init(yaml_config)
 
     def _extract_state(self, proximity_values, light_values):
-
         # find max values and indices
         idx1 = int(np.argmin(proximity_values))
         idx2 = int(np.argmax(light_values))
