@@ -17,6 +17,7 @@ import io.github.srs.controller.message.DynamicEntityProposal
 import cats.effect.IO
 import io.github.srs.utils.random.SimpleRNG
 import io.github.srs.model.entity.dynamicentity.action.NoAction
+import io.github.srs.logger
 
 object RLControllerModule:
 
@@ -122,9 +123,11 @@ object RLControllerModule:
         override def init(config: SimulationConfig[ValidEnvironment]): Unit =
           _initialState = bundle.stateLogic.createState(config)
           _state = _initialState
+          logger.debug(s"new config, state = \n $state")
 
         override def reset(rng: RNG): (Observations, Infos) =
           _state = context.model.update(state)(using _ => bundle.stateLogic.updateState(initialState, rng))
+          logger.debug("resetting controller")
           (state.environment.getObservations, state.environment.getInfos)
 
         override def step(actions: Map[Agent, Action[IO]]): StepResponse =
@@ -142,12 +145,23 @@ object RLControllerModule:
           _state = context.model
             .update(state)(using s => bundle.randomLogic.random(s, SimpleRNG(s.simulationRNG.nextLong._1)))
             .unsafeRunSync()
+          val observations = state.environment.getObservations
+          val rewards = state.environment.getRewards(prevState.environment)
+          val terminateds = state.getTerminations(prevState)
+          val truncateds = state.getTruncations(prevState)
+          val infos = state.environment.getInfos
+          logger.debug(s"step completed, state = \n $state")
+          logger.debug(s"observations: $observations")
+          logger.debug(s"rewards: $rewards")
+          logger.debug(s"terminateds: $terminateds")
+          logger.debug(s"truncateds: $truncateds")
+          logger.debug(s"infos: $infos")
           StepResponse(
-            observations = state.environment.getObservations,
-            rewards = state.environment.getRewards(prevState.environment),
-            terminateds = state.getTerminations(prevState),
-            truncateds = state.getTruncations(prevState),
-            infos = state.environment.getInfos,
+            observations,
+            rewards,
+            terminateds,
+            truncateds,
+            infos,
           )
 
         end step
