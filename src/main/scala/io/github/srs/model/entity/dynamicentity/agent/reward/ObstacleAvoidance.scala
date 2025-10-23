@@ -38,18 +38,19 @@ final case class ObstacleAvoidance() extends RewardModel[Agent]:
     logger.debug(s"previous min proximity: $prevMin")
     logger.debug(s"current min proximity: $currentMin")
 
-    val rSurv = state * 0.1
-    logger.debug(s"survival reward: $rSurv")
-    val rClear = pow(5, currentMin / 0.2)
-    logger.debug(s"clearance reward: $rClear")
+    val rSurv = state * 0.001
+    val rClear = pow(2, currentMin / 0.2)
     val rColl = if currentMin < CollisionTriggerDistance then -100.0 else 0.0
     val rMove = action match
-      case MovementAction(1.0, 1.0) => 10
-      case MovementAction(-1.0, 1.0) => 3
-      case MovementAction(1.0, -1.0) => 3
-      case _ => 0
+      case MovementAction(1.0, 1.0) => 50
+      case _ => -10
+    logger.info(s"survival reward: $rSurv")
+    logger.info(s"clearance reward: $rClear")
+    logger.info(s"collision penalty: $rColl")
+    logger.info(s"movement reward: $rMove")
 
     val reward = rSurv + rClear + rColl + rMove
+    logger.info(s"total reward: $reward")
 
     state = state + 1
     reward

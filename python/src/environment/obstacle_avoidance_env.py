@@ -16,7 +16,7 @@ class ObstacleAvoidanceEnv:
 
     def __init__(self, server_address, client_name) -> None:
         self.client = RLClient(server_address, client_name)
-        self.action_space = spaces.Discrete(4)
+        self.action_space = spaces.Discrete(3)
         self.observation_space = spaces.MultiDiscrete([8, 11])
         self.observation_space_n = 8 * 11
 
@@ -93,11 +93,11 @@ class ObstacleAvoidanceEnv:
                     left_wheel=-1.0,
                     right_wheel=1.0,
                 )
-            case 3:
-                return rl_pb2.ContinuousAction(
-                    left_wheel=1.0,
-                    right_wheel=-1.0,
-                )
+            # case 3:
+            #     return rl_pb2.ContinuousAction(
+            #         left_wheel=1.0,
+            #         right_wheel=-1.0,
+            #     )
 
     def _decode_actions(self, actions):
         return {k: self._decode_action(v) for k, v in actions.items()}
