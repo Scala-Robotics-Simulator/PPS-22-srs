@@ -22,7 +22,7 @@ async def main():
         await client.connect()
 
         config_path = get_yaml_path(
-            "src", "main", "resources", "configurations", "default", "phototaxis.yml"
+            "resources", "configurations", "phototaxis.yml"
         )
         config = read_file(config_path)
         logger.info(config)
@@ -31,24 +31,47 @@ async def main():
 
         observations, infos = await client.reset(seed=42)
 
-        observations, rewards, terminateds, truncateds, infos = await client.step(
-            actions={
-                "849417d9-df87-43ac-a62d-972d9b6f5249": {
-                    "left_wheel": 1.0,
-                    "right_wheel": 0.5,
-                }
-            }
-        )
-
         rgb_array = await client.render()
 
         # TODO: delete, just for testing display
         pygame.init()
         screen = pygame.display.set_mode((800, 600))
-        surface = pygame.surfarray.make_surface(np.transpose(rgb_array, (1, 0, 2)))
-        screen.blit(surface, (0, 0))
-        pygame.display.flip()
-        await asyncio.sleep(5)
+        pygame.display.set_caption("DQN Agent Playing")
+        clock = pygame.time.Clock()
+        running = True
+
+        for _ in range(1000):
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+
+            actions = {
+                "00000000-0000-0000-0000-000000000001": {
+                    "left_wheel": 1.0,
+                    "right_wheel": 1.0,
+                },
+                "00000000-0000-0000-0000-000000000002": {
+                    "left_wheel": -1.0,
+                    "right_wheel": -1.0,
+                }
+            }
+
+            observations, rewards, terminateds, truncateds, infos = await client.step(
+                actions=actions
+            )
+
+            rgb_array = await client.render()
+
+            surface = pygame.surfarray.make_surface(
+                np.transpose(rgb_array, (1, 0, 2))
+            )
+            screen.blit(surface, (0, 0))
+            pygame.display.flip()
+
+            clock.tick(30)
+
+            if not running:
+                break
         pygame.quit()
 
     except asyncio.TimeoutError:
