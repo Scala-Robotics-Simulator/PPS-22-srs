@@ -131,6 +131,8 @@ object RLControllerModule:
           (state.environment.getObservations, state.environment.getInfos)
 
         override def step(actions: Map[Agent, Action[IO]]): StepResponse =
+          logger.info("sending step command to controller")
+          logger.info(s"actions: $actions")
           _state = context.model.update(state)(using s => bundle.tickLogic.tick(s, state.dt)).unsafeRunSync()
           val actionsList =
             actions.map { (agent, action) =>

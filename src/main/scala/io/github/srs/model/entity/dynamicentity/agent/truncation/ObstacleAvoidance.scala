@@ -17,5 +17,5 @@ final case class ObstacleAvoidance() extends TruncationModel[Agent]:
 
   override def evaluate(prev: BaseState, current: BaseState, entity: Agent, action: Action[?]): Boolean =
     val currentMin =
-      entity.senseAll[Id](current.environment).proximityReadings.foldLeft(0.0)((acc, sr) => min(acc, sr.value))
+      entity.senseAll[Id](current.environment).proximityReadings.foldLeft(1.0)((acc, sr) => min(acc, sr.value))
     currentMin < CollisionTriggerDistance

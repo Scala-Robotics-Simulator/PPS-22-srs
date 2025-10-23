@@ -44,7 +44,7 @@ class QAgent:
         self.alpha = alpha
         self.gamma = gamma
 
-        self.Q = np.zeros((self.env.observation_space.n, self.env.action_space.n))
+        self.Q = np.zeros((self.env.observation_space_n, self.env.action_space.n))
         self.epsilon = self.epsilon_max
 
     def choose_action(self, state: int):
