@@ -15,7 +15,7 @@ def get_yaml_path(*subpaths):
     Returns:
         Path: The full path to the YAML file.
     """
-    project_root = Path(__file__).resolve().parents[3]
+    project_root = Path(__file__).resolve().parents[2]
     return project_root.joinpath(*subpaths)
 
 

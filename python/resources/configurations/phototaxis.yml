@@ -1,0 +1,52 @@
+simulation:
+  seed: 42
+environment:
+  width: 10
+  height: 10
+  entities:
+    - obstacle:
+        orientation: 90.0
+        position: [ 8.0, 4.0 ]
+        height: 0.2
+        width: 7.0
+    - agent:
+        id: 00000000-0000-0000-0000-000000000001
+        radius: 0.25
+        withProximitySensors: true
+        withLightSensors: true
+        position: [ 1.0, 7.0 ]
+        orientation: 0.0
+        speed: 1.0
+        reward: NoReward
+        truncation: NeverTruncate
+        termination: NeverTerminate
+    - agent:
+        id: 00000000-0000-0000-0000-000000000002
+        withLightSensors: true
+        position: [ 3.0, 1.0 ]
+        speed: 1.0
+        reward: NoReward
+        truncation: NeverTruncate
+        termination: NeverTerminate
+        orientation: 0.0
+        radius: 0.25
+        withProximitySensors: true
+    - light:
+        orientation: 0.0
+        illuminationRadius: 5.0
+        radius: 0.2
+        intensity: 1.0
+        attenuation: 1.0
+        position: [ 8.0, 8.0 ]
+    - light:
+        radius: 0.2
+        illuminationRadius: 5.0
+        attenuation: 1.0
+        orientation: 0.0
+        position: [ 2.0, 2.0 ]
+        intensity: 1.0
+    - obstacle:
+        width: 3.0
+        position: [ 5.0, 5.0 ]
+        orientation: 0.0
+        height: 0.5
