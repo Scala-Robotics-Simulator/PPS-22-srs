@@ -1,6 +1,6 @@
 package io.github.srs.model.entity.dynamicentity.agent.reward
 
-import scala.math.{ min, pow }
+import scala.math.{ exp, min }
 
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
 import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings.proximityReadings
@@ -33,9 +33,9 @@ object ObstacleAvoidanceRewardModule:
       if entity.aliveSteps == 1 then restoreState(entity)
 
       val currentMin = distanceFromObstacle(current, entity)
-      val rExpl = explorationReward(entity) * 10
+      val rExpl = explorationReward(entity) * 5
       val rSurv = survivalReward(ticks, maxTicks)
-      val rClear = pow(2, currentMin / 0.2) / 10
+      val rClear = clearanceReward(prev, current, entity)
       val rColl = if currentMin < CollisionTriggerDistance then -100.0 else 0.0
       // val rMove = movementReward(entity.lastAction.getOrElse(NoAction[Id]()))
       logger.info(s"evaluation at tick: $ticks")
@@ -51,6 +51,14 @@ object ObstacleAvoidanceRewardModule:
       ticks += 1
       reward
     end evaluate
+
+    private def clearanceReward(prev: Environment, current: Environment, entity: Agent): Double =
+      val prevMin = distanceFromObstacle(prev, entity)
+      val currMin = distanceFromObstacle(current, entity)
+      val delta = currMin - prevMin
+      val rChange = delta * 10.0
+      val rProximity = -exp(-5 * currMin)
+      rChange + rProximity
 
     private def restoreState(entity: Agent): Unit =
       logger.info("restoring obstacle avoidance reward state")
@@ -78,7 +86,9 @@ object ObstacleAvoidanceRewardModule:
     //     case _ => -10.0
 
     private def distanceFromObstacle(env: Environment, entity: Agent): Double =
-      entity.senseAll[Id](env).proximityReadings.foldLeft(1.0)((acc, sr) => min(acc, sr.value))
+      val agent =
+        env.entities.collectFirst { case a: Agent if a.id.toString == entity.id.toString => a }.getOrElse(entity)
+      agent.senseAll[Id](env).proximityReadings.foldLeft(1.0)((acc, sr) => min(acc, sr.value))
 
   end ObstacleAvoidance
 end ObstacleAvoidanceRewardModule
