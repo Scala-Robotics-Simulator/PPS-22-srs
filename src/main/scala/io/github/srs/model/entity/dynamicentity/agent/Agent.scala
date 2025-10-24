@@ -43,6 +43,7 @@ final case class Agent(
     termination: Termination = AgentDefaults.DefaultTermination,
     truncation: Truncation = AgentDefaults.DefaultTruncation,
     lastAction: Option[Action[IO]] = None,
+    aliveSteps: Int = 0,
 ) extends DynamicEntity
 
 object Agent:
@@ -76,8 +77,9 @@ object Agent:
       termination: Termination = AgentDefaults.DefaultTermination,
       truncation: Truncation = AgentDefaults.DefaultTruncation,
       action: Option[Action[IO]] = None,
+      aliveSteps: Int = 0,
   ): Agent =
-    new Agent(id, position, shape, orientation, actuators, sensors, reward, termination, truncation, action)
+    new Agent(id, position, shape, orientation, actuators, sensors, reward, termination, truncation, action, aliveSteps)
 
   /**
    * Extractor method for the [[Agent]] .

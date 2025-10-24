@@ -136,7 +136,7 @@ object RLControllerModule:
           _state = context.model.update(state)(using s => bundle.tickLogic.tick(s, state.dt)).unsafeRunSync()
           val actionsList =
             actions.map { (agent, action) =>
-              DynamicEntityProposal(agent.copy(lastAction = Some(action)), action)
+              DynamicEntityProposal(agent.copy(lastAction = Some(action), aliveSteps = agent.aliveSteps + 1), action)
             }.toList.sortBy(_.entity.id)
           val prevState = state
           _state = context.model
