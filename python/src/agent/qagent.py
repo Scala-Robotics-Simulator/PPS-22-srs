@@ -47,7 +47,7 @@ class QAgent:
         self.Q = np.zeros((self.env.observation_space_n, self.env.action_space.n))
         self.epsilon = self.epsilon_max
 
-    def choose_action(self, state: int):
+    def choose_action(self, state: int, epsilon_greedy: bool = True):
         """Selects an action based on the current state using the epsilon-greedy policy.
 
         Parameters
@@ -59,7 +59,7 @@ class QAgent:
         action : int
             The action chosen by the agent.
         """
-        if np.random.rand() < self.epsilon:
+        if np.random.rand() < self.epsilon and epsilon_greedy:
             return self.env.action_space.sample()
         return np.argmax(self.Q[state])
 

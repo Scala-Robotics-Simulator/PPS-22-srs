@@ -17,22 +17,33 @@ environment:
               termination: EndSimulationTermination
               truncation: ObstacleAvoidance
         - obstacle:
-              height: 0.2
-              width: 4.0
-              orientation: 0.0
-              position: [3.0, 5.0]
-        - obstacle:
-              width: 0.2
-              height: 5.0
-              position: [7.0, 6.0]
-              orientation: 15.0
-        - obstacle:
-              width: 6.8
-              position: [4.0, 3.0]
-              height: 0.2
-              orientation: 0.0
-        - obstacle:
-              orientation: 10.0
-              position: [5.0, 7.5]
+              position: [3.5, 7.0]
+              width: 0.20000000298023224
               height: 4.0
-              width: 0.2
+              id: ce04f32c-91c2-4b98-b5a9-0d16e54989ce
+              orientation: 10.0
+        - obstacle:
+              width: 6.800000190734863
+              orientation: 0.0
+              height: 0.20000000298023224
+              id: d85e8c11-28ba-4a17-badc-b1d0f4d110e2
+              position: [4.0, 3.0]
+        - obstacle:
+              width: 0.20000000298023224
+              orientation: 10.0
+              position: [5.5, 5.0]
+              height: 3.0
+              id: 5a62e731-349e-48c9-86a5-f5da6ac61f11
+        - obstacle:
+              id: c732a5d6-797a-48d2-bd85-24a22117f311
+              position: [2.0, 5.0]
+              orientation: 0.0
+              width: 3.0
+              height: 0.20000000298023224
+        - obstacle:
+              position: [5.5, 8.0]
+              orientation: 0.0
+              width: 4.0
+              height: 0.2
+              id: 9843d64a-0d3a-489f-bb29-e788f4f0204b
+
