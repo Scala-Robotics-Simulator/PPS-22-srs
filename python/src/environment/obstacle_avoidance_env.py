@@ -85,7 +85,7 @@ class ObstacleAvoidanceEnv:
                 )
             case 1:
                 return rl_pb2.ContinuousAction(
-                    left_wheel=-1.0,
+                    left_wheel=1.0,
                     right_wheel=-1.0,
                 )
             case 2:
@@ -95,7 +95,7 @@ class ObstacleAvoidanceEnv:
                 )
             # case 3:
             #     return rl_pb2.ContinuousAction(
-            #         left_wheel=1.0,
+            #         left_wheel=-1.0,
             #         right_wheel=-1.0,
             #     )
 

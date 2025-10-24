@@ -299,7 +299,7 @@ object SimulationDefaults:
       )
 
       object CollisionAvoidance:
-        val CollisionTriggerDistance: Double = 0.005
+        val CollisionTriggerDistance: Double = 0.01
 
     end Agent
 
