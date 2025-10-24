@@ -77,11 +77,6 @@
         # Development Shell
         devShells.default = pkgs.mkShell {
           packages = [appPythonEnv pkgs.ruff pkgs.uv pkgs.jupyter-all];
-          shellHook = ''
-            rm -r .venv
-            mkdir -p .venv/bin
-            ln -sf $(which python) .venv/bin/python
-          '';
           nativeBuildInputs = [pkgs.makeWrapper];
           buildInputs = [appPythonEnv]; # Runtime Python environment
         };
