@@ -1,6 +1,5 @@
 simulation:
     seed: 42
-    duration: 1000000
 environment:
     width: 10
     height: 10
