@@ -16,9 +16,16 @@ class ObstacleAvoidanceEnv:
 
     def __init__(self, server_address, client_name) -> None:
         self.client = RLClient(server_address, client_name)
-        self.action_space = spaces.Discrete(3)
         self.observation_space = spaces.MultiDiscrete([8, 11])
         self.observation_space_n = 8 * 11
+        self.actions = [
+            (1.0, 1.0),  # forward
+            (1.0, -1.0),  # left
+            (-1.0, 1.0),  # right
+            (1.0, 0.0),  # forward-left
+            (0.0, 1.0),  # forward-right
+        ]
+        self.action_space = spaces.Discrete(len(self.actions))
 
     async def init_client(self):
         """Initialize the RL client and connect to the server
@@ -77,27 +84,8 @@ class ObstacleAvoidanceEnv:
         return self._encode_observations(observations), infos
 
     def _decode_action(self, action):
-        match action:
-            case 0:
-                return rl_pb2.ContinuousAction(
-                    left_wheel=1.0,
-                    right_wheel=1.0,
-                )
-            case 1:
-                return rl_pb2.ContinuousAction(
-                    left_wheel=1.0,
-                    right_wheel=-1.0,
-                )
-            case 2:
-                return rl_pb2.ContinuousAction(
-                    left_wheel=-1.0,
-                    right_wheel=1.0,
-                )
-            # case 3:
-            #     return rl_pb2.ContinuousAction(
-            #         left_wheel=-1.0,
-            #         right_wheel=-1.0,
-            #     )
+        left, right = self.actions[action]
+        return rl_pb2.ContinuousAction(left_wheel=left, right_wheel=right)
 
     def _decode_actions(self, actions):
         return {k: self._decode_action(v) for k, v in actions.items()}
