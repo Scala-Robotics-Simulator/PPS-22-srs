@@ -22,8 +22,6 @@ class ObstacleAvoidanceEnv:
             (1.0, 1.0),  # forward
             (1.0, -1.0),  # left
             (-1.0, 1.0),  # right
-            (1.0, 0.0),  # forward-left
-            (0.0, 1.0),  # forward-right
         ]
         self.action_space = spaces.Discrete(len(self.actions))
 
