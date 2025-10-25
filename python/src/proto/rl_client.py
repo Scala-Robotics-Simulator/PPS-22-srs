@@ -4,9 +4,10 @@ import logging
 
 import grpc
 import numpy as np
+from PIL import Image
+
 import rl_pb2
 import rl_pb2_grpc
-from PIL import Image
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
@@ -92,7 +93,7 @@ class RLClient:
         """
         request = rl_pb2.RenderRequest(width=width, height=height)
         response = await self.stub.Render(request)
-        logger.info(
+        logger.debug(
             f"✓ Rendered {response.format} image: {response.width}x{response.height}"
         )
 

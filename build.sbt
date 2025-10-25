@@ -60,7 +60,7 @@ lazy val root = project
       "-Wnonunit-statement",
       "-Yexplicit-nulls",
       "-Wsafe-init",
-      "-Ycheck-reentrant",
+      // "-Ycheck-reentrant",
       "-Xcheck-macros",
       "-rewrite",
       "-indent",
@@ -118,7 +118,6 @@ lazy val root = project
     libraryDependencies += fs2Io,
     libraryDependencies += scopt,
     libraryDependencies += grpc,
-    Test / parallelExecution := false,
   )
   .enablePlugins(JacocoCoverallsPlugin)
   .dependsOn(protobuf)

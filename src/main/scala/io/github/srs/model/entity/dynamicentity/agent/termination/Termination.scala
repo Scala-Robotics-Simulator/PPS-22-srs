@@ -1,5 +1,6 @@
 package io.github.srs.model.entity.dynamicentity.agent.termination
 
+import io.github.srs.model.entity.dynamicentity.agent.termination.EndSimulationTermination as EndSimulationTerminationModel
 import io.github.srs.model.entity.dynamicentity.agent.Agent
 import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.ModelModule.BaseState
@@ -12,6 +13,7 @@ import io.github.srs.model.ModelModule.BaseState
  */
 enum Termination(val name: String) derives CanEqual:
   case NeverTerminate extends Termination("NeverTerminate")
+  case EndSimulationTermination extends Termination("EndSimulationTermination")
 
   /**
    * Evaluates whether the agent should terminate based on the state transition and action.
@@ -30,6 +32,7 @@ enum Termination(val name: String) derives CanEqual:
   def evaluate(prev: BaseState, current: BaseState, entity: Agent, action: Action[?]): Boolean =
     this match
       case NeverTerminate => false
+      case EndSimulationTermination => EndSimulationTerminationModel().evaluate(prev, current, entity, action)
 
   /**
    * String representation of the termination type.

@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 
 
@@ -33,21 +35,22 @@ class QAgent:
         env,
         epsilon_max: float = 1.0,
         epsilon_min: float = 0.001,
-        epsilon_decay: float = 0.01,
         alpha: float = 0.5,
         gamma: float = 0.99,
+        episodes: int = 1000,
     ):
+        self.episodes = episodes
         self.env = env
         self.epsilon_max = epsilon_max
         self.epsilon_min = epsilon_min
-        self.epsilon_decay = epsilon_decay
+        self.epsilon_decay = -math.log(self.epsilon_min) / self.episodes
         self.alpha = alpha
         self.gamma = gamma
 
-        self.Q = np.zeros((self.env.observation_space.n, self.env.action_space.n))
+        self.Q = np.zeros((self.env.observation_space_n, self.env.action_space.n))
         self.epsilon = self.epsilon_max
 
-    def choose_action(self, state: int):
+    def choose_action(self, state: int, epsilon_greedy: bool = True):
         """Selects an action based on the current state using the epsilon-greedy policy.
 
         Parameters
@@ -59,7 +62,7 @@ class QAgent:
         action : int
             The action chosen by the agent.
         """
-        if np.random.rand() < self.epsilon:
+        if np.random.rand() < self.epsilon and epsilon_greedy:
             return self.env.action_space.sample()
         return np.argmax(self.Q[state])
 
@@ -87,6 +90,8 @@ class QAgent:
             state, action
         ] + self.alpha * target
 
-    def decay_epsilon(self):
+    def decay_epsilon(self, episode: int):
         """Decays the exploration rate epsilon after each episode."""
-        self.epsilon = max(self.epsilon_min, self.epsilon - self.epsilon_decay)
+        self.epsilon = self.epsilon_min + (
+            self.epsilon_max - self.epsilon_min
+        ) * math.exp(-self.epsilon_decay * episode)
