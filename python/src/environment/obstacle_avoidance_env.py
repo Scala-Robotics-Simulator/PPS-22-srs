@@ -1,12 +1,15 @@
 import asyncio
+from typing import TYPE_CHECKING
 
 import grpc
 import gymnasium.spaces as spaces
-import numpy as np
 
 import rl_pb2
 from proto.rl_client import RLClient
 from utils.log import Logger
+
+if TYPE_CHECKING:
+    import numpy as np
 
 logger = Logger(__name__)
 
