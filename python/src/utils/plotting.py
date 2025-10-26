@@ -5,12 +5,12 @@ def plot_learning_history(
     learning_history, fig_size=(15, 5), show=True, save_path=None
 ):
     """
-    Plot the learning process for Q-Learning (or multi-agent) agents.
+    Plot the learning process for multi-agent Q-Learning.
 
     Parameters
     ----------
-    learning_history : list of lists of dict
-        Each element is a list of steps for one episode, each step is a dict containing 'total_reward'.
+    learning_history : dict[str, list of list of dict]
+        Dict mapping agent_id to their episode histories.
     fig_size : tuple, optional
         Size of the figure (default=(15,5)).
     show : bool, optional
@@ -18,26 +18,39 @@ def plot_learning_history(
     save_path : str, optional
         If provided, saves the plot to this path.
     """
-    steps = [len(episode) for episode in learning_history]
-    total_rewards = [episode[-1]["total_reward"] for episode in learning_history]
-
     fig, ax1 = plt.subplots(figsize=fig_size)
+    ax2 = ax1.twinx()
 
-    ax1.plot(range(len(steps)), steps, color="orange")
-    ax1.tick_params(axis="y", labelcolor="orange")
+    for agent_id, agent_history in learning_history.items():
+        steps = [ep["steps"] for ep in agent_history]
+        total_rewards = [ep["total_reward"] for ep in agent_history]
+
+        ax1.plot(
+            range(len(steps)),
+            steps,
+            label=f"{agent_id} steps",
+            linestyle="--",
+            color="orange",
+        )
+        ax2.plot(
+            range(len(total_rewards)),
+            total_rewards,
+            label=f"{agent_id} reward",
+            color="#1f77b4",
+        )
+
     ax1.set_xlabel("Episodes")
     ax1.set_ylabel("Steps", color="orange")
-
-    ax2 = ax1.twinx()
-    ax2.plot(range(len(total_rewards)), total_rewards, color="#1f77b4")
-    ax2.tick_params(axis="y", labelcolor="#1f77b4")
     ax2.set_ylabel("Total reward", color="#1f77b4")
+
+    lines, labels = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    ax1.legend(lines + lines2, labels + labels2, loc="upper left")
 
     fig.tight_layout()
 
     if save_path:
         plt.savefig(save_path)
-
     if show:
         plt.show()
     else:
