@@ -16,8 +16,8 @@ class ObstacleAvoidanceEnv:
 
     def __init__(self, server_address, client_name) -> None:
         self.client = RLClient(server_address, client_name)
-        self.observation_space = spaces.MultiDiscrete([8, 11])
-        self.observation_space_n = 8 * 11
+        self.observation_space = spaces.MultiDiscrete([3] * 8)
+        self.observation_space_n = 3**8
         self.actions = [
             (1.0, 1.0),  # forward
             (1.0, -1.0),  # left
@@ -55,15 +55,24 @@ class ObstacleAvoidanceEnv:
         await self.client.init(yaml_config)
 
     def _extract_state(self, proximity_values):
-        # find max values and indices
-        idx1 = int(np.argmin(proximity_values))
-        val1 = round(float(proximity_values[idx1]), 1)
+        bins = []
+        for val in proximity_values:
+            if val < 0.02:
+                bins.append(0)
+            elif val < 0.2:
+                bins.append(1)
+            else:
+                bins.append(2)
 
-        return self._encode_observation(idx1, val1)
+        # Convert to unique state ID
+        state = 0
+        for i, b in enumerate(bins):
+            state += b * (3**i)
+        return state
 
-    def _encode_observation(self, idx1, val1):
-        v1 = int(val1 * 10)
-        return idx1 * 11 + v1
+    # def _encode_observation(self, idx1, val1):
+    #     v1 = int(val1 * 10)
+    #     return idx1 * 11 + v1
 
     def _encode_observations(self, observations):
         return {
