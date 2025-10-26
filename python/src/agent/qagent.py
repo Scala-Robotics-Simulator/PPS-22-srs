@@ -61,6 +61,9 @@ class QAgent:
         ----------
         state : int
             The current state of the environment.
+
+        epsilon_greedy : bool, optional (default=True)
+            Whether to use epsilon-greedy strategy for action selection.
         Returns
         -------
         action : int
