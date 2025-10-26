@@ -14,6 +14,7 @@ import io.github.srs.model.entity.dynamicentity.agent.reward.ObstacleAvoidanceRe
 enum Reward(val name: String) derives CanEqual:
   case NoReward extends Reward("NoReward")
   case ObstacleAvoidance extends Reward("ObstacleAvoidance")
+  case Exploration extends Reward("Exploration")
 
   /**
    * Evaluates the reward for the given state transition and action.
@@ -34,6 +35,8 @@ enum Reward(val name: String) derives CanEqual:
       case NoReward => 0.0
       case ObstacleAvoidance =>
         ObstacleAvoidanceRewardModule.ObstacleAvoidance().evaluate(prev, current, entity, action)
+      case Exploration =>
+        ExplorationReward.Exploration().evaluate(prev, current, entity, action)
 
   /**
    * String representation of the reward type.
