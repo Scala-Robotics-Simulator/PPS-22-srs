@@ -1,11 +1,10 @@
-import logging
-
 import numpy as np
 from tqdm import trange
 
 from agent.qagent import QAgent
+from utils.log import Logger
 
-logger = logging.getLogger(__name__)
+logger = Logger(__name__)
 
 
 class QLearning:
@@ -139,7 +138,7 @@ class QLearning:
         avg_steps = sum_steps / test_episode_count
         avg_total_reward = sum_total_reward / test_episode_count
 
-        logging.info(f"Average number of steps per episode: {avg_steps:.1f}")
-        logging.info(f"Average total reward per episode: {avg_total_reward:.1f}")
+        logger.info(f"Average number of steps per episode: {avg_steps:.1f}")
+        logger.info(f"Average total reward per episode: {avg_total_reward:.1f}")
 
         return avg_steps, avg_total_reward
