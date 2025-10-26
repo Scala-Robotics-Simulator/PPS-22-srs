@@ -1,6 +1,5 @@
 import asyncio
 import io
-import logging
 
 import grpc
 import numpy as np
@@ -8,9 +7,9 @@ from PIL import Image
 
 import rl_pb2
 import rl_pb2_grpc
+from utils.log import Logger
 
-logging.basicConfig(level=logging.INFO, format="%(message)s")
-logger = logging.getLogger(__name__)
+logger = Logger(__name__)
 
 
 class RLClient:
