@@ -14,6 +14,9 @@ dependencies = [
     "tensorflow>=2.20.0",
     "imageio>=2.31.4",
     "pygame>=2.6.1",
+    "notebook>=7.4.7",
+    "jupyter>=1.1.1",
+    "jupyterlab>=4.4.10",
 ]
 
 [tool.uv]
@@ -33,7 +36,7 @@ target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "N", "B", "A", "COM"]
-ignore = ["E501", "COM812", "S311", "S603", "S607", "I001"]
+ignore = ["E501", "COM812", "S311", "S603", "S607", "TCH002", "I001"]
 extend-select = ["C4", "T20", "S", "RET", "TCH"]
 
 [tool.ruff.lint.per-file-ignores]
