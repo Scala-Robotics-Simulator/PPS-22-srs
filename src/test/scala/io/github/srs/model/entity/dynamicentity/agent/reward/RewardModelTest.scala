@@ -1,5 +1,7 @@
 package io.github.srs.model.entity.dynamicentity.agent.reward
 
+import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
+
 import cats.effect.IO
 import io.github.srs.model.entity.Point2D
 import io.github.srs.model.entity.dynamicentity.action.{ Action, NoAction }
@@ -8,17 +10,40 @@ import io.github.srs.model.entity.dynamicentity.agent.dsl.AgentDsl.*
 import io.github.srs.model.environment.Environment
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import io.github.srs.model.ModelModule.BaseState
+import io.github.srs.model.BaseSimulationState
+import io.github.srs.utils.random.SimpleRNG
+import io.github.srs.model.environment.dsl.CreationDSL.*
+import org.scalatest.OptionValues.*
 
 class RewardModelTest extends AnyFlatSpec with Matchers:
 
   val testAgent: Agent = agent at Point2D(1.0, 1.0)
+
   val env1: Environment = Environment(10, 10)
   val env2: Environment = Environment(10, 10)
+
+  val state1: BaseState = BaseSimulationState(
+    simulationTime = None,
+    elapsedTime = FiniteDuration(100, MILLISECONDS),
+    dt = FiniteDuration(100, MILLISECONDS),
+    simulationRNG = SimpleRNG(42),
+    environment = env1.validate.toOption.value,
+  )
+
+  val state2: BaseState = BaseSimulationState(
+    simulationTime = None,
+    elapsedTime = FiniteDuration(0, MILLISECONDS),
+    dt = FiniteDuration(100, MILLISECONDS),
+    simulationRNG = SimpleRNG(42),
+    environment = env2.validate.toOption.value,
+  )
+
   val dummyAction: Action[IO] = NoAction[IO]()
 
   "NoReward" should "return zero reward for any transition" in:
     val reward = NoReward()
-    val result = reward.evaluate(env1, env2, testAgent, dummyAction)
+    val result = reward.evaluate(state1, state2, testAgent, dummyAction)
     result shouldBe 0.0
 
   it should "be instantiable with apply syntax" in:
@@ -33,20 +58,20 @@ class RewardModelTest extends AnyFlatSpec with Matchers:
   "RewardModel" should "have an evaluate method" in:
     val customReward = new RewardModel[Agent]:
       override def evaluate(
-          prev: Environment,
-          current: Environment,
+          prev: BaseState,
+          current: BaseState,
           entity: Agent,
           action: Action[?],
       ): Double = 1.5
 
-    val result = customReward.evaluate(env1, env2, testAgent, dummyAction)
+    val result = customReward.evaluate(state1, state2, testAgent, dummyAction)
     result shouldBe 1.5
 
   it should "support custom reward logic" in:
     val distanceReward = new RewardModel[Agent]:
       override def evaluate(
-          prev: Environment,
-          current: Environment,
+          prev: BaseState,
+          current: BaseState,
           entity: Agent,
           action: Action[?],
       ): Double =
@@ -58,19 +83,21 @@ class RewardModelTest extends AnyFlatSpec with Matchers:
     val nearAgent = agent at Point2D(5.0, 5.0)
     val farAgent = agent at Point2D(0.0, 0.0)
 
-    val nearReward = distanceReward.evaluate(env1, env2, nearAgent, dummyAction)
-    val farReward = distanceReward.evaluate(env1, env2, farAgent, dummyAction)
+    val nearReward = distanceReward.evaluate(state1, state2, nearAgent, dummyAction)
+    val farReward = distanceReward.evaluate(state1, state2, farAgent, dummyAction)
 
     nearReward should be > farReward
 
   "StatefulReward" should "maintain state across evaluations" in:
-    @SuppressWarnings(Array("org.wartremover.warts.Var"))
+    object CountRewardStateManager extends RewardStateManager[Agent, Int]:
+      override def createState(): Int = 0
     val stepCountReward = new StatefulReward[Agent, Int]:
-      protected var state: Int = 0
+
+      override protected def stateManager: RewardStateManager[Agent, Int] = CountRewardStateManager
 
       override protected def compute(
-          prev: Environment,
-          curr: Environment,
+          prev: BaseState,
+          curr: BaseState,
           entity: Agent,
           action: Action[?],
           state: Int,
@@ -78,9 +105,9 @@ class RewardModelTest extends AnyFlatSpec with Matchers:
         val newState = state + 1
         (newState.toDouble, newState)
 
-    val reward1 = stepCountReward.evaluate(env1, env2, testAgent, dummyAction)
-    val reward2 = stepCountReward.evaluate(env1, env2, testAgent, dummyAction)
-    val reward3 = stepCountReward.evaluate(env1, env2, testAgent, dummyAction)
+    val reward1 = stepCountReward.evaluate(state1, state2, testAgent, dummyAction)
+    val reward2 = stepCountReward.evaluate(state1, state2, testAgent, dummyAction)
+    val reward3 = stepCountReward.evaluate(state1, state2, testAgent, dummyAction)
 
     val _ = reward1 shouldBe 1.0
     val _ = reward2 shouldBe 2.0
@@ -88,12 +115,16 @@ class RewardModelTest extends AnyFlatSpec with Matchers:
 
   it should "update state based on computation" in:
     @SuppressWarnings(Array("org.wartremover.warts.Var"))
+    object DecayingRewardStateManager extends RewardStateManager[Agent, Double]:
+      override def createState(): Double = 10.0
+
     val decayingReward = new StatefulReward[Agent, Double]:
-      protected var state: Double = 10.0
+
+      override protected def stateManager: RewardStateManager[Agent, Double] = DecayingRewardStateManager
 
       override protected def compute(
-          prev: Environment,
-          curr: Environment,
+          prev: BaseState,
+          curr: BaseState,
           entity: Agent,
           action: Action[?],
           currentState: Double,
@@ -101,8 +132,8 @@ class RewardModelTest extends AnyFlatSpec with Matchers:
         val newState = currentState * 0.9
         (newState, newState)
 
-    val reward1 = decayingReward.evaluate(env1, env2, testAgent, dummyAction)
-    val reward2 = decayingReward.evaluate(env1, env2, testAgent, dummyAction)
+    val reward1 = decayingReward.evaluate(state1, state2, testAgent, dummyAction)
+    val reward2 = decayingReward.evaluate(state1, state2, testAgent, dummyAction)
 
     val _ = reward1 shouldBe 9.0 +- 0.001
     reward2 shouldBe 8.1 +- 0.001

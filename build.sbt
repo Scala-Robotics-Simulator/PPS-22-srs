@@ -88,6 +88,7 @@ lazy val root = project
       Wart.Nothing,
       Wart.Var,
       Wart.ToString,
+      Wart.MutableDataStructures,
     ),
     jacocoExcludes := Seq(
       "io.github.srs.view.*",

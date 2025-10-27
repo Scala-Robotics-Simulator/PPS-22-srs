@@ -14,38 +14,44 @@ import io.github.srs.model.entity.Point2D
 import io.github.srs.model.entity.Point2D.*
 import utils.types.CircularBuffer
 import io.github.srs.model.entity.dynamicentity.action.MovementAction
+import io.github.srs.model.ModelModule.BaseState
 
 object ObstacleAvoidanceRewardModule:
-  private var ticks: Int = 0
-  private val maxTicks: Int = 10_000
-  private val positions: CircularBuffer[Point2D] = CircularBuffer(200)
-  private val actionHistorySize: Int = 200
-  private val actionHistory: CircularBuffer[Action[?]] = CircularBuffer(actionHistorySize)
+
+  final protected case class ObstacleAvoidanceState(
+      var ticks: Int = 0,
+      val positions: CircularBuffer[Point2D] = CircularBuffer(200),
+      val actionHistory: CircularBuffer[Action[?]] = CircularBuffer(200),
+      maxTicks: Int = 10_000,
+  )
+
+  object ObstacleAvoidanceRewardStateManager extends RewardStateManager[Agent, ObstacleAvoidanceState]:
+    override def createState(): ObstacleAvoidanceState = ObstacleAvoidanceState()
 
   /**
    * Reward model focused on obstacle avoidance.
    */
-  final case class ObstacleAvoidance() extends RewardModel[Agent]:
+  final case class ObstacleAvoidance() extends StatefulReward[Agent, ObstacleAvoidanceState]:
     private val logger = Logger(getClass.getName)
 
-    override def evaluate(
-        prev: Environment,
-        current: Environment,
+    override protected def stateManager: RewardStateManager[Agent, ObstacleAvoidanceState] =
+      ObstacleAvoidanceRewardStateManager
+
+    override def compute(
+        prev: BaseState,
+        current: BaseState,
         entity: Agent,
         action: Action[?],
-    ): Double =
-      if entity.aliveSteps == 1 then restoreState()
-
-      actionHistory.add(action)
-
-      val currentMin = distanceFromObstacle(current, entity)
-      val rExpl = explorationReward(entity) * 5
-      val rSurv = survivalReward(ticks, maxTicks)
-      val rClear = clearanceReward(prev, current, entity)
+        state: ObstacleAvoidanceState,
+    ): (Double, ObstacleAvoidanceState) =
+      val currentMin = distanceFromObstacle(current.environment, entity)
+      val rExpl = explorationReward(entity, state) * 5
+      val rSurv = survivalReward(state.ticks, state.maxTicks)
+      val rClear = clearanceReward(prev.environment, current.environment, entity)
       val rColl = if currentMin < CollisionTriggerDistance then -100.0 else 0.0
-      val rMove = moveReward(action)
+      val rMove = moveReward(action, state)
 
-      logger.info(s"evaluation at tick: $ticks")
+      logger.info(s"evaluation at tick: ${state.ticks}")
       logger.info(s"exploration reward: $rExpl")
       logger.info(s"survival reward: $rSurv")
       logger.info(s"clearance reward: $rClear")
@@ -55,9 +61,19 @@ object ObstacleAvoidanceRewardModule:
       val reward = rExpl + rSurv + rClear + rColl + rMove
       logger.info(s"total reward: $reward")
 
-      ticks += 1
-      reward
-    end evaluate
+      val newPos =
+        if state.ticks % 100 == 0 then state.positions.add(entity.position) else state.positions
+
+      (
+        reward,
+        state.copy(
+          ticks = state.ticks + 1,
+          positions = newPos,
+          actionHistory = state.actionHistory.add(action),
+          maxTicks = current.simulationTime.map(st => (st.toMillis / current.dt.toMillis).toInt).getOrElse(10_000),
+        ),
+      )
+    end compute
 
     private def clearanceReward(prev: Environment, current: Environment, entity: Agent): Double =
       val prevMin = distanceFromObstacle(prev, entity)
@@ -67,16 +83,8 @@ object ObstacleAvoidanceRewardModule:
       val rProximity = -exp(-5 * currMin)
       (rChange + rProximity) / 2
 
-    private def restoreState(): Unit =
-      logger.info("restoring obstacle avoidance reward state")
-      ticks = 0
-      positions.clear
-      actionHistory.clear
-
-    private def explorationReward(entity: Agent): Double =
-      val current = entity.position
-      val displacement = positions.map(current.distanceTo).minOption.getOrElse(0.0)
-      if ticks % 100 == 0 then positions.add(current)
+    private def explorationReward(entity: Agent, state: ObstacleAvoidanceState): Double =
+      val displacement = state.positions.map(entity.position.distanceTo).minOption.getOrElse(0.0)
       displacement
 
     private def survivalReward(duration: Int, maxDuration: Int): Double =
@@ -93,10 +101,10 @@ object ObstacleAvoidanceRewardModule:
         env.entities.collectFirst { case a: Agent if a.id.toString == entity.id.toString => a }.getOrElse(entity)
       agent.senseAll[Id](env).proximityReadings.foldLeft(1.0)((acc, sr) => min(acc, sr.value))
 
-    private def moveReward(action: Action[?]): Double =
+    private def moveReward(action: Action[?], state: ObstacleAvoidanceState): Double =
       // Don't add here - already added in evaluate()
 
-      val movementActions = actionHistory.collect { case ma: MovementAction[?] => ma }
+      val movementActions = state.actionHistory.collect { case ma: MovementAction[?] => ma }
 
       val (actLeft, actRight) = action match
         case ma: MovementAction[?] => (ma.leftSpeed, ma.rightSpeed)
