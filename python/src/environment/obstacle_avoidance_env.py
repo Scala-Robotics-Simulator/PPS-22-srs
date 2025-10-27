@@ -2,7 +2,6 @@ import gymnasium.spaces as spaces
 
 import rl_pb2
 from environment.abstract_env import AbstractEnv
-from proto.rl_client import RLClient
 from utils.log import Logger
 
 logger = Logger(__name__)
