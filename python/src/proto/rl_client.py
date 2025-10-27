@@ -3,10 +3,10 @@ import io
 
 import grpc
 import numpy as np
+import rl_pb2
+import rl_pb2_grpc
 from PIL import Image
 
-import proto.rl_pb2 as rl_pb2
-import proto.rl_pb2_grpc as rl_pb2_grpc
 from utils.log import Logger
 
 logger = Logger(__name__)
