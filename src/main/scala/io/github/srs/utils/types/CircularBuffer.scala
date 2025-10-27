@@ -2,21 +2,25 @@ package utils.types
 
 import scala.reflect.ClassTag
 
-class CircularBuffer[A: ClassTag](val maxSize: Int) extends Iterable[A]:
-  private var buffer = Array.ofDim[A](maxSize)
-  private var start = 0
-  private var end = 0
+class CircularBuffer[A: ClassTag] private (
+    private val buffer: Array[A],
+    private val start: Int,
+    private val end: Int,
+    val maxSize: Int,
+) extends Iterable[A]:
 
-  def clear: Unit =
-    start = 0
-    end = 0
-    buffer = Array.ofDim[A](maxSize)
+  def this(maxSize: Int) = this(Array.ofDim[A](maxSize), 0, 0, maxSize)
 
-  def add(element: A): Unit =
-    buffer(end) = element
-    end = (end + 1) % maxSize
+  def clear: CircularBuffer[A] =
+    new CircularBuffer[A](maxSize)
 
-    if end == start then start = (start + 1) % maxSize
+  def add(element: A): CircularBuffer[A] =
+    val newBuffer = buffer.clone()
+    newBuffer(end) = element
+    val newEnd = (end + 1) % maxSize
+    val newStart = if newEnd == start then (start + 1) % maxSize else start
+
+    new CircularBuffer[A](newBuffer, newStart, newEnd, maxSize)
 
   def get(index: Int): Option[A] =
     if index >= 0 && index < size then Some(buffer((start + index) % maxSize))

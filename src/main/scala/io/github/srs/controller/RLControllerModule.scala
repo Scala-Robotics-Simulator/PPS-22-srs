@@ -148,7 +148,7 @@ object RLControllerModule:
             .update(state)(using s => bundle.randomLogic.random(s, SimpleRNG(s.simulationRNG.nextLong._1)))
             .unsafeRunSync()
           val observations = state.environment.getObservations
-          val rewards = state.environment.getRewards(prevState.environment)
+          val rewards = state.getRewards(prevState)
           val terminateds = state.getTerminations(prevState)
           val truncateds = state.getTruncations(prevState)
           val infos = state.environment.getInfos
@@ -185,16 +185,16 @@ object RLControllerModule:
           a -> a.truncation.evaluate(prev, s, a, a.lastAction.getOrElse(NoAction[IO]()))
         }.toMap
 
+      def getRewards(prev: ModelModule.BaseState): Rewards =
+        s.environment.entities.collect { case a: Agent =>
+          a -> a.reward.evaluate(prev, s, a, a.lastAction.getOrElse(NoAction[IO]()))
+        }.toMap
+
     extension (env: ValidEnvironment)
 
       def getObservations: Observations =
         env.entities.collect { case a: Agent =>
           a -> a.senseAll[Id](env)
-        }.toMap
-
-      def getRewards(prev: ValidEnvironment): Rewards =
-        env.entities.collect { case a: Agent =>
-          a -> a.reward.evaluate(prev, env, a, a.lastAction.getOrElse(NoAction[IO]()))
         }.toMap
 
       def getInfos: Infos =

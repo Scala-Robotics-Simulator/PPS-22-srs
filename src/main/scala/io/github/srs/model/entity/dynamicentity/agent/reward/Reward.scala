@@ -2,8 +2,8 @@ package io.github.srs.model.entity.dynamicentity.agent.reward
 
 import io.github.srs.model.entity.dynamicentity.agent.Agent
 import io.github.srs.model.entity.dynamicentity.action.Action
-import io.github.srs.model.environment.Environment
 import io.github.srs.model.entity.dynamicentity.agent.reward.ObstacleAvoidanceRewardModule
+import io.github.srs.model.ModelModule.BaseState
 
 /**
  * An enumeration of available reward models for agents.
@@ -29,7 +29,7 @@ enum Reward(val name: String) derives CanEqual:
    * @return
    *   the reward value for this transition
    */
-  def evaluate(prev: Environment, current: Environment, entity: Agent, action: Action[?]): Double =
+  def evaluate(prev: BaseState, current: BaseState, entity: Agent, action: Action[?]): Double =
     this match
       case NoReward => 0.0
       case ObstacleAvoidance =>
