@@ -3,8 +3,8 @@ from typing import TYPE_CHECKING
 
 import grpc
 import gymnasium.spaces as spaces
-
 import rl_pb2
+
 from proto.rl_client import RLClient
 from utils.log import Logger
 
