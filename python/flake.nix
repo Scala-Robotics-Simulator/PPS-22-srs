@@ -26,6 +26,7 @@
           jupyterlab
           pyzmq
           nest-asyncio
+          keras
         ]);
     in {
       devShell = pkgs.mkShell {
