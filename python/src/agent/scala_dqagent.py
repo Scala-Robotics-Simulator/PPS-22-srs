@@ -11,7 +11,7 @@ class DQAgent:
     ----------
     env : gym.Env
         The environment in which the agent interacts.
-    id : str
+    agent_id : str
         The id of the agent
     epsilon_max : float, optional (default=1.0)
         Initial exploration rate (epsilon).
@@ -49,7 +49,7 @@ class DQAgent:
     def __init__(
         self,
         env,
-        id,
+        agent_id,
         epsilon_max: float = 1.0,
         epsilon_min: float = 0.01,
         epsilon_decay: float = 0.0002,
@@ -64,7 +64,7 @@ class DQAgent:
         episode_max_steps: int = 400,
     ):
         self.env = env
-        self.id = id
+        self.id = agent_id
         self.epsilon_max = epsilon_max
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
