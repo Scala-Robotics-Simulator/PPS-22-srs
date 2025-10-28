@@ -25,6 +25,7 @@
           jupyter
           jupyterlab
           pyzmq
+          nest-asyncio
         ]);
     in {
       devShell = pkgs.mkShell {

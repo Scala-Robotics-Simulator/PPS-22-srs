@@ -27,11 +27,19 @@ class AbstractEnv(ABC):
         The RL client for gRPC communication.
     render_mode : str
         The render mode for the environment.
+    loop : asyncio.AbstractEventLoop
+        The event loop for running async operations.
     """
 
     def __init__(self, server_address, client_name) -> None:
         self.client = RLClient(server_address, client_name)
         self.render_mode = "rgb_array"
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.loop)
+
+    def _run_async(self, coro):
+        """Helper method to run async coroutines synchronously"""
+        return self.loop.run_until_complete(coro)
 
     @abstractmethod
     def _encode_observation(self, proximity_values, light_values):
@@ -54,10 +62,10 @@ class AbstractEnv(ABC):
         """Decode multiple actions"""
         return {k: self._decode_action(v) for k, v in actions.items()}
 
-    async def connect_to_client(self):
+    def connect_to_client(self):
         """Initialize the RL client and connect to the server"""
         try:
-            await self.client.connect()
+            self._run_async(self.client.connect())
         except asyncio.TimeoutError:
             logger.info(
                 f"✗ Connection timeout - server at {self.client.server_address} not responding"
@@ -67,7 +75,7 @@ class AbstractEnv(ABC):
         except Exception as e:
             logger.info(f"✗ Error: {e}")
 
-    async def init(self, yaml_config: str):
+    def init(self, yaml_config: str):
         """Initialize the environment with the given YAML configuration
 
         Parameters
@@ -75,9 +83,9 @@ class AbstractEnv(ABC):
         yaml_config : str
             The YAML configuration string.
         """
-        await self.client.init(yaml_config)
+        self._run_async(self.client.init(yaml_config))
 
-    async def step(self, actions: dict) -> tuple[dict, dict, dict, dict, dict]:
+    def step(self, actions: dict) -> tuple[dict, dict, dict, dict, dict]:
         """Take a step in the environment with the given actions
 
         Parameters
@@ -92,8 +100,8 @@ class AbstractEnv(ABC):
         """
         actions = self._decode_actions(actions)
 
-        observations, rewards, terminateds, truncateds, infos = await self.client.step(
-            actions
+        observations, rewards, terminateds, truncateds, infos = self._run_async(
+            self.client.step(actions)
         )
         return (
             self._encode_observations(observations),
@@ -103,7 +111,7 @@ class AbstractEnv(ABC):
             infos,
         )
 
-    async def render(self, width: int = 800, height: int = 600) -> np.ndarray:
+    def render(self, width: int = 800, height: int = 600) -> np.ndarray:
         """Render the current state of the environment
 
         Parameters
@@ -118,9 +126,9 @@ class AbstractEnv(ABC):
         np.ndarray
             A numpy array representing the rendered RGB image.
         """
-        return await self.client.render(width, height)
+        return self._run_async(self.client.render(width, height))
 
-    async def reset(self, seed: int = 42) -> tuple[dict, dict]:
+    def reset(self, seed: int = 42) -> tuple[dict, dict]:
         """Reset the environment to an initial state
 
         Parameters
@@ -128,9 +136,10 @@ class AbstractEnv(ABC):
         seed : int
             The seed for random number generation.
         """
-        observations, infos = await self.client.reset(seed)
+        observations, infos = self._run_async(self.client.reset(seed))
         return self._encode_observations(observations), infos
 
-    async def close(self):
+    def close(self):
         """Close the environment and the client connection"""
-        await self.client.close()
+        self._run_async(self.client.close())
+        self.loop.close()
