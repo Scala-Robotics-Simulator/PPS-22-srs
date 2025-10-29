@@ -1,6 +1,6 @@
 package io.github.srs.model.entity.dynamicentity.agent.truncation
 
-import io.github.srs.model.entity.dynamicentity.agent.truncation.ObstacleAvoidance as ObstacleAvoidanceTruncationModel
+import io.github.srs.model.entity.dynamicentity.agent.truncation.CollisionDetection as CollisionDetectionTruncationModel
 import io.github.srs.model.entity.dynamicentity.agent.Agent
 import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.ModelModule.BaseState
@@ -13,7 +13,7 @@ import io.github.srs.model.ModelModule.BaseState
  */
 enum Truncation(val name: String) derives CanEqual:
   case NeverTruncate extends Truncation("NeverTruncate")
-  case ObstacleAvoidance extends Truncation("ObstacleAvoidance")
+  case CollisionDetection extends Truncation("CollisionDetection")
 
   /**
    * Evaluates whether the episode should be truncated based on the state transition and action.
@@ -32,7 +32,7 @@ enum Truncation(val name: String) derives CanEqual:
   def evaluate(prev: BaseState, current: BaseState, entity: Agent, action: Action[?]): Boolean =
     this match
       case NeverTruncate => false
-      case ObstacleAvoidance => ObstacleAvoidanceTruncationModel().evaluate(prev, current, entity, action)
+      case CollisionDetection => CollisionDetectionTruncationModel().evaluate(prev, current, entity, action)
 
   /**
    * String representation of the truncation type.

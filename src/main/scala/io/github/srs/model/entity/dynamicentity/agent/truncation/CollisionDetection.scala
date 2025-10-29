@@ -11,9 +11,13 @@ import io.github.srs.utils.SimulationDefaults.DynamicEntity.Agent.CollisionAvoid
 import cats.Id
 
 /**
- * Default placeholder truncation model. Returns false for every transition — suitable as a neutral fallback.
+ * Generic truncation model for collision detection.
+ *
+ * Episode truncates (FAILURE) when the agent collides with an obstacle (proximity sensor < threshold).
+ * This is reusable for any task where collision indicates failure:
+ * phototaxis, obstacle avoidance, navigation, safe exploration, etc.
  */
-final case class ObstacleAvoidance() extends TruncationModel[Agent]:
+final case class CollisionDetection() extends TruncationModel[Agent]:
 
   override def evaluate(prev: BaseState, current: BaseState, entity: Agent, action: Action[?]): Boolean =
     val currentMin =
