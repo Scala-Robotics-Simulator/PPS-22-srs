@@ -95,3 +95,45 @@ class QAgent:
         self.epsilon = self.epsilon_min + (
             self.epsilon_max - self.epsilon_min
         ) * math.exp(-self.epsilon_decay * episode)
+
+    def save(self, filepath: str):
+        """Save the Q-table and agent parameters to a file.
+
+        Parameters
+        ----------
+        filepath : str
+            Path to save the agent state (without extension, .npz will be added).
+        """
+        np.savez(
+            filepath,
+            q_table=self.Q,
+            epsilon=self.epsilon,
+            epsilon_max=self.epsilon_max,
+            epsilon_min=self.epsilon_min,
+            epsilon_decay=self.epsilon_decay,
+            alpha=self.alpha,
+            gamma=self.gamma,
+            episodes=self.episodes,
+        )
+        print(f"Agent saved to {filepath}.npz")
+
+    def load(self, filepath: str):
+        """Load the Q-table and agent parameters from a file.
+
+        Parameters
+        ----------
+        filepath : str
+            Path to load the agent state from (without extension).
+        """
+        data = np.load(f"{filepath}.npz")
+        self.Q = data["q_table"]
+        self.epsilon = float(data["epsilon"])
+        self.epsilon_max = float(data["epsilon_max"])
+        self.epsilon_min = float(data["epsilon_min"])
+        self.epsilon_decay = float(data["epsilon_decay"])
+        self.alpha = float(data["alpha"])
+        self.gamma = float(data["gamma"])
+        self.episodes = int(data["episodes"])
+        print(f"Agent loaded from {filepath}.npz")
+        print(f"  Q-table shape: {self.Q.shape}")
+        print(f"  Current epsilon: {self.epsilon:.4f}")
