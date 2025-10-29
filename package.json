@@ -10,7 +10,7 @@
     "semantic-release-preconfigured-conventional-commits": "1.1.152"
   },
   "engines": {
-    "node": "22.21"
+    "node": "24.11"
   },
   "scripts": {
     "lint-format": "sbt \"scalafixAll ; scalafmtAll\"",
