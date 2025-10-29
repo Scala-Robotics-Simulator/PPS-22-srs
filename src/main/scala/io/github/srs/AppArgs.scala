@@ -11,6 +11,10 @@ package io.github.srs
  *   the time to run the simulation for (in milliseconds).
  * @param seed
  *   the seed for the random number generator.
+ * @param reinforcementLearning
+ *   true if the application should run in RL server mode.
+ * @param port
+ *   the port number for the RL gRPC server (default: 50051).
  */
 final case class AppArgs(
     headless: Boolean = false,
@@ -18,4 +22,5 @@ final case class AppArgs(
     simulationTime: Option[Long] = None,
     seed: Option[Long] = None,
     reinforcementLearning: Boolean = false,
+    port: Int = 50051,
 )

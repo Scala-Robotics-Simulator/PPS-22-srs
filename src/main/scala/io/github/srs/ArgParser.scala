@@ -26,6 +26,10 @@ object ArgParser:
       opt[Unit]("rl")
         .action((_, c) => c.copy(reinforcementLearning = true))
         .text("Run as a Server for reinforcement leaning purposes"),
+      opt[Int]("port")
+        .action((port, c) => c.copy(port = port))
+        .valueName("<port>")
+        .text("Port number for RL gRPC server (default: 50051)"),
       opt[Unit]("headless")
         .action((_, c) => c.copy(headless = true))
         .text("Run in CLI headless mode (no GUI)"),

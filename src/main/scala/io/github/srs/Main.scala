@@ -9,7 +9,7 @@ private val logger = Logger("SRS_main")
 @main def main(args: String*): Unit =
   ArgParser.parse(args) match
     case Some(parsed) =>
-      if parsed.reinforcementLearning then Runners.runRL()
+      if parsed.reinforcementLearning then Runners.runRL(parsed.port)
       else Runners.runClassic(parsed)
     case None =>
       logger.error("Failed to parse arguments.")
@@ -31,5 +31,5 @@ object Runners:
 
     runner.unsafeRunSync()
 
-  def runRL(): Unit =
-    RLLauncher.run.unsafeRunSync()
+  def runRL(port: Int = 50051): Unit =
+    RLLauncher(port).run.unsafeRunSync()
