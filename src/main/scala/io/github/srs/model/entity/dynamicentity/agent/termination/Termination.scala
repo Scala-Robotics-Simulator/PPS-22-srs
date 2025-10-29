@@ -16,6 +16,7 @@ enum Termination(val name: String) derives CanEqual:
   case NeverTerminate extends Termination("NeverTerminate")
   case LightReached extends Termination("LightReached")
   case CollisionDetection extends Termination("CollisionDetection")
+  case CoverageTermination extends Termination("CoverageTermination")
 
   /**
    * Evaluates whether the agent should terminate based on the state transition and action.
