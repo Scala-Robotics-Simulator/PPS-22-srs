@@ -20,13 +20,15 @@ import nest_asyncio
 import numpy as np
 from tqdm import trange
 
+sys.path.append("..")
+
 from agent.qagent import QAgent
 from environment.qlearning.phototaxis_env import PhototaxisEnv
 from utils.log import Logger
 from utils.reader import get_yaml_path, read_file
 
 nest_asyncio.apply()
-sys.path.append("..")
+
 
 # Initialize logger
 logger = Logger(__name__)
