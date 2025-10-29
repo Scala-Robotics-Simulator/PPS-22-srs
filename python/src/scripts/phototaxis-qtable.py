@@ -12,21 +12,24 @@ Saved commands:
 from __future__ import annotations
 
 import argparse
-import nest_asyncio
-import numpy as np
 import os
 import sys
 from pathlib import Path
+
+import nest_asyncio
+import numpy as np
 from tqdm import trange
-from typing import Dict
+
+from agent.qagent import QAgent
+from environment.qlearning.phototaxis_env import PhototaxisEnv
+from utils.log import Logger
+from utils.reader import get_yaml_path, read_file
 
 nest_asyncio.apply()
 sys.path.append("..")
 
-# Project imports
-from environment.qlearning.phototaxis_env import PhototaxisEnv
-from utils.reader import get_yaml_path, read_file
-from agent.qagent import QAgent
+# Initialize logger
+logger = Logger(__name__)
 
 # -------- Defaults (single source of truth) --------
 DEFAULTS = {
@@ -119,7 +122,7 @@ def parse_args() -> argparse.Namespace:
     return p.parse_args()
 
 
-def resolve_config_path(config_name: string) -> str:
+def resolve_config_path(config_name: str) -> str:
     """Resolve config NAME to a full path using get_yaml_path(resources, configurations, NAME)."""
     name = ensure_yml_suffix(config_name)
     base_a, base_b = DEFAULTS["config_root"]
@@ -136,23 +139,23 @@ def infer_checkpoint_base(config_path: str, explicit_dir: str | None) -> str:
 def print_effective_config(
     args: argparse.Namespace, config_path: str, checkpoint_base: str
 ) -> None:
-    print("== Effective settings ==")
-    print(f"  config_name        : {args.config}")
-    print(f"  resolved_config    : {config_path}")
-    print(f"  server             : {args.server_host}:{args.port}")
-    print(f"  client_name        : {args.client_name}")
-    print(f"  episodes           : {args.episodes}")
-    print(f"  steps/episode      : {args.steps}")
-    print(f"  checkpoint_interval: {args.checkpoint_interval}")
-    print(f"  checkpoint_base    : {checkpoint_base}")
-    print(f"  load_checkpoint    : {args.load_checkpoint or 'None'}")
-    print(f"  start_episode      : {args.start_episode}")
-    print("========================\n")
+    logger.info("== Effective settings ==")
+    logger.info(f"  config_name        : {args.config}")
+    logger.info(f"  resolved_config    : {config_path}")
+    logger.info(f"  server             : {args.server_host}:{args.port}")
+    logger.info(f"  client_name        : {args.client_name}")
+    logger.info(f"  episodes           : {args.episodes}")
+    logger.info(f"  steps/episode      : {args.steps}")
+    logger.info(f"  checkpoint_interval: {args.checkpoint_interval}")
+    logger.info(f"  checkpoint_base    : {checkpoint_base}")
+    logger.info(f"  load_checkpoint    : {args.load_checkpoint or 'None'}")
+    logger.info(f"  start_episode      : {args.start_episode}")
+    logger.info("========================\n")
 
 
 def run_episodes(
     env: PhototaxisEnv,
-    agents: Dict[str, QAgent],
+    agents: dict[str, QAgent],
     agent_id: str,
     episode_count: int,
     episode_max_steps: int,
@@ -165,7 +168,7 @@ def run_episodes(
     if load_checkpoint:
         for a in agents.values():
             a.load(load_checkpoint)
-        print(f"[Warm Start] Loaded agent from: {load_checkpoint}")
+        logger.info(f"[Warm Start] Loaded agent from: {load_checkpoint}")
 
     # Ensure checkpoint directory exists (always, for final save)
     os.makedirs(os.path.dirname(checkpoint_base) or ".", exist_ok=True)
@@ -205,7 +208,7 @@ def run_episodes(
                     for _, a in agents.items():
                         save_path = f"{checkpoint_base}_ep{actual_episode + 1}"
                         a.save(save_path)
-                    print(
+                    logger.info(
                         f"\n[Checkpoint] Saved at episode {actual_episode + 1} | Reward: {total_reward[agent_id]:.3f}"
                     )
 
@@ -213,7 +216,7 @@ def run_episodes(
         for _, a in agents.items():
             final_path = f"{checkpoint_base}_final"
             a.save(final_path)
-        print("\n[Final Save] Training complete.")
+        logger.info("\n[Final Save] Training complete.")
 
 
 def main() -> None:
@@ -255,11 +258,11 @@ def main() -> None:
     )
 
     # Quick stats
-    print(f"Q-table shape: {agent.Q.shape}")
-    print(f"Non-zero entries: {np.count_nonzero(agent.Q)}")
-    print(f"Q-table min/max: {agent.Q.min():.4f} / {agent.Q.max():.4f}")
+    logger.info(f"Q-table shape: {agent.Q.shape}")
+    logger.info(f"Non-zero entries: {np.count_nonzero(agent.Q)}")
+    logger.info(f"Q-table min/max: {agent.Q.min():.4f} / {agent.Q.max():.4f}")
     visited_states = np.where(np.any(agent.Q != 0, axis=1))[0]
-    print(f"States visited: {len(visited_states)} / {agent.Q.shape[0]}")
+    logger.info(f"States visited: {len(visited_states)} / {agent.Q.shape[0]}")
 
 
 if __name__ == "__main__":
