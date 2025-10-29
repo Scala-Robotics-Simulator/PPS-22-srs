@@ -13,9 +13,8 @@ import cats.Id
 /**
  * Generic truncation model for collision detection.
  *
- * Episode truncates (FAILURE) when the agent collides with an obstacle (proximity sensor < threshold).
- * This is reusable for any task where collision indicates failure:
- * phototaxis, obstacle avoidance, navigation, safe exploration, etc.
+ * Episode truncates (FAILURE) when the agent collides with an obstacle (proximity sensor < threshold). This is reusable
+ * for any task where collision indicates failure: phototaxis, obstacle avoidance, navigation, safe exploration, etc.
  */
 final case class CollisionDetection() extends TruncationModel[Agent]:
 

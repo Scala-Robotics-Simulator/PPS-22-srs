@@ -3,6 +3,7 @@ package io.github.srs.model.entity.dynamicentity.agent.reward
 import io.github.srs.model.entity.dynamicentity.agent.Agent
 import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.agent.reward.ObstacleAvoidanceRewardModule
+import io.github.srs.model.entity.dynamicentity.agent.reward.PhototaxisRewardModule
 import io.github.srs.model.ModelModule.BaseState
 
 /**
@@ -14,6 +15,7 @@ import io.github.srs.model.ModelModule.BaseState
 enum Reward(val name: String) derives CanEqual:
   case NoReward extends Reward("NoReward")
   case ObstacleAvoidance extends Reward("ObstacleAvoidance")
+  case Phototaxis extends Reward("Phototaxis")
 
   /**
    * Evaluates the reward for the given state transition and action.
@@ -34,6 +36,8 @@ enum Reward(val name: String) derives CanEqual:
       case NoReward => 0.0
       case ObstacleAvoidance =>
         ObstacleAvoidanceRewardModule.ObstacleAvoidance().evaluate(prev, current, entity, action)
+      case Phototaxis =>
+        PhototaxisRewardModule.Phototaxis().evaluate(prev, current, entity, action)
 
   /**
    * String representation of the reward type.
