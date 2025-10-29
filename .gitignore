@@ -44,3 +44,7 @@ env/
 __pycache__/
 *_pb2*.py
 .ipynb_checkpoints/
+#all folder that could be checkpoints_old, checkpointsokay, etc.
+python/src/notebooks/checkpoints*/
+python/src/scripts/checkpoints*/
+python/src/checkpoints*/
