@@ -2,6 +2,8 @@ import math
 
 import numpy as np
 
+from utils.log import Logger
+
 
 class QAgent:
     """
@@ -50,6 +52,7 @@ class QAgent:
         self.Q = np.zeros((self.env.observation_space_n, self.env.action_space.n))
         self.epsilon = self.epsilon_max
         self.total_episodes_trained = 0  # Track actual episodes trained
+        self.logger = Logger(self.__class__.__name__)
 
     def choose_action(self, state: int, epsilon_greedy: bool = True):
         """Selects an action based on the current state using the epsilon-greedy policy.
@@ -118,7 +121,7 @@ class QAgent:
             episodes=self.episodes,
             total_episodes_trained=self.total_episodes_trained,
         )
-        print(
+        self.logger.info(
             f"Agent saved to {filepath}.npz (Total episodes: {self.total_episodes_trained})"
         )
 
@@ -140,7 +143,7 @@ class QAgent:
         self.gamma = float(data["gamma"])
         self.episodes = int(data["episodes"])
         self.total_episodes_trained = int(data.get("total_episodes_trained", 0))
-        print(f"Agent loaded from {filepath}.npz")
-        print(f"  Q-table shape: {self.Q.shape}")
-        print(f"  Current epsilon: {self.epsilon:.4f}")
-        print(f"  Total episodes trained: {self.total_episodes_trained}")
+        self.logger.info(f"Agent loaded from {filepath}.npz")
+        self.logger.info(f"  Q-table shape: {self.Q.shape}")
+        self.logger.info(f"  Current epsilon: {self.epsilon:.4f}")
+        self.logger.info(f"  Total episodes trained: {self.total_episodes_trained}")
