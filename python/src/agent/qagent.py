@@ -49,6 +49,7 @@ class QAgent:
 
         self.Q = np.zeros((self.env.observation_space_n, self.env.action_space.n))
         self.epsilon = self.epsilon_max
+        self.total_episodes_trained = 0  # Track actual episodes trained
 
     def choose_action(self, state: int, epsilon_greedy: bool = True):
         """Selects an action based on the current state using the epsilon-greedy policy.
@@ -95,6 +96,7 @@ class QAgent:
         self.epsilon = self.epsilon_min + (
             self.epsilon_max - self.epsilon_min
         ) * math.exp(-self.epsilon_decay * episode)
+        self.total_episodes_trained = episode + 1  # Update total count
 
     def save(self, filepath: str):
         """Save the Q-table and agent parameters to a file.
@@ -114,8 +116,11 @@ class QAgent:
             alpha=self.alpha,
             gamma=self.gamma,
             episodes=self.episodes,
+            total_episodes_trained=self.total_episodes_trained,
         )
-        print(f"Agent saved to {filepath}.npz")
+        print(
+            f"Agent saved to {filepath}.npz (Total episodes: {self.total_episodes_trained})"
+        )
 
     def load(self, filepath: str):
         """Load the Q-table and agent parameters from a file.
@@ -134,6 +139,8 @@ class QAgent:
         self.alpha = float(data["alpha"])
         self.gamma = float(data["gamma"])
         self.episodes = int(data["episodes"])
+        self.total_episodes_trained = int(data.get("total_episodes_trained", 0))
         print(f"Agent loaded from {filepath}.npz")
         print(f"  Q-table shape: {self.Q.shape}")
         print(f"  Current epsilon: {self.epsilon:.4f}")
+        print(f"  Total episodes trained: {self.total_episodes_trained}")
