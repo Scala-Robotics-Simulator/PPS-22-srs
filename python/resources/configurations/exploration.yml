@@ -6,13 +6,19 @@ environment:
     height: 10
     entities:
         - agent:
-              id: 00000000-0000-0000-0000-000000000001
-              radius: 0.25
-              withProximitySensors: true
-              withLightSensors: true
-              position: [1.0, 4.0]
-              orientation: 0.0
-              speed: 1.0
-              reward: Exploration
-              termination: EndSimulationTermination
-              truncation: ObstacleAvoidance
+            id: 00000000-0000-0000-0000-000000000001
+            radius: 0.25
+            withProximitySensors: true
+            withLightSensors: true
+            position: [1.0, 4.0]
+            orientation: 0.0
+            speed: 1.0
+            reward: Exploration
+            termination: CoverageTermination
+            truncation: ObstacleAvoidance
+        - obstacle:
+            orientation: 0.2
+            position: [ 5.6, 4.0 ]
+            width: 4.0
+            id: 0749c579-c64b-43be-a225-c8a0745e4fee
+            height: 1.4
