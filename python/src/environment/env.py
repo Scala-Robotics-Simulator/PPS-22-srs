@@ -4,7 +4,7 @@ import grpc
 import gymnasium.spaces as spaces
 import numpy as np
 
-from proto.rl_client import RLClient
+from rl.rl_client import RLClient
 from utils.log import Logger
 
 logger = Logger(__name__)
