@@ -21,7 +21,6 @@ import time
 from pathlib import Path
 
 import nest_asyncio
-from tqdm import trange
 
 from agent.scala_dqagent import DQAgent
 from environment.deepqlearning.obstacle_avoidance_env import ObstacleAvoidanceEnv
@@ -46,11 +45,19 @@ DEFAULTS = {
     "steps": 5000,
     "checkpoint_interval": 200,  # 0 disables periodic checkpoints
     "checkpoint_dir": None,  # inferred from config basename
-    "load_checkpoint": None,
-    "start_episode": 0,
     "client_name": "PhototaxisRLClient",
     "env": "phototaxis",
     "neurons": [64, 32],
+    "epsilon_max": 1.0,
+    "epsilon_min": 0.01,
+    "gamma": 0.99,
+    "replay_memory_max_size": 100000,
+    "replay_memory_init_size": 1000,
+    "batch_size": 64,
+    "step_per_update": 4,
+    "step_per_update_target_model": 8,
+    "moving_avg_window_size": 20,
+    "moving_avg_stop_thr": 100,
 }
 FIXED_AGENT_ID = "00000000-0000-0000-0000-000000000001"
 
@@ -77,6 +84,7 @@ def parse_args() -> argparse.Namespace:
         type=str,
         default=DEFAULTS["server_host"],
         help="Server hostname or IP for the proto server.",
+        required=False,
     )
     p.add_argument(
         "--port",
@@ -109,22 +117,11 @@ def parse_args() -> argparse.Namespace:
         help="Checkpoint base path (without suffix). If omitted, inferred from config name.",
     )
     p.add_argument(
-        "--load-checkpoint",
-        type=str,
-        default=DEFAULTS["load_checkpoint"],
-        help="Optional path to load a previously saved agent (warm-start).",
-    )
-    p.add_argument(
-        "--start-episode",
-        type=int,
-        default=DEFAULTS["start_episode"],
-        help="Starting episode index (useful when resuming).",
-    )
-    p.add_argument(
         "--client-name",
         type=str,
         default=DEFAULTS["client_name"],
         help="Client name for the environment.",
+        required=False,
     )
     p.add_argument(
         "--env",
@@ -138,6 +135,76 @@ def parse_args() -> argparse.Namespace:
         nargs="+",
         default=DEFAULTS["neurons"],
         help="Number of neurons for the hidden layers of the network (formatted like 64 32)",
+    )
+    p.add_argument(
+        "--epsilon-max",
+        type=float,
+        default=DEFAULTS["epsilon_max"],
+        help="Maximum exploration rate (epsilon).",
+        required=False,
+    )
+    p.add_argument(
+        "--epsilon-min",
+        type=float,
+        default=DEFAULTS["epsilon_min"],
+        help="Minimum exploration rate (epsilon).",
+        required=False,
+    )
+    p.add_argument(
+        "--gamma",
+        type=float,
+        default=DEFAULTS["gamma"],
+        help="Discount factor (gamma).",
+        required=False,
+    )
+    p.add_argument(
+        "--replay-memory-max-size",
+        type=int,
+        default=DEFAULTS["replay_memory_max_size"],
+        help="Maximum size of the replay memory.",
+        required=False,
+    )
+    p.add_argument(
+        "--replay-memory-init-size",
+        type=int,
+        default=DEFAULTS["replay_memory_init_size"],
+        help="Initial size of the replay memory before training starts.",
+        required=False,
+    )
+    p.add_argument(
+        "--batch-size",
+        type=int,
+        default=DEFAULTS["batch_size"],
+        help="Batch size for training.",
+        required=False,
+    )
+    p.add_argument(
+        "--step-per-update",
+        type=int,
+        default=DEFAULTS["step_per_update"],
+        help="Number of steps between each network update.",
+        required=False,
+    )
+    p.add_argument(
+        "--step-per-update-target-model",
+        type=int,
+        default=DEFAULTS["step_per_update_target_model"],
+        help="Number of steps between each target network update.",
+        required=False,
+    )
+    p.add_argument(
+        "--moving-avg-window-size",
+        type=int,
+        default=DEFAULTS["moving_avg_window_size"],
+        help="Window size for moving average of rewards.",
+        required=False,
+    )
+    p.add_argument(
+        "--moving-avg-stop-thr",
+        type=float,
+        default=DEFAULTS["moving_avg_stop_thr"],
+        help="Moving average reward threshold to stop training.",
+        required=False,
     )
     return p.parse_args()
 
@@ -170,86 +237,28 @@ def infer_checkpoint_base(config_path: str, explicit_dir: str | None) -> str:
 def print_effective_config(
     args: argparse.Namespace, config_path: str, checkpoint_base: str
 ) -> None:
-    logger.info("== Effective settings ==")
-    logger.info(f"  config_name        : {args.config}")
-    logger.info(f"  resolved_config    : {config_path}")
-    logger.info(f"  server             : {args.server_host}:{args.port}")
-    logger.info(f"  client_name        : {args.client_name}")
-    logger.info(f"  episodes           : {args.episodes}")
-    logger.info(f"  steps/episode      : {args.steps}")
-    logger.info(f"  checkpoint_interval: {args.checkpoint_interval}")
-    logger.info(f"  checkpoint_base    : {checkpoint_base}")
-    logger.info(f"  load_checkpoint    : {args.load_checkpoint or 'None'}")
-    logger.info(f"  start_episode      : {args.start_episode}")
-    logger.info(f"  env                : {args.env}")
-    logger.info(f"  neurons            : {args.neurons}")
-    logger.info("========================\n")
-
-
-def run_episodes(
-    env,
-    agents: dict[str, DQAgent],
-    agent_id: str,
-    episode_count: int,
-    episode_max_steps: int,
-    checkpoint_interval: int | None,
-    checkpoint_base: str,
-    start_episode: int = 0,
-    load_checkpoint: str | None = None,
-) -> None:
-    # Warm start
-    if load_checkpoint:
-        for a in agents.values():
-            a.load(load_checkpoint)
-        logger.info(f"[Warm Start] Loaded agent from: {load_checkpoint}")
-
-    # Ensure checkpoint directory exists (always, for final save)
-    os.makedirs(os.path.dirname(checkpoint_base) or ".", exist_ok=True)
-
-    try:
-        for ep_idx in trange(episode_count, desc="Training", unit="ep"):
-            actual_episode = start_episode + ep_idx
-
-            obs, _ = env.reset()
-            done = False
-            step = 0
-            total_reward = {agent_id: 0.0}
-
-            while not done and step < episode_max_steps:
-                actions = {
-                    k: agents[k].choose_action(v, epsilon_greedy=True)
-                    for k, v in obs.items()
-                }
-
-                next_obs, rewards, terminateds, truncateds, _ = env.step(actions)
-                done = terminateds[agent_id] or truncateds[agent_id]
-
-                for k in next_obs.keys():
-                    agents[k].update_q(
-                        obs[k], actions[k], rewards[k], next_obs[k], done
-                    )
-                    total_reward[k] += float(rewards[k])
-
-                obs = next_obs
-                step += 1
-
-            for a in agents.values():
-                a.decay_epsilon(actual_episode)
-
-            if checkpoint_interval and checkpoint_interval > 0:
-                if (ep_idx + 1) % checkpoint_interval == 0:
-                    for _, a in agents.items():
-                        save_path = f"{checkpoint_base}_ep{actual_episode + 1}"
-                        a.save(save_path)
-                    logger.info(
-                        f"\n[Checkpoint] Saved at episode {actual_episode + 1} | Reward: {total_reward[agent_id]:.3f}"
-                    )
-
-    finally:
-        for _, a in agents.items():
-            final_path = f"{checkpoint_base}_final"
-            a.save(final_path)
-        logger.info("\n[Final Save] Training complete.")
+    logger.info("== Effective settings ==========")
+    logger.info(f"  config_name                 : {args.config}")
+    logger.info(f"  resolved_config             : {config_path}")
+    logger.info(f"  server                      : {args.server_host}:{args.port}")
+    logger.info(f"  client_name                 : {args.client_name}")
+    logger.info(f"  episodes                    : {args.episodes}")
+    logger.info(f"  steps/episode               : {args.steps}")
+    logger.info(f"  checkpoint_interval         : {args.checkpoint_interval}")
+    logger.info(f"  checkpoint_base             : {checkpoint_base}")
+    logger.info(f"  env                         : {args.env}")
+    logger.info(f"  neurons                     : {args.neurons}")
+    logger.info(f"  epsilon_max                 : {args.epsilon_max}")
+    logger.info(f"  epsilon_min                 : {args.epsilon_min}")
+    logger.info(f"  gamma                       : {args.gamma}")
+    logger.info(f"  replay_memory_max_size      : {args.replay_memory_max_size}")
+    logger.info(f"  replay_memory_init_size     : {args.replay_memory_init_size}")
+    logger.info(f"  batch_size                  : {args.batch_size}")
+    logger.info(f"  step_per_update             : {args.step_per_update}")
+    logger.info(f"  step_per_update_target_model: {args.step_per_update_target_model}")
+    logger.info(f"  moving_avg_window_size      : {args.moving_avg_window_size}")
+    logger.info(f"  moving_avg_stop_thr         : {args.moving_avg_stop_thr}")
+    logger.info("================================\n")
 
 
 def main() -> None:
@@ -273,37 +282,54 @@ def main() -> None:
         env.observation_space.shape,
         args.neurons,
         env.action_space.n,
-        summary=True,
+        summary=False,
     )
     target_net = DQNetwork(
         env.observation_space.shape,
         args.neurons,
         env.action_space.n,
-        summary=True,
+        summary=False,
     )
 
-    target_net.model.set_weights(action_net.model.get_weights())
-
     # Agent(s)
-    agent = DQAgent(env, agent_id=FIXED_AGENT_ID)
+    agent = DQAgent(
+        env,
+        agent_id=FIXED_AGENT_ID,
+        action_model=action_net,
+        target_model=target_net,
+        epsilon_max=args.epsilon_max,
+        epsilon_min=args.epsilon_min,
+        gamma=args.gamma,
+        replay_memory_max_size=args.replay_memory_max_size,
+        replay_memory_init_size=args.replay_memory_init_size,
+        batch_size=args.batch_size,
+        step_per_update=args.step_per_update,
+        step_per_update_target_model=args.step_per_update_target_model,
+        moving_avg_window_size=args.moving_avg_window_size,
+        moving_avg_stop_thr=args.moving_avg_stop_thr,
+        episode_max_steps=args.steps,
+        episodes=args.episodes,
+    )
 
     train_start_time = time.time()
 
     trainer = DQLearning(
         env,
-        agent,
+        [agent],
         episode_count=args.episodes,
         episode_max_steps=args.steps,
-        dqn_action_model=action_net,
-        dqn_target_model=target_net,
     )
 
     # # Compute checkpoint base & show effective settings
     checkpoint_base = infer_checkpoint_base(config_path, args.checkpoint_dir)
     print_effective_config(args, config_path, checkpoint_base)
 
+    os.makedirs(os.path.dirname(checkpoint_base) or ".", exist_ok=True)
+
     # Train
-    _ = trainer.simple_dqn_training()
+    _ = trainer.simple_dqn_training(
+        checkpoint_interval=args.checkpoint_interval, checkpoint_base=checkpoint_base
+    )
 
     train_finish_time = time.time()
     train_elapsed_time = train_finish_time - train_start_time
@@ -312,26 +338,6 @@ def main() -> None:
     logger.info(
         f"Train time: {train_elapsed_time / 60.0:.1f}m [{train_avg_episode_time:.1f}s]"
     )
-    #
-    # # Train
-    # run_episodes(
-    #     env=env,
-    #     agents=agents,
-    #     agent_id=FIXED_AGENT_ID,
-    #     episode_count=args.episodes,
-    #     episode_max_steps=args.steps,
-    #     checkpoint_interval=args.checkpoint_interval,
-    #     checkpoint_base=checkpoint_base,
-    #     start_episode=args.start_episode,
-    #     load_checkpoint=args.load_checkpoint,
-    # )
-    #
-    # # Quick stats
-    # logger.info(f"Q-table shape: {agent.Q.shape}")
-    # logger.info(f"Non-zero entries: {np.count_nonzero(agent.Q)}")
-    # logger.info(f"Q-table min/max: {agent.Q.min():.4f} / {agent.Q.max():.4f}")
-    # visited_states = np.where(np.any(agent.Q != 0, axis=1))[0]
-    # logger.info(f"States visited: {len(visited_states)} / {agent.Q.shape[0]}")
 
 
 if __name__ == "__main__":

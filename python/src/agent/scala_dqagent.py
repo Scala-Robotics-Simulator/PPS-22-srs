@@ -275,8 +275,8 @@ class DQAgent:
     def save(self, directory: str):
         """Save agent state: models, epsilon, and parameters."""
         os.makedirs(directory, exist_ok=True)
-        self.action_model.save(os.path.join(directory, "action_model.h5"))
-        self.target_model.save(os.path.join(directory, "target_model.h5"))
+        self.action_model.save(os.path.join(directory, "action_model.keras"))
+        self.target_model.save(os.path.join(directory, "target_model.keras"))
 
         np.savez(
             os.path.join(directory, "agent_state.npz"),
@@ -296,8 +296,8 @@ class DQAgent:
         """Load agent state: models, epsilon, and parameters."""
         from keras.models import load_model
 
-        self.action_model = load_model(os.path.join(directory, "action_model.h5"))
-        self.target_model = load_model(os.path.join(directory, "target_model.h5"))
+        self.action_model = load_model(os.path.join(directory, "action_model.keras"))
+        self.target_model = load_model(os.path.join(directory, "target_model.keras"))
 
         data = np.load(os.path.join(directory, "agent_state.npz"))
         self.epsilon = float(data["epsilon"])
