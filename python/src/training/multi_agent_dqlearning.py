@@ -6,7 +6,6 @@ import pygame
 from tqdm import trange
 
 from agent.scala_dqagent import DQAgent
-from training.dqnetwork import DQNetwork
 from utils.log import Logger
 
 logger = Logger(__name__)
@@ -22,10 +21,6 @@ class DQLearning:
         The environment in which the agent interacts.
     agent : DQAgent
         The Deep Q-Agent.
-    dqn_action_model : DQNetwork
-        The main Q-network, trained at each step.
-    dqn_target_model : DQNetwork
-        The target Q-network, periodically updated from the main model.
     episode_count : int, optional (default=1000)
         Number of training episodes.
     episode_max_steps : int, optional (default=200)
@@ -36,15 +31,11 @@ class DQLearning:
         self,
         env,
         agent: DQAgent,
-        dqn_action_model: DQNetwork,
-        dqn_target_model: DQNetwork,
         episode_count: int = 1000,
         episode_max_steps: int = 200,
     ):
         self.env = env
         self.agent = agent
-        self.dqn_action_model = dqn_action_model.model
-        self.dqn_target_model = dqn_target_model.model
         self.episode_count = episode_count
         self.episode_max_steps = episode_max_steps
 
@@ -63,7 +54,7 @@ class DQLearning:
             step_count = 0
 
             while step_count < self.episode_max_steps and not done:
-                action = self.agent.choose_action(state, self.dqn_action_model)
+                action = self.agent.choose_action(state)
                 actions = {self.agent.id: action}
 
                 next_states, rewards, terminateds, truncateds, _ = self.env.step(
@@ -80,18 +71,10 @@ class DQLearning:
                     train_step_count % self.agent.step_per_update == 0
                     and len(self.agent.replay_memory) >= self.agent.batch_size
                 ):
-                    mini_batch = self.agent.get_random_batch()
-                    self.dqn_action_model = self.simple_dqn_update(
-                        self.dqn_action_model,
-                        self.dqn_target_model,
-                        mini_batch,
-                        self.agent.gamma,
-                    )
+                    self.agent.dqn_update()
 
                 if train_step_count % self.agent.step_per_update_target_model == 0:
-                    self.agent.update_target_model(
-                        self.dqn_action_model, self.dqn_target_model
-                    )
+                    self.agent.update_target_model()
 
                 self.agent.decay_epsilon()
 
@@ -120,67 +103,6 @@ class DQLearning:
             #     break
 
         return train_rewards
-
-    def simple_dqn_update(
-        self,
-        dqn_action_model,
-        dqn_target_model,
-        mini_batch: tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray],
-        gamma: float,
-    ):
-        """Update the action model using a mini-batch from replay memory.
-
-        Parameters
-        ----------
-        dqn_action_model : keras.Sequential
-            The main Deep Q-network to be updated.
-        dqn_target_model : keras.Sequential
-            The target Deep Q-network used to compute target Q-values.
-        mini_batch : tuple of np.ndarray
-            A mini-batch of transitions (states, actions, rewards, new_states, dones).
-        gamma : float
-            Discount factor for future rewards.
-
-        Returns
-        -------
-        dqn_action_model : keras.Sequential
-            The updated action model.
-        """
-        # the transition mini-batch is divided into a mini-batch for each element of a transition
-        state_batch, action_batch, reward_batch, new_state_batch, done_batch = (
-            mini_batch
-        )
-
-        # 1. find the target model Q values for all possible actions given the new state batch
-        target_new_state_q_values = dqn_target_model.predict(new_state_batch, verbose=0)
-
-        # 2. find the action model Q values for all possible actions given the current state batch
-        predicted_state_q_values = dqn_action_model.predict(state_batch, verbose=0)
-
-        # estimate the target values y_i
-        # for the action we took, use the target model Q values
-        # for other actions, use the action model Q values
-        # in this way, loss function will be 0 for other actions
-        for i, (a, r, new_state_q_values, done) in enumerate(
-            zip(
-                action_batch,
-                reward_batch,
-                target_new_state_q_values,
-                done_batch,
-                strict=False,
-            )
-        ):
-            if not done:
-                target_value = r + gamma * np.amax(new_state_q_values)
-            else:
-                target_value = r
-            predicted_state_q_values[i][a] = target_value  # y_i
-
-        # 3. update weights of action model using the train_on_batch method
-        dqn_action_model.train_on_batch(state_batch, predicted_state_q_values)
-
-        # return the updated action model
-        return dqn_action_model
 
     def play_with_pygame(self, episodes=5, fps=30, render_scale=(600, 400)):
         """Run the trained agent and visualize with Pygame.
@@ -211,7 +133,7 @@ class DQLearning:
                     if event.type == pygame.QUIT:
                         running = False
 
-                q_values = self.dqn_action_model.predict(state[np.newaxis], verbose=0)
+                q_values = self.agent.action_model.predict(state[np.newaxis], verbose=0)
                 action = np.argmax(q_values[0])
                 actions = {self.agent.id: action}
 
