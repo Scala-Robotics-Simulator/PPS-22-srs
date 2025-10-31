@@ -1,3 +1,5 @@
+import math
+import os
 import random
 from collections import deque
 
@@ -23,8 +25,6 @@ class DQAgent:
         Initial exploration rate (epsilon).
     epsilon_min : float, optional (default=0.01)
         Minimum exploration rate.
-    epsilon_decay : float, optional (default=0.0002)
-        Decay rate for epsilon after each step.
     gamma : float, optional (default=0.99)
         Discount factor for future rewards.
     replay_memory_max_size : int, optional (default=100000)
@@ -43,6 +43,8 @@ class DQAgent:
         Threshold for stopping criteria based on moving average.
     episode_max_steps : int, optional (default=400)
         Maximum number of steps per episode during replay memory initialization.
+    episodes : int, optional (default=1000)
+        Number of training episodes.
 
     Attributes
     ----------
@@ -50,6 +52,8 @@ class DQAgent:
         Experience replay memory storing past transitions.
     epsilon : float
         Current exploration rate.
+    terminated : bool
+        Flag indicating whether the agent has terminated.
     """
 
     def __init__(
@@ -60,7 +64,6 @@ class DQAgent:
         target_model: DQNetwork,
         epsilon_max: float = 1.0,
         epsilon_min: float = 0.01,
-        epsilon_decay: float = 0.0002,
         gamma: float = 0.99,
         replay_memory_max_size: int = 100000,
         replay_memory_init_size: int = 1000,
@@ -70,6 +73,7 @@ class DQAgent:
         moving_avg_window_size: int = 20,
         moving_avg_stop_thr: int = 100,
         episode_max_steps: int = 400,
+        episodes: int = 1000,
     ):
         self.env = env
         self.id = agent_id
@@ -78,7 +82,7 @@ class DQAgent:
         self.target_model.set_weights(self.action_model.get_weights())
         self.epsilon_max = epsilon_max
         self.epsilon_min = epsilon_min
-        self.epsilon_decay = epsilon_decay
+        self.epsilon_decay = -math.log(self.epsilon_min) / episodes
         self.epsilon = epsilon_max
         self.gamma = gamma
         self.batch_size = batch_size
@@ -86,6 +90,7 @@ class DQAgent:
         self.step_per_update_target_model = step_per_update_target_model
         self.moving_avg_window_size = moving_avg_window_size
         self.moving_avg_stop_thr = moving_avg_stop_thr
+        self.episodes = episodes
         self.terminated = False
 
         self.replay_memory = deque(maxlen=replay_memory_max_size)
@@ -163,9 +168,11 @@ class DQAgent:
         """
         self.target_model.set_weights(self.action_model.get_weights())
 
-    def decay_epsilon(self):
+    def decay_epsilon(self, episode: int):
         """Decay the exploration rate epsilon."""
-        self.epsilon = max(self.epsilon_min, self.epsilon - self.epsilon_decay)
+        self.epsilon = self.epsilon_min + (
+            self.epsilon_max - self.epsilon_min
+        ) * math.exp(-self.epsilon_decay * episode)
 
     def simple_dqn_replay_memory_init(
         self,
@@ -264,3 +271,42 @@ class DQAgent:
 
         # 3. update weights of action model using the train_on_batch method
         self.action_model.train_on_batch(state_batch, predicted_state_q_values)
+
+    def save(self, directory: str):
+        """Save agent state: models, epsilon, and parameters."""
+        os.makedirs(directory, exist_ok=True)
+        self.action_model.save(os.path.join(directory, "action_model.h5"))
+        self.target_model.save(os.path.join(directory, "target_model.h5"))
+
+        np.savez(
+            os.path.join(directory, "agent_state.npz"),
+            epsilon=self.epsilon,
+            epsilon_max=self.epsilon_max,
+            epsilon_min=self.epsilon_min,
+            epsilon_decay=self.epsilon_decay,
+            gamma=self.gamma,
+            batch_size=self.batch_size,
+            step_per_update=self.step_per_update,
+            step_per_update_target_model=self.step_per_update_target_model,
+            moving_avg_window_size=self.moving_avg_window_size,
+            moving_avg_stop_thr=self.moving_avg_stop_thr,
+        )
+
+    def load(self, directory: str):
+        """Load agent state: models, epsilon, and parameters."""
+        from keras.models import load_model
+
+        self.action_model = load_model(os.path.join(directory, "action_model.h5"))
+        self.target_model = load_model(os.path.join(directory, "target_model.h5"))
+
+        data = np.load(os.path.join(directory, "agent_state.npz"))
+        self.epsilon = float(data["epsilon"])
+        self.epsilon_max = float(data["epsilon_max"])
+        self.epsilon_min = float(data["epsilon_min"])
+        self.epsilon_decay = float(data["epsilon_decay"])
+        self.gamma = float(data["gamma"])
+        self.batch_size = int(data["batch_size"])
+        self.step_per_update = int(data["step_per_update"])
+        self.step_per_update_target_model = int(data["step_per_update_target_model"])
+        self.moving_avg_window_size = int(data["moving_avg_window_size"])
+        self.moving_avg_stop_thr = float(data["moving_avg_stop_thr"])

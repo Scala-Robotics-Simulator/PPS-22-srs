@@ -95,7 +95,7 @@ class DQLearning:
                         if train_step_count % agent.step_per_update_target_model == 0:
                             agent.update_target_model()
 
-                        agent.decay_epsilon()
+                        agent.decay_epsilon(n)
 
                 step_count += 1
                 train_step_count += 1
@@ -111,6 +111,7 @@ class DQLearning:
                     else episode_reward[agent.id]
                 )
                 for agent in self.agents
+                if not agent.terminated
             }
             train_rewards.append(episode_reward)
 
