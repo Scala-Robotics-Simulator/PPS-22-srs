@@ -39,7 +39,9 @@ class DQLearning:
         self.episode_count = episode_count
         self.episode_max_steps = episode_max_steps
 
-    def simple_dqn_training(self):
+    def simple_dqn_training(
+        self, checkpoint_interval: int | None = None, checkpoint_base: str = ""
+    ):
         """Trains the agent using the Deep Q-Learning algorithm."""
         train_rewards = []
         train_step_count = 0
@@ -64,16 +66,16 @@ class DQLearning:
                 next_states, rewards, terminateds, truncateds, _ = self.env.step(
                     actions
                 )
+
                 dones = {
                     agent.id: terminateds[agent.id] or truncateds[agent.id]
                     for agent in self.agents
                 }
-                for agent in self.agents:
-                    if dones[agent.id]:
-                        agent.terminated = True
-                done = all(dones.values())
+
+                # Process each agent
                 for agent in self.agents:
                     if not agent.terminated:
+                        # Store transition
                         agent.store_transition(
                             states[agent.id],
                             actions[agent.id],
@@ -82,10 +84,11 @@ class DQLearning:
                             dones[agent.id],
                         )
 
-                states = next_states
+                        episode_reward[agent.id] += rewards[agent.id]
 
-                for agent in self.agents:
-                    if not agent.terminated:
+                        if dones[agent.id]:
+                            agent.terminated = True
+
                         if (
                             train_step_count % agent.step_per_update == 0
                             and len(agent.replay_memory) >= agent.batch_size
@@ -97,21 +100,24 @@ class DQLearning:
 
                         agent.decay_epsilon(n)
 
+                done = all(dones.values())
+                states = next_states
                 step_count += 1
                 train_step_count += 1
-                for agent in self.agents:
-                    if not agent.terminated:
-                        episode_reward[agent.id] += rewards[agent.id]
 
             episode_time = time.time() - episode_start_time
             moving_avg_reward = {
                 agent.id: (
-                    statistics.mean(train_rewards[-agent.moving_avg_window_size :])
+                    statistics.mean(
+                        [
+                            reward[agent.id]
+                            for reward in train_rewards[-agent.moving_avg_window_size :]
+                        ]
+                    )
                     if len(train_rewards) >= agent.moving_avg_window_size
                     else episode_reward[agent.id]
                 )
                 for agent in self.agents
-                if not agent.terminated
             }
             train_rewards.append(episode_reward)
 
@@ -120,12 +126,23 @@ class DQLearning:
                 f"Epsilon: {episode_epsilon:.3f} | Time: {episode_time:.2f}s | "
                 f"Reward: {episode_reward} | MovingAvg: {moving_avg_reward}"
             )
-
+            if checkpoint_interval is not None and (n + 1) % checkpoint_interval == 0:
+                for agent in self.agents:
+                    save_path = f"{checkpoint_base}_ep{n + 1}"
+                    agent.save(save_path)
+                    logger.info(
+                        f"\n[Checkpoint] Saved at episode {n + 1} | Reward: {train_rewards[n][agent.id]:.3f}"
+                    )
             # if (
             #     self.agent.moving_avg_stop_thr
             #     and moving_avg_reward >= self.agent.moving_avg_stop_thr
             # ):
             #     break
+        if checkpoint_interval is not None:
+            for agent in self.agents:
+                save_path = f"{checkpoint_base}_final"
+                agent.save(save_path)
+            logger.info("\n[Final Save] Training complete.")
 
         return train_rewards
 
