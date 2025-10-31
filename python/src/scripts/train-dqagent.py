@@ -21,7 +21,6 @@ import time
 from pathlib import Path
 
 import nest_asyncio
-import numpy as np
 from tqdm import trange
 
 from agent.scala_dqagent import DQAgent
@@ -189,7 +188,7 @@ def print_effective_config(
 
 def run_episodes(
     env,
-    agents: dict[str, QAgent],
+    agents: dict[str, DQAgent],
     agent_id: str,
     episode_count: int,
     episode_max_steps: int,
@@ -287,7 +286,6 @@ def main() -> None:
 
     # Agent(s)
     agent = DQAgent(env, agent_id=FIXED_AGENT_ID)
-    agents = {FIXED_AGENT_ID: agent}
 
     train_start_time = time.time()
 
@@ -305,7 +303,7 @@ def main() -> None:
     print_effective_config(args, config_path, checkpoint_base)
 
     # Train
-    train_rewards = trainer.simple_dqn_training()
+    _ = trainer.simple_dqn_training()
 
     train_finish_time = time.time()
     train_elapsed_time = train_finish_time - train_start_time
