@@ -2,6 +2,9 @@ import random
 from collections import deque
 
 import numpy as np
+from pygame import ver
+
+from training.dqnetwork import DQNetwork
 
 
 class DQAgent:
@@ -13,6 +16,10 @@ class DQAgent:
         The environment in which the agent interacts.
     agent_id : str
         The id of the agent
+    action_model : DQNetwork
+        The main Q-network, trained at each step.
+    target_model : DQNetwork
+        The target Q-network, periodically updated from the main model.
     epsilon_max : float, optional (default=1.0)
         Initial exploration rate (epsilon).
     epsilon_min : float, optional (default=0.01)
@@ -50,6 +57,8 @@ class DQAgent:
         self,
         env,
         agent_id,
+        action_model: DQNetwork,
+        target_model: DQNetwork,
         epsilon_max: float = 1.0,
         epsilon_min: float = 0.01,
         epsilon_decay: float = 0.0002,
@@ -65,6 +74,8 @@ class DQAgent:
     ):
         self.env = env
         self.id = agent_id
+        self.action_model = action_model.model
+        self.target_model = target_model.model
         self.epsilon_max = epsilon_max
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
@@ -83,7 +94,7 @@ class DQAgent:
                 env, self.replay_memory, replay_memory_init_size, episode_max_steps
             )
 
-    def choose_action(self, state: np.ndarray, dqn_action_model):
+    def choose_action(self, state: np.ndarray):
         """Select an action using epsilon-greedy policy.
 
         Parameters
@@ -100,7 +111,7 @@ class DQAgent:
         """
         if random.uniform(0, 1) <= self.epsilon:
             return self.env.action_space.sample()
-        q_values = dqn_action_model.predict(state[np.newaxis], verbose=0)
+        q_values = self.action_model.predict(state[np.newaxis], verbose=0)
         return np.argmax(q_values)
 
     def store_transition(
@@ -140,7 +151,7 @@ class DQAgent:
             self.replay_memory, self.batch_size
         )
 
-    def update_target_model(self, dqn_action_model, dqn_target_model):
+    def update_target_model(self):
         """Copy weights from action to a target model.
         Parameters
         ----------
@@ -149,7 +160,7 @@ class DQAgent:
         dqn_target_model : keras.Sequential
             The target model.
         """
-        dqn_target_model.set_weights(dqn_action_model.get_weights())
+        self.target_model.set_weights(self.action_model.get_weights())
 
     def decay_epsilon(self):
         """Decay the exploration rate epsilon."""
@@ -218,3 +229,37 @@ class DQAgent:
         done_batch = np.array([sample[4] for sample in minibatch])
 
         return [state_batch, action_batch, reward_batch, new_state_batch, done_batch]
+
+    def dqn_update(self) -> None:
+        state_batch, action_batch, reward_batch, new_state_batch, done_batch = (
+            self.get_random_batch()
+        )
+        # 1. find the target model Q values for all possible actions given the new state batch
+        target_new_state_q_values = self.target_model.predict(
+            new_state_batch, verbose=0
+        )
+
+        # 2. find the action model Q values for all possible actions given the current state batch
+        predicted_state_q_values = self.action_model.predict(state_batch, verbose=0)
+
+        # estimate the target values y_i
+        # for the action we took, use the target model Q values
+        # for other actions, use the action model Q values
+        # in this way, loss function will be 0 for other actions
+        for i, (a, r, new_state_q_values, done) in enumerate(
+            zip(
+                action_batch,
+                reward_batch,
+                target_new_state_q_values,
+                done_batch,
+                strict=False,
+            )
+        ):
+            if not done:
+                target_value = r + self.gamma * np.amax(new_state_q_values)
+            else:
+                target_value = r
+            predicted_state_q_values[i][a] = target_value  # y_i
+
+        # 3. update weights of action model using the train_on_batch method
+        self.action_model.train_on_batch(state_batch, predicted_state_q_values)
