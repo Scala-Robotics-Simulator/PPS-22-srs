@@ -2,7 +2,6 @@ import random
 from collections import deque
 
 import numpy as np
-from pygame import ver
 
 from training.dqnetwork import DQNetwork
 

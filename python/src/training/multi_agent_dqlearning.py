@@ -46,7 +46,7 @@ class DQLearning:
 
         for n in trange(self.episode_count, desc="Training DQN", unit="ep"):
             states, _ = self.env.reset()
-            episode_reward = 0
+            episode_reward = {agent.id: 0 for agent in self.agents}
             episode_start_time = time.time()
             episode_epsilon = self.agents[0].epsilon
             done = False
@@ -99,20 +99,25 @@ class DQLearning:
 
                 step_count += 1
                 train_step_count += 1
-                episode_reward += list(rewards.values())[0]
+                for agent in self.agents:
+                    if not agent.terminated:
+                        episode_reward[agent.id] += rewards[agent.id]
 
             episode_time = time.time() - episode_start_time
-            moving_avg_reward = (
-                statistics.mean(train_rewards[-self.agents[0].moving_avg_window_size :])
-                if len(train_rewards) >= self.agents[0].moving_avg_window_size
-                else episode_reward
-            )
+            moving_avg_reward = {
+                agent.id: (
+                    statistics.mean(train_rewards[-agent.moving_avg_window_size :])
+                    if len(train_rewards) >= agent.moving_avg_window_size
+                    else episode_reward[agent.id]
+                )
+                for agent in self.agents
+            }
             train_rewards.append(episode_reward)
 
             logger.info(
                 f"Episode: {n} | Steps: {step_count}[{train_step_count}] | "
-                f"Epsilon (of the first agent): {episode_epsilon:.3f} | Time: {episode_time:.2f}s | "
-                f"Reward (of the first agent): {episode_reward:.1f} | MovingAvg (of the first agent): {moving_avg_reward:.1f}"
+                f"Epsilon: {episode_epsilon:.3f} | Time: {episode_time:.2f}s | "
+                f"Reward: {episode_reward} | MovingAvg: {moving_avg_reward}"
             )
 
             # if (
@@ -185,5 +190,4 @@ class DQLearning:
 
             logger.info(f"Episode {ep + 1}/{episodes} - Reward: {total_reward}")
 
-        self.env.close()
         pygame.quit()
