@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """
-train.py — Headless training runner for Phototaxis Q-Learning.
+Headless training runner for Deep Q Learning.
 
-Saved commands:
-    python .\train-qagent.py --config phototaxis --server-host localhost --port 50051 --episodes 2000 --steps 5000 --checkpoint-interval 200 --checkpoint-dir checkpoints\phototaxis --start-episode 0 --client-name PhototaxisRLClient1
-    python .\train-qagent.py --config phototaxis_aggressive --server-host localhost --port 50052 --episodes 2000 --steps 5000 --checkpoint-interval 200 --checkpoint-dir checkpoints\phototaxis_aggressive --start-episode 0 --client-name PhototaxisRLClient2
-    python .\train-qagent.py --config phototaxis_safety --server-host localhost --port 50053 --episodes 2000 --steps 5000 --checkpoint-interval 200 --checkpoint-dir checkpoints\phototaxis_safety --start-episode 0 --client-name PhototaxisRLClient3
-    python .\train-qagent.py --config phototaxis_balanced --server-host localhost --port 50054 --episodes 2000 --steps 5000 --checkpoint-interval 200 --checkpoint-dir checkpoints\phototaxis_balanced --start-episode 0 --client-name PhototaxisRLClient4
+How to run:
+    python train-dqagent.py --neurons 64 32 --config obstacle-avoidance --env oa --port 50051 --episodes 20 --steps 50 --checkpoint-interval 2 --checkpoint-dir checkpoints/oa
+All other possible configurations are visible below or can be shown with:
+    python train-dqagent.py --help
 """
 
 from __future__ import annotations
