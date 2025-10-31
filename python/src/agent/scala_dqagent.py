@@ -76,6 +76,7 @@ class DQAgent:
         self.id = agent_id
         self.action_model = action_model.model
         self.target_model = target_model.model
+        self.target_model.set_weights(self.action_model.get_weights())
         self.epsilon_max = epsilon_max
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
@@ -86,6 +87,7 @@ class DQAgent:
         self.step_per_update_target_model = step_per_update_target_model
         self.moving_avg_window_size = moving_avg_window_size
         self.moving_avg_stop_thr = moving_avg_stop_thr
+        self.terminated = False
 
         self.replay_memory = deque(maxlen=replay_memory_max_size)
 
