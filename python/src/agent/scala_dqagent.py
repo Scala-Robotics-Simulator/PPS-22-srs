@@ -4,6 +4,7 @@ import random
 from collections import deque
 
 import numpy as np
+import tensorflow as tf
 
 from training.dqnetwork import DQNetwork
 
@@ -95,10 +96,62 @@ class DQAgent:
 
         self.replay_memory = deque(maxlen=replay_memory_max_size)
 
+        # Create compiled TensorFlow functions for faster inference
+        self._create_tf_functions()
+
         if replay_memory_init_size > 0:
             self.simple_dqn_replay_memory_init(
                 env, self.replay_memory, replay_memory_init_size, episode_max_steps
             )
+
+    def _create_tf_functions(self):
+        """Create compiled TensorFlow functions for faster execution."""
+
+        @tf.function
+        def predict_q_values(model, state):
+            """Compiled function for Q-value prediction."""
+            return model(state, training=False)
+
+        @tf.function
+        def train_step(
+            action_model,
+            target_model,
+            states,
+            actions,
+            rewards,
+            next_states,
+            dones,
+            gamma,
+        ):
+            """Compiled function for training step."""
+            # Get target Q-values for next states
+            next_q_values = target_model(next_states, training=False)
+            max_next_q = tf.reduce_max(next_q_values, axis=1)
+
+            # Calculate target values
+            target_q = rewards + (1.0 - dones) * gamma * max_next_q
+
+            # Create masks for actions taken
+            masks = tf.one_hot(actions, action_model.output_shape[-1])
+
+            with tf.GradientTape() as tape:
+                # Get current Q-values
+                q_values = action_model(states, training=True)
+                # Get Q-values for actions taken
+                q_action = tf.reduce_sum(q_values * masks, axis=1)
+                # Calculate loss
+                loss = tf.reduce_mean(tf.square(target_q - q_action))
+
+            # Apply gradients
+            gradients = tape.gradient(loss, action_model.trainable_variables)
+            action_model.optimizer.apply_gradients(
+                zip(gradients, action_model.trainable_variables, strict=False)
+            )
+
+            return loss
+
+        self._predict_q_values = predict_q_values
+        self._train_step = train_step
 
     def choose_action(self, state: np.ndarray):
         """Select an action using epsilon-greedy policy.
@@ -107,8 +160,6 @@ class DQAgent:
         ----------
         state : np.ndarray
             Current state of the environment.
-        dqn_action_model : keras.Sequential
-            The action model used to predict Q-values.
 
         Returns
         -------
@@ -117,8 +168,11 @@ class DQAgent:
         """
         if random.uniform(0, 1) <= self.epsilon:
             return self.env.action_space.sample()
-        q_values = self.action_model.predict(state[np.newaxis], verbose=0)
-        return np.argmax(q_values)
+
+        # Use compiled TensorFlow function
+        state_tensor = tf.constant(state[np.newaxis], dtype=tf.float32)
+        q_values = self._predict_q_values(self.action_model, state_tensor)
+        return int(tf.argmax(q_values[0]).numpy())
 
     def store_transition(
         self,
@@ -158,14 +212,7 @@ class DQAgent:
         )
 
     def update_target_model(self):
-        """Copy weights from action to a target model.
-        Parameters
-        ----------
-        dqn_action_model : keras.Sequential
-            The action model.
-        dqn_target_model : keras.Sequential
-            The target model.
-        """
+        """Copy weights from action to a target model."""
         self.target_model.set_weights(self.action_model.get_weights())
 
     def decay_epsilon(self, episode: int):
@@ -230,47 +277,40 @@ class DQAgent:
         minibatch_indices = np.random.choice(range(len(replay_memory)), size=batch_size)
         minibatch = [replay_memory[i] for i in minibatch_indices]
 
-        state_batch = np.array([sample[0] for sample in minibatch])
-        action_batch = np.array([sample[1] for sample in minibatch])
-        reward_batch = np.array([sample[2] for sample in minibatch])
-        new_state_batch = np.array([sample[3] for sample in minibatch])
-        done_batch = np.array([sample[4] for sample in minibatch])
+        state_batch = np.array([sample[0] for sample in minibatch], dtype=np.float32)
+        action_batch = np.array([sample[1] for sample in minibatch], dtype=np.int32)
+        reward_batch = np.array([sample[2] for sample in minibatch], dtype=np.float32)
+        new_state_batch = np.array(
+            [sample[3] for sample in minibatch], dtype=np.float32
+        )
+        done_batch = np.array([sample[4] for sample in minibatch], dtype=np.float32)
 
         return [state_batch, action_batch, reward_batch, new_state_batch, done_batch]
 
     def dqn_update(self) -> None:
+        """Perform a DQN update using the compiled TensorFlow function."""
         state_batch, action_batch, reward_batch, new_state_batch, done_batch = (
             self.get_random_batch()
         )
-        # 1. find the target model Q values for all possible actions given the new state batch
-        target_new_state_q_values = self.target_model.predict(
-            new_state_batch, verbose=0
+
+        # Convert to TensorFlow tensors
+        states_tf = tf.constant(state_batch, dtype=tf.float32)
+        actions_tf = tf.constant(action_batch, dtype=tf.int32)
+        rewards_tf = tf.constant(reward_batch, dtype=tf.float32)
+        next_states_tf = tf.constant(new_state_batch, dtype=tf.float32)
+        dones_tf = tf.constant(done_batch, dtype=tf.float32)
+
+        # Use compiled training function
+        self._train_step(
+            self.action_model,
+            self.target_model,
+            states_tf,
+            actions_tf,
+            rewards_tf,
+            next_states_tf,
+            dones_tf,
+            self.gamma,
         )
-
-        # 2. find the action model Q values for all possible actions given the current state batch
-        predicted_state_q_values = self.action_model.predict(state_batch, verbose=0)
-
-        # estimate the target values y_i
-        # for the action we took, use the target model Q values
-        # for other actions, use the action model Q values
-        # in this way, loss function will be 0 for other actions
-        for i, (a, r, new_state_q_values, done) in enumerate(
-            zip(
-                action_batch,
-                reward_batch,
-                target_new_state_q_values,
-                done_batch,
-                strict=False,
-            )
-        ):
-            if not done:
-                target_value = r + self.gamma * np.amax(new_state_q_values)
-            else:
-                target_value = r
-            predicted_state_q_values[i][a] = target_value  # y_i
-
-        # 3. update weights of action model using the train_on_batch method
-        self.action_model.train_on_batch(state_batch, predicted_state_q_values)
 
     def save(self, directory: str):
         """Save agent state: models, epsilon, and parameters."""
@@ -298,6 +338,9 @@ class DQAgent:
 
         self.action_model = load_model(os.path.join(directory, "action_model.keras"))
         self.target_model = load_model(os.path.join(directory, "target_model.keras"))
+
+        # Recreate TensorFlow functions after loading models
+        self._create_tf_functions()
 
         data = np.load(os.path.join(directory, "agent_state.npz"))
         self.epsilon = float(data["epsilon"])

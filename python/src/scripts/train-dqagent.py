@@ -20,6 +20,7 @@ import time
 from pathlib import Path
 
 import nest_asyncio
+import tensorflow as tf
 
 from agent.scala_dqagent import DQAgent
 from environment.deepqlearning.obstacle_avoidance_env import ObstacleAvoidanceEnv
@@ -29,6 +30,10 @@ from utils.log import Logger
 from utils.reader import get_yaml_path, read_file
 
 nest_asyncio.apply()
+
+gpus = tf.config.experimental.list_physical_devices("GPU")
+if gpus:
+    tf.config.experimental.set_memory_growth(gpus[0], True)
 
 
 # Initialize logger
@@ -51,10 +56,10 @@ DEFAULTS = {
     "epsilon_min": 0.01,
     "gamma": 0.99,
     "replay_memory_max_size": 100000,
-    "replay_memory_init_size": 1000,
-    "batch_size": 64,
+    "replay_memory_init_size": 10000,
+    "batch_size": 32,
     "step_per_update": 4,
-    "step_per_update_target_model": 8,
+    "step_per_update_target_model": 1000,
     "moving_avg_window_size": 20,
     "moving_avg_stop_thr": 100,
 }

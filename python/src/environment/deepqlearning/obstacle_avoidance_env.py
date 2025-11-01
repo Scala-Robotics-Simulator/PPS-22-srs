@@ -18,10 +18,11 @@ class ObstacleAvoidanceEnv(AbstractEnv):
             low=0.0, high=1.0, shape=(8,), dtype=np.float32
         )
 
-        self.actions = []
-        for left in np.linspace(-1.0, 1.0, 5):  # 5 discrete values
-            for right in np.linspace(-1.0, 1.0, 5):
-                self.actions.append((left, right))
+        self.actions = [
+            (1.0, 1.0),  # forward
+            (1.0, -1.0),  # left
+            (-1.0, 1.0),  # right
+        ]
 
         self.action_space = spaces.Discrete(len(self.actions))
 
