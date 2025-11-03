@@ -17,6 +17,8 @@ class QAgent:
         Initial exploration rate (epsilon).
     epsilon_min : float, optional (default=0.001)
         Minimum exploration rate.
+    epsilon_decay : float, optional (default=0.01)
+        Decay rate for epsilon after each episode.
     alpha : float, optional (default=0.5)
         Learning rate.
     gamma : float, optional (default=0.99)
@@ -28,8 +30,6 @@ class QAgent:
         Q-table mapping state-action pairs to their estimated values.
     epsilon : float
         Current exploration rate.
-    epsilon_decay : float
-        Decay rate for epsilon after each episode.
     """
 
     def __init__(
@@ -61,9 +61,6 @@ class QAgent:
         ----------
         state : int
             The current state of the environment.
-
-        epsilon_greedy : bool, optional (default=True)
-            Whether to use epsilon-greedy strategy for action selection.
         Returns
         -------
         action : int
@@ -74,13 +71,7 @@ class QAgent:
         return np.argmax(self.Q[state])
 
     def update_q(
-        self,
-        state: int,
-        action: int,
-        reward: float,
-        next_state: int,
-        terminated: bool,
-        truncated: bool = False,
+        self, state: int, action: int, reward: float, next_state: int, done: bool
     ):
         """Updates the Q-value for a given state-action pair using the Q-learning formula.
 
@@ -94,18 +85,11 @@ class QAgent:
             The reward received after taking the action.
         next_state : int
             The state of the environment after taking the action.
-        terminated : bool
-            Whether the episode ended at a terminal state (goal/failure).
-        truncated : bool, optional (default=False)
-            Whether the episode was truncated (timeout/boundary).
-        -----
-        This is critical for correct Q-learning convergence.
+        done : bool
+            Whether the episode has ended.
         """
         best_next = np.max(self.Q[next_state])
-        # Only zero out bootstrap when TERMINATED (goal/failure), not when TRUNCATED (timeout)
-        # If truncated, we still bootstrap because the episode was artificially cut off
-        should_bootstrap = not terminated or truncated
-        target = reward + (self.gamma * best_next if should_bootstrap else 0)
+        target = reward + (0 if done else self.gamma * best_next)
         self.Q[state, action] = (1 - self.alpha) * self.Q[
             state, action
         ] + self.alpha * target
