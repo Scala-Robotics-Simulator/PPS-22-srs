@@ -3,7 +3,7 @@
 train.py — Headless training runner for Phototaxis Q-Learning.
 
 Saved commands:
-python3 train-qagent.py --config-root src scripts resources generated obstacle-avoidance --episodes 1000 --steps 5000 --checkpoint-dir src scripts resources generated obstacle-avoidance checkpoints --env oa --window_size 50
+python3 train-qagent.py --config-root src scripts resources generated obstacle-avoidance --episodes 1000 --steps 5000 --checkpoint-dir src scripts resources generated obstacle-avoidance checkpoints --env oa --window-size 50
 """
 
 from __future__ import annotations
