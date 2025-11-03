@@ -151,7 +151,7 @@ class DQLearning:
 
         return train_rewards
 
-    def play_with_pygame(self, episodes=5, fps=30, render_scale=(800, 600)):
+    def play_with_pygame(self, episodes=1, fps=30, render_scale=(800, 600)):
         """Run the trained agent and visualize with Pygame.
 
         Parameters
@@ -168,6 +168,11 @@ class DQLearning:
         pygame.display.set_caption("DQN Agent Playing")
         clock = pygame.time.Clock()
         running = True
+        paused = False
+        current_fps = fps
+        # Font for displaying info
+        font = pygame.font.Font(None, 24)
+        info_font = pygame.font.Font(None, 20)
 
         for ep in range(episodes):
             states, _ = self.env.reset()
@@ -176,11 +181,26 @@ class DQLearning:
             for agent in self.agents:
                 agent.terminated = False
 
+            step = 0
             while not done and running:
+                step += 1
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         running = False
+                    elif event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_ESCAPE or event.key == pygame.K_q:
+                            running = False
+                        elif event.key == pygame.K_SPACE:
+                            paused = not paused
+                        elif event.key == pygame.K_UP:
+                            current_fps = min(240, current_fps + 10)
+                        elif event.key == pygame.K_DOWN:
+                            current_fps = max(10, current_fps - 10)
 
+                # Skip step if paused
+                if paused:
+                    pygame.time.wait(100)
+                    continue
                 actions = {
                     agent.id: np.argmax(
                         agent.action_model.predict(
@@ -207,9 +227,27 @@ class DQLearning:
                 )
                 surface = pygame.transform.scale(surface, render_scale)
                 screen.blit(surface, (0, 0))
+                # Display info overlay
+                if font and info_font:
+                    info_texts = [
+                        f"Episode: {ep + 1}",
+                        f"Step: {step}",
+                        f"Reward: {total_reward:.2f}",
+                        f"Epsilon: {self.agents[0].epsilon:.4f}",
+                        f"FPS: {current_fps} (↑/↓ to adjust)",
+                        f"{'PAUSED' if paused else 'SPACE: Pause'}",
+                    ]
+
+                    y_offset = 10
+                    for text in info_texts:
+                        color = (255, 255, 0) if paused else (255, 255, 255)
+                        text_surface = info_font.render(text, True, color, (0, 0, 0))
+                        screen.blit(text_surface, (10, y_offset))
+                        y_offset += 25
+
                 pygame.display.flip()
 
-                clock.tick(fps)
+                clock.tick(current_fps)
 
             logger.info(f"Episode {ep + 1}/{episodes} - Reward: {total_reward}")
 
