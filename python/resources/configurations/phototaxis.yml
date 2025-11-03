@@ -1,39 +1,25 @@
 simulation:
-    seed: 42
+  seed: 42
+
 environment:
-    width: 10
-    height: 10
-    entities:
-        - agent:
-              id: 00000000-0000-0000-0000-000000000001
-              radius: 0.25
-              withProximitySensors: true
-              withLightSensors: true
-              position: [1.0, 1.0]
-              orientation: 0.0
-              speed: 1.0
-              reward: Phototaxis
-              termination: LightReached
-              truncation: NeverTruncate
-        - light:
-              position: [8.0, 8.0]
-              intensity: 1.0
-              radius: 0.3
-              illuminationRadius: 10.0
-              attenuation: 1.0
-              orientation: 0.0
-        - obstacle:
-              orientation: 0.0
-              position: [5.0, 2.0]
-              width: 0.4
-              height: 2.0
-        - obstacle:
-              orientation: 0.0
-              width: 2.5
-              position: [3.5, 5.5]
-              height: 0.4
-        - obstacle:
-              width: 0.4
-              position: [7.0, 4.0]
-              height: 2.5
-              orientation: 0.0
+  width: 5
+  height: 5
+  entities:
+    - agent:
+        id: 00000000-0000-0000-0000-000000000001
+        radius: 0.25
+        withProximitySensors: true
+        withLightSensors: true
+        position: [2.0, 2.0]
+        orientation: 0.0
+        speed: 1.0
+        reward: Phototaxis
+        termination: LightReached
+        truncation: CollisionContact
+
+    - light:
+        position: [4.0, 4.0]
+        intensity: 1.0
+        radius: 0.3
+        illuminationRadius: 3.0
+        attenuation: 1.0
