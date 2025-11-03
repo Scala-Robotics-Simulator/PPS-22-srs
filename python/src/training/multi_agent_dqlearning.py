@@ -31,22 +31,25 @@ class DQLearning:
         self,
         env,
         agents: list[DQAgent],
+        configs: list[str],
         episode_count: int = 1000,
         episode_max_steps: int = 200,
     ):
         self.env = env
         self.agents = agents
+        self.configs = configs
         self.episode_count = episode_count
         self.episode_max_steps = episode_max_steps
 
-    def simple_dqn_training(
-        self, checkpoint_interval: int | None = None, checkpoint_base: str = ""
-    ):
+    def simple_dqn_training(self, checkpoint_base: str | None = None):
         """Trains the agent using the Deep Q-Learning algorithm."""
         train_rewards = []
         train_step_count = 0
+        max_avg_reward = np.finfo(np.float32).min
 
         for n in trange(self.episode_count, desc="Training DQN", unit="ep"):
+            config = np.random.choice(self.configs)
+            _ = self.env.init(config)
             states, _ = self.env.reset()
             episode_reward = {agent.id: 0 for agent in self.agents}
             episode_start_time = time.time()
@@ -115,7 +118,7 @@ class DQLearning:
                         ]
                     )
                     if len(train_rewards) >= agent.moving_avg_window_size
-                    else episode_reward[agent.id]
+                    else max_avg_reward
                 )
                 for agent in self.agents
             }
@@ -126,19 +129,21 @@ class DQLearning:
                 f"Epsilon: {episode_epsilon:.3f} | Time: {episode_time:.2f}s | "
                 f"Reward: {episode_reward} | MovingAvg: {moving_avg_reward}"
             )
-            if checkpoint_interval is not None and (n + 1) % checkpoint_interval == 0:
+            if checkpoint_base is not None:
                 for agent in self.agents:
-                    save_path = f"{checkpoint_base}_ep{n + 1}"
-                    agent.save(save_path)
-                    logger.info(
-                        f"\n[Checkpoint] Saved at episode {n + 1} | Reward: {train_rewards[n][agent.id]:.3f}"
-                    )
+                    if moving_avg_reward[agent.id] > max_avg_reward:
+                        max_avg_reward = moving_avg_reward[agent.id]
+                        save_path = f"{checkpoint_base}_ep{n + 1}"
+                        agent.save(save_path)
+                        logger.info(
+                            f"\n[Checkpoint] Saved at episode {n + 1} | Reward: {train_rewards[n][agent.id]:.3f} | AvgReward: {max_avg_reward:.3f}"
+                        )
             # if (
             #     self.agent.moving_avg_stop_thr
             #     and moving_avg_reward >= self.agent.moving_avg_stop_thr
             # ):
             #     break
-        if checkpoint_interval is not None:
+        if checkpoint_base is not None:
             for agent in self.agents:
                 save_path = f"{checkpoint_base}_final"
                 agent.save(save_path)
