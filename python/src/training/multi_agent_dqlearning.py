@@ -124,7 +124,7 @@ class DQLearning:
             }
             train_rewards.append(episode_reward)
 
-            logger.info(
+            logger.debug(
                 f"Episode: {n} | Steps: {step_count}[{train_step_count}] | "
                 f"Epsilon: {episode_epsilon:.3f} | Time: {episode_time:.2f}s | "
                 f"Reward: {episode_reward} | MovingAvg: {moving_avg_reward}"
