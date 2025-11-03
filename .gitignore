@@ -48,3 +48,4 @@ __pycache__/
 python/src/notebooks/checkpoints*/
 python/src/scripts/checkpoints*/
 python/src/checkpoints*/
+python/src/scripts/resources/generated/

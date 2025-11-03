@@ -4,7 +4,7 @@ Generator of random environments
 
 How to run:
 `
-python3 generate_environments.py --config-root resources generated obstacle-avoidance --width 10 --height 10 --obstacle-num 6 --obstacle-min-size 0.5 --obstacle-max-size 8.0 --light-num 0
+python3 generate_environments.py --num 10 --config-root resources generated obstacle-avoidance --width 10 --height 10 --obstacle-min-num 4 --obstacle-max-num 15 --obstacle-min-size 0.5 --obstacle-max-size 8.0 --light-min-num 0 --light-max-num 0
 `
 """
 
@@ -21,8 +21,8 @@ from pathlib import Path
 import nest_asyncio
 
 from environment.qlearning.obstacle_avoidance_env import ObstacleAvoidanceEnv
+from scripts.lib.environment_generator import generate_multiple_environments
 from utils.log import Logger
-from utils.reader import get_yaml_path
 
 nest_asyncio.apply()
 
@@ -34,12 +34,15 @@ DEFAULTS = {
     "server_host": "localhost",
     "port": 50051,
     "client_name": "EnvGeneratorClient",
+    "num": 5,
     "width": 10,
     "height": 10,
-    "obstacle_num": 6,
+    "obstacle_min_num": 4,
+    "obstacle_max_num": 15,
     "obstacle_min_size": 0.5,
     "obstacle_max_size": 8.0,
-    "light_num": 0,
+    "light_min_num": 0,
+    "light_max_num": 0,
 }
 FIXED_AGENT_ID = "00000000-0000-0000-0000-000000000001"
 
@@ -81,6 +84,13 @@ def parse_args() -> argparse.Namespace:
         required=False,
     )
     p.add_argument(
+        "--num",
+        type=int,
+        default=DEFAULTS["num"],
+        help="Number of environments to generate",
+        required=False,
+    )
+    p.add_argument(
         "--width",
         type=int,
         default=DEFAULTS["width"],
@@ -95,10 +105,16 @@ def parse_args() -> argparse.Namespace:
         required=False,
     )
     p.add_argument(
-        "--obstacle-num",
+        "--obstacle-min-num",
         type=int,
-        default=DEFAULTS["obstacle_num"],
-        help="Number of obstacles to generate.",
+        default=DEFAULTS["obstacle_min_num"],
+        help="Minimum number of obstacles to generate.",
+    )
+    p.add_argument(
+        "--obstacle-max-num",
+        type=int,
+        default=DEFAULTS["obstacle_max_num"],
+        help="Maximum number of obstacles to generate.",
     )
     p.add_argument(
         "--obstacle-min-size",
@@ -113,19 +129,18 @@ def parse_args() -> argparse.Namespace:
         help="Maximum size of obstacles.",
     )
     p.add_argument(
-        "--light-num",
+        "--light-min-num",
         type=int,
-        default=DEFAULTS["light_num"],
-        help="Number of lights to generate.",
+        default=DEFAULTS["light_min_num"],
+        help="Minimum number of lights to generate.",
+    )
+    p.add_argument(
+        "--light-max-num",
+        type=int,
+        default=DEFAULTS["light_max_num"],
+        help="Maximum number of lights to generate.",
     )
     return p.parse_args()
-
-
-def resolve_config_path(config_name: str) -> str:
-    """Resolve config NAME to a full path using get_yaml_path(resources, configurations, NAME)."""
-    name = ensure_yml_suffix(config_name)
-    base = DEFAULTS["config_root"]
-    return get_yaml_path(base, name)
 
 
 def print_effective_config(args: argparse.Namespace) -> None:
@@ -133,12 +148,15 @@ def print_effective_config(args: argparse.Namespace) -> None:
     logger.info(f"  config_root                 : {args.config_root}")
     logger.info(f"  server                      : {args.server_host}:{args.port}")
     logger.info(f"  client_name                 : {args.client_name}")
+    logger.info(f"  num                         : {args.num}")
     logger.info(f"  width                       : {args.width}")
     logger.info(f"  height                      : {args.height}")
-    logger.info(f"  obstacle_num                : {args.obstacle_num}")
+    logger.info(f"  obstacle_min_num            : {args.obstacle_min_num}")
+    logger.info(f"  obstacle_max_num            : {args.obstacle_max_num}")
     logger.info(f"  obstacle_min_size           : {args.obstacle_min_size}")
     logger.info(f"  obstacle_max_size           : {args.obstacle_max_size}")
-    logger.info(f"  light_num                   : {args.light_num}")
+    logger.info(f"  light_min_num               : {args.light_min_num}")
+    logger.info(f"  light_max_num               : {args.light_max_num}")
     logger.info("================================\n")
 
 
@@ -155,8 +173,29 @@ def main() -> None:
     print_effective_config(args)
 
     configs_path = Path(*args.config_root)
-    print(configs_path)
     os.makedirs(os.path.dirname(configs_path), exist_ok=True)
+
+    config = {
+        "env_width": args.width,
+        "env_height": args.height,
+        "min_obstacles": args.obstacle_min_num,
+        "max_obstacles": args.obstacle_max_num,
+        "min_obstacle_width": args.obstacle_min_size,
+        "max_obstacle_width": args.obstacle_max_size,
+        "min_obstacle_height": args.obstacle_min_size,
+        "max_obstacle_height": args.obstacle_max_size,
+        "min_lights": args.light_min_num,
+        "max_lights": args.light_max_num,
+    }
+
+    files = generate_multiple_environments(
+        env=env,
+        num_environments=args.num,
+        generator_config=config,
+        output_dir=configs_path,
+        max_retries=None,
+    )
+    logger.info(f"\nSuccessfully generated {len(files)} valid environment files")
 
 
 if __name__ == "__main__":
