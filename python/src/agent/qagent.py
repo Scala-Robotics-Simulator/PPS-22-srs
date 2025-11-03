@@ -71,7 +71,13 @@ class QAgent:
         return np.argmax(self.Q[state])
 
     def update_q(
-        self, state: int, action: int, reward: float, next_state: int, done: bool
+        self,
+        state: int,
+        action: int,
+        reward: float,
+        next_state: int,
+        terminated: bool,
+        truncated: bool = False,
     ):
         """Updates the Q-value for a given state-action pair using the Q-learning formula.
 
@@ -85,11 +91,15 @@ class QAgent:
             The reward received after taking the action.
         next_state : int
             The state of the environment after taking the action.
-        done : bool
-            Whether the episode has ended.
+        terminated : bool
+            Whether the episode ended at a terminal state (goal/failure).
+        truncated : bool, optional (default=False)
+            Whether the episode was truncated (timeout/boundary).
+        -----
         """
         best_next = np.max(self.Q[next_state])
-        target = reward + (0 if done else self.gamma * best_next)
+        should_bootstrap = not terminated or truncated
+        target = reward + (self.gamma * best_next if should_bootstrap else 0)
         self.Q[state, action] = (1 - self.alpha) * self.Q[
             state, action
         ] + self.alpha * target
