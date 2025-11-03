@@ -3,11 +3,12 @@
 train.py — Headless training runner for Phototaxis Q-Learning.
 
 Saved commands:
-python3 train-qagent.py --config-root src scripts resources generated obstacle-avoidance --episodes 1000 --steps 5000 --checkpoint-interval 100 --checkpoint-dir src scripts resources generated obstacle-avoidance checkpoints --env oa
+python3 train-qagent.py --config-root src scripts resources generated obstacle-avoidance --episodes 1000 --steps 5000 --checkpoint-dir src scripts resources generated obstacle-avoidance checkpoints --env oa --window_size 50
 """
 
 from __future__ import annotations
 
+import statistics
 import sys
 
 sys.path.append("..")
@@ -38,7 +39,7 @@ DEFAULTS = {
     "port": 50051,
     "episodes": 10,
     "steps": 5000,
-    "checkpoint_interval": 200,  # 0 disables periodic checkpoints
+    "window_size": 50,
     "checkpoint_dir": None,  # inferred from config basename
     "load_checkpoint": None,
     "start_episode": 0,
@@ -92,10 +93,11 @@ def parse_args() -> argparse.Namespace:
         help="Max steps per episode.",
     )
     p.add_argument(
-        "--checkpoint-interval",
+        "--window-size",
         type=int,
-        default=DEFAULTS["checkpoint_interval"],
-        help="Save checkpoint every N episodes (0 = disabled).",
+        default=DEFAULTS["window_size"],
+        help="Sliding window size for reward averaging.",
+        required=False,
     )
     p.add_argument(
         "--checkpoint-dir",
@@ -156,7 +158,7 @@ def print_effective_config(
     logger.info(f"  client_name        : {args.client_name}")
     logger.info(f"  episodes           : {args.episodes}")
     logger.info(f"  steps/episode      : {args.steps}")
-    logger.info(f"  checkpoint_interval: {args.checkpoint_interval}")
+    logger.info(f"  window_size        : {args.window_size}")
     logger.info(f"  checkpoint_base    : {checkpoint_base}")
     logger.info(f"  load_checkpoint    : {args.load_checkpoint or 'None'}")
     logger.info(f"  start_episode      : {args.start_episode}")
@@ -171,7 +173,7 @@ def run_episodes(
     agent_id: str,
     episode_count: int,
     episode_max_steps: int,
-    checkpoint_interval: int | None,
+    window_size: int,
     checkpoint_base: str,
     start_episode: int = 0,
     load_checkpoint: str | None = None,
@@ -184,6 +186,8 @@ def run_episodes(
 
     # Ensure checkpoint directory exists (always, for final save)
     os.makedirs(os.path.dirname(checkpoint_base) or ".", exist_ok=True)
+    train_rewards = {FIXED_AGENT_ID: []}
+    max_avg_reward = np.finfo(np.float32).min
 
     try:
         for ep_idx in trange(episode_count, desc="Training", unit="ep"):
@@ -217,14 +221,22 @@ def run_episodes(
             for a in agents.values():
                 a.decay_epsilon(actual_episode)
 
-            if checkpoint_interval and checkpoint_interval > 0:
-                if (ep_idx + 1) % checkpoint_interval == 0:
-                    for _, a in agents.items():
-                        save_path = f"{checkpoint_base}_ep{actual_episode + 1}"
-                        a.save(save_path)
-                    logger.info(
-                        f"\n[Checkpoint] Saved at episode {actual_episode + 1} | Reward: {total_reward[agent_id]:.3f}"
-                    )
+            train_rewards[FIXED_AGENT_ID].append(total_reward[FIXED_AGENT_ID])
+
+            moving_avg_reward = (
+                statistics.mean(train_rewards[FIXED_AGENT_ID][-window_size:])
+                if len(train_rewards[FIXED_AGENT_ID]) >= window_size
+                else max_avg_reward
+            )
+
+            if moving_avg_reward > max_avg_reward:
+                max_avg_reward = moving_avg_reward
+                for _, a in agents.items():
+                    save_path = f"{checkpoint_base}_ep{actual_episode + 1}"
+                    a.save(save_path)
+                logger.info(
+                    f"\n[Checkpoint] Saved at episode {actual_episode + 1} | Reward: {total_reward[agent_id]:.3f} | AvgReward: {moving_avg_reward:.3f}"
+                )
 
     finally:
         for _, a in agents.items():
@@ -268,7 +280,7 @@ def main() -> None:
         agent_id=FIXED_AGENT_ID,
         episode_count=args.episodes,
         episode_max_steps=args.steps,
-        checkpoint_interval=args.checkpoint_interval,
+        window_size=args.window_size,
         checkpoint_base=checkpoint_base,
         start_episode=args.start_episode,
         load_checkpoint=args.load_checkpoint,
