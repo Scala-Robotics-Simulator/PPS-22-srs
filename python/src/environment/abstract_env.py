@@ -83,7 +83,7 @@ class AbstractEnv(ABC):
         yaml_config : str
             The YAML configuration string.
         """
-        self._run_async(self.client.init(yaml_config))
+        return self._run_async(self.client.init(yaml_config))
 
     def step(self, actions: dict) -> tuple[dict, dict, dict, dict, dict]:
         """Take a step in the environment with the given actions
