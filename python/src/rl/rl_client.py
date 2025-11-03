@@ -3,10 +3,10 @@ import io
 
 import grpc
 import numpy as np
-import rl_pb2
-import rl_pb2_grpc
 from PIL import Image
 
+import rl_pb2
+import rl_pb2_grpc
 from utils.log import Logger
 
 logger = Logger(__name__)
@@ -47,7 +47,7 @@ class RLClient:
         request = rl_pb2.InitRequest(config=yaml_config)
         response = await self.stub.Init(request)
         if response.ok:
-            logger.info("✓ Initialization successful")
+            logger.debug("✓ Initialization successful")
         else:
             logger.warning(f"✗ Initialization failed: {response.message}")
         return response.ok, response.message

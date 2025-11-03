@@ -3,10 +3,7 @@
 train.py — Headless training runner for Phototaxis Q-Learning.
 
 Saved commands:
-    python .\train-qagent.py --config phototaxis --server-host localhost --port 50051 --episodes 2000 --steps 5000 --checkpoint-interval 200 --checkpoint-dir checkpoints\phototaxis --start-episode 0 --client-name PhototaxisRLClient1
-    python .\train-qagent.py --config phototaxis_aggressive --server-host localhost --port 50052 --episodes 2000 --steps 5000 --checkpoint-interval 200 --checkpoint-dir checkpoints\phototaxis_aggressive --start-episode 0 --client-name PhototaxisRLClient2
-    python .\train-qagent.py --config phototaxis_safety --server-host localhost --port 50053 --episodes 2000 --steps 5000 --checkpoint-interval 200 --checkpoint-dir checkpoints\phototaxis_safety --start-episode 0 --client-name PhototaxisRLClient3
-    python .\train-qagent.py --config phototaxis_balanced --server-host localhost --port 50054 --episodes 2000 --steps 5000 --checkpoint-interval 200 --checkpoint-dir checkpoints\phototaxis_balanced --start-episode 0 --client-name PhototaxisRLClient4
+python3 train-qagent.py --config-root src scripts resources generated obstacle-avoidance --episodes 1000 --steps 5000 --checkpoint-interval 100 --checkpoint-dir src scripts resources generated obstacle-avoidance checkpoints --env oa
 """
 
 from __future__ import annotations
@@ -17,7 +14,6 @@ sys.path.append("..")
 
 import argparse
 import os
-from pathlib import Path
 
 import nest_asyncio
 import numpy as np
@@ -37,7 +33,6 @@ logger = Logger(__name__)
 
 # -------- Defaults (single source of truth) --------
 DEFAULTS = {
-    "config_name": "phototaxis.yml",  # name only, resolved via get_yaml_path("resources","configurations", name)
     "config_root": ("resources", "configurations"),
     "server_host": "localhost",
     "port": 50051,
@@ -64,23 +59,25 @@ def parse_args() -> argparse.Namespace:
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     p.add_argument(
-        "--config",
+        "--config-root",
         type=str,
-        default=DEFAULTS["config_name"],
-        help="Configuration NAME (e.g., 'phototaxis.yml' or 'phototaxis_dense'). "
-        "Resolved via get_yaml_path('resources','configurations', NAME).",
+        nargs="*",
+        default=DEFAULTS["config_root"],
+        help="Path components to the configuration root directory.",
     )
     p.add_argument(
         "--server-host",
         type=str,
         default=DEFAULTS["server_host"],
         help="Server hostname or IP for the proto server.",
+        required=False,
     )
     p.add_argument(
         "--port",
         type=int,
         default=DEFAULTS["port"],
         help="Server port (e.g., 5051, 5052, 5053).",
+        required=False,
     )
     p.add_argument(
         "--episodes",
@@ -103,6 +100,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--checkpoint-dir",
         type=str,
+        nargs="*",
         default=DEFAULTS["checkpoint_dir"],
         help="Checkpoint base path (without suffix). If omitted, inferred from config name.",
     )
@@ -111,18 +109,21 @@ def parse_args() -> argparse.Namespace:
         type=str,
         default=DEFAULTS["load_checkpoint"],
         help="Optional path to load a previously saved agent (warm-start).",
+        required=False,
     )
     p.add_argument(
         "--start-episode",
         type=int,
         default=DEFAULTS["start_episode"],
         help="Starting episode index (useful when resuming).",
+        required=False,
     )
     p.add_argument(
         "--client-name",
         type=str,
         default=DEFAULTS["client_name"],
         help="Client name for the environment.",
+        required=False,
     )
     p.add_argument(
         "--env",
@@ -131,13 +132,6 @@ def parse_args() -> argparse.Namespace:
         help="Environmen to use (for observations and actions)",
     )
     return p.parse_args()
-
-
-def resolve_config_path(config_name: str) -> str:
-    """Resolve config NAME to a full path using get_yaml_path(resources, configurations, NAME)."""
-    name = ensure_yml_suffix(config_name)
-    base_a, base_b = DEFAULTS["config_root"]
-    return get_yaml_path(base_a, base_b, name)
 
 
 def resolve_env(
@@ -153,18 +147,10 @@ def resolve_env(
             exit(1)
 
 
-def infer_checkpoint_base(config_path: str, explicit_dir: str | None) -> str:
-    if explicit_dir:
-        return explicit_dir.rstrip("/")
-    stem = Path(config_path).stem  # e.g., 'phototaxis_dense'
-    return f"checkpoints/{stem}"
-
-
 def print_effective_config(
     args: argparse.Namespace, config_path: str, checkpoint_base: str
 ) -> None:
     logger.info("== Effective settings ==")
-    logger.info(f"  config_name        : {args.config}")
     logger.info(f"  resolved_config    : {config_path}")
     logger.info(f"  server             : {args.server_host}:{args.port}")
     logger.info(f"  client_name        : {args.client_name}")
@@ -180,6 +166,7 @@ def print_effective_config(
 
 def run_episodes(
     env: PhototaxisEnv | ObstacleAvoidanceEnv,
+    configs: list[str],
     agents: dict[str, QAgent],
     agent_id: str,
     episode_count: int,
@@ -202,6 +189,8 @@ def run_episodes(
         for ep_idx in trange(episode_count, desc="Training", unit="ep"):
             actual_episode = start_episode + ep_idx
 
+            config = np.random.choice(configs)
+            _ = env.init(config)
             obs, _ = env.reset()
             done = False
             step = 0
@@ -247,11 +236,14 @@ def run_episodes(
 def main() -> None:
     args = parse_args()
 
-    # Resolve config NAME -> full path and load YAML
-    config_path = resolve_config_path(args.config)
-    config = read_file(config_path)
-    if config is None:
-        raise RuntimeError(f"Failed to read YAML config from: {config_path}")
+    config_path = get_yaml_path(*args.config_root)
+    yml_files = list(config_path.glob("*.yml"))
+    configs = [read_file(f) for f in yml_files]
+    if len(configs) < 5:
+        logger.error(
+            f"Not enough configurations, you have {len(configs)} at least 5 needed"
+        )
+        exit(1)
 
     # Build server address
     server_address = f"{args.server_host}:{args.port}"
@@ -259,19 +251,19 @@ def main() -> None:
     # Init environment
     env = resolve_env(args.env, server_address, args.client_name)
     env.connect_to_client()
-    env.init(config)
 
     # Agent(s)
     agent = QAgent(env, episodes=args.episodes)
     agents = {FIXED_AGENT_ID: agent}
 
     # Compute checkpoint base & show effective settings
-    checkpoint_base = infer_checkpoint_base(config_path, args.checkpoint_dir)
+    checkpoint_base = get_yaml_path(*args.checkpoint_dir)
     print_effective_config(args, config_path, checkpoint_base)
 
     # Train
     run_episodes(
         env=env,
+        configs=configs,
         agents=agents,
         agent_id=FIXED_AGENT_ID,
         episode_count=args.episodes,
