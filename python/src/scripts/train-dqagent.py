@@ -3,7 +3,7 @@
 Headless training runner for Deep Q Learning.
 
 How to run:
-    python train-dqagent.py --neurons 64 32 --config obstacle-avoidance --env oa --port 50051 --episodes 20 --steps 50 --checkpoint-interval 2 --checkpoint-dir checkpoints/oa
+python train-dqagent.py --neurons 64 32 --config-root src scripts resources generated obstacle-avoidance --checkpoint-dir src scripts checkpoints obstacle-avoidance oa --env oa --port 50051 --episodes 1000 --steps 2000 --window-size 50
 All other possible configurations are visible below or can be shown with:
     python train-dqagent.py --help
 """
@@ -41,13 +41,12 @@ logger = Logger(__name__)
 
 # -------- Defaults (single source of truth) --------
 DEFAULTS = {
-    "config_name": "phototaxis.yml",  # name only, resolved via get_yaml_path("resources","configurations", name)
     "config_root": ("resources", "configurations"),
     "server_host": "localhost",
     "port": 50051,
     "episodes": 10,
     "steps": 5000,
-    "checkpoint_interval": 200,  # 0 disables periodic checkpoints
+    "window_size": 50,
     "checkpoint_dir": None,  # inferred from config basename
     "client_name": "PhototaxisRLClient",
     "env": "phototaxis",
@@ -60,7 +59,6 @@ DEFAULTS = {
     "batch_size": 32,
     "step_per_update": 4,
     "step_per_update_target_model": 1000,
-    "moving_avg_window_size": 20,
     "moving_avg_stop_thr": 100,
 }
 FIXED_AGENT_ID = "00000000-0000-0000-0000-000000000001"
@@ -77,11 +75,11 @@ def parse_args() -> argparse.Namespace:
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     p.add_argument(
-        "--config",
+        "--config-root",
         type=str,
-        default=DEFAULTS["config_name"],
-        help="Configuration NAME (e.g., 'phototaxis.yml' or 'phototaxis_dense'). "
-        "Resolved via get_yaml_path('resources','configurations', NAME).",
+        nargs="*",
+        default=DEFAULTS["config_root"],
+        help="Path components to the configuration root directory.",
     )
     p.add_argument(
         "--server-host",
@@ -109,14 +107,16 @@ def parse_args() -> argparse.Namespace:
         help="Max steps per episode.",
     )
     p.add_argument(
-        "--checkpoint-interval",
+        "--window-size",
         type=int,
-        default=DEFAULTS["checkpoint_interval"],
-        help="Save checkpoint every N episodes (0 = disabled).",
+        default=DEFAULTS["window_size"],
+        help="Sliding window size for reward averaging.",
+        required=False,
     )
     p.add_argument(
         "--checkpoint-dir",
         type=str,
+        nargs="*",
         default=DEFAULTS["checkpoint_dir"],
         help="Checkpoint base path (without suffix). If omitted, inferred from config name.",
     )
@@ -197,13 +197,6 @@ def parse_args() -> argparse.Namespace:
         required=False,
     )
     p.add_argument(
-        "--moving-avg-window-size",
-        type=int,
-        default=DEFAULTS["moving_avg_window_size"],
-        help="Window size for moving average of rewards.",
-        required=False,
-    )
-    p.add_argument(
         "--moving-avg-stop-thr",
         type=float,
         default=DEFAULTS["moving_avg_stop_thr"],
@@ -211,13 +204,6 @@ def parse_args() -> argparse.Namespace:
         required=False,
     )
     return p.parse_args()
-
-
-def resolve_config_path(config_name: str) -> str:
-    """Resolve config NAME to a full path using get_yaml_path(resources, configurations, NAME)."""
-    name = ensure_yml_suffix(config_name)
-    base_a, base_b = DEFAULTS["config_root"]
-    return get_yaml_path(base_a, base_b, name)
 
 
 def resolve_env(env_name: str, server_address: str, client_name: str):
@@ -242,13 +228,12 @@ def print_effective_config(
     args: argparse.Namespace, config_path: str, checkpoint_base: str
 ) -> None:
     logger.info("== Effective settings ==========")
-    logger.info(f"  config_name                 : {args.config}")
     logger.info(f"  resolved_config             : {config_path}")
     logger.info(f"  server                      : {args.server_host}:{args.port}")
     logger.info(f"  client_name                 : {args.client_name}")
     logger.info(f"  episodes                    : {args.episodes}")
     logger.info(f"  steps/episode               : {args.steps}")
-    logger.info(f"  checkpoint_interval         : {args.checkpoint_interval}")
+    logger.info(f"  window_size                 : {args.window_size}")
     logger.info(f"  checkpoint_base             : {checkpoint_base}")
     logger.info(f"  env                         : {args.env}")
     logger.info(f"  neurons                     : {args.neurons}")
@@ -260,7 +245,6 @@ def print_effective_config(
     logger.info(f"  batch_size                  : {args.batch_size}")
     logger.info(f"  step_per_update             : {args.step_per_update}")
     logger.info(f"  step_per_update_target_model: {args.step_per_update_target_model}")
-    logger.info(f"  moving_avg_window_size      : {args.moving_avg_window_size}")
     logger.info(f"  moving_avg_stop_thr         : {args.moving_avg_stop_thr}")
     logger.info("================================\n")
 
@@ -269,10 +253,14 @@ def main() -> None:
     args = parse_args()
 
     # Resolve config NAME -> full path and load YAML
-    config_path = resolve_config_path(args.config)
-    config = read_file(config_path)
-    if config is None:
-        raise RuntimeError(f"Failed to read YAML config from: {config_path}")
+    config_path = get_yaml_path(*args.config_root)
+    yml_files = list(config_path.glob("*.yml"))
+    configs = [read_file(f) for f in yml_files]
+    if len(configs) < 5:
+        logger.error(
+            f"Not enough configurations, you have {len(configs)} at least 5 needed"
+        )
+        exit(1)
 
     # Build server address
     server_address = f"{args.server_host}:{args.port}"
@@ -280,7 +268,6 @@ def main() -> None:
     # Init environment
     env = resolve_env(args.env, server_address, args.client_name)
     env.connect_to_client()
-    env.init(config)
 
     action_net = DQNetwork(
         env.observation_space.shape,
@@ -309,7 +296,7 @@ def main() -> None:
         batch_size=args.batch_size,
         step_per_update=args.step_per_update,
         step_per_update_target_model=args.step_per_update_target_model,
-        moving_avg_window_size=args.moving_avg_window_size,
+        moving_avg_window_size=args.window_size,
         moving_avg_stop_thr=args.moving_avg_stop_thr,
         episode_max_steps=args.steps,
         episodes=args.episodes,
@@ -320,20 +307,19 @@ def main() -> None:
     trainer = DQLearning(
         env,
         [agent],
+        configs=configs,
         episode_count=args.episodes,
         episode_max_steps=args.steps,
     )
 
     # # Compute checkpoint base & show effective settings
-    checkpoint_base = infer_checkpoint_base(config_path, args.checkpoint_dir)
+    checkpoint_base = get_yaml_path(*args.checkpoint_dir)
     print_effective_config(args, config_path, checkpoint_base)
 
     os.makedirs(os.path.dirname(checkpoint_base) or ".", exist_ok=True)
 
     # Train
-    _ = trainer.simple_dqn_training(
-        checkpoint_interval=args.checkpoint_interval, checkpoint_base=checkpoint_base
-    )
+    _ = trainer.simple_dqn_training(checkpoint_base=checkpoint_base)
 
     train_finish_time = time.time()
     train_elapsed_time = train_finish_time - train_start_time
