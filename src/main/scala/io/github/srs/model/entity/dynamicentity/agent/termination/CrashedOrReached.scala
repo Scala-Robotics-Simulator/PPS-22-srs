@@ -6,7 +6,7 @@ import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.agent.Agent
 import io.github.srs.model.entity.dynamicentity.agent.util.TerminationUtils
 
-final case class LightReached() extends TerminationModel[Agent]:
+final case class CrashedOrReached() extends TerminationModel[Agent]:
   private val logger = Logger(this.getClass)
 
   override def evaluate(prev: BaseState, current: BaseState, entity: Agent, action: Action[?]): Boolean =
@@ -14,5 +14,7 @@ final case class LightReached() extends TerminationModel[Agent]:
       .getOrElse(entity)
 
     val reached = TerminationUtils.atLeastOneLightReached(updatedAgent, current.environment)
+    val collided = TerminationUtils.isCollided(updatedAgent, current)
     if reached then logger.info(f"[LightReached] SUCCESS: Agent ${entity.id} reached the goal.")
-    reached
+//    if collided then logger.info(f"[LightReached] FAILURE: Agent ${entity.id} crashed.")
+    collided || reached

@@ -4,7 +4,7 @@ import cats.Id
 import io.github.srs.model.ModelModule.BaseState
 import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.agent.Agent
-import io.github.srs.model.entity.dynamicentity.agent.util.{ TerminationUtils, TruncationUtils }
+import io.github.srs.model.entity.dynamicentity.agent.util.TerminationUtils
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
 import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings.*
 import io.github.srs.model.entity.staticentity.StaticEntity.Light
@@ -27,16 +27,19 @@ object PhototaxisReward:
 
   final case class Phototaxis() extends RewardModel[Agent]:
 
-    private val ProgressScale = 20.0
-    private val StepPenalty = -0.01
+    // "Compass" (Far): A *small* nudge.
+    private val ProgressScale = 2.0
+    // "Lava" (Always): The main motivator.
+    private val StepPenalty = -0.1
+    // The "Bubble"
+    private val GoalProximityRadius = 1.5
+    // "Tractor Beam" (Near): Must be stronger than the StepPenalty.
+    private val TractorBeamScale = 2.0
+
     private val GoalBonus = 800.0
     private val FailurePenalty = -350.0
 
     private val NoLightThreshold = 0.01 // Sync with Environment
-
-    // avoiding farming near the goal (attractor vector inside a bubble)
-    private val GoalProximityRadius = 1.5
-    private val TractorBeamScale = 0.2
 
     override def evaluate(
         prev: BaseState,
@@ -48,7 +51,7 @@ object PhototaxisReward:
       val goalReached = TerminationUtils.atLeastOneLightReached(agentNow, current.environment)
       if goalReached then GoalBonus + StepPenalty
       else
-        val collided = TruncationUtils.isCollided(agentNow, current)
+        val collided = TerminationUtils.isCollided(agentNow, current)
         if collided then FailurePenalty
         else
           val maxLight = agentNow

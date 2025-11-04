@@ -16,7 +16,7 @@ class PhototaxisEnv(AbstractEnv):
             client_name: str = "phototaxis_env",
             *,
             # action
-            action_set: str = "gentle4",
+            action_set: str = "pivot6",
             # light
             light_direction: str = "light8",
             light_has_no_light_state: bool = False,
