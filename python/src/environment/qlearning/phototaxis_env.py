@@ -1,55 +1,36 @@
 import gymnasium.spaces as spaces
 import rl_pb2
 from environment.abstract_env import AbstractEnv
-from collections.abc import Callable  # typing only
+from collections.abc import Callable
 from utils.log import Logger
 
 logger = Logger(__name__)
 
 
 class PhototaxisEnv(AbstractEnv):
-    """
-    Fully configurable phototaxis / obstacle-avoidance env.
-
-    State is built as a PRODUCT of a light-part and a prox-part:
-
-        light_part = light_dir_states * light_intensity_bins
-        prox_part  = prox_dir_states  * prox_intensity_bins
-
-        total_states = light_part * prox_part
-
-    You can choose:
-    - how to encode light direction (4, 8, +no-light)
-    - how many bins for light intensity
-    - how to encode proximity direction (none, front_min, prox4, prox8, prox4_threat, prox8_threat)
-    - how many bins for proximity intensity
-    - thresholds for both
-    """
-
-    # indices for cardinal sensors (assuming 8 sensors around robot)
     _CARDINAL_IDX = [0, 2, 4, 6]
 
     def __init__(
-        self,
-        server_address: str,
-        client_name: str = "phototaxis_env",
-        *,
-        # action
-        action_set: str = "gentle4",
-        # light
-        light_direction: str = "light8",
-        light_has_no_light_state: bool = False,
-        light_intensity_bins: int = 1,
-        # prox
-        prox_direction: str = "front_min",
-        prox_intensity_bins: int = 3,
-        # thresholds
-        no_light_threshold: float = 0.01,  # sync with scala reward
-        prox_thresholds: list[float] | None = None,
-        light_intensity_thresholds: list[float] | None = None,
-        # sensor shapes
-        num_light_sensors: int = 8,
-        num_prox_sensors: int = 8,
+            self,
+            server_address: str,
+            client_name: str = "phototaxis_env",
+            *,
+            # action
+            action_set: str = "gentle4",
+            # light
+            light_direction: str = "light8",
+            light_has_no_light_state: bool = False,
+            light_intensity_bins: int = 1,
+            # prox
+            prox_direction: str = "front_min",
+            prox_intensity_bins: int = 3,
+            # thresholds
+            no_light_threshold: float = 0.01,  # sync with scala reward
+            prox_thresholds: list[float] | None = None,
+            light_intensity_thresholds: list[float] | None = None,
+            # sensor shapes
+            num_light_sensors: int = 8,
+            num_prox_sensors: int = 8,
     ) -> None:
         super().__init__(server_address, client_name)
 
@@ -78,8 +59,8 @@ class PhototaxisEnv(AbstractEnv):
 
         # ------------------ VALIDATION ------------------
         if (
-            self.light_intensity_bins > 1
-            and len(self.light_intensity_thresholds) != self.light_intensity_bins - 1
+                self.light_intensity_bins > 1
+                and len(self.light_intensity_thresholds) != self.light_intensity_bins - 1
         ):
             raise ValueError(
                 f"light_intensity_bins={self.light_intensity_bins} requires "
@@ -87,15 +68,15 @@ class PhototaxisEnv(AbstractEnv):
             )
 
         if (
-            self.prox_intensity_bins > 1
-            and len(self.prox_thresholds) != self.prox_intensity_bins - 1
+                self.prox_intensity_bins > 1
+                and len(self.prox_thresholds) != self.prox_intensity_bins - 1
         ):
             raise ValueError(
                 f"prox_intensity_bins={self.prox_intensity_bins} requires "
                 f"{self.prox_intensity_bins - 1} thresholds, got {len(self.prox_thresholds)}"
             )
 
-        # ------------------ ACTION SPACE ------------------
+        # Action Space
         self._actions = self._build_action_registry()
         if self.action_set not in self._actions:
             logger.warning(
@@ -105,17 +86,15 @@ class PhototaxisEnv(AbstractEnv):
         self.actions = self._actions[self.action_set]["actions"]
         self.action_space = spaces.Discrete(len(self.actions))
 
-        # ------------------ LIGHT DIR ENCODER ------------------
+        # Light encoder
         self._light_dir_encoder, self.light_dir_states = self._build_light_dir_encoder()
 
-        # ------------------ PROX DIR ENCODER -------------------
+        # Prox encoder
         self._prox_dir_encoder, self.prox_dir_states = self._build_prox_dir_encoder()
 
-        # ------------------ STATE SPACE SIZE -------------------
-        # light part = light_dir_states * light_intensity_bins
-        # prox part  = prox_dir_states  * prox_intensity_bins
+        # state space (light_dir* light_bins) * (prox_dir* prox_bins)
         n_states = (self.light_dir_states * self.light_intensity_bins) * (
-            self.prox_dir_states * self.prox_intensity_bins
+                self.prox_dir_states * self.prox_intensity_bins
         )
 
         self._encode_fn = self._master_encoder
@@ -134,9 +113,7 @@ class PhototaxisEnv(AbstractEnv):
         )
         logger.info(f"[PhototaxisEnv] Total discrete states: {n_states}")
 
-    # =====================================================================
-    # ACTIONS
-    # =====================================================================
+    # Action
     @staticmethod
     def _build_action_registry() -> dict[str, dict]:
         return {
@@ -171,59 +148,53 @@ class PhototaxisEnv(AbstractEnv):
         left, right = self.actions[action]
         return rl_pb2.ContinuousAction(left_wheel=float(left), right_wheel=float(right))
 
-    # =====================================================================
-    # SENSOR PADDING
-    # =====================================================================
+    # Sensor Padding
     def _pad_light(self, light: list[float]) -> list[float]:
         if len(light) < self.num_light_sensors:
+            logger.warning("[PhototaxisEnv] Light sensor data empty. Padding with zeros.")
             light = light + [0.0] * (self.num_light_sensors - len(light))
         return light
 
     def _pad_prox(self, prox: list[float] | None) -> list[float]:
         prox = prox or [1.0] * self.num_prox_sensors
         if len(prox) < self.num_prox_sensors:
+            logger.warning("[PhototaxisEnv] Proximity sensor data empty. Padding with ones.")
             prox = prox + [1.0] * (self.num_prox_sensors - len(prox))
         return prox
 
-    # =====================================================================
-    # OBSERVATION ENCODING
-    # =====================================================================
+    # Observation encoding
     def _encode_observation(
-        self,
-        proximity_values: list[float] | None,
-        light_values: list[float],
+            self,
+            proximity_values: list[float] | None,
+            light_values: list[float],
     ) -> int:
         prox_padded = self._pad_prox(proximity_values)
         light_padded = self._pad_light(light_values)
         return self._encode_fn(prox_padded, light_padded)
 
-    # =====================================================================
-    # MASTER ENCODER
-    # =====================================================================
+    # Master encoding
     def _master_encoder(self, prox: list[float], light: list[float]) -> int:
-        # --- light part ---
+        # light
         dir_state = self._light_dir_encoder(light)
         int_state = self._enc_light_intensity(light)
         light_part = (
-            dir_state * self.light_intensity_bins + int_state
-        )  # 0 .. (L*Li - 1)
+                dir_state * self.light_intensity_bins + int_state
+        )
 
-        # --- prox part ---
+        # prx
         prox_dir_state = self._prox_dir_encoder(prox)
         prox_int_state = self._enc_prox_intensity(prox)
         prox_part = (
-            prox_dir_state * self.prox_intensity_bins + prox_int_state
-        )  # 0 .. (P*Pi - 1)
+                prox_dir_state * self.prox_intensity_bins + prox_int_state
+        )
 
-        # combine
+        # combining
         total_prox_states = self.prox_dir_states * self.prox_intensity_bins
         return light_part * total_prox_states + prox_part
 
-    # =====================================================================
-    # LIGHT DIR ENCODER BUILDER
-    # =====================================================================
+    # light dir encoder builder
     def _build_light_dir_encoder(self) -> (Callable[[list[float]], int], int):
-        """Return (encoder_fn, n_states) for light direction."""
+        """Return (encoder_fn, n_states) for a light direction."""
         if self.light_direction == "light4":
             base_states = 4
             base_encoder = self._enc_light4
@@ -247,12 +218,10 @@ class PhototaxisEnv(AbstractEnv):
             return _enc_with_no_light, base_states + 1
         return base_encoder, base_states
 
-    # =====================================================================
-    # PROX DIR ENCODER BUILDER
-    # =====================================================================
+    # prox dir encoder builder
     def _build_prox_dir_encoder(self) -> (Callable[[list[float]], int], int):
         """
-        Return (encoder_fn, n_states) for proximity direction.
+        Return (encoder_fn, n_states) for a proximity direction.
         """
         pd = self.prox_direction
 
@@ -264,7 +233,7 @@ class PhototaxisEnv(AbstractEnv):
             return (lambda prox: 0), 1
 
         if pd == "prox4":
-            # clearest among F,R,B,L
+            # clearest among F, R, B, L
             return self._enc_prox4_clear, 4
 
         if pd == "prox8":
@@ -272,7 +241,7 @@ class PhototaxisEnv(AbstractEnv):
             return self._enc_prox8_clear, 8
 
         if pd == "prox4_threat":
-            # nearest threat among F,R,B,L (argmin)
+            # nearest threat among F, R, B, L (argmin)
             return self._enc_prox4_threat, 4
 
         if pd == "prox8_threat":
@@ -281,24 +250,14 @@ class PhototaxisEnv(AbstractEnv):
 
         raise ValueError(f"Unknown prox_direction: {pd}")
 
-    # =====================================================================
-    # SMALL HELPERS
-    # =====================================================================
     @staticmethod
     def _bin_value(value: float, thresholds: list[float]) -> int:
-        """
-        Generic binning helper.
-        thresholds must be sorted.
-        returns 0..len(thresholds)
-        """
         for i, thr in enumerate(thresholds):
             if value < thr:
                 return i
         return len(thresholds)
 
-    # =====================================================================
-    # LIGHT DIRECTION ENCODERS
-    # =====================================================================
+    # light direction encoders
     def _enc_light4(self, light: list[float]) -> int:
         forward, right, back, left = [light[i] for i in self._CARDINAL_IDX]
         vals = [forward, right, back, left]
@@ -307,18 +266,14 @@ class PhototaxisEnv(AbstractEnv):
     def _enc_light8(self, light: list[float]) -> int:
         return int(max(range(8), key=lambda k: light[k]))
 
-    # =====================================================================
-    # LIGHT INTENSITY
-    # =====================================================================
+    # light intensity encoder
     def _enc_light_intensity(self, light: list[float]) -> int:
         if self.light_intensity_bins == 1:
             return 0
         max_val = max(light)
         return self._bin_value(max_val, self.light_intensity_thresholds)
 
-    # =====================================================================
-    # PROX DIRECTION ENCODERS
-    # =====================================================================
+    # prox direction encoders
     def _enc_prox4_clear(self, prox: list[float]) -> int:
         """Pick direction with max clearance among F,R,B,L."""
         forward, right, back, left = [prox[i] for i in self._CARDINAL_IDX]
@@ -330,23 +285,21 @@ class PhototaxisEnv(AbstractEnv):
         return int(max(range(8), key=lambda k: prox[k]))
 
     def _enc_prox4_threat(self, prox: list[float]) -> int:
-        """Pick direction with MIN clearance among F,R,B,L (nearest obstacle)."""
-        forward, right, back, left= [prox[i] for i in self._CARDINAL_IDX]
+        """Pick direction with MIN clearance among F, R, B, L (the nearest obstacle)."""
+        forward, right, back, left = [prox[i] for i in self._CARDINAL_IDX]
         vals = [forward, right, back, left]
         return int(min(range(4), key=lambda k: vals[k]))
 
     def _enc_prox8_threat(self, prox: list[float]) -> int:
-        """Pick direction with MIN clearance among 8 (nearest obstacle)."""
+        """Pick direction with MIN clearance among 8 (the nearest obstacle)."""
         return int(min(range(8), key=lambda k: prox[k]))
 
-    # =====================================================================
-    # PROX INTENSITY
-    # =====================================================================
+    # prox intensity encoder
     def _enc_prox_intensity(self, prox: list[float]) -> int:
         """
         Bins how *bad* the current situation is.
         - if prox_direction == 'front_min': bin front triple (0,1,7)
-        - else: bin global min (worst sensor)
+        - else: bin global min (the worst sensor)
         """
         if self.prox_intensity_bins == 1:
             return 0
