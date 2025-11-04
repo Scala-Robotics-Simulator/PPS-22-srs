@@ -11,26 +11,26 @@ class PhototaxisEnv(AbstractEnv):
     _CARDINAL_IDX = [0, 2, 4, 6]
 
     def __init__(
-            self,
-            server_address: str,
-            client_name: str = "phototaxis_env",
-            *,
-            # action
-            action_set: str = "pivot6",
-            # light
-            light_direction: str = "light8",
-            light_has_no_light_state: bool = False,
-            light_intensity_bins: int = 1,
-            # prox
-            prox_direction: str = "front_min",
-            prox_intensity_bins: int = 3,
-            # thresholds
-            no_light_threshold: float = 0.01,  # sync with scala reward
-            prox_thresholds: list[float] | None = None,
-            light_intensity_thresholds: list[float] | None = None,
-            # sensor shapes
-            num_light_sensors: int = 8,
-            num_prox_sensors: int = 8,
+        self,
+        server_address: str,
+        client_name: str = "phototaxis_env",
+        *,
+        # action
+        action_set: str = "pivot6",
+        # light
+        light_direction: str = "light8",
+        light_has_no_light_state: bool = False,
+        light_intensity_bins: int = 1,
+        # prox
+        prox_direction: str = "front_min",
+        prox_intensity_bins: int = 3,
+        # thresholds
+        no_light_threshold: float = 0.01,  # sync with scala reward
+        prox_thresholds: list[float] | None = None,
+        light_intensity_thresholds: list[float] | None = None,
+        # sensor shapes
+        num_light_sensors: int = 8,
+        num_prox_sensors: int = 8,
     ) -> None:
         super().__init__(server_address, client_name)
 
@@ -59,8 +59,8 @@ class PhototaxisEnv(AbstractEnv):
 
         # ------------------ VALIDATION ------------------
         if (
-                self.light_intensity_bins > 1
-                and len(self.light_intensity_thresholds) != self.light_intensity_bins - 1
+            self.light_intensity_bins > 1
+            and len(self.light_intensity_thresholds) != self.light_intensity_bins - 1
         ):
             raise ValueError(
                 f"light_intensity_bins={self.light_intensity_bins} requires "
@@ -68,8 +68,8 @@ class PhototaxisEnv(AbstractEnv):
             )
 
         if (
-                self.prox_intensity_bins > 1
-                and len(self.prox_thresholds) != self.prox_intensity_bins - 1
+            self.prox_intensity_bins > 1
+            and len(self.prox_thresholds) != self.prox_intensity_bins - 1
         ):
             raise ValueError(
                 f"prox_intensity_bins={self.prox_intensity_bins} requires "
@@ -94,7 +94,7 @@ class PhototaxisEnv(AbstractEnv):
 
         # state space (light_dir* light_bins) * (prox_dir* prox_bins)
         n_states = (self.light_dir_states * self.light_intensity_bins) * (
-                self.prox_dir_states * self.prox_intensity_bins
+            self.prox_dir_states * self.prox_intensity_bins
         )
 
         self._encode_fn = self._master_encoder
@@ -151,22 +151,26 @@ class PhototaxisEnv(AbstractEnv):
     # Sensor Padding
     def _pad_light(self, light: list[float]) -> list[float]:
         if len(light) < self.num_light_sensors:
-            logger.warning("[PhototaxisEnv] Light sensor data empty. Padding with zeros.")
+            logger.warning(
+                "[PhototaxisEnv] Light sensor data empty. Padding with zeros."
+            )
             light = light + [0.0] * (self.num_light_sensors - len(light))
         return light
 
     def _pad_prox(self, prox: list[float] | None) -> list[float]:
         prox = prox or [1.0] * self.num_prox_sensors
         if len(prox) < self.num_prox_sensors:
-            logger.warning("[PhototaxisEnv] Proximity sensor data empty. Padding with ones.")
+            logger.warning(
+                "[PhototaxisEnv] Proximity sensor data empty. Padding with ones."
+            )
             prox = prox + [1.0] * (self.num_prox_sensors - len(prox))
         return prox
 
     # Observation encoding
     def _encode_observation(
-            self,
-            proximity_values: list[float] | None,
-            light_values: list[float],
+        self,
+        proximity_values: list[float] | None,
+        light_values: list[float],
     ) -> int:
         prox_padded = self._pad_prox(proximity_values)
         light_padded = self._pad_light(light_values)
@@ -177,16 +181,12 @@ class PhototaxisEnv(AbstractEnv):
         # light
         dir_state = self._light_dir_encoder(light)
         int_state = self._enc_light_intensity(light)
-        light_part = (
-                dir_state * self.light_intensity_bins + int_state
-        )
+        light_part = dir_state * self.light_intensity_bins + int_state
 
         # prx
         prox_dir_state = self._prox_dir_encoder(prox)
         prox_int_state = self._enc_prox_intensity(prox)
-        prox_part = (
-                prox_dir_state * self.prox_intensity_bins + prox_int_state
-        )
+        prox_part = prox_dir_state * self.prox_intensity_bins + prox_int_state
 
         # combining
         total_prox_states = self.prox_dir_states * self.prox_intensity_bins
