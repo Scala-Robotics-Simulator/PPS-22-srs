@@ -1,19 +1,19 @@
 package io.github.srs.model.entity.dynamicentity.agent.reward
 
 import scala.collection.mutable
-import scala.math.{ abs, min }
 
 import cats.Id
 import com.typesafe.scalalogging.Logger
 import io.github.srs.model.ModelModule.BaseState
 import io.github.srs.model.entity.Point2D
-import io.github.srs.model.entity.Point2D.*
-import io.github.srs.model.entity.dynamicentity.action.{ Action, MovementAction }
+import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.agent.Agent
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
 import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings.proximityReadings
 import io.github.srs.model.environment.Environment
+import io.github.srs.utils.EqualityGivenInstances.given_CanEqual_T_T
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Agent.CollisionAvoidance.CollisionTriggerDistance
+import io.github.srs.utils.SpatialUtils.{ discreteCell, estimateCoverage }
 import utils.types.CircularBuffer
 
 object ExplorationReward:
@@ -23,13 +23,16 @@ object ExplorationReward:
       positions: CircularBuffer[Point2D] = CircularBuffer(200),
       actionHistory: CircularBuffer[Action[?]] = CircularBuffer(200),
       visitedCells: mutable.Set[(Int, Int)] = mutable.Set(),
+      achievedMilestones: mutable.Set[Double] = mutable.Set(),
+      var explorationComplete: Boolean = false,
       maxTicks: Int = 10_000,
   )
 
   private object ExplorationRewardStateManager extends RewardStateManager[Agent, ExplorationState]:
     override def createState(): ExplorationState = ExplorationState()
 
-  final case class Exploration() extends StatefulReward[Agent, ExplorationState]:
+  final case class Exploration(cellSize: Double = 0.5, coverageScaling: Double = 100.0)
+      extends StatefulReward[Agent, ExplorationState]:
     private val logger = Logger(getClass.getName)
 
     override protected def stateManager: RewardStateManager[Agent, ExplorationState] =
@@ -43,110 +46,78 @@ object ExplorationReward:
         state: ExplorationState,
     ): (Double, ExplorationState) =
 
+      val newTick = state.ticks + 1
+      val updatedPositions = state.positions.add(entity.position)
+
+      // stuck
+      val stuckWindow = 10
+      val isStuck =
+        if updatedPositions.sizeIs >= stuckWindow then
+          val recentPositions = updatedPositions.takeRight(stuckWindow)
+          recentPositions.headOption.exists(head => recentPositions.forall(_ == head))
+        else false
+      val stuckReward = if isStuck then -1.0 else +0.5
+
+      // collide
       val currentMin = distanceFromObstacle(current.environment, entity)
+      val collidingReward = if currentMin < CollisionTriggerDistance then -100.0 else 0.0
 
-      val rClear = clearanceReward(currentMin)
-      val rCoverage = coverageReward(entity, state)
-      val rMove = moveReward(action, state)
-      val rExpl = explorationReward(entity, state)
-      val rColl = if currentMin < CollisionTriggerDistance then -1000.0 else 0.0
+      // bonus milestone coverage
+      val currentCell = discreteCell(entity.position, cellSize)
+      state.visitedCells += currentCell
+      val coverage = estimateCoverage(state.visitedCells, current.environment, cellSize)
+      val milestones = (1 to 100).map(_ * 0.1) // 1%, 2%, ..., 100%
+      val eps = 1e-6
+      val milestoneReward = +50.0
+      val newMilestones = milestones.filter { m =>
+        coverage + eps >= m && !state.achievedMilestones.exists(am => math.abs(am - m) < eps)
+      }
+      newMilestones.foreach(state.achievedMilestones.add)
+      val milestoneBonus = newMilestones.size * milestoneReward
+      val updateAchieved = state.achievedMilestones ++ newMilestones
 
-      val reward = 1.0 * rClear + 3.0 * rCoverage + 1.0 * rMove + 2.0 * rExpl + rColl
-
-      logger.info(
-        f"Tick [${state.ticks}] | Pos: (${entity.position.x}%.2f, ${entity.position.y}%.2f) | Reward: $reward%.3f",
-      )
-      logger.info(f"rClear, $rClear, rCoverage $rCoverage, rMove $rMove, rExpl $rExpl, rColl $rColl")
-
-      state.positions.add(entity.position): Unit
-
-      val cellSize = 1.0
-      val pos = entity.position
-      val cellX = (pos.x / cellSize).toInt
-      val cellY = (pos.y / cellSize).toInt
-
-      state.visitedCells += ((cellX, cellY))
-
-      (
-        reward,
-        state.copy(
-          ticks = state.ticks + 1,
-          positions = state.positions,
-          visitedCells = state.visitedCells,
-          actionHistory = state.actionHistory.add(action),
-          maxTicks = current.simulationTime.map(st => (st.toMillis / current.dt.toMillis).toInt).getOrElse(10_000),
-        ),
-      )
-    end compute
-
-  end Exploration
-
-  private def clearanceReward(minDist: Double): Double =
-    val safeDistance = 0.3
-    val K = 5.0
-    if minDist < safeDistance then -K * (safeDistance - minDist)
-    else 0.0
-
-  private def explorationReward(entity: Agent, state: ExplorationState): Double =
-    if state.positions.sizeIs < 2 then 0.0
-    else
-      val last = state.positions.lastOption.getOrElse(entity.position)
-      val dist = entity.position.distanceTo(last)
-
-      val immobilityPenalty =
-        if dist < 0.05 then -0.05 * math.min(state.ticks, 20) // limita a 20 tick
+      // final bonus
+      val finalCoverageThreshold = 0.8
+      val finalReward = +500
+      val completionBonus: Double =
+        if !state.explorationComplete && coverage >= finalCoverageThreshold then
+          state.explorationComplete = true
+          finalReward
         else 0.0
 
-      val smallMoveBonus = if dist >= 0.05 then dist else 0.01
+      val isNewCell = !state.visitedCells.contains(currentCell)
+      val explorationReward = if isNewCell then +5.0 else 0.0
 
-      smallMoveBonus + immobilityPenalty
+      val reward =
+        milestoneBonus + // +50.0 una volta a ogni milestone raggiunta oppure 0.0
+          completionBonus + // +500.0 oppure 0.0
+          collidingReward + // -100.0 oppure 0.0
+          stuckReward + // -1.0 oppure 0.5
+          explorationReward // +5.0 oppure 0.0
 
-  // TODO
-  private def coverageReward(entity: Agent, state: ExplorationState): Double =
-    val pos = entity.position
-    val cellSize = 1.0
-    val cell = ((pos.x / cellSize).toInt, (pos.y / cellSize).toInt)
-    val alreadyVisited = state.visitedCells.toSeq.contains(cell)
-    if !alreadyVisited then 100.0 else 0.05
+      logger.info(
+        f"TICK [$newTick] colliding=$collidingReward stuck=$stuckReward coverage=$coverage " +
+          f"milestone=$milestoneBonus | reward=$reward ",
+//          f"milestones=${state.achievedMilestones.toList.sorted.mkString(",")} " +
+//          f"final=${state.explorationComplete}"
+      )
 
-  // TODO
-//  private def noveltyReward(entity: Agent, state: ExplorationState): Double =
-//    val pos = entity.position
-//    val distances = state.visitedCells.toSeq.map(_.distanceTo(pos))
-//    val minDistance = distances.foldLeft(Double.MaxValue) { (acc, d) =>
-//      if (d < acc) d else acc
-//    }
-//    if minDistance > 1.0 then 1.0 else 0.0
+      val newState = state.copy(
+        ticks = newTick,
+        positions = updatedPositions,
+        actionHistory = state.actionHistory.add(action),
+        visitedCells = state.visitedCells,
+        achievedMilestones = updateAchieved,
+        explorationComplete = state.explorationComplete,
+        maxTicks = current.simulationTime.map(st => (st.toMillis / current.dt.toMillis).toInt).getOrElse(10_000),
+      )
+      (reward, newState)
 
-  // TODO
-  private def moveReward(action: Action[?], state: ExplorationState): Double =
-    val movementActions = state.actionHistory.collect { case ma: MovementAction[?] => ma }
-    val (actLeft, actRight) = action match
-      case ma: MovementAction[?] => (ma.leftSpeed, ma.rightSpeed)
-      case _ => (0.0, 0.0)
+    end compute
 
-    val lastActions = movementActions.takeRight(5)
-    val spinPenalty =
-      if lastActions.nonEmpty && lastActions.forall(a => a.leftSpeed * a.rightSpeed < 0) then -2.0 else 0.0
-
-    val oscillationPenalty =
-      if movementActions.sizeIs >= 10 then
-        val avgLeft = movementActions.map(_.leftSpeed).sum / movementActions.size
-        val avgRight = movementActions.map(_.rightSpeed).sum / movementActions.size
-        val dl = abs(actLeft - avgLeft)
-        val dr = abs(actRight - avgRight)
-        if dl + dr > 0.5 then -(dl + dr) * 0.1 else 0.0
-      else 0.0
-
-    val forwardBonus =
-      if abs(actLeft - actRight) < 0.5 && (actLeft.abs + actRight.abs) > 0.1 then 1.0 else 0.0
-
-    spinPenalty + oscillationPenalty + forwardBonus
-  end moveReward
-
-  private def distanceFromObstacle(env: Environment, entity: Agent): Double =
-    val agent =
-      env.entities.collectFirst { case a: Agent if a.id.toString == entity.id.toString => a }.getOrElse(entity)
-    agent.senseAll[Id](env).proximityReadings.foldLeft(1.0)((acc, sr) => min(acc, sr.value))
-
+    private def distanceFromObstacle(env: Environment, entity: Agent): Double =
+      val agent =
+        env.entities.collectFirst { case a: Agent if a.id.toString == entity.id.toString => a }.getOrElse(entity)
+      agent.senseAll[Id](env).proximityReadings.foldLeft(1.0)((acc, sr) => math.min(acc, sr.value))
+  end Exploration
 end ExplorationReward

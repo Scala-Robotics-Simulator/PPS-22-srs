@@ -16,8 +16,8 @@ def set_global_seed(seed=None, env=None, tensorflow_deterministic=False, verbose
     ----------
     seed : int or None
         The seed value. If None, does nothing.
-    env : gym.Env or None
-        Optional Gymnasium or Gym environment to seed.
+    env : Env or None.
+        Optional environment to seed.
     tensorflow_deterministic : bool
         If True, sets TensorFlow to operate in a deterministic mode.
     verbose: bool
@@ -35,7 +35,7 @@ def set_global_seed(seed=None, env=None, tensorflow_deterministic=False, verbose
     if tensorflow_deterministic:
         _seed_tensorflow(seed=seed, verbose=verbose)
 
-    _seed_gymnasium(seed=seed, env=env, verbose=verbose)
+    _seed_environment(seed=seed, env=env, verbose=verbose)
 
     if verbose:
         logger.info(f"[set_global_seed] All available seeds set to {seed}.")
@@ -76,15 +76,15 @@ def _seed_tensorflow(seed, verbose=False):
         logger.info("[set_global_seed] TensorFlow seed set.")
 
 
-def _seed_gymnasium(seed, env, verbose=False):
-    """Set Gymnasium environment seed for reproducibility.
+def _seed_environment(seed, env, verbose=False):
+    """Set environment seed for reproducibility.
 
     Parameters
     ----------
     seed : int
         The seed value.
-    env : gym.Env or None
-        Optional Gymnasium or Gym environment to seed.
+    env : Env or None
+        Optional environment to seed.
     verbose: bool
         If True, logging.infos out information about the seeding process.
     """
@@ -97,7 +97,7 @@ def _seed_gymnasium(seed, env, verbose=False):
         if hasattr(env.observation_space, "seed"):
             env.observation_space.seed(seed)
         if verbose:
-            logger.info("[set_global_seed] Gymnasium environment seed set.")
+            logger.info("[set_global_seed] Environment seed set.")
     except Exception as e:
         if verbose:
             logger.warning(

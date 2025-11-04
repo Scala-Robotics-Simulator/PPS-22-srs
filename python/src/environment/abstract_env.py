@@ -42,7 +42,9 @@ class AbstractEnv(ABC):
         return self.loop.run_until_complete(coro)
 
     @abstractmethod
-    def _encode_observation(self, proximity_values, light_values):
+    def _encode_observation(
+        self, proximity_values, light_values, position, orientation
+    ):
         """Encode the observation from proximity and light values"""
         pass
 
@@ -54,7 +56,9 @@ class AbstractEnv(ABC):
     def _encode_observations(self, observations):
         """Encode multiple observations"""
         return {
-            k: self._encode_observation(v.proximity_values, v.light_values)
+            k: self._encode_observation(
+                v.proximity_values, v.light_values, v.position, v.orientation
+            )
             for k, v in observations.items()
         }
 

@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """
-train.py — Headless training runner for Phototaxis Q-Learning.
 
 Saved commands:
 python3 train-qagent.py --config-root src scripts resources generated obstacle-avoidance --episodes 1000 --steps 5000 --checkpoint-dir src scripts resources generated obstacle-avoidance checkpoints --env oa --window-size 50 --alpha 0.5
@@ -10,6 +9,7 @@ from __future__ import annotations
 
 import statistics
 import sys
+import asyncio
 
 sys.path.append("..")
 
@@ -23,6 +23,7 @@ from tqdm import trange
 from agent.qagent import QAgent
 from environment.qlearning.obstacle_avoidance_env import ObstacleAvoidanceEnv
 from environment.qlearning.phototaxis_env import PhototaxisEnv
+from environment.qlearning.exploration_env import ExplorationEnv
 from utils.log import Logger
 from utils.reader import get_yaml_path, read_file
 from utils.reproducibility import set_global_seed
@@ -44,8 +45,8 @@ DEFAULTS = {
     "checkpoint_dir": None,  # inferred from config basename
     "load_checkpoint": None,
     "start_episode": 0,
-    "client_name": "PhototaxisRLClient",
-    "env": "phototaxis",
+    "client_name": "RLClient",
+    "env": "exploration",
     "alpha": 0.5,
 }
 FIXED_AGENT_ID = "00000000-0000-0000-0000-000000000001"
@@ -58,7 +59,7 @@ def ensure_yml_suffix(name: str) -> str:
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(
-        description="Phototaxis Q-Learning trainer (headless). Uses config NAME, not path.",
+        description="Q-Learning trainer (headless). Uses config NAME, not path.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     p.add_argument(
@@ -133,7 +134,7 @@ def parse_args() -> argparse.Namespace:
         "--env",
         type=str,
         default=DEFAULTS["env"],
-        help="Environmen to use (for observations and actions)",
+        help="Environment to use (for observations and actions)",
     )
     p.add_argument(
         "--alpha",
@@ -146,12 +147,14 @@ def parse_args() -> argparse.Namespace:
 
 def resolve_env(
     env_name: str, server_address: str, client_name: str
-) -> PhototaxisEnv | ObstacleAvoidanceEnv:
+) -> PhototaxisEnv | ObstacleAvoidanceEnv | ExplorationEnv:
     match env_name:
         case "phototaxis":
             return PhototaxisEnv(server_address, client_name)
         case "oa":
             return ObstacleAvoidanceEnv(server_address, client_name)
+        case "exploration":
+            return ExplorationEnv(server_address, client_name)
         case _:
             logger.error("Environment not found")
             exit(1)
@@ -252,6 +255,10 @@ def run_episodes(
             final_path = f"{checkpoint_base}_final"
             a.save(final_path)
         logger.info("\n[Final Save] Training complete.")
+
+
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
 def main() -> None:

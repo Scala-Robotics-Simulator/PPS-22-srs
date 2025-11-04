@@ -12,9 +12,9 @@ import io.github.srs.config.yaml.YamlManager
 import io.github.srs.model.environment.dsl.CreationDSL.validate
 import io.github.srs.utils.random.SimpleRNG
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
-import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings
 import io.github.srs.model.entity.dynamicentity.action.MovementActionFactory
 import io.github.srs.model.entity.dynamicentity.agent.Agent
+import io.github.srs.protos.rl.Observation.Position
 
 /**
  * Module that exposes a simple RL gRPC service used by the RL controller feature.
@@ -204,13 +204,30 @@ object RLServiceModule:
             val (de, a) = self
             de.id.toString -> f(a)
 
-        extension (self: (DynamicEntity, SensorReadings))
+//        extension (self: (DynamicEntity, SensorReadings))
+//
+//          def toObservationPair: (String, Observation) =
+//            self.to(readings =>
+//              Observation(
+//                proximityValues = readings.proximityReadings.map(_.value),
+//                lightValues = readings.lightReadings.map(_.value),
+//              ),
+//            )
+
+        extension (self: (DynamicEntity, RLControllerModule.AgentObservation))
 
           def toObservationPair: (String, Observation) =
-            self.to(readings =>
+            self.to(obs =>
               Observation(
-                proximityValues = readings.proximityReadings.map(_.value),
-                lightValues = readings.lightReadings.map(_.value),
+                proximityValues = obs.sensorReadings.proximityReadings.map(_.value),
+                lightValues = obs.sensorReadings.lightReadings.map(_.value),
+                position = Some(
+                  Position(
+                    x = obs.position._1,
+                    y = obs.position._2,
+                  ),
+                ),
+                orientation = obs.orientation,
               ),
             )
       end ServiceImpl

@@ -35,6 +35,7 @@ enum Termination(val name: String) derives CanEqual:
   def evaluate(prev: BaseState, current: BaseState, entity: Agent, action: Action[?]): Boolean =
     this match
       case NeverTerminate => false
+      case CoverageTermination => ExplorationCoverageTermination().evaluate(prev, current, entity, action)
       case LightReached => LightReachedTerminationModel().evaluate(prev, current, entity, action)
       case CollisionDetection => CollisionDetectionTerminationModel().evaluate(prev, current, entity, action)
 
