@@ -14,6 +14,7 @@ import sys
 sys.path.append("..")
 
 import argparse
+import asyncio
 import os
 
 import nest_asyncio
@@ -25,6 +26,10 @@ from environment.qlearning.obstacle_avoidance_env import ObstacleAvoidanceEnv
 from environment.qlearning.phototaxis_env import PhototaxisEnv
 from utils.log import Logger
 from utils.reader import get_yaml_path, read_file
+
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
 
 nest_asyncio.apply()
 
@@ -132,24 +137,57 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULTS["env"],
         help="Environmen to use (for observations and actions)",
     )
+
+    p.add_argument(
+        "--action-set",
+        type=str,
+        default="gentle4",
+        choices=["gentle4", "hard3", "pivot6"],
+    )
+    p.add_argument(
+        "--light-direction",
+        type=str,
+        default="light8",
+        choices=["light4", "light8", "none"],
+    )
+    p.add_argument(
+        "--light-has-no-light-state",
+        action="store_true",
+        help="Add +1 state for 'no light' (e.g., light8 -> 9 states)",
+    )
+    p.add_argument("--light-intensity-bins", type=int, default=1)
+    p.add_argument(
+        "--prox-direction",
+        type=str,
+        default="front_min",
+        choices=["none", "front_min", "prox4", "prox8", "prox4_threat", "prox8_threat"],
+    )
+    p.add_argument("--prox-intensity-bins", type=int, default=3)
+    p.add_argument(
+        "--prox-thresholds",
+        type=float,
+        nargs="*",
+        default=None,  # Use the env's default [0.03, 0.15]
+        help="Bin thresholds, e.g., --prox-thresholds 0.2 0.6",
+    )
     return p.parse_args()
 
 
 def resolve_env(
-    env_name: str, server_address: str, client_name: str
+    env_name: str, server_address: str, client_name: str, args: argparse.Namespace
 ) -> PhototaxisEnv | ObstacleAvoidanceEnv:
     match env_name:
         case "phototaxis":
             return PhototaxisEnv(
                 server_address,
                 client_name,
-                light_direction="light8",
-                light_has_no_light_state=False,
-                light_intensity_bins=3,
-                light_intensity_thresholds=[0.2, 0.6],
-                prox_direction="front_min",
-                prox_intensity_bins=2,
-                prox_thresholds=[0.03],
+                action_set=args.action_set,
+                light_direction=args.light_direction,
+                light_has_no_light_state=args.light_has_no_light_state,
+                light_intensity_bins=args.light_intensity_bins,
+                prox_direction=args.prox_direction,
+                prox_intensity_bins=args.prox_intensity_bins,
+                prox_thresholds=args.prox_thresholds,
             )
         case "oa":
             return ObstacleAvoidanceEnv(server_address, client_name)
@@ -275,7 +313,7 @@ def main() -> None:
     server_address = f"{args.server_host}:{args.port}"
 
     # Init environment
-    env = resolve_env(args.env, server_address, args.client_name)
+    env = resolve_env(args.env, server_address, args.client_name, args)
     env.connect_to_client()
 
     # Agent(s)
