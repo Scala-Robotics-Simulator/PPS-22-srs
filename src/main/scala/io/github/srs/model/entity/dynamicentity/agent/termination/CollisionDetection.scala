@@ -1,14 +1,15 @@
-package io.github.srs.model.entity.dynamicentity.agent.truncation
+package io.github.srs.model.entity.dynamicentity.agent.termination
 
 import scala.math.min
 
+import cats.Id
+import io.github.srs.model.ModelModule.BaseState
 import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.agent.Agent
-import io.github.srs.model.ModelModule.BaseState
+import io.github.srs.model.entity.dynamicentity.agent.truncation.TruncationModel
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
 import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings.proximityReadings
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Agent.CollisionAvoidance.CollisionTriggerDistance
-import cats.Id
 
 /**
  * Generic truncation model for collision detection.
