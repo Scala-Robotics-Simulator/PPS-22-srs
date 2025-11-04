@@ -28,13 +28,11 @@ from utils.log import Logger
 from utils.reader import get_yaml_path, read_file
 from agent.qagent import QAgent
 from environment.qlearning.phototaxis_env import PhototaxisEnv
+
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 nest_asyncio.apply()
-
-
-
 
 
 logger = Logger(__name__)
@@ -56,7 +54,7 @@ DEFAULTS = {
     "checkpoint_dir": None,
     "load_checkpoint": None,
     "client_name": "PhototaxisRLClient",
-    "encoder": "light9",
+    "encoder": "light9_plus_prox3",
     "action": "gentle4",
 }
 FIXED_AGENT_ID = "00000000-0000-0000-0000-000000000001"
@@ -81,6 +79,7 @@ def parse_args() -> argparse.Namespace:
             "compact36",
             "prox8_3bins",
             "light4_plus_flags",
+            "light9_plus_prox3",
         ],
         help="State encoder variant (default: light9)",
     )
@@ -94,7 +93,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--scenario",
         type=str,
-        default="minimal",
+        default="phototaxis",
         help="Reward scenario family (affects YAML filenames)",
     )
     p.add_argument(
