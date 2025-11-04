@@ -154,20 +154,28 @@ object ObstacleAvoidanceRewardModule:
       // Proximity penalty (graduated based on closest obstacle)
       val minDistance = if distances.isEmpty then Double.MaxValue else distances.foldLeft(1.0)((acc, v) => min(acc, v))
       val proximityReward = minDistance match
-        case d if d < SafeDistance * 0.5 => -10.0 // Very close
-        case d if d < SafeDistance => -2.0 // Too close
-        case d if d < SafeDistance * 2 => 0.5 // Comfortable
-        case _ => 1.0 // Safe
+        case d if d < SafeDistance * 0.5 => -2.0 // Very close
+        case d if d < SafeDistance => -0.2 // Too close
+        case _ => 0.1 // Safe
+
+      // Reward forward movement (distance traveled)
+      val displacement = math.sqrt(
+        math.pow(entity.position.x - prevAgent.position.x, 2) +
+          math.pow(entity.position.y - prevAgent.position.y, 2),
+      )
+      val movementReward = displacement * 100
 
       // Small penalty for staying still (only if not in danger)
-      val movementReward =
-        if prevAgent.position == entity.position && minDistance > SafeDistance then -0.1 else 0.0
+      val rotationPenalty =
+        if displacement < 0.001 && prevAgent.position == entity.position then -2.0 else 0.0
 
       logger.info(s"Tick: ${current.elapsedTime.length / current.dt.length}")
       logger.info(s"Proximity Reward: $proximityReward")
       logger.info(s"Collision Reward: $collisionReward")
+      logger.info(s"Displacement: $displacement")
       logger.info(s"Movement Reward: $movementReward")
-      proximityReward + collisionReward + movementReward
+      logger.info(s"Rotation Penalty: $rotationPenalty")
+      proximityReward + collisionReward + movementReward + rotationPenalty
     end evaluate
   end SimpleObstacleAvoidance
 
