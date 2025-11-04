@@ -14,7 +14,7 @@ environment:
               speed: 1.0
               reward: ObstacleAvoidance
               termination: CollisionDetection
-              truncation: EndSimulation
+              truncation: EndSimulationTruncation
         - obstacle:
               orientation: 0.0
               position: [5.6, 8.0]

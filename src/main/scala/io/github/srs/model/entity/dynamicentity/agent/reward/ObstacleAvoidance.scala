@@ -15,6 +15,7 @@ import io.github.srs.model.entity.Point2D.*
 import utils.types.CircularBuffer
 import io.github.srs.model.entity.dynamicentity.action.MovementAction
 import io.github.srs.model.ModelModule.BaseState
+import io.github.srs.logger
 
 object ObstacleAvoidanceRewardModule:
 
@@ -135,4 +136,24 @@ object ObstacleAvoidanceRewardModule:
     end moveReward
 
   end ObstacleAvoidance
+
+  final case class SimpleObstacleAvoidance() extends RewardModel[Agent]:
+
+    private def getAgentFromId(agent: Agent, state: BaseState): Agent =
+      state.environment.entities.collectFirst { case a: Agent if a.id.equals(agent.id) => a }.getOrElse(agent)
+
+    override def evaluate(prev: BaseState, current: BaseState, entity: Agent, action: Action[?]): Double =
+      val prevAgent = getAgentFromId(entity, prev)
+      val movementReward = if prevAgent.position == entity.position then -1.0 else 0.1
+      val distances = entity.senseAll[Id](current.environment).proximityReadings.map(_.value)
+      val distanceFromObstacles = distances.sum
+      val prevDistanceFromObstacles = prevAgent.senseAll[Id](prev.environment).proximityReadings.map(_.value).sum
+      val clearanceReward = if distanceFromObstacles > prevDistanceFromObstacles then 1.0 else -1.0
+      val collisionReward =
+        if distances.foldLeft(1.0)((acc, v) => min(acc, v)) < CollisionTriggerDistance then -100 else 0
+      logger.info(
+        s"SimpleObstacleAvoidance - movementReward: $movementReward, clearanceReward: $clearanceReward, collisionReward: $collisionReward",
+      )
+      movementReward + clearanceReward + collisionReward
+
 end ObstacleAvoidanceRewardModule
