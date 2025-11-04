@@ -1,7 +1,12 @@
 package io.github.srs.model.entity.dynamicentity.agent.termination
 
+import java.util.UUID
+
+import scala.collection.mutable
+
 import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.ModelModule.BaseState
+import io.github.srs.model.entity.Entity
 
 /**
  * Defines a termination model for evaluating the outcomes of actions performed by agents in the simulation.
@@ -12,16 +17,32 @@ import io.github.srs.model.ModelModule.BaseState
 trait TerminationModel[E]:
   def evaluate(prev: BaseState, current: BaseState, entity: E, action: Action[?]): Boolean
 
+trait TerminationStateManager[E <: Entity, S]:
+  val states: mutable.Map[UUID, S] = mutable.Map.empty[UUID, S]
+
+  def createState(): S
+
+  def getOrCreateState(entityId: UUID): S = states.getOrElseUpdate(entityId, createState())
+
+  def updateState(entityId: UUID, nextState: S): Unit =
+    states.update(entityId, nextState)
+
+  def resetState(entityId: UUID): Unit =
+    states.update(entityId, createState())
+
+  def resetAll(): Unit =
+    states.clear()
+
 /**
  * A termination model that maintains internal state to evaluate action outcomes.
  *
- * @param E
+ * @tparam E
  *   The type of entity for which the termination model is applicable.
- * @param S
+ * @tparam S
  *   The type of internal state maintained by the termination model.
  */
-trait StatefulTermination[E, S] extends TerminationModel[E]:
-  protected var state: S
+trait StatefulTermination[E <: Entity, S] extends TerminationModel[E]:
+  protected def stateManager: TerminationStateManager[E, S]
 
   protected def compute(
       prev: BaseState,
@@ -37,7 +58,10 @@ trait StatefulTermination[E, S] extends TerminationModel[E]:
       entity: E,
       action: Action[?],
   ): Boolean =
-    val (reward, next) = compute(prev, curr, entity, action, state)
-    state = next
+    if curr.elapsedTime.toMillis == 100 then stateManager.resetAll() // This is the first state after an episode
+    val state = stateManager.getOrCreateState(entity.id)
+    val (reward, nextState) = compute(prev, curr, entity, action, state)
+    stateManager.updateState(entity.id, nextState)
     reward
+
 end StatefulTermination
