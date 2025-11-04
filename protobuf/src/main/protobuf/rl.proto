@@ -32,6 +32,13 @@ message InitResponse {
 message Observation {
   repeated double proximity_values = 1; // Fixed size: 8 values
   repeated double light_values = 2;     // Fixed size: 8 values
+  double orientation = 3;               // Degree [0,360)
+
+  message Position {
+    double x = 1;
+    double y = 2;
+  }
+  Position position = 4;
 }
 
 message ResetResponse {

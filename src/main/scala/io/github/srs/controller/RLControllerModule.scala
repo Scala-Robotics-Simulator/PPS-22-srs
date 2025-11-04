@@ -1,27 +1,32 @@
 package io.github.srs.controller
 
-import cats.effect.unsafe.implicits.global
-import io.github.srs.model.ModelModule
-import io.github.srs.config.SimulationConfig
-import io.github.srs.model.environment.ValidEnvironment
-import io.github.srs.utils.random.RNG
-import io.github.srs.model.entity.dynamicentity.action.Action
 import cats.Id
-import io.github.srs.model.Simulation.simulation
-import io.github.srs.model.logic.RLLogicsBundle
-import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings
-import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
-import io.github.srs.view.rendering.EnvironmentRenderer
-import io.github.srs.model.entity.dynamicentity.agent.Agent
-import io.github.srs.controller.message.DynamicEntityProposal
 import cats.effect.IO
-import io.github.srs.utils.random.SimpleRNG
-import io.github.srs.model.entity.dynamicentity.action.NoAction
+import cats.effect.unsafe.implicits.global
+import io.github.srs.config.SimulationConfig
+import io.github.srs.controller.message.DynamicEntityProposal
 import io.github.srs.logger
+import io.github.srs.model.ModelModule
+import io.github.srs.model.Simulation.simulation
+import io.github.srs.model.entity.dynamicentity.action.{ Action, NoAction }
+import io.github.srs.model.entity.dynamicentity.agent.Agent
+import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
+import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings
+import io.github.srs.model.environment.ValidEnvironment
+import io.github.srs.model.logic.RLLogicsBundle
+import io.github.srs.utils.random.{ RNG, SimpleRNG }
+import io.github.srs.view.rendering.EnvironmentRenderer
+import io.github.srs.model.entity.Point2D.*
 
 object RLControllerModule:
 
-  type Observations = Map[Agent, SensorReadings]
+  final case class AgentObservation(
+      sensorReadings: SensorReadings,
+      position: (Double, Double),
+      orientation: Double,
+  )
+
+  type Observations = Map[Agent, AgentObservation]
   type Infos = Map[Agent, String]
   type Rewards = Map[Agent, Double]
   type Terminateds = Map[Agent, Boolean]
@@ -194,7 +199,10 @@ object RLControllerModule:
 
       def getObservations: Observations =
         env.entities.collect { case a: Agent =>
-          a -> a.senseAll[Id](env)
+          val sensors = a.senseAll[Id](env)
+          val position = (a.position.x, a.position.y)
+          val orientation = a.orientation.degrees
+          a -> AgentObservation(sensors, position, orientation)
         }.toMap
 
       def getInfos: Infos =

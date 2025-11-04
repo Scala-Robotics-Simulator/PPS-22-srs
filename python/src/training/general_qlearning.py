@@ -1,12 +1,12 @@
-import logging
 import numpy as np
 import pygame
 from agent.qagent import QAgent
 from pygame import Surface
 from pygame.time import Clock
 from tqdm import trange
+from utils.log import Logger
 
-logger = logging.getLogger(__name__)
+logger = Logger(__name__)
 
 
 class QLearning:
@@ -44,7 +44,7 @@ class QLearning:
         self.episode_max_steps = max_steps_per_episode
         self.learning_history = {agent_id: [] for agent_id in agents.keys()}
 
-    async def _run_episode(
+    def _run_episode(
         self,
         render: bool,
         record_history: bool,
@@ -84,7 +84,7 @@ class QLearning:
             - episode_history : dict | None
                 Step-by-step episode data if `record_history=True`.
         """
-        obs, _ = await self.env.reset()
+        obs, _ = self.env.reset()
         done = dict.fromkeys(self.agents.keys(), False)
         total_reward = dict.fromkeys(self.agents.keys(), 0)
         episode_history = (
@@ -101,7 +101,7 @@ class QLearning:
                 for k, v in obs.items()
             }
 
-            next_obs, rewards, terminateds, truncateds, _ = await self.env.step(actions)
+            next_obs, rewards, terminateds, truncateds, _ = self.env.step(actions)
 
             for agent_id in self.agents.keys():
                 if (
@@ -143,7 +143,7 @@ class QLearning:
             step_count += 1
 
             if render:
-                rgb_array = await self.env.render()
+                rgb_array = self.env.render()
                 _render_frame(rgb_array, screen, clock)
                 running = _check_quit_event()
                 if not running:
@@ -164,7 +164,7 @@ class QLearning:
 
         return total_reward, step_count, running, episode_history
 
-    async def train(
+    def train(
         self, render: bool = False, record_history: bool = True
     ) -> dict[str, list[float]]:
         """
@@ -193,7 +193,7 @@ class QLearning:
             screen, clock = _init_render("Q-Learning Multi-Agent Training")
 
         for ep in trange(self.episode_count, desc="Training", unit="ep"):
-            total_reward, step_count, _running, _ = await self._run_episode(
+            total_reward, step_count, _running, _ = self._run_episode(
                 render, record_history, ep, training=True, screen=screen, clock=clock
             )
             for agent_id in self.agents.keys():
@@ -206,7 +206,7 @@ class QLearning:
 
         return rewards_per_agent
 
-    async def evaluate(
+    def evaluate(
         self,
         test_episode_count: int = 100,
         max_steps_per_episode: int or None = None,
@@ -254,7 +254,7 @@ class QLearning:
 
         _running = True
         for ep in trange(test_episode_count, desc="Evaluation", unit="ep"):
-            total_reward, step_count, _running, _ = await self._run_episode(
+            total_reward, step_count, _running, _ = self._run_episode(
                 render,
                 record_history=False,
                 episode_idx=ep,

@@ -4,10 +4,9 @@ import scala.collection.mutable
 
 import com.typesafe.scalalogging.Logger
 import io.github.srs.model.ModelModule.BaseState
-import io.github.srs.model.entity.Point2D.*
 import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.agent.Agent
-import io.github.srs.model.environment.Environment
+import io.github.srs.utils.SpatialUtils.{ discreteCell, estimateCoverage }
 
 /**
  * Represents the state for an exploration-based termination condition. Tracks which cells in the environment have been
@@ -39,7 +38,7 @@ private object ExplorationTerminationStateManager extends TerminationStateManage
  */
 final case class ExplorationCoverageTermination(
     coverageThreshold: Double = 0.8,
-    cellSize: Double = 1.0,
+    cellSize: Double = 0.5, // 1,
 ) extends StatefulTermination[Agent, ExplorationState]:
 
   private val logger = Logger(getClass.getName)
@@ -49,13 +48,6 @@ final case class ExplorationCoverageTermination(
 
   /**
    * Computes whether the exploration termination condition has been met.
-   *
-   * This function:
-   *   - Determines which cell the agent currently occupies.
-   *   - Marks that cell as visited.
-   *   - Estimates total number of environment cells.
-   *   - Computes the ratio of visited to total cells.
-   *   - Returns true if the coverage threshold is reached or exceeded.
    *
    * @param prev
    *   previous simulation state
@@ -78,33 +70,13 @@ final case class ExplorationCoverageTermination(
       state: ExplorationState,
   ): (Boolean, ExplorationState) =
 
-    val cellX = (entity.position.x / cellSize).toInt
-    val cellY = (entity.position.y / cellSize).toInt
-
-    state.visitedCells += ((cellX, cellY))
-
+    val currentCell = discreteCell(entity.position, cellSize)
+    state.visitedCells += currentCell
     logger.info(s"visitedCells: ${state.visitedCells.toList.toString()}")
 
-    val totalCells = estimateTotalCells(current.environment)
-    val coverage = state.visitedCells.size.toDouble / totalCells.toDouble
-    logger.info(s"coverage >= coverageThreshold: ${coverage >= coverageThreshold}")
+    val coverage = estimateCoverage(state.visitedCells, current.environment, cellSize)
     logger.info(f"Exploration: ${coverage * 100}%.2f%% area covered.")
 
     (coverage >= coverageThreshold, state)
-  end compute
 
-  /**
-   * Estimates the total number of discrete cells in the environment.
-   *
-   * @param env
-   *   the environment being explored
-   * @return
-   *   approximate number of total cells
-   */
-  private def estimateTotalCells(env: Environment): Int =
-    val width = env.width
-    val height = env.height
-    val nX = (width / cellSize).toInt
-    val nY = (height / cellSize).toInt
-    nX * nY
 end ExplorationCoverageTermination

@@ -186,6 +186,7 @@ def validate_yaml(env, yaml_content: str) -> bool:
     Replace this with actual validation logic.
     """
     ok, _ = env.init(yaml_content)
+    return ok
     if ok:
         pygame.init()
         screen = pygame.display.set_mode((800, 600))
@@ -260,9 +261,9 @@ def save_yaml(env, content: dict[str, Any], output_dir: str, index: int) -> str:
 def generate_multiple_environments(
     env,
     num_environments: int,
-    generator_config: dict[str, Any] | None = None,
+    generator_config: dict[str, Any] or None = None,
     output_dir: str = "resources/generated",
-    max_retries: int | None = 1000,
+    max_retries: int or None = 1000,
 ) -> list[str]:
     """
     Generate multiple VALID environment YAML files.
