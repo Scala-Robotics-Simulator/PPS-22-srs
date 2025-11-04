@@ -15,7 +15,6 @@ import io.github.srs.model.entity.Point2D.*
 import utils.types.CircularBuffer
 import io.github.srs.model.entity.dynamicentity.action.MovementAction
 import io.github.srs.model.ModelModule.BaseState
-import io.github.srs.logger
 
 object ObstacleAvoidanceRewardModule:
 
@@ -138,22 +137,38 @@ object ObstacleAvoidanceRewardModule:
   end ObstacleAvoidance
 
   final case class SimpleObstacleAvoidance() extends RewardModel[Agent]:
+    private val logger = Logger(getClass.getName)
+    private val SafeDistance = 0.1
 
     private def getAgentFromId(agent: Agent, state: BaseState): Agent =
       state.environment.entities.collectFirst { case a: Agent if a.id.equals(agent.id) => a }.getOrElse(agent)
 
     override def evaluate(prev: BaseState, current: BaseState, entity: Agent, action: Action[?]): Double =
       val prevAgent = getAgentFromId(entity, prev)
-      val movementReward = if prevAgent.position == entity.position then -1.0 else 0.1
       val distances = entity.senseAll[Id](current.environment).proximityReadings.map(_.value)
-      val distanceFromObstacles = distances.sum
-      val prevDistanceFromObstacles = prevAgent.senseAll[Id](prev.environment).proximityReadings.map(_.value).sum
-      val clearanceReward = if distanceFromObstacles > prevDistanceFromObstacles then 1.0 else -1.0
+
+      // Collision penalty (immediate danger)
       val collisionReward =
-        if distances.foldLeft(1.0)((acc, v) => min(acc, v)) < CollisionTriggerDistance then -100 else 0
-      logger.info(
-        s"SimpleObstacleAvoidance - movementReward: $movementReward, clearanceReward: $clearanceReward, collisionReward: $collisionReward",
-      )
-      movementReward + clearanceReward + collisionReward
+        if distances.exists(_ < CollisionTriggerDistance) then -100.0 else 0.0
+
+      // Proximity penalty (graduated based on closest obstacle)
+      val minDistance = if distances.isEmpty then Double.MaxValue else distances.foldLeft(1.0)((acc, v) => min(acc, v))
+      val proximityReward = minDistance match
+        case d if d < SafeDistance * 0.5 => -10.0 // Very close
+        case d if d < SafeDistance => -2.0 // Too close
+        case d if d < SafeDistance * 2 => 0.5 // Comfortable
+        case _ => 1.0 // Safe
+
+      // Small penalty for staying still (only if not in danger)
+      val movementReward =
+        if prevAgent.position == entity.position && minDistance > SafeDistance then -0.1 else 0.0
+
+      logger.info(s"Tick: ${current.elapsedTime.length / current.dt.length}")
+      logger.info(s"Proximity Reward: $proximityReward")
+      logger.info(s"Collision Reward: $collisionReward")
+      logger.info(s"Movement Reward: $movementReward")
+      proximityReward + collisionReward + movementReward
+    end evaluate
+  end SimpleObstacleAvoidance
 
 end ObstacleAvoidanceRewardModule
