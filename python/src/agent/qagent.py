@@ -98,7 +98,8 @@ class QAgent:
         -----
         """
         best_next = np.max(self.Q[next_state])
-        should_bootstrap = not terminated or truncated
+        should_bootstrap = not terminated
+
         target = reward + (self.gamma * best_next if should_bootstrap else 0)
         self.Q[state, action] = (1 - self.alpha) * self.Q[
             state, action
