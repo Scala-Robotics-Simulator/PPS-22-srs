@@ -27,12 +27,16 @@ object PhototaxisReward:
 
   final case class Phototaxis() extends RewardModel[Agent]:
 
-    private val ProgressScale = 10.0
+    private val ProgressScale = 20.0
     private val StepPenalty = -0.01
     private val GoalBonus = 800.0
-    private val FailurePenalty = -500.0
+    private val FailurePenalty = -350.0
 
     private val NoLightThreshold = 0.01 // Sync with Environment
+
+    // avoiding farming near the goal (attractor vector inside a bubble)
+    private val GoalProximityRadius = 1.5
+    private val TractorBeamScale = 0.2
 
     override def evaluate(
         prev: BaseState,
@@ -58,12 +62,19 @@ object PhototaxisReward:
             val agentPrev = getAgent(prev.environment, entity)
             val prevDist = distanceToNearestLight(prev.environment, agentPrev)
             val currDist = distanceToNearestLight(current.environment, agentNow)
-            val progress = prevDist - currDist
 
-            val rProgress =
-              if progress.isNaN then 0.0
-              else ProgressScale * progress
-            rProgress + StepPenalty
+            if currDist < GoalProximityRadius then
+              val attractorEffect = (GoalProximityRadius - currDist) * TractorBeamScale
+              attractorEffect + StepPenalty
+            else
+              val progress = prevDist - currDist
+
+              val rProgress =
+                if progress.isNaN then 0.0
+                else ProgressScale * progress
+              rProgress + StepPenalty
+        end if
+
       end if
     end evaluate
   end Phototaxis
