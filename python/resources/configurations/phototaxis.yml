@@ -14,7 +14,7 @@ environment:
               speed: 1.0
               reward: Phototaxis
               termination: LightReached
-              truncation: CollisionDetection
+              truncation: NeverTruncate
         - light:
               position: [8.0, 8.0]
               intensity: 1.0
