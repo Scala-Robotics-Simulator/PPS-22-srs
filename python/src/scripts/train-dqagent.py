@@ -23,7 +23,8 @@ import nest_asyncio
 import tensorflow as tf
 
 from agent.scala_dqagent import DQAgent
-from environment.deepqlearning.obstacle_avoidance_env import ObstacleAvoidanceEnv
+from environment.deepqlearning.obstacle_avoidance_env import \
+    ObstacleAvoidanceEnv
 from training.dqnetwork import DQNetwork
 from training.multi_agent_dqlearning import DQLearning
 from utils.log import Logger
@@ -268,6 +269,7 @@ def main() -> None:
     # Init environment
     env = resolve_env(args.env, server_address, args.client_name)
     env.connect_to_client()
+    env.init(configs[0])
 
     action_net = DQNetwork(
         env.observation_space.shape,
