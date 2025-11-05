@@ -135,7 +135,7 @@ def parse_args() -> argparse.Namespace:
         "--env",
         type=str,
         default=DEFAULTS["env"],
-        help="Environmen to use (for observations and actions)",
+        help="Environment to use (for observations and actions)",
     )
 
     p.add_argument(
@@ -152,7 +152,7 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument(
         "--light-has-no-light-state",
-        action="store_true",
+        action="store_false",
         help="Add +1 state for 'no light' (e.g., light8 -> 9 states)",
     )
     p.add_argument("--light-intensity-bins", type=int, default=1)
@@ -167,7 +167,7 @@ def parse_args() -> argparse.Namespace:
         "--prox-thresholds",
         type=float,
         nargs="*",
-        default=None,  # Use the env's default [0.03, 0.15]
+        default=None,
         help="Bin thresholds, e.g., --prox-thresholds 0.2 0.6",
     )
     return p.parse_args()
