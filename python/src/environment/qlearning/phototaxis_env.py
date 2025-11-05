@@ -36,7 +36,10 @@ class PhototaxisEnv(AbstractEnv):
 
         # defaults for thresholds
         if prox_thresholds is None:
-            prox_thresholds = [0.03, 0.15]
+            if prox_intensity_bins == 2:
+                prox_thresholds = [0.15]
+            elif prox_intensity_bins == 3:
+                prox_thresholds = [0.03, 0.15]
         if light_intensity_thresholds is None:
             light_intensity_thresholds = [0.2, 0.6]
 
