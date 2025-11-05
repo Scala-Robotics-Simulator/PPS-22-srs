@@ -138,7 +138,7 @@ object ObstacleAvoidanceRewardModule:
 
   final case class SimpleObstacleAvoidance() extends RewardModel[Agent]:
     private val logger = Logger(getClass.getName)
-    private val SafeDistance = 0.1
+    private val SafeDistance = 0.2
 
     private def getAgentFromId(agent: Agent, state: BaseState): Agent =
       state.environment.entities.collectFirst { case a: Agent if a.id.equals(agent.id) => a }.getOrElse(agent)
@@ -154,7 +154,7 @@ object ObstacleAvoidanceRewardModule:
       // Proximity penalty (graduated based on closest obstacle)
       val minDistance = if distances.isEmpty then Double.MaxValue else distances.foldLeft(1.0)((acc, v) => min(acc, v))
       val proximityReward = minDistance match
-        case d if d < SafeDistance * 0.5 => -2.0 // Very close
+        case d if d < SafeDistance * 0.1 => -2.0 // Very close
         case d if d < SafeDistance => -0.2 // Too close
         case _ => 0.1 // Safe
 
@@ -163,19 +163,22 @@ object ObstacleAvoidanceRewardModule:
         math.pow(entity.position.x - prevAgent.position.x, 2) +
           math.pow(entity.position.y - prevAgent.position.y, 2),
       )
-      val movementReward = displacement * 100
+      // val movementReward = displacement * 100
 
       // Small penalty for staying still (only if not in danger)
       val rotationPenalty =
-        if displacement < 0.001 && prevAgent.position == entity.position then -2.0 else 0.0
+        if displacement < 0.001 && prevAgent.position == entity.position && minDistance > SafeDistance then -1.0
+        else 0.0
 
       logger.info(s"Tick: ${current.elapsedTime.length / current.dt.length}")
       logger.info(s"Proximity Reward: $proximityReward")
       logger.info(s"Collision Reward: $collisionReward")
       logger.info(s"Displacement: $displacement")
-      logger.info(s"Movement Reward: $movementReward")
+      // logger.info(s"Movement Reward: $movementReward")
       logger.info(s"Rotation Penalty: $rotationPenalty")
-      proximityReward + collisionReward + movementReward + rotationPenalty
+      val total = proximityReward + collisionReward + rotationPenalty
+      logger.info(s"Total Reward: $total")
+      total
     end evaluate
   end SimpleObstacleAvoidance
 

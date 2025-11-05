@@ -15,6 +15,7 @@ import io.github.srs.model.ModelModule.BaseState
 enum Reward(val name: String) derives CanEqual:
   case NoReward extends Reward("NoReward")
   case ObstacleAvoidance extends Reward("ObstacleAvoidance")
+  case SimpleObstacleAvoidance extends Reward("SimpleObstacleAvoidance")
   case Phototaxis extends Reward("Phototaxis")
 
   /**
@@ -35,6 +36,8 @@ enum Reward(val name: String) derives CanEqual:
     this match
       case NoReward => 0.0
       case ObstacleAvoidance =>
+        ObstacleAvoidanceRewardModule.ObstacleAvoidance().evaluate(prev, current, entity, action)
+      case SimpleObstacleAvoidance =>
         ObstacleAvoidanceRewardModule.SimpleObstacleAvoidance().evaluate(prev, current, entity, action)
       case Phototaxis =>
         PhototaxisRewardModule.Phototaxis().evaluate(prev, current, entity, action)
