@@ -1,4 +1,4 @@
-package io.github.srs.model.entity.dynamicentity.agent.termination
+package io.github.srs.model.entity.dynamicentity.agent.truncation
 
 import scala.math.min
 
