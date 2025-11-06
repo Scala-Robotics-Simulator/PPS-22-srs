@@ -25,6 +25,7 @@ from environment.qlearning.obstacle_avoidance_env import ObstacleAvoidanceEnv
 from environment.qlearning.phototaxis_env import PhototaxisEnv
 from utils.log import Logger
 from utils.reader import get_yaml_path, read_file
+from utils.reproducibility import set_global_seed
 
 nest_asyncio.apply()
 
@@ -247,6 +248,7 @@ def run_episodes(
 
 def main() -> None:
     args = parse_args()
+    set_global_seed(seed=42)
 
     config_path = get_yaml_path(*args.config_root)
     yml_files = list(config_path.glob("*.yml"))

@@ -12,29 +12,42 @@ class ObstacleAvoidanceEnv(AbstractEnv):
 
     def __init__(self, server_address, client_name) -> None:
         super().__init__(server_address, client_name)
-        self.observation_space = spaces.MultiDiscrete([3] * 8)
-        self.observation_space_n = 3**8
+        self._bin_values = 4
+        self._bin_num = 3
+        self.observation_space = spaces.MultiDiscrete(
+            [self._bin_values] * self._bin_num
+        )
+        self.observation_space_n = self._bin_values**self._bin_num
         self.actions = [
             (1.0, 1.0),  # forward
             (1.0, -1.0),  # left
             (-1.0, 1.0),  # right
+            (1.0, 0.0),  # soft right
+            (0.0, 1.0),  # soft left
         ]
         self.action_space = spaces.Discrete(len(self.actions))
 
     def _encode_observation(self, proximity_values, _):
         bins = []
-        for val in proximity_values:
-            if val < 0.02:
+        values = [
+            proximity_values[0],
+            proximity_values[1],
+            proximity_values[7],
+        ]
+        for val in values:
+            if val < 0.1:
                 bins.append(0)
-            elif val < 0.2:
+            elif val < 0.3:
                 bins.append(1)
-            else:
+            elif val < 0.6:
                 bins.append(2)
+            else:
+                bins.append(3)
 
         # Convert to unique state ID
         state = 0
         for i, b in enumerate(bins):
-            state += b * (3**i)
+            state += b * (self._bin_values**i)
         return state
 
     def _decode_action(self, action):
