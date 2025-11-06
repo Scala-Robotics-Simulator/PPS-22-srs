@@ -89,7 +89,8 @@ class QAgent:
             Whether the episode has ended.
         """
         best_next = np.max(self.Q[next_state])
-        target = reward + (0 if done else self.gamma * best_next)
+        should_bootstrap = not done
+        target = reward + (self.gamma * best_next if should_bootstrap else 0)
         self.Q[state, action] = (1 - self.alpha) * self.Q[
             state, action
         ] + self.alpha * target

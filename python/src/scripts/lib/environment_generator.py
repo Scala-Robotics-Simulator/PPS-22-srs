@@ -68,8 +68,8 @@ class EnvironmentGenerator:
                 "orientation": round(float(orientation), 1),
                 "speed": self.agent_speed,
                 "reward": "ObstacleAvoidance",
-                "termination": "EndSimulationTermination",
-                "truncation": "CollisionDetection",
+                "termination": "CollisionDetection",
+                "truncation": "EndSimulationTruncation",
             }
         }
 
