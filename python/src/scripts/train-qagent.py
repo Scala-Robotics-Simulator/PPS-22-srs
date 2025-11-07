@@ -3,7 +3,7 @@
 train.py — Headless training runner for Phototaxis Q-Learning.
 
 Saved commands:
-python3 train-qagent.py --config-root src scripts resources generated obstacle-avoidance --episodes 1000 --steps 5000 --checkpoint-dir src scripts resources generated obstacle-avoidance checkpoints --env oa --window-size 50
+python3 train-qagent.py --config-root src scripts resources generated obstacle-avoidance --episodes 1000 --steps 5000 --checkpoint-dir src scripts resources generated obstacle-avoidance checkpoints --env oa --window-size 50 --alpha 0.5
 """
 
 from __future__ import annotations
@@ -46,6 +46,7 @@ DEFAULTS = {
     "start_episode": 0,
     "client_name": "PhototaxisRLClient",
     "env": "phototaxis",
+    "alpha": 0.5,
 }
 FIXED_AGENT_ID = "00000000-0000-0000-0000-000000000001"
 
@@ -134,6 +135,12 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULTS["env"],
         help="Environmen to use (for observations and actions)",
     )
+    p.add_argument(
+        "--alpha",
+        type=float,
+        default=DEFAULTS["alpha"],
+        help="Learning rate for the Q-Agent.",
+    )
     return p.parse_args()
 
 
@@ -164,6 +171,7 @@ def print_effective_config(
     logger.info(f"  load_checkpoint    : {args.load_checkpoint or 'None'}")
     logger.info(f"  start_episode      : {args.start_episode}")
     logger.info(f"  env                : {args.env}")
+    logger.info(f"  alpha              : {args.alpha}")
     logger.info("========================\n")
 
 
@@ -267,7 +275,7 @@ def main() -> None:
     env.connect_to_client()
 
     # Agent(s)
-    agent = QAgent(env, episodes=args.episodes)
+    agent = QAgent(env, episodes=args.episodes, alpha=args.alpha)
     agents = {FIXED_AGENT_ID: agent}
 
     # Compute checkpoint base & show effective settings

@@ -50,7 +50,7 @@ object ObstacleAvoidanceRewardModule:
       val currentMin = distanceFromObstacle(current.environment, entity)
       val rExpl = explorationReward(entity, state) * 0 // TODO: remove if this works
       val rClear = clearanceReward(prev.environment, current.environment, entity)
-      val rColl = if currentMin < CollisionTriggerDistance then -250.0 else 0.0
+      val rColl = if currentMin < CollisionTriggerDistance then -1000.0 else 0.0
       val prevAgent = getAgentFromId(entity, prev)
       val rMove = moveReward(entity, prevAgent, action, currentMin)
 
