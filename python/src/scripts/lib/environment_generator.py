@@ -67,9 +67,9 @@ class EnvironmentGenerator:
                 "position": [round(float(pos[0]), 1), round(float(pos[1]), 1)],
                 "orientation": round(float(orientation), 1),
                 "speed": self.agent_speed,
-                "reward": "ObstacleAvoidance",
-                "termination": "CollisionDetection",
-                "truncation": "EndSimulationTruncation",
+                "reward": "NoReward",
+                "termination": "NeverTerminate",
+                "truncation": "NeverTruncate",
             }
         }
 
@@ -186,7 +186,6 @@ def validate_yaml(env, yaml_content: str) -> bool:
     Replace this with actual validation logic.
     """
     ok, _ = env.init(yaml_content)
-    return ok
     if ok:
         pygame.init()
         screen = pygame.display.set_mode((800, 600))

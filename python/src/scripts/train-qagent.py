@@ -223,7 +223,11 @@ def run_episodes(
 
                 for k in next_obs.keys():
                     agents[k].update_q(
-                        obs[k], actions[k], rewards[k], next_obs[k], done
+                        state=obs[k],
+                        action=actions[k],
+                        reward=rewards[k],
+                        next_state=next_obs[k],
+                        done=done,
                     )
                     total_reward[k] += float(rewards[k])
 
