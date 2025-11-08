@@ -204,16 +204,6 @@ object RLServiceModule:
             val (de, a) = self
             de.id.toString -> f(a)
 
-//        extension (self: (DynamicEntity, SensorReadings))
-//
-//          def toObservationPair: (String, Observation) =
-//            self.to(readings =>
-//              Observation(
-//                proximityValues = readings.proximityReadings.map(_.value),
-//                lightValues = readings.lightReadings.map(_.value),
-//              ),
-//            )
-
         extension (self: (DynamicEntity, RLControllerModule.AgentObservation))
 
           def toObservationPair: (String, Observation) =

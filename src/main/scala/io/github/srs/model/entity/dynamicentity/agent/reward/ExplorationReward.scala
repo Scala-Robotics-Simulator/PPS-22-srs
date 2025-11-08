@@ -1,11 +1,10 @@
 package io.github.srs.model.entity.dynamicentity.agent.reward
 
-import scala.collection.mutable
-
 import cats.Id
 import com.typesafe.scalalogging.Logger
 import io.github.srs.model.ModelModule.BaseState
 import io.github.srs.model.entity.Point2D
+import io.github.srs.model.entity.Point2D.distanceTo
 import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.agent.Agent
 import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
@@ -13,27 +12,40 @@ import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings.proximityR
 import io.github.srs.model.environment.Environment
 import io.github.srs.utils.EqualityGivenInstances.given_CanEqual_T_T
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Agent.CollisionAvoidance.CollisionTriggerDistance
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.Agent.CoverageTermination.{
+  CellSize,
+  CoverageThreshold,
+  WindowStuck,
+}
 import io.github.srs.utils.SpatialUtils.{ discreteCell, estimateCoverage }
 import utils.types.CircularBuffer
 
 object ExplorationReward:
 
+  private val StuckPenalty: Double = -1.0
+  private val NotStuckBonus: Double = +0.5
+  private val CollidingPenalty: Double = -100.0
+  private val MilestoneBonus: Double = +5.0
+  private val ExplorationBonus: Double = +5.0
+  private val CoverageBonus: Double = +500.0
+  private val NotBonus: Double = 0.0
+
+  private val Percent: Double = 100
+  private val logger = Logger(getClass.getName)
+
   case class ExplorationState(
       var ticks: Int = 0,
-      positions: CircularBuffer[Point2D] = CircularBuffer(200),
+      positions: List[Point2D] = List.empty,
       actionHistory: CircularBuffer[Action[?]] = CircularBuffer(200),
-      visitedCells: mutable.Set[(Int, Int)] = mutable.Set(),
-      achievedMilestones: mutable.Set[Double] = mutable.Set(),
-      var explorationComplete: Boolean = false,
+      visitedCells: Set[(Int, Int)] = Set.empty,
+      achievedMilestones: Set[Int] = Set.empty,
       maxTicks: Int = 10_000,
   )
 
   private object ExplorationRewardStateManager extends RewardStateManager[Agent, ExplorationState]:
     override def createState(): ExplorationState = ExplorationState()
 
-  final case class Exploration(cellSize: Double = 0.5, coverageScaling: Double = 100.0)
-      extends StatefulReward[Agent, ExplorationState]:
-    private val logger = Logger(getClass.getName)
+  final case class Exploration() extends StatefulReward[Agent, ExplorationState]:
 
     override protected def stateManager: RewardStateManager[Agent, ExplorationState] =
       ExplorationRewardStateManager
@@ -47,68 +59,51 @@ object ExplorationReward:
     ): (Double, ExplorationState) =
 
       val newTick = state.ticks + 1
-      val updatedPositions = state.positions.add(entity.position)
+      val updatedPositions = entity.position :: state.positions
 
       // stuck
-      val stuckWindow = 10
-      val isStuck =
-        if updatedPositions.sizeIs >= stuckWindow then
-          val recentPositions = updatedPositions.takeRight(stuckWindow)
-          recentPositions.headOption.exists(head => recentPositions.forall(_ == head))
-        else false
-      val stuckReward = if isStuck then -1.0 else +0.5
+      val isStuck = isAgentStuck(updatedPositions, WindowStuck)
+      val stuckReward = if isStuck then StuckPenalty else NotStuckBonus
 
-      // collide
+      // collision
       val currentMin = distanceFromObstacle(current.environment, entity)
-      val collidingReward = if currentMin < CollisionTriggerDistance then -100.0 else 0.0
+      val collidingReward = if currentMin < CollisionTriggerDistance then CollidingPenalty else NotBonus
+
+      // exploration new cell
+      val currentCell = discreteCell(entity.position, CellSize)
+      val isNewCell = !state.visitedCells.contains(currentCell)
+      val updatedVisited = if isNewCell then state.visitedCells + currentCell else state.visitedCells
+      val explorationReward = if isNewCell then ExplorationBonus else NotBonus
 
       // bonus milestone coverage
-      val currentCell = discreteCell(entity.position, cellSize)
-      state.visitedCells += currentCell
-      val coverage = estimateCoverage(state.visitedCells, current.environment, cellSize)
-      val milestones = (1 to 100).map(_ * 0.1) // 1%, 2%, ..., 100%
-      val eps = 1e-6
-      val milestoneReward = +50.0
-      val newMilestones = milestones.filter { m =>
-        coverage + eps >= m && !state.achievedMilestones.exists(am => math.abs(am - m) < eps)
-      }
-      newMilestones.foreach(state.achievedMilestones.add)
-      val milestoneBonus = newMilestones.size * milestoneReward
-      val updateAchieved = state.achievedMilestones ++ newMilestones
+      val coverage = estimateCoverage(updatedVisited, current.environment, CellSize)
+      val currentPercent = math.floor(coverage * Percent).toInt
+      val achieved = state.achievedMilestones
+      val newMilestones = (1 to currentPercent).filterNot(achieved.contains).toSet
+      val milestonesReward = newMilestones.map(m => m * MilestoneBonus).sum
+      val updateMilestones = achieved ++ newMilestones
 
       // final bonus
-      val finalCoverageThreshold = 0.8
-      val finalReward = +500
-      val completionBonus: Double =
-        if !state.explorationComplete && coverage >= finalCoverageThreshold then
-          state.explorationComplete = true
-          finalReward
-        else 0.0
-
-      val isNewCell = !state.visitedCells.contains(currentCell)
-      val explorationReward = if isNewCell then +5.0 else 0.0
+      val completionReward: Double = if coverage >= CoverageThreshold then CoverageBonus else NotBonus
 
       val reward =
-        milestoneBonus + // +50.0 una volta a ogni milestone raggiunta oppure 0.0
-          completionBonus + // +500.0 oppure 0.0
-          collidingReward + // -100.0 oppure 0.0
-          stuckReward + // -1.0 oppure 0.5
-          explorationReward // +5.0 oppure 0.0
+        milestonesReward + // +5.0 * milestone.size or 0.0
+          completionReward + // +500.0 or 0.0
+          collidingReward + // -100.0 or 0.0
+          stuckReward + // -1.0 or 0.5
+          explorationReward // +5.0 or 0.0
 
       logger.info(
-        f"TICK [$newTick] colliding=$collidingReward stuck=$stuckReward coverage=$coverage " +
-          f"milestone=$milestoneBonus | reward=$reward ",
-//          f"milestones=${state.achievedMilestones.toList.sorted.mkString(",")} " +
-//          f"final=${state.explorationComplete}"
+        f"TICK [$newTick] colliding=$collidingReward stuck=$stuckReward coverage=$coverage exploration=$explorationReward " +
+          f"milestone=$milestonesReward completion=$completionReward | reward=$reward ",
       )
 
       val newState = state.copy(
         ticks = newTick,
-        positions = updatedPositions,
         actionHistory = state.actionHistory.add(action),
-        visitedCells = state.visitedCells,
-        achievedMilestones = updateAchieved,
-        explorationComplete = state.explorationComplete,
+        positions = updatedPositions,
+        visitedCells = updatedVisited,
+        achievedMilestones = updateMilestones,
         maxTicks = current.simulationTime.map(st => (st.toMillis / current.dt.toMillis).toInt).getOrElse(10_000),
       )
       (reward, newState)
@@ -119,5 +114,13 @@ object ExplorationReward:
       val agent =
         env.entities.collectFirst { case a: Agent if a.id.toString == entity.id.toString => a }.getOrElse(entity)
       agent.senseAll[Id](env).proximityReadings.foldLeft(1.0)((acc, sr) => math.min(acc, sr.value))
+
+    private def isAgentStuck(positions: List[Point2D], window: Int, tolerance: Double = 0.01): Boolean =
+      if positions.sizeIs >= window then
+        val recentPositions = positions.take(window)
+        recentPositions.headOption.exists { head =>
+          recentPositions.forall(p => head.distanceTo(p) < tolerance)
+        }
+      else false
   end Exploration
 end ExplorationReward

@@ -1,11 +1,10 @@
 package io.github.srs.model.entity.dynamicentity.agent.termination
 
-import scala.collection.mutable
-
 import com.typesafe.scalalogging.Logger
 import io.github.srs.model.ModelModule.BaseState
 import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.agent.Agent
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.Agent.CoverageTermination.{ CellSize, CoverageThreshold }
 import io.github.srs.utils.SpatialUtils.{ discreteCell, estimateCoverage }
 
 /**
@@ -15,9 +14,7 @@ import io.github.srs.utils.SpatialUtils.{ discreteCell, estimateCoverage }
  * @param visitedCells
  *   mutable set of visited cell coordinates represented as (x, y) tuples
  */
-final case class ExplorationState(
-    visitedCells: mutable.Set[(Int, Int)] = mutable.Set(),
-)
+final case class ExplorationState(visitedCells: Set[(Int, Int)] = Set.empty)
 
 private object ExplorationTerminationStateManager extends TerminationStateManager[Agent, ExplorationState]:
   /**
@@ -36,10 +33,7 @@ private object ExplorationTerminationStateManager extends TerminationStateManage
  * @param cellSize
  *   the size of each discretized cell in environment units (default: 1.0)
  */
-final case class ExplorationCoverageTermination(
-    coverageThreshold: Double = 0.8,
-    cellSize: Double = 0.5, // 1,
-) extends StatefulTermination[Agent, ExplorationState]:
+final case class CoverageTermination() extends StatefulTermination[Agent, ExplorationState]:
 
   private val logger = Logger(getClass.getName)
 
@@ -70,13 +64,19 @@ final case class ExplorationCoverageTermination(
       state: ExplorationState,
   ): (Boolean, ExplorationState) =
 
-    val currentCell = discreteCell(entity.position, cellSize)
-    state.visitedCells += currentCell
-    logger.info(s"visitedCells: ${state.visitedCells.toList.toString()}")
+    // exploration new cell
+    val currentCell = discreteCell(entity.position, CellSize)
+    val isNewCell = !state.visitedCells.contains(currentCell)
+    val updatedVisited = if isNewCell then state.visitedCells + currentCell else state.visitedCells
+    val coverage = estimateCoverage(updatedVisited, current.environment, CellSize)
 
-    val coverage = estimateCoverage(state.visitedCells, current.environment, cellSize)
     logger.info(f"Exploration: ${coverage * 100}%.2f%% area covered.")
+    val reachedGoal = coverage >= CoverageThreshold
+    logger.info(s"visitedCells: ${updatedVisited.toList.toString()}")
 
-    (coverage >= coverageThreshold, state)
+    val shouldTerminate = reachedGoal
+    val newState = state.copy(visitedCells = updatedVisited)
+    (shouldTerminate, newState)
+  end compute
 
-end ExplorationCoverageTermination
+end CoverageTermination

@@ -1,10 +1,13 @@
 package io.github.srs.model.entity.dynamicentity.agent.termination
 
-import io.github.srs.model.entity.dynamicentity.agent.termination.LightReached as LightReachedTerminationModel
-import io.github.srs.model.entity.dynamicentity.agent.termination.CollisionDetection as CollisionDetectionTerminationModel
-import io.github.srs.model.entity.dynamicentity.agent.Agent
-import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.ModelModule.BaseState
+import io.github.srs.model.entity.dynamicentity.action.Action
+import io.github.srs.model.entity.dynamicentity.agent.Agent
+import io.github.srs.model.entity.dynamicentity.agent.termination.{
+  CollisionDetection as CollisionDetectionTerminationModel,
+  CoverageTermination as CoverageTerminationModel,
+  LightReached as LightReachedTerminationModel,
+}
 
 /**
  * An enumeration of available termination models for agents.
@@ -17,6 +20,7 @@ enum Termination(val name: String) derives CanEqual:
   case LightReached extends Termination("LightReached")
   case CollisionDetection extends Termination("CollisionDetection")
   case CoverageTermination extends Termination("CoverageTermination")
+  case ExplorationTermination extends Termination("ExplorationTermination")
 
   /**
    * Evaluates whether the agent should terminate based on the state transition and action.
@@ -35,9 +39,20 @@ enum Termination(val name: String) derives CanEqual:
   def evaluate(prev: BaseState, current: BaseState, entity: Agent, action: Action[?]): Boolean =
     this match
       case NeverTerminate => false
-      case CoverageTermination => ExplorationCoverageTermination().evaluate(prev, current, entity, action)
-      case LightReached => LightReachedTerminationModel().evaluate(prev, current, entity, action)
-      case CollisionDetection => CollisionDetectionTerminationModel().evaluate(prev, current, entity, action)
+      case CoverageTermination => coverage(prev, current, entity, action)
+      case LightReached => lightReached(prev, current, entity, action)
+      case CollisionDetection => collision(prev, current, entity, action)
+      case ExplorationTermination =>
+        collision(prev, current, entity, action) || coverage(prev, current, entity, action)
+
+  private def coverage(prev: BaseState, current: BaseState, entity: Agent, action: Action[?]): Boolean =
+    CoverageTerminationModel().evaluate(prev, current, entity, action)
+
+  private def collision(prev: BaseState, current: BaseState, entity: Agent, action: Action[?]): Boolean =
+    CollisionDetectionTerminationModel().evaluate(prev, current, entity, action)
+
+  private def lightReached(prev: BaseState, current: BaseState, entity: Agent, action: Action[?]): Boolean =
+    LightReachedTerminationModel().evaluate(prev, current, entity, action)
 
   /**
    * String representation of the termination type.

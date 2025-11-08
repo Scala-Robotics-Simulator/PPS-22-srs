@@ -301,6 +301,11 @@ object SimulationDefaults:
       object CollisionAvoidance:
         val CollisionTriggerDistance: Double = 0.05
 
+      object CoverageTermination:
+        val CoverageThreshold: Double = 0.8
+        val CellSize: Double = 1.0
+        val WindowStuck: Int = 10
+
     end Agent
 
     object Robot:
