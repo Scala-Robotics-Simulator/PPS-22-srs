@@ -12,7 +12,7 @@
 #SBATCH --chdir=/scratch.hpc/simone.ceredi/test-run
 #SBATCH --gres=gpu:1
 PATH=$PATH:/scratch.hpc/simone.ceredi/jdk-21.0.9/bin
-java -jar PPS-22-srs-assembly-latest.jar --rl --port 50051 &
+java -jar PPS-22-srs-assembly-latest.jar --rl --port 50051 > /dev/null &
 sleep 10s
 source venv/bin/activate
 cd PPS-22-SRS/python
