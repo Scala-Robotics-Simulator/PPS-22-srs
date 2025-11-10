@@ -19,7 +19,7 @@ Say `yes` when prompted for stuff (`yes/no/fingerprint`).
 
 ```bash
 virtualenv wormhole
-~/wormhole/bin/pip3 install magic-wormhole
+~/wormhole/bin/pip3 install --no-cache-dir magic-wormhole
 ```
 
 2. To use magic wormhole you don't need to activate the venv, you can just use
@@ -34,6 +34,7 @@ Since 400MB of space aren't enough due to python dependecies create your persona
 
 ```bash
 mkdir -p /scratch.hpc/nome.cognome
+cd /scratch.hpc/nome.cognome
 ```
 
 ### Download jdk 21
