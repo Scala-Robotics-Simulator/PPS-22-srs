@@ -18,7 +18,7 @@ Say `yes` when prompted for stuff (`yes/no/fingerprint`).
 1. Create a venv dedicated to magic wormhole in a easily reachable place, e.g. `~/womhole`
 
 ```bash
-virtualenv wormhole
+python3 -m venv wormhole
 ~/wormhole/bin/pip3 install --no-cache-dir magic-wormhole
 ```
 
@@ -86,7 +86,7 @@ And receive it from the server
 #### Create the venv to execute the python script
 
 ```bash
-virtualenv venv
+python3 -m venv venv
 venv/bin/pip3 install --no-cache-dir -e PPS-22-srs/python/
 ```
 
