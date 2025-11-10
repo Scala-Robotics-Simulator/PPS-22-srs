@@ -4,7 +4,11 @@ import com.typesafe.scalalogging.Logger
 import io.github.srs.model.ModelModule.BaseState
 import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.agent.Agent
-import io.github.srs.utils.SimulationDefaults.DynamicEntity.Agent.CoverageTermination.{ CellSize, CoverageThreshold }
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.Agent.CoverageTermination.{
+  CellSize,
+  CoverageThreshold,
+  Percent,
+}
 import io.github.srs.utils.SpatialUtils.{ discreteCell, estimateCoverage }
 
 /**
@@ -70,7 +74,7 @@ final case class CoverageTermination() extends StatefulTermination[Agent, Explor
     val updatedVisited = if isNewCell then state.visitedCells + currentCell else state.visitedCells
     val coverage = estimateCoverage(updatedVisited, current.environment, CellSize)
 
-    logger.info(f"Exploration: ${coverage * 100}%.2f%% area covered.")
+    logger.info(f"Exploration: ${coverage * Percent}%.2f%% area covered.")
     val reachedGoal = coverage >= CoverageThreshold
     logger.info(s"visitedCells: ${updatedVisited.toList.toString()}")
 

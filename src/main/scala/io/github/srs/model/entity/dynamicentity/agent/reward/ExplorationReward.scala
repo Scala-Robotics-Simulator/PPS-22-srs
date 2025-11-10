@@ -12,11 +12,7 @@ import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings.proximityR
 import io.github.srs.model.environment.Environment
 import io.github.srs.utils.EqualityGivenInstances.given_CanEqual_T_T
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Agent.CollisionAvoidance.CollisionTriggerDistance
-import io.github.srs.utils.SimulationDefaults.DynamicEntity.Agent.CoverageTermination.{
-  CellSize,
-  CoverageThreshold,
-  WindowStuck,
-}
+import io.github.srs.utils.SimulationDefaults.DynamicEntity.Agent.CoverageTermination.*
 import io.github.srs.utils.SpatialUtils.{ discreteCell, estimateCoverage }
 import utils.types.CircularBuffer
 
@@ -30,7 +26,6 @@ object ExplorationReward:
   private val CoverageBonus: Double = +500.0
   private val NotBonus: Double = 0.0
 
-  private val Percent: Double = 100
   private val logger = Logger(getClass.getName)
 
   case class ExplorationState(

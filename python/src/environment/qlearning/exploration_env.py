@@ -8,7 +8,13 @@ from environment.abstract_env import AbstractEnv
 class ExplorationEnv(AbstractEnv):
     """Custom environment class for RL interaction via gRPC"""
 
-    def __init__(self, server_address, client_name) -> None:
+    def __init__(
+        self,
+        server_address,
+        client_name,
+        grid_size: tuple = (5, 5),
+        orientation_bins: int = 8,
+    ) -> None:
         super().__init__(server_address, client_name)
 
         self.actions = [
@@ -20,8 +26,8 @@ class ExplorationEnv(AbstractEnv):
         ]
         self.action_space = spaces.Discrete(len(self.actions))
 
-        self.grid_size = (5, 5)
-        self.orientation_bins = 8
+        self.grid_size = grid_size
+        self.orientation_bins = orientation_bins
         self.observation_space_n = (
             self.grid_size[0] * self.grid_size[1] * self.orientation_bins
         )

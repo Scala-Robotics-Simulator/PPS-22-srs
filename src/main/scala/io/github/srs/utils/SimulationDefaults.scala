@@ -305,6 +305,7 @@ object SimulationDefaults:
         val CoverageThreshold: Double = 0.8
         val CellSize: Double = 1.0
         val WindowStuck: Int = 10
+        val Percent: Double = 100
 
     end Agent
 
