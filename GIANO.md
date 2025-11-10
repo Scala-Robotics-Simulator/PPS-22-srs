@@ -83,13 +83,6 @@ And receive it from the server
 ~/wormhole/bin/wormhole receive [very nice randomly generated name]
 ```
 
-Go to where you want your environments to be located
-
-```bash
-cd inputs/python
-~/wormhole/bin/wormhole receive ...
-```
-
 #### Create the venv to execute the python script
 
 ```bash
