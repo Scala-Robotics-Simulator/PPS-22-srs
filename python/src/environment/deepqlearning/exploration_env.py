@@ -6,7 +6,7 @@ from environment.abstract_env import AbstractEnv
 
 
 class ExplorationEnv(AbstractEnv):
-    """Custom environment for Q-Learning Exploration via gRPC"""
+    """Custom environment for Deep Q-Learning Exploration via gRPC"""
 
     def __init__(
         self,
@@ -28,24 +28,22 @@ class ExplorationEnv(AbstractEnv):
 
         self.grid_size = grid_size
         self.orientation_bins = orientation_bins
-        self.observation_space_n = (
-            self.grid_size[0] * self.grid_size[1] * self.orientation_bins
+
+        # (x_norm, y_norm, orientation_norm)
+        self.observation_space = spaces.Box(
+            low=0.0,
+            high=1.0,
+            shape=(3,),
+            dtype=np.float32,
         )
-        self.observation_space = spaces.Discrete(self.observation_space_n)
 
     def _encode_observation(
         self, proximity_values, light_values, position, orientation
     ) -> int:
-        orientation_step = 360.0 / self.orientation_bins
-        orientation_idx = int((orientation % 360) / orientation_step)
-
-        x = int(np.clip(position.x, 0, self.grid_size[0] - 1))
-        y = int(np.clip(position.y, 0, self.grid_size[1] - 1))
-
-        state = x
-        state += y * self.grid_size[0]
-        state += orientation_idx * self.grid_size[0] * self.grid_size[1]
-        return state
+        x_norm = np.clip(position.x / (self.grid_size[0] - 1), 0.0, 1.0)
+        y_norm = np.clip(position.y / (self.grid_size[1] - 1), 0.0, 1.0)
+        orientation_norm = (orientation % 360.0) / 360.0
+        return np.array([x_norm, y_norm, orientation_norm], dtype=np.float32)
 
     def _decode_action(self, action) -> rl_pb2.ContinuousAction:
         left, right = self.actions[action]
