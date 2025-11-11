@@ -20,6 +20,7 @@ import io.github.srs.utils.SimulationDefaults.DynamicEntity.DefaultMaxRetries
 import io.github.srs.utils.SimulationDefaults.{ BinarySearchDurationThreshold, DebugMode }
 import io.github.srs.model.entity.dynamicentity.DynamicEntity
 import io.github.srs.model.BaseSimulationState
+import io.github.srs.model.entity.dynamicentity.agent.Agent
 
 /**
  * Logic for handling dynamic entities actions within the simulation.
@@ -113,8 +114,18 @@ object DynamicEntityActionsLogic:
                 .flatMap { candidate =>
                   env.updateEntity(candidate) match
                     case Right(_) => binarySearch(mid, high, Some(candidate), attempts + 1)
-                    case Left(_) => binarySearch(low, mid, best, attempts + 1)
+                    case Left(_) =>
+                      binarySearch(
+                        low,
+                        mid,
+                        best.map {
+                          case a: Agent => a.copy(didCollide = true)
+                          case e: DynamicEntity => e
+                        },
+                        attempts + 1,
+                      )
                 }
+          end match
 
       binarySearch(0.nanos, maxDt, None, 0)
     end safeMove
