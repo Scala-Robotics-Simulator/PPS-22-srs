@@ -24,6 +24,7 @@ import tensorflow as tf
 
 from agent.scala_dqagent import DQAgent
 from environment.deepqlearning.obstacle_avoidance_env import ObstacleAvoidanceEnv
+from environment.deepqlearning.exploration_env import ExplorationEnv
 from training.dqnetwork import DQNetwork
 from training.multi_agent_dqlearning import DQLearning
 from utils.log import Logger
@@ -48,8 +49,8 @@ DEFAULTS = {
     "steps": 5000,
     "window_size": 50,
     "checkpoint_dir": None,  # inferred from config basename
-    "client_name": "PhototaxisRLClient",
-    "env": "phototaxis",
+    "client_name": "RLClient",
+    "env": "exploration",
     "neurons": [64, 32],
     "epsilon_max": 1.0,
     "epsilon_min": 0.01,
@@ -71,7 +72,7 @@ def ensure_yml_suffix(name: str) -> str:
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(
-        description="Phototaxis Q-Learning trainer (headless). Uses config NAME, not path.",
+        description="Deep Q-Learning trainer (headless). Uses config NAME, not path.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     p.add_argument(
@@ -206,12 +207,15 @@ def parse_args() -> argparse.Namespace:
     return p.parse_args()
 
 
-def resolve_env(env_name: str, server_address: str, client_name: str):
+def resolve_env(env_name: str, server_address: str, client_name: str
+) -> ObstacleAvoidanceEnv | ExplorationEnv:
     match env_name:
         # case "phototaxis":
         #     return PhototaxisEnv(server_address, client_name)
         case "oa":
             return ObstacleAvoidanceEnv(server_address, client_name)
+        case "exploration":
+            return ExplorationEnv(server_address, client_name)
         case _:
             logger.error("Environment not found")
             exit(1)
