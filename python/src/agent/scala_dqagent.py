@@ -153,7 +153,7 @@ class DQAgent:
         self._predict_q_values = predict_q_values
         self._train_step = train_step
 
-    def choose_action(self, state: np.ndarray):
+    def choose_action(self, state: np.ndarray, epsilon_greedy: bool = True):
         """Select an action using epsilon-greedy policy.
 
         Parameters

@@ -4,6 +4,7 @@ import numpy as np
 from tqdm import trange
 
 from agent.qagent import QAgent
+from agent.scala_dqagent import DQAgent
 from environment.qlearning.exploration_env import ExplorationEnv
 from environment.qlearning.obstacle_avoidance_env import ObstacleAvoidanceEnv
 from environment.qlearning.phototaxis_env import PhototaxisEnv
@@ -11,7 +12,7 @@ from environment.qlearning.phototaxis_env import PhototaxisEnv
 
 def evaluate(
     env: PhototaxisEnv | ObstacleAvoidanceEnv | ExplorationEnv,
-    agents: dict[str, QAgent],
+    agents: dict[str, QAgent | DQAgent],
     configs: str,
     max_steps: int,
     did_succeed: Callable[[float, bool, bool], bool],
