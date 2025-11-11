@@ -28,7 +28,9 @@ class ObstacleAvoidanceEnv(AbstractEnv):
 
         self.action_space = spaces.Discrete(len(self.actions))
 
-    def _encode_observation(self, proximity_values, _):
+    def _encode_observation(
+        self, proximity_values, light_values, position, orientation
+    ):
         return np.array(proximity_values, dtype=np.float32)
 
     def _decode_action(self, action):
