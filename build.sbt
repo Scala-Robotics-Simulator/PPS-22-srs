@@ -1,6 +1,6 @@
 import Dependencies.*
 
-val scala3Version = "3.7.3"
+val scala3Version = "3.7.4"
 enablePlugins(JavaAppPackaging)
 dockerBaseImage := "openjdk:21"
 dockerRepository := Some("ghcr.io/scala-robotics-simulator")

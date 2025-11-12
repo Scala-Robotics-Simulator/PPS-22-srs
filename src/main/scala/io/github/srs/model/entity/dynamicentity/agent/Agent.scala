@@ -33,7 +33,7 @@ import io.github.srs.model.entity.dynamicentity.agent.truncation.Truncation
  *   The set of sensors that allows the agent to perceive its surroundings in the environment.
  */
 final case class Agent(
-    override val id: java.util.UUID = java.util.UUID.randomUUID(),
+    override val id: UUID = UUID.randomUUID(),
     override val position: io.github.srs.model.entity.Point2D = AgentDefaults.DefaultPosition,
     override val shape: ShapeType.Circle = AgentDefaults.DefaultShape,
     override val orientation: Orientation = AgentDefaults.DefaultOrientation,
@@ -68,7 +68,7 @@ object Agent:
    *   An instance of the [[Agent]] class with the specified or default attributes.
    */
   def apply(
-      id: UUID = UUID.randomUUID(),
+      id: UUID = UUID.randomUUID(): UUID,
       position: Point2D = AgentDefaults.DefaultPosition,
       shape: ShapeType.Circle = AgentDefaults.DefaultShape,
       orientation: Orientation = AgentDefaults.DefaultOrientation,
