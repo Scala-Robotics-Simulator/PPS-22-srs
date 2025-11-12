@@ -34,13 +34,14 @@ object ExplorationReward:
       actionHistory: CircularBuffer[Action[?]] = CircularBuffer(200),
       visitedCells: Set[(Int, Int)] = Set.empty,
       achievedMilestones: Set[Int] = Set.empty,
+      lastCoverage: Double = 0.0,
       maxTicks: Int = 10_000,
   )
 
   private object ExplorationRewardStateManager extends RewardStateManager[Agent, ExplorationState]:
     override def createState(): ExplorationState = ExplorationState()
 
-  final case class Exploration() extends StatefulReward[Agent, ExplorationState]:
+  final case class ExplorationQL() extends StatefulReward[Agent, ExplorationState]:
 
     override protected def stateManager: RewardStateManager[Agent, ExplorationState] =
       ExplorationRewardStateManager
@@ -105,17 +106,83 @@ object ExplorationReward:
 
     end compute
 
-    private def distanceFromObstacle(env: Environment, entity: Agent): Double =
-      val agent =
-        env.entities.collectFirst { case a: Agent if a.id.toString == entity.id.toString => a }.getOrElse(entity)
-      agent.senseAll[Id](env).proximityReadings.foldLeft(1.0)((acc, sr) => math.min(acc, sr.value))
+  end ExplorationQL
 
-    private def isAgentStuck(positions: List[Point2D], window: Int, tolerance: Double = 0.01): Boolean =
-      if positions.sizeIs >= window then
-        val recentPositions = positions.take(window)
-        recentPositions.headOption.exists { head =>
-          recentPositions.forall(p => head.distanceTo(p) < tolerance)
-        }
-      else false
-  end Exploration
+  final case class ExplorationDQN() extends StatefulReward[Agent, ExplorationState]:
+
+    override protected def stateManager: RewardStateManager[Agent, ExplorationState] =
+      ExplorationRewardStateManager
+
+    override def compute(
+        prev: BaseState,
+        current: BaseState,
+        entity: Agent,
+        action: Action[?],
+        state: ExplorationState,
+    ): (Double, ExplorationState) =
+
+      val newTick = state.ticks + 1
+      val updatedPositions = entity.position :: state.positions
+
+      // --- 1. Penalità / bonus per "stuck" (leggera e continua)
+      val isStuck = isAgentStuck(updatedPositions, WindowStuck)
+      val stuckReward = if isStuck then -0.05 else +0.02
+
+      // --- 2. Collisione -> penalità soft basata su distanza
+      val currentMin = distanceFromObstacle(current.environment, entity)
+      val collisionFactor = math.max(0.0, 1.0 - (currentMin / CollisionTriggerDistance))
+      val collidingReward = -collisionFactor * 0.8 // penalità max -0.8 se molto vicino
+
+      // --- 3. Esplorazione nuova cella
+      val currentCell = discreteCell(entity.position, CellSize)
+      val isNewCell = !state.visitedCells.contains(currentCell)
+      val updatedVisited = if isNewCell then state.visitedCells + currentCell else state.visitedCells
+      val explorationReward = if isNewCell then +0.3 else 0.0
+
+      // --- 4. Coverage progressiva
+      val coverage = estimateCoverage(updatedVisited, current.environment, CellSize)
+      val deltaCoverage = coverage - state.lastCoverage
+      val coverageReward = math.max(0.0, deltaCoverage * 5.0) // reward proporzionale al progresso
+
+      // --- 5. Completion bonus (soft)
+      val completionReward = if coverage >= CoverageThreshold then +1.0 else 0.0
+
+      // --- 6. Somma totale
+      var reward = stuckReward + collidingReward + explorationReward + coverageReward + completionReward
+
+      // --- 7. Clipping per stabilità DQN
+      reward = math.max(-1.0, math.min(1.0, reward))
+
+      if newTick % 1000 == 0 then
+        logger.info(
+          f"TICK $newTick reward=$reward coverage=$coverage exploration=$explorationReward collision=$collidingReward",
+        )
+
+      val newState = state.copy(
+        ticks = newTick,
+        positions = updatedPositions,
+        actionHistory = state.actionHistory.add(action),
+        visitedCells = updatedVisited,
+        lastCoverage = coverage,
+        maxTicks = current.simulationTime.map(st => (st.toMillis / current.dt.toMillis).toInt).getOrElse(10_000),
+      )
+      (reward, newState)
+
+    end compute
+
+  end ExplorationDQN
+
+  private def distanceFromObstacle(env: Environment, entity: Agent): Double =
+    val agent =
+      env.entities.collectFirst { case a: Agent if a.id.toString == entity.id.toString => a }.getOrElse(entity)
+    agent.senseAll[Id](env).proximityReadings.foldLeft(1.0)((acc, sr) => math.min(acc, sr.value))
+
+  private def isAgentStuck(positions: List[Point2D], window: Int, tolerance: Double = 0.01): Boolean =
+    if positions.sizeIs >= window then
+      val recentPositions = positions.take(window)
+      recentPositions.headOption.exists { head =>
+        recentPositions.forall(p => head.distanceTo(p) < tolerance)
+      }
+    else false
+
 end ExplorationReward

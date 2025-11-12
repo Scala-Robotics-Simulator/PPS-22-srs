@@ -132,7 +132,7 @@ def parse_args() -> argparse.Namespace:
         "--env",
         type=str,
         default=DEFAULTS["env"],
-        help="Environmen to use (for observations and actions)",
+        help="Environment to use (for observations and actions)",
     )
     p.add_argument(
         "--neurons",
@@ -207,7 +207,8 @@ def parse_args() -> argparse.Namespace:
     return p.parse_args()
 
 
-def resolve_env(env_name: str, server_address: str, client_name: str
+def resolve_env(
+    env_name: str, server_address: str, client_name: str
 ) -> ObstacleAvoidanceEnv | ExplorationEnv:
     match env_name:
         # case "phototaxis":
