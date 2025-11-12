@@ -17,7 +17,8 @@ enum Reward(val name: String) derives CanEqual:
   case QObstacleAvoidance extends Reward("QObstacleAvoidance")
   case DQObstacleAvoidance extends Reward("DQObstacleAvoidance")
   case Phototaxis extends Reward("Phototaxis")
-  case Exploration extends Reward("Exploration")
+  case ExplorationQL extends Reward("ExplorationQL")
+  case ExplorationDQN extends Reward("ExplorationDQN")
 
   /**
    * Evaluates the reward for the given state transition and action.
@@ -42,8 +43,10 @@ enum Reward(val name: String) derives CanEqual:
         ObstacleAvoidanceRewardModule.DQObstacleAvoidance().evaluate(prev, current, entity, action)
       case Phototaxis =>
         PhototaxisRewardModule.Phototaxis().evaluate(prev, current, entity, action)
-      case Exploration =>
-        ExplorationReward.Exploration().evaluate(prev, current, entity, action)
+      case ExplorationQL =>
+        ExplorationReward.ExplorationQL().evaluate(prev, current, entity, action)
+      case ExplorationDQN =>
+        ExplorationReward.ExplorationDQN().evaluate(prev, current, entity, action)
 
   /**
    * String representation of the reward type.
