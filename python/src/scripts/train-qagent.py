@@ -7,9 +7,9 @@ python3 train-qagent.py --config-root src scripts resources generated obstacle-a
 
 from __future__ import annotations
 
+import asyncio
 import statistics
 import sys
-import asyncio
 
 sys.path.append("..")
 
@@ -21,9 +21,9 @@ import numpy as np
 from tqdm import trange
 
 from agent.qagent import QAgent
+from environment.qlearning.exploration_env import ExplorationEnv
 from environment.qlearning.obstacle_avoidance_env import ObstacleAvoidanceEnv
 from environment.qlearning.phototaxis_env import PhototaxisEnv
-from environment.qlearning.exploration_env import ExplorationEnv
 from utils.log import Logger
 from utils.reader import get_yaml_path, read_file
 from utils.reproducibility import set_global_seed
