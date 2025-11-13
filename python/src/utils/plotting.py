@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 def plot_learning_history(
@@ -55,3 +56,26 @@ def plot_learning_history(
         plt.show()
     else:
         plt.close(fig)
+
+
+def plot_td_losses(td_losses: list[list[float]], episode_idx: list[int]) -> None:
+    episode_means = [np.mean(ep) for ep in td_losses]
+
+    alpha = 0.1
+    smoothed = []
+    for m in episode_means:
+        if not smoothed:
+            smoothed.append(m)
+        else:
+            smoothed.append(alpha * m + (1 - alpha) * smoothed[-1])
+
+    plt.figure(figsize=(8, 4))
+    plt.plot(episode_idx, episode_means, label="Mean TD Loss per Episode", linewidth=1)
+    plt.plot(episode_idx, smoothed, label=f"Smoothed (α={alpha})", linewidth=2)
+    plt.xlabel("Episode Index")
+    plt.ylabel("TD Loss")
+    plt.title("Smoothed Temporal Difference Loss over Evaluation Episodes")
+    plt.legend()
+    plt.grid(True, linestyle="--", alpha=0.5)
+    plt.tight_layout()
+    plt.show()

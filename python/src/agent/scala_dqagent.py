@@ -46,6 +46,8 @@ class DQAgent:
         Maximum number of steps per episode during replay memory initialization.
     episodes : int, optional (default=1000)
         Number of training episodes.
+    n_step : int, optional (default=5)
+        Number of steps for n-step returns.
 
     Attributes
     ----------
@@ -75,6 +77,7 @@ class DQAgent:
         moving_avg_stop_thr: int = 100,
         episode_max_steps: int = 400,
         episodes: int = 1000,
+        n_step: int = 1,  # NEW: number of steps for n-step returns
     ):
         self.env = env
         self.id = agent_id
@@ -93,8 +96,10 @@ class DQAgent:
         self.moving_avg_stop_thr = moving_avg_stop_thr
         self.episodes = episodes
         self.terminated = False
+        self.n_step = n_step  # NEW
 
         self.replay_memory = deque(maxlen=replay_memory_max_size)
+        self.n_step_buffer = deque(maxlen=n_step)  # NEW: buffer for n-step transitions
 
         # Create compiled TensorFlow functions for faster inference
         self._create_tf_functions()
@@ -122,14 +127,17 @@ class DQAgent:
             next_states,
             dones,
             gamma,
+            n_steps,
         ):
-            """Compiled function for training step."""
+            """Compiled function for training step with n-step returns."""
             # Get target Q-values for next states
             next_q_values = target_model(next_states, training=False)
             max_next_q = tf.reduce_max(next_q_values, axis=1)
 
-            # Calculate target values
-            target_q = rewards + (1.0 - dones) * gamma * max_next_q
+            # Calculate n-step target values
+            # rewards already contain the n-step discounted sum
+            # n_steps contains the actual discount factor to apply
+            target_q = rewards + (1.0 - dones) * n_steps * max_next_q
 
             # Create masks for actions taken
             masks = tf.one_hot(actions, action_model.output_shape[-1])
@@ -154,19 +162,8 @@ class DQAgent:
         self._train_step = train_step
 
     def choose_action(self, state: np.ndarray, epsilon_greedy: bool = True):
-        """Select an action using epsilon-greedy policy.
-
-        Parameters
-        ----------
-        state : np.ndarray
-            Current state of the environment.
-
-        Returns
-        -------
-        action : int
-            Selected action.
-        """
-        if random.uniform(0, 1) <= self.epsilon:
+        """Select an action using epsilon-greedy policy."""
+        if epsilon_greedy and random.uniform(0, 1) <= self.epsilon:
             return self.env.action_space.sample()
 
         # Use compiled TensorFlow function
@@ -182,31 +179,46 @@ class DQAgent:
         next_state: np.ndarray,
         done: bool,
     ):
-        """Store transition in replay memory.
+        """Store transition with n-step returns."""
+        # Add to n-step buffer
+        self.n_step_buffer.append([state, action, reward, next_state, done])
 
-        Parameters
-        ----------
-        state : np.ndarray
-            Current state.
-        action : int
-            Action taken.
-        reward : float
-            Reward received.
-        next_state : np.ndarray
-            Next state after taking the action.
-        done : bool
-            Whether the episode has ended.
-        """
-        self.replay_memory.append([state, action, reward, next_state, done])
+        # If buffer is full or episode ended, compute n-step return
+        if len(self.n_step_buffer) == self.n_step or done:
+            # Compute n-step return
+            n_step_return = 0
+            n_step_gamma = 1
+            actual_n = len(self.n_step_buffer)
+
+            for i in range(actual_n):
+                n_step_return += n_step_gamma * self.n_step_buffer[i][2]  # reward
+                n_step_gamma *= self.gamma
+
+            # Get the first state and action, and the last next_state
+            first_state = self.n_step_buffer[0][0]
+            first_action = self.n_step_buffer[0][1]
+            last_next_state = self.n_step_buffer[-1][3]
+            last_done = self.n_step_buffer[-1][4]
+
+            # Store the n-step transition
+            # Format: [state, action, n_step_return, next_state_n, done, gamma^n]
+            self.replay_memory.append(
+                [
+                    first_state,
+                    first_action,
+                    n_step_return,
+                    last_next_state,
+                    last_done,
+                    self.gamma**actual_n,
+                ]
+            )
+
+            # Clear buffer if episode ended
+            if done:
+                self.n_step_buffer.clear()
 
     def get_random_batch(self):
-        """Retrieve a random mini-batch from replay memory.
-
-        Returns
-        -------
-        batch : tuple of np.ndarray
-            Mini-batch containing states, actions, rewards, next_states, and done flags.
-        """
+        """Retrieve a random mini-batch from replay memory."""
         return self.get_random_batch_from_replay_memory(
             self.replay_memory, self.batch_size
         )
@@ -228,18 +240,7 @@ class DQAgent:
         replay_memory_init_size: int,
         episode_max_steps: int,
     ):
-        """Initialize replay memory with random transitions.
-        Parameters
-        ----------
-        env : gym.Env
-            The environment in which the agent interacts.
-        replay_memory : deque
-            The replay memory to be initialized.
-        replay_memory_init_size : int
-            The desired initial size of the replay memory.
-        episode_max_steps : int
-            Maximum number of steps per episode during initialization.
-        """
+        """Initialize replay memory with random transitions."""
         while len(replay_memory) < replay_memory_init_size:
             states, _ = env.reset()
             state = states[self.id]
@@ -254,7 +255,7 @@ class DQAgent:
                 new_state = new_states[self.id]
                 reward = rewards[self.id]
 
-                replay_memory.append([state, action, reward, new_state, done])
+                self.store_transition(state, action, reward, new_state, done)
 
                 state = new_state
                 step_count += 1
@@ -262,18 +263,7 @@ class DQAgent:
     def get_random_batch_from_replay_memory(
         self, replay_memory: deque, batch_size: int
     ):
-        """Retrieve a random mini-batch from the given replay memory.
-        Parameters
-        ----------
-        replay_memory : deque
-            The replay memory from which to sample.
-        batch_size : int
-            The size of the mini-batch to sample.
-        Returns
-        -------
-        batch : tuple of np.ndarray
-            Mini-batch containing states, actions, rewards, next_states, and done flags.
-        """
+        """Retrieve a random mini-batch from the given replay memory."""
         minibatch_indices = np.random.choice(range(len(replay_memory)), size=batch_size)
         minibatch = [replay_memory[i] for i in minibatch_indices]
 
@@ -284,14 +274,33 @@ class DQAgent:
             [sample[3] for sample in minibatch], dtype=np.float32
         )
         done_batch = np.array([sample[4] for sample in minibatch], dtype=np.float32)
+        gamma_n_batch = np.array([sample[5] for sample in minibatch], dtype=np.float32)
 
-        return [state_batch, action_batch, reward_batch, new_state_batch, done_batch]
+        return [
+            state_batch,
+            action_batch,
+            reward_batch,
+            new_state_batch,
+            done_batch,
+            gamma_n_batch,
+        ]
 
-    def dqn_update(self) -> None:
-        """Perform a DQN update using the compiled TensorFlow function."""
-        state_batch, action_batch, reward_batch, new_state_batch, done_batch = (
-            self.get_random_batch()
-        )
+    def dqn_update(self) -> float:
+        """Perform a DQN update using the compiled TensorFlow function.
+
+        Returns
+        -------
+        loss : float
+            The TD loss value for this update.
+        """
+        (
+            state_batch,
+            action_batch,
+            reward_batch,
+            new_state_batch,
+            done_batch,
+            gamma_n_batch,
+        ) = self.get_random_batch()
 
         # Convert to TensorFlow tensors
         states_tf = tf.constant(state_batch, dtype=tf.float32)
@@ -299,9 +308,10 @@ class DQAgent:
         rewards_tf = tf.constant(reward_batch, dtype=tf.float32)
         next_states_tf = tf.constant(new_state_batch, dtype=tf.float32)
         dones_tf = tf.constant(done_batch, dtype=tf.float32)
+        gamma_n_tf = tf.constant(gamma_n_batch, dtype=tf.float32)
 
         # Use compiled training function
-        self._train_step(
+        loss = self._train_step(
             self.action_model,
             self.target_model,
             states_tf,
@@ -310,7 +320,57 @@ class DQAgent:
             next_states_tf,
             dones_tf,
             self.gamma,
+            gamma_n_tf,
         )
+
+        return float(loss.numpy())
+
+    def compute_td_loss(
+        self,
+        state: np.ndarray,
+        action: int,
+        reward: float,
+        next_state: np.ndarray,
+        done: bool,
+    ) -> float:
+        """Compute TD loss for a single transition (useful for inference/evaluation).
+
+        Parameters
+        ----------
+        state : np.ndarray
+            Current state.
+        action : int
+            Action taken.
+        reward : float
+            Reward received.
+        next_state : np.ndarray
+            Next state.
+        done : bool
+            Whether episode ended.
+
+        Returns
+        -------
+        td_loss : float
+            The TD error (loss) for this transition.
+        """
+        # Convert to tensors
+        state_tensor = tf.constant(state[np.newaxis], dtype=tf.float32)
+        next_state_tensor = tf.constant(next_state[np.newaxis], dtype=tf.float32)
+
+        # Get Q-values
+        q_values = self.action_model(state_tensor, training=False)
+        next_q_values = self.target_model(next_state_tensor, training=False)
+
+        # Compute target
+        max_next_q = tf.reduce_max(next_q_values, axis=1)
+        target = reward + (0.0 if done else self.gamma) * max_next_q
+
+        # Compute TD error
+        current_q = q_values[0][action]
+        td_error = target - current_q
+        td_loss = td_error**2
+
+        return float(td_loss.numpy())
 
     def save(self, directory: str):
         """Save agent state: models, epsilon, and parameters."""
@@ -330,6 +390,7 @@ class DQAgent:
             step_per_update_target_model=self.step_per_update_target_model,
             moving_avg_window_size=self.moving_avg_window_size,
             moving_avg_stop_thr=self.moving_avg_stop_thr,
+            n_step=self.n_step,
         )
 
     def load(self, directory: str):
@@ -353,3 +414,4 @@ class DQAgent:
         self.step_per_update_target_model = int(data["step_per_update_target_model"])
         self.moving_avg_window_size = int(data["moving_avg_window_size"])
         self.moving_avg_stop_thr = float(data["moving_avg_stop_thr"])
+        self.n_step = int(data.get("n_step", 5))
