@@ -229,7 +229,8 @@ def run_episodes(
                         action=actions[k],
                         reward=rewards[k],
                         next_state=next_obs[k],
-                        done=done,
+                        terminated=terminateds[k],
+                        truncated=truncateds[k],
                     )
                     total_reward[k] += float(rewards[k])
 
