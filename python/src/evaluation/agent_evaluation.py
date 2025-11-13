@@ -16,18 +16,23 @@ def evaluate(
     configs: str,
     max_steps: int,
     did_succeed: Callable[[float, bool, bool], bool],
+    window_size: int = 100,
 ):
     successes = dict.fromkeys(agents.keys(), 0)
     successes_idx = dict.fromkeys(agents.keys(), [])
     steps_to_success = dict.fromkeys(agents.keys(), [])
     td_losses = dict.fromkeys(agents.keys(), [])
+    total_rewards = dict.fromkeys(agents.keys(), [])
+    moving_avg_reward = dict.fromkeys(agents.keys(), [])
     for config_idx in trange(len(configs), desc="Evaluation", unit="configuration run"):
         env.init(configs[config_idx])
         obs, _ = env.reset()
         done = False
         step = 0
-        total_rewards = dict.fromkeys(agents.keys(), 0)
+        episode_rewards = dict.fromkeys(agents.keys(), [])
+        episode_total_reward = dict.fromkeys(agents.keys(), 0)
         episode_td_losses = dict.fromkeys(agents.keys(), [])
+        episode_moving_avg_reward = dict.fromkeys(agents.keys(), [])
         while not done and step < max_steps:
             actions = {
                 k: agents[k].choose_action(v, epsilon_greedy=False)
@@ -55,21 +60,29 @@ def evaluate(
                 for agent_id in agents.keys()
             }
             step += 1
-            for k in agents.keys():
-                total_rewards[k] += rewards[k]
-                if dones[k] or step == max_steps:
+            for agent_id in agents.keys():
+                episode_total_reward[agent_id] += rewards[agent_id]
+                episode_rewards[agent_id].append(rewards[agent_id])
+                episode_moving_avg_reward[agent_id].append(
+                    episode_rewards[agent_id][-window_size:]
+                    if len(episode_rewards[agent_id]) >= window_size
+                    else rewards[agent_id]
+                )
+                if dones[agent_id] or step == max_steps:
                     if did_succeed(
-                        rewards[k],
-                        terminateds[k],
-                        truncateds[k] or step == max_steps,
+                        rewards[agent_id],
+                        terminateds[agent_id],
+                        truncateds[agent_id] or step == max_steps,
                     ):
-                        successes[k] += 1
-                        successes_idx[k].append(config_idx)
-                        steps_to_success[k].append(step)
+                        successes[agent_id] += 1
+                        successes_idx[agent_id].append(config_idx)
+                        steps_to_success[agent_id].append(step)
             done = all(dones.values())
             obs = next_obs
         for agent_id in agents.keys():
             td_losses[agent_id].append(episode_td_losses[agent_id])
+            total_rewards[agent_id].append(episode_total_reward[agent_id])
+            moving_avg_reward[agent_id].append(episode_moving_avg_reward[agent_id])
     success_rate = {agent_id: v / len(configs) for agent_id, v in successes.items()}
     median_steps_to_success = {
         agent_id: np.median(np.array(v)) for agent_id, v in steps_to_success.items()
@@ -78,6 +91,9 @@ def evaluate(
     return {
         "success_rate": success_rate,
         "successes_idx": successes_idx,
+        "steps_to_success": steps_to_success,
         "median_steps_to_success": median_steps_to_success,
+        "total_rewards": total_rewards,
+        "moving_avg_reward": moving_avg_reward,
         "td_losses": td_losses,
     }
