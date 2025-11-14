@@ -1,14 +1,8 @@
 package io.github.srs.model.entity.dynamicentity.agent.termination
 
-import scala.math.min
-
-import cats.Id
 import io.github.srs.model.ModelModule.BaseState
 import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.agent.Agent
-import io.github.srs.model.entity.dynamicentity.sensor.Sensor.senseAll
-import io.github.srs.model.entity.dynamicentity.sensor.SensorReadings.proximityReadings
-import io.github.srs.utils.SimulationDefaults.DynamicEntity.Agent.CollisionAvoidance.CollisionTriggerDistance
 
 /**
  * Generic termination model for collision detection.
@@ -20,6 +14,4 @@ import io.github.srs.utils.SimulationDefaults.DynamicEntity.Agent.CollisionAvoid
 final case class CollisionDetection() extends TerminationModel[Agent]:
 
   override def evaluate(prev: BaseState, current: BaseState, entity: Agent, action: Action[?]): Boolean =
-    val currentMin =
-      entity.senseAll[Id](current.environment).proximityReadings.foldLeft(1.0)((acc, sr) => min(acc, sr.value))
-    currentMin < CollisionTriggerDistance
+    entity.didCollide

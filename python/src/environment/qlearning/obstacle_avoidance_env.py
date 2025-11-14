@@ -27,7 +27,9 @@ class ObstacleAvoidanceEnv(AbstractEnv):
         ]
         self.action_space = spaces.Discrete(len(self.actions))
 
-    def _encode_observation(self, proximity_values, _):
+    def _encode_observation(
+        self, proximity_values, light_values, position, orientation
+    ):
         bins = []
         values = [
             proximity_values[0],
