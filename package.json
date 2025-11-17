@@ -7,7 +7,7 @@
   },
   "homepage": "https://github.com/Scala-Robotics-Simulator/PPS-22-srs#readme",
   "devDependencies": {
-    "semantic-release-preconfigured-conventional-commits": "1.1.154"
+    "semantic-release-preconfigured-conventional-commits": "1.1.156"
   },
   "engines": {
     "node": "24.11"
