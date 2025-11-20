@@ -141,20 +141,46 @@ class EnvironmentGenerator:
         orientations = self.rng.uniform(0, 360, num_obstacles)
 
         obstacles = []
-        for i in range(num_obstacles):
-            obstacles.append(
-                {
-                    "obstacle": {
-                        "orientation": round(float(orientations[i]), 1),
-                        "position": [
-                            round(float(positions[i, 0]), 1),
-                            round(float(positions[i, 1]), 1),
-                        ],
-                        "height": round(float(heights[i]), 1),
-                        "width": round(float(widths[i]), 1),
-                    }
+        # for i in range(num_obstacles):
+        #     obstacles.append(
+        #         {
+        #             "obstacle": {
+        #                 "orientation": round(float(orientations[i]), 1),
+        #                 "position": [
+        #                     round(float(positions[i, 0]), 1),
+        #                     round(float(positions[i, 1]), 1),
+        #                 ],
+        #                 "height": round(float(heights[i]), 1),
+        #                 "width": round(float(widths[i]), 1),
+        #             }
+        #         }
+        #     )
+        obstacles.append(
+            {
+                "obstacle": {
+                    "orientation": 0.2,
+                    "position": [
+                        1.9,
+                        3.1,
+                    ],
+                    "height": 0.5,
+                    "width": 1.6,
                 }
-            )
+            }
+        )
+        obstacles.append(
+            {
+                "obstacle": {
+                    "orientation": 0.0,
+                    "position": [
+                        4.2,
+                        1.3,
+                    ],
+                    "height": 1.2,
+                    "width": 0.8,
+                }
+            }
+        )
         return obstacles
 
     def generate_environment(self) -> dict[str, Any]:
@@ -191,6 +217,7 @@ def validate_yaml(env, yaml_content: str) -> bool:
     Replace this with actual validation logic.
     """
     ok, _ = env.init(yaml_content)
+    return ok
     if ok:
         pygame.init()
         screen = pygame.display.set_mode((800, 600))
