@@ -9,7 +9,7 @@ import io.github.srs.utils.SimulationDefaults.DynamicEntity.Agent.CoverageTermin
   CoverageThreshold,
   Percent,
 }
-import io.github.srs.utils.SpatialUtils.{ discreteCell, estimateCoverage }
+import io.github.srs.utils.SpatialUtils.{ discreteCell, estimateRealCoverage }
 
 /**
  * Represents the state for an exploration-based termination condition. Tracks which cells in the environment have been
@@ -72,13 +72,16 @@ final case class CoverageTermination() extends StatefulTermination[Agent, Explor
     val currentCell = discreteCell(entity.position, CellSize)
     val isNewCell = !state.visitedCells.contains(currentCell)
     val updatedVisited = if isNewCell then state.visitedCells + currentCell else state.visitedCells
-    val coverage = estimateCoverage(updatedVisited, current.environment, CellSize)
+//    val coverage = estimateCoverage(updatedVisited, current.environment, CellSize)
+    val coverage = estimateRealCoverage(updatedVisited, current.environment, entity.shape.radius, CellSize)
 
+//    val reachedGoalQL = coverage >= CoverageThreshold
+//    val coverageThreshold = explorableThreshold(current.environment, entity.shape.radius, CellSize, 0.8)
+    val reachedGoalDQN = coverage >= CoverageThreshold
     logger.info(f"Exploration: ${coverage * Percent}%.2f%% area covered.")
-    val reachedGoal = coverage >= CoverageThreshold
     logger.info(s"visitedCells: ${updatedVisited.toList.toString()}")
 
-    val shouldTerminate = reachedGoal
+    val shouldTerminate = reachedGoalDQN
     val newState = state.copy(visitedCells = updatedVisited)
     (shouldTerminate, newState)
   end compute
