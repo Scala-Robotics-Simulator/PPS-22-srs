@@ -5,6 +5,7 @@ import io.github.srs.model.entity.Point2D.*
 import io.github.srs.model.entity.staticentity.StaticEntity.Obstacle
 import io.github.srs.model.environment.Environment
 
+// TODO
 object SpatialUtils:
 
   def discreteCell(pos: Point2D, cellSize: Double): (Int, Int) =
@@ -67,6 +68,11 @@ object SpatialUtils:
     if freeCells.isEmpty then 0.0
     else visitedCells.count(freeCells.contains).toDouble / freeCells.size.toDouble
 
+//  def totalCells(env: Environment, cellSize: Double): Int =
+//    val nX = (env.width / cellSize).toInt
+//    val nY = (env.height / cellSize).toInt
+//    nX * nY
+
   def countExplorableCells(
       env: Environment,
       agentRadius: Double,
@@ -81,13 +87,22 @@ object SpatialUtils:
       if isCellFree(x, y, env, agentRadius, cellSize)
     yield ()).size
 
-  def explorableThreshold(
-      env: Environment,
-      agentRadius: Double,
-      cellSize: Double,
-      fraction: Double,
-  ): Int =
-    val free = countExplorableCells(env, agentRadius, cellSize)
-    (free * fraction).toInt
+//  def percentageExplorable(
+//                            env: Environment,
+//                            agentRadius: Double,
+//                            cellSize: Double,
+//                          ): Double =
+//    val free = countExplorableCells(env, agentRadius, cellSize)
+//    val total = totalCells(env, cellSize)
+//    free.toDouble / total.toDouble
+//
+//  def explorableThreshold(
+//                           env: Environment,
+//                           agentRadius: Double,
+//                           cellSize: Double,
+//                           fraction: Double,
+//                         ): Int =
+//    val free = countExplorableCells(env, agentRadius, cellSize)
+//    (free * fraction).toInt
 
 end SpatialUtils
