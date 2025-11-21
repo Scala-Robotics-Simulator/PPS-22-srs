@@ -6,7 +6,7 @@ from environment.abstract_env import AbstractEnv
 
 
 class ExplorationEnv(AbstractEnv):
-    """Custom environment class for RL interaction via gRPC"""
+    """Custom environment for Q-Learning Exploration via gRPC"""
 
     def __init__(
         self,
