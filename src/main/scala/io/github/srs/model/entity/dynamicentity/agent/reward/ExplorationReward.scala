@@ -114,7 +114,7 @@ object ExplorationReward:
     //    private val NotStuckBonus: Double = +0.5
     private val CollisionHardPenalty = -100.0
     // private val CollisionSoftPenalty = -1.0
-    private val MilestoneBonus: Double = +10.0
+    private val MilestoneBonus: Double = +20.0
     private val ExplorationBonus: Double = +30.0
     private val CoverageBonus: Double = +500.0
     private val NotBonus: Double = 0.0
@@ -136,9 +136,6 @@ object ExplorationReward:
       val isStuck = isAgentStuck(updatedPositions, WindowStuck)
       val stuckReward = if isStuck then StuckPenalty else NotBonus
 
-      val currentMin = distanceFromObstacle(current.environment, entity)
-      val collidingReward = if currentMin < CollisionTriggerDistance then CollisionHardPenalty else NotBonus
-
       val currentCell = discreteCell(entity.position, CellSize)
       val isNewCell = !state.visitedCells.contains(currentCell)
       val updatedVisited = if isNewCell then state.visitedCells + currentCell else state.visitedCells
@@ -159,23 +156,35 @@ object ExplorationReward:
           CoverageBonus * math.min(1.0, math.max(0.0, scaled))
         else NotBonus
 
-      val rClear = clearanceReward(prev.environment, current.environment, entity, -2)
+      val currentMin = distanceFromObstacle(current.environment, entity)
+      val collidingReward = if currentMin < CollisionTriggerDistance then CollisionHardPenalty else NotBonus
+      val rClear = clearanceReward(prev.environment, current.environment, entity, -5)
       val prevAgent = getAgentFromId(entity, prev)
-      val rMove = moveReward(entity, prevAgent, action, currentMin) / 10
+      val rMove = moveReward(entity, prevAgent, action, currentMin)
 
-      val reward =
-        milestonesReward +
-          completionReward +
-          collidingReward +
-          stuckReward +
+      val sensorVariance = variance(entity.senseAll[Id](current.environment).proximityReadings.map(_.value))
+      val curiosityReward = sensorVariance * 0.5
+
+      val rawReward =
+        stuckReward +
           explorationReward +
-          rMove +
-          rClear
+          milestonesReward +
+          completionReward +
+          (collidingReward + rClear + rMove).max(-20).min(+20) +
+          curiosityReward
+
+      val reward = rawReward.max(-1.0).min(+1.0)
 
       logger.info(
-        f"TICK [$newTick] colliding=$collidingReward stuck=$stuckReward coverage=$coverage " +
-          f"exploration=$explorationReward milestone=$milestonesReward completion=$completionReward move=$rMove clearance=$rClear " +
-          f"| reward=$reward",
+        f"TICK [$newTick] reward=$reward | " +
+          f"colliding=$collidingReward " +
+          f"stuck=$stuckReward " +
+          f"coverage=$coverage " +
+          f"exploration=$explorationReward " +
+          f"milestone=$milestonesReward " +
+          f"completion=$completionReward " +
+          f"move=$rMove " +
+          f"clearance=$rClear ",
       )
 
       val newState = state.copy(
@@ -223,5 +232,12 @@ object ExplorationReward:
         recentPositions.forall(p => head.distanceTo(p) < tolerance)
       }
     else false
+
+  def variance(xs: Seq[Double]): Double =
+    if xs.isEmpty then 0.0
+    else
+      val mean = xs.sum / xs.size
+      val meanSq = xs.map(x => x * x).sum / xs.size
+      meanSq - mean * mean
 
 end ExplorationReward
