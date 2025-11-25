@@ -56,12 +56,23 @@ def _smooth(data: list[float], alpha: float = 0.1) -> list[float]:
 def plot_total_reward(results: dict, agents: list[str], save_path: str = None):
     """
     Plot total reward per episode for each agent.
+    Displays 2 agents side by side.
     """
     n_agents = len(agents)
-    _, axes = plt.subplots(n_agents, 1, figsize=(10, 4 * n_agents), sharex=False)
+    n_cols = 2
+    n_rows = (n_agents + n_cols - 1) // n_cols
 
+    fig, axes = plt.subplots(
+        n_rows, n_cols, figsize=(10 * n_cols, 4 * n_rows), sharex=False
+    )
+
+    # Flatten axes array for easier indexing
     if n_agents == 1:
         axes = [axes]
+    elif n_rows == 1 or n_cols == 1:
+        axes = axes.flatten()
+    else:
+        axes = axes.flatten()
 
     for idx, agent_id in enumerate(agents):
         ax = axes[idx]
@@ -99,6 +110,10 @@ def plot_total_reward(results: dict, agents: list[str], save_path: str = None):
         ax.set_ylabel("Total Reward")
         ax.legend()
         ax.grid(True, alpha=0.3)
+
+    # Hide any unused subplots
+    for idx in range(n_agents, len(axes)):
+        axes[idx].set_visible(False)
 
     plt.tight_layout()
     if save_path:
@@ -191,15 +206,26 @@ def plot_avg_reward_per_configuration(
 ):
     """
     Compare moving average reward per episode across agents for each configuration.
+    Plots up to 3 configurations side by side.
     """
     n_configs = max(len(results["moving_avg_reward"][a]) for a in agents)
-    _, axes = plt.subplots(n_configs, 1, figsize=(10, 4 * n_configs), sharex=False)
+    n_cols = min(3, n_configs)
+    n_rows = (n_configs + n_cols - 1) // n_cols
 
+    _, axes = plt.subplots(
+        n_rows, n_cols, figsize=(5 * n_cols, 4 * n_rows), sharex=False
+    )
+
+    # Flatten axes array for easier indexing
     if n_configs == 1:
-        axes = [axes]
+        axes = [[axes]]
+    elif n_rows == 1 or n_cols == 1:
+        axes = axes.reshape(n_rows, n_cols)
+
+    axes_flat = axes.flatten()
 
     for cfg_idx in range(n_configs):
-        ax = axes[cfg_idx]
+        ax = axes_flat[cfg_idx]
         for agent_id in agents:
             moving_avg = results["moving_avg_reward"][agent_id]
             if cfg_idx < len(moving_avg) and isinstance(moving_avg[cfg_idx], list):
@@ -216,6 +242,10 @@ def plot_avg_reward_per_configuration(
         ax.set_ylabel("Moving Average Reward")
         ax.legend()
         ax.grid(True, alpha=0.3)
+
+    # Hide any unused subplots
+    for idx in range(n_configs, len(axes_flat)):
+        axes_flat[idx].set_visible(False)
 
     plt.tight_layout()
     if save_path:
