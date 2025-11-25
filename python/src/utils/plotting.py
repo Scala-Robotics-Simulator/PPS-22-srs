@@ -66,13 +66,10 @@ def plot_total_reward(results: dict, agents: list[str], save_path: str = None):
         n_rows, n_cols, figsize=(10 * n_cols, 4 * n_rows), sharex=False
     )
 
-    # Flatten axes array for easier indexing
-    if n_agents == 1:
-        axes = [axes]
-    elif n_rows == 1 or n_cols == 1:
+    if isinstance(axes, np.ndarray):
         axes = axes.flatten()
     else:
-        axes = axes.flatten()
+        axes = [axes]
 
     for idx, agent_id in enumerate(agents):
         ax = axes[idx]
@@ -217,15 +214,13 @@ def plot_avg_reward_per_configuration(
     )
 
     # Flatten axes array for easier indexing
-    if n_configs == 1:
-        axes = [[axes]]
-    elif n_rows == 1 or n_cols == 1:
-        axes = axes.reshape(n_rows, n_cols)
-
-    axes_flat = axes.flatten()
+    if isinstance(axes, np.ndarray):
+        axes = axes.flatten()
+    else:
+        axes = [axes]
 
     for cfg_idx in range(n_configs):
-        ax = axes_flat[cfg_idx]
+        ax = axes[cfg_idx]
         for agent_id in agents:
             moving_avg = results["moving_avg_reward"][agent_id]
             if cfg_idx < len(moving_avg) and isinstance(moving_avg[cfg_idx], list):
@@ -244,8 +239,8 @@ def plot_avg_reward_per_configuration(
         ax.grid(True, alpha=0.3)
 
     # Hide any unused subplots
-    for idx in range(n_configs, len(axes_flat)):
-        axes_flat[idx].set_visible(False)
+    for idx in range(n_configs, len(axes)):
+        axes[idx].set_visible(False)
 
     plt.tight_layout()
     if save_path:
