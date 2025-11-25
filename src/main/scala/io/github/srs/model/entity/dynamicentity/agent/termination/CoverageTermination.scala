@@ -78,7 +78,8 @@ final case class CoverageTermination() extends StatefulTermination[Agent, Explor
 
     val coveragePercent = visitedCount.toDouble / totalExplorable.toDouble * Percent
     logger.info(
-      f"Exploration: $coveragePercent%.2f%% of explorable cells covered. Coverage Threshold: $thresholdCells cells.",
+      f"Exploration: $coveragePercent%.2f%% of explorable cells covered. " +
+        f"Coverage: $visitedCount on $thresholdCells cells (total= $totalExplorable).",
     )
     logger.info(s"visitedCells: ${updatedVisited.toList}")
 
