@@ -1,17 +1,15 @@
 package io.github.srs.model.entity.dynamicentity.agent.termination
 
 import io.github.srs.model.ModelModule.BaseState
-import io.github.srs.model.entity.dynamicentity.action.Action
-import io.github.srs.model.entity.dynamicentity.agent.Agent
 import io.github.srs.model.entity.dynamicentity.agent.termination.EndSimulationTermination as EndSimulationTerminationModel
 import io.github.srs.model.entity.dynamicentity.agent.termination.CrashedOrReached as CrashOrReachedTerminationModel
 import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.agent.Agent
-import io.github.srs.model.entity.dynamicentity.agent.termination.{
+import io.github.srs.model.entity.dynamicentity.agent.termination.Termination.{
   CollisionDetection as CollisionDetectionTerminationModel,
-  CoverageTermination as CoverageTerminationModel,
   LightReached as LightReachedTerminationModel,
 }
+import io.github.srs.model.entity.dynamicentity.agent.termination.CoverageTermination as CoverageTerminationModel
 
 /**
  * An enumeration of available termination models for agents.
@@ -57,10 +55,10 @@ enum Termination(val name: String) derives CanEqual:
     CoverageTerminationModel().evaluate(prev, current, entity, action)
 
   private def collision(prev: BaseState, current: BaseState, entity: Agent, action: Action[?]): Boolean =
-    CollisionDetectionTerminationModel().evaluate(prev, current, entity, action)
+    CollisionDetectionTerminationModel.evaluate(prev, current, entity, action)
 
   private def lightReached(prev: BaseState, current: BaseState, entity: Agent, action: Action[?]): Boolean =
-    LightReachedTerminationModel().evaluate(prev, current, entity, action)
+    LightReachedTerminationModel.evaluate(prev, current, entity, action)
 
   /**
    * String representation of the termination type.
