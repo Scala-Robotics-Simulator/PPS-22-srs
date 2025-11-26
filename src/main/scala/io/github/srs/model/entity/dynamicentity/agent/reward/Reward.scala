@@ -44,7 +44,6 @@ enum Reward(val name: String) derives CanEqual:
       case Exploration =>
         ExplorationReward.Exploration().evaluate(prev, current, entity, action)
 
-
   /**
    * String representation of the reward type.
    * @return
