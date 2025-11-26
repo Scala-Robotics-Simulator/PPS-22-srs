@@ -3,6 +3,7 @@ package io.github.srs.model.entity.dynamicentity.agent.truncation
 import io.github.srs.model.ModelModule.BaseState
 import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.agent.Agent
+import io.github.srs.model.entity.dynamicentity.agent.termination.TerminationModel
 
 /**
  * Generic termination model for collision detection.
