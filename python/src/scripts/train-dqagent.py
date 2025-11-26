@@ -24,6 +24,7 @@ import tensorflow as tf
 
 from agent.scala_dqagent import DQAgent
 from environment.deepqlearning.obstacle_avoidance_env import ObstacleAvoidanceEnv
+from environment.deepqlearning.phototaxis_env import PhototaxisEnv
 from training.dqnetwork import DQNetwork
 from training.multi_agent_dqlearning import DQLearning
 from utils.log import Logger
@@ -208,12 +209,14 @@ def parse_args() -> argparse.Namespace:
 
 def resolve_env(env_name: str, server_address: str, client_name: str):
     match env_name:
-        # case "phototaxis":
-        #     return PhototaxisEnv(server_address, client_name)
+        case "phototaxis":
+            return PhototaxisEnv(server_address, client_name)
         case "oa":
             return ObstacleAvoidanceEnv(server_address, client_name)
         case _:
-            logger.error("Environment not found")
+            logger.error(
+                f"Environment '{env_name}' not found. Available: phototaxis, oa"
+            )
             exit(1)
 
 
