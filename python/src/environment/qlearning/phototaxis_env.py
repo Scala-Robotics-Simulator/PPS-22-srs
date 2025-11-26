@@ -174,6 +174,8 @@ class PhototaxisEnv(AbstractEnv):
         self,
         proximity_values: list[float] | None,
         light_values: list[float],
+        position=None,
+        orientation=None,
     ) -> int:
         prox_padded = self._pad_prox(proximity_values)
         light_padded = self._pad_light(light_values)
