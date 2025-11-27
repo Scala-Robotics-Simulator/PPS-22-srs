@@ -33,16 +33,18 @@ def evaluate(
         episode_total_reward = dict.fromkeys(agents.keys(), 0)
         episode_td_losses = dict.fromkeys(agents.keys(), [])
         episode_moving_avg_reward = dict.fromkeys(agents.keys(), [])
+        prev_dones = dict.fromkeys(agents.keys(), False)
         while not done and step < max_steps:
             actions = {
                 k: agents[k].choose_action(v, epsilon_greedy=False)
                 for k, v in obs.items()
+                if not prev_dones[k]
             }
 
             next_obs, rewards, terminateds, truncateds, _ = env.step(actions)
 
             for agent_id, agent in agents.items():
-                if isinstance(agent, DQAgent):
+                if not prev_dones[agent_id] and isinstance(agent, DQAgent):
                     state = obs[agent_id]
                     action = actions[agent_id]
                     reward = rewards[agent_id]
@@ -57,10 +59,10 @@ def evaluate(
 
             dones = {
                 agent_id: terminateds[agent_id] or truncateds[agent_id]
-                for agent_id in agents.keys()
+                for agent_id in terminateds.keys()
             }
             step += 1
-            for agent_id in agents.keys():
+            for agent_id in next_obs.keys():
                 episode_total_reward[agent_id] += rewards[agent_id]
                 episode_rewards[agent_id].append(rewards[agent_id])
                 episode_moving_avg_reward[agent_id].append(
@@ -79,6 +81,10 @@ def evaluate(
                         steps_to_success[agent_id].append(step)
             done = all(dones.values())
             obs = next_obs
+            prev_dones = {
+                agent_id: prev_dones[agent_id] or dones[agent_id]
+                for agent_id in agents.keys()
+            }
         for agent_id in agents.keys():
             td_losses[agent_id].append(episode_td_losses[agent_id])
             total_rewards[agent_id].append(episode_total_reward[agent_id])
