@@ -55,14 +55,14 @@ class EnvironmentGenerator:
         self.seed = seed if seed is not None else np.random.randint(0, 999999)
         self.rng = np.random.default_rng(np_seed)
 
-    def generate_agent(self, id: str) -> dict[str, Any]:
+    def generate_agent(self, agent_id: str) -> dict[str, Any]:
         """Generate agent configuration."""
         pos = self.rng.uniform([0, 0], [self.env_width, self.env_height])
         orientation = self.rng.uniform(0, 360)
 
         return {
             "agent": {
-                "id": id,
+                "id": agent_id,
                 "radius": self.agent_radius,
                 "withProximitySensors": True,
                 "withLightSensors": True,
@@ -163,9 +163,8 @@ class EnvironmentGenerator:
 
         # 1. Generate agent
         for i in range(self.agent_num):
-            # 00000000-0000-0000-0000-000000000001
             entities.append(
-                self.generate_agent(f"00000000-0000-0000-0000-{(i+1):012d}")
+                self.generate_agent(f"00000000-0000-0000-0000-{(i + 1):012d}")
             )
 
         # 2. Generate lights
