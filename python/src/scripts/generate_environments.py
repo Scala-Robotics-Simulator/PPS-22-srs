@@ -4,7 +4,7 @@ Generator of random environments
 
 How to run:
 `
-python3 generate_environments.py --num 10 --config-root resources generated obstacle-avoidance --width 10 --height 10 --obstacle-min-num 4 --obstacle-max-num 15 --obstacle-min-size 0.5 --obstacle-max-size 8.0 --light-min-num 0 --light-max-num 0
+python3 generate_environments.py --num 10 --config-root resources generated obstacle-avoidance --width 10 --height 10 --obstacle-min-num 4 --obstacle-max-num 15 --obstacle-min-size 0.5 --obstacle-max-size 8.0 --light-min-num 0 --light-max-num 0 --agent-num 1
 `
 """
 
@@ -43,6 +43,7 @@ DEFAULTS = {
     "obstacle_max_size": 8.0,
     "light_min_num": 0,
     "light_max_num": 0,
+    "agent_num": 1,
 }
 FIXED_AGENT_ID = "00000000-0000-0000-0000-000000000001"
 
@@ -140,6 +141,12 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULTS["light_max_num"],
         help="Maximum number of lights to generate.",
     )
+    p.add_argument(
+        "--agent-num",
+        type=int,
+        default=DEFAULTS["agent_num"],
+        help="Number of agents in the environment.",
+    )
     return p.parse_args()
 
 
@@ -157,6 +164,7 @@ def print_effective_config(args: argparse.Namespace) -> None:
     logger.info(f"  obstacle_max_size           : {args.obstacle_max_size}")
     logger.info(f"  light_min_num               : {args.light_min_num}")
     logger.info(f"  light_max_num               : {args.light_max_num}")
+    logger.info(f"  agent_num                   : {args.agent_num}")
     logger.info("================================\n")
 
 
@@ -186,6 +194,7 @@ def main() -> None:
         "max_obstacle_height": args.obstacle_max_size,
         "min_lights": args.light_min_num,
         "max_lights": args.light_max_num,
+        "agent_num": args.agent_num,
     }
 
     files = generate_multiple_environments(
