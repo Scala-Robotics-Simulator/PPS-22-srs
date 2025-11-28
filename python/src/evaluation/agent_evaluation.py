@@ -61,29 +61,27 @@ def evaluate(
                 for agent_id in terminateds.keys()
             }
             step += 1
-            for agent_id in next_obs.keys():
-                episode_total_reward[agent_id] += rewards[agent_id]
-                episode_rewards[agent_id].append(rewards[agent_id])
-                episode_moving_avg_reward[agent_id].append(
-                    np.mean(episode_rewards[agent_id][-window_size:])
-                    if len(episode_rewards[agent_id]) >= window_size
-                    else rewards[agent_id]
-                )
-                if dones[agent_id] or step == max_steps:
-                    if did_succeed(
-                        rewards[agent_id],
-                        terminateds[agent_id],
-                        truncateds[agent_id] or step == max_steps,
-                    ):
-                        successes[agent_id] += 1
-                        successes_idx[agent_id].append(config_idx)
-                        steps_to_success[agent_id].append(step)
+            for agent_id in agents.keys():
+                if not prev_dones[agent_id]:
+                    episode_total_reward[agent_id] += rewards[agent_id]
+                    episode_rewards[agent_id].append(rewards[agent_id])
+                    episode_moving_avg_reward[agent_id].append(
+                        np.mean(episode_rewards[agent_id][-window_size:])
+                        if len(episode_rewards[agent_id]) >= window_size
+                        else rewards[agent_id]
+                    )
+                    if dones[agent_id] or step == max_steps:
+                        if did_succeed(
+                            rewards[agent_id],
+                            terminateds[agent_id],
+                            truncateds[agent_id] or step == max_steps,
+                        ):
+                            successes[agent_id] += 1
+                            successes_idx[agent_id].append(config_idx)
+                            steps_to_success[agent_id].append(step)
             done = all(dones.values())
             obs = next_obs
-            prev_dones = {
-                agent_id: prev_dones[agent_id] or dones[agent_id]
-                for agent_id in agents.keys()
-            }
+            prev_dones = dones
         for agent_id in agents.keys():
             td_losses[agent_id].append(episode_td_losses[agent_id])
             total_rewards[agent_id].append(episode_total_reward[agent_id])
