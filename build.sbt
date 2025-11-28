@@ -2,7 +2,7 @@ import Dependencies.*
 
 val scala3Version = "3.7.4"
 enablePlugins(JavaAppPackaging)
-dockerBaseImage := "openjdk:21"
+dockerBaseImage := "eclipse-temurin:21"
 dockerRepository := Some("ghcr.io/scala-robotics-simulator")
 dockerExposedPorts ++= Seq(50051)
 dockerCmd := Seq("--rl")
