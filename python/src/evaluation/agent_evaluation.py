@@ -19,20 +19,20 @@ def evaluate(
     window_size: int = 100,
 ):
     successes = dict.fromkeys(agents.keys(), 0)
-    successes_idx = dict.fromkeys(agents.keys(), [])
-    steps_to_success = dict.fromkeys(agents.keys(), [])
-    td_losses = dict.fromkeys(agents.keys(), [])
-    total_rewards = dict.fromkeys(agents.keys(), [])
-    moving_avg_reward = dict.fromkeys(agents.keys(), [])
+    successes_idx = {k: [] for k in agents.keys()}
+    steps_to_success = {k: [] for k in agents.keys()}
+    td_losses = {k: [] for k in agents.keys()}
+    total_rewards = {k: [] for k in agents.keys()}
+    moving_avg_reward = {k: [] for k in agents.keys()}
     for config_idx in trange(len(configs), desc="Evaluation", unit="configuration run"):
         env.init(configs[config_idx])
         obs, _ = env.reset()
         done = False
         step = 0
-        episode_rewards = dict.fromkeys(agents.keys(), [])
+        episode_rewards = {k: [] for k in agents.keys()}
         episode_total_reward = dict.fromkeys(agents.keys(), 0)
-        episode_td_losses = dict.fromkeys(agents.keys(), [])
-        episode_moving_avg_reward = dict.fromkeys(agents.keys(), [])
+        episode_td_losses = {k: [] for k in agents.keys()}
+        episode_moving_avg_reward = {k: [] for k in agents.keys()}
         prev_dones = dict.fromkeys(agents.keys(), False)
         while not done and step < max_steps:
             actions = {
@@ -54,7 +54,6 @@ def evaluate(
                     td_loss = agent.compute_td_loss(
                         state, action, reward, next_state, done_flag
                     )
-                    # td_losses[agent_id].append(td_loss)
                     episode_td_losses[agent_id].append(td_loss)
 
             dones = {
@@ -66,7 +65,7 @@ def evaluate(
                 episode_total_reward[agent_id] += rewards[agent_id]
                 episode_rewards[agent_id].append(rewards[agent_id])
                 episode_moving_avg_reward[agent_id].append(
-                    episode_rewards[agent_id][-window_size:]
+                    np.mean(episode_rewards[agent_id][-window_size:])
                     if len(episode_rewards[agent_id]) >= window_size
                     else rewards[agent_id]
                 )

@@ -206,11 +206,9 @@ def plot_avg_reward_per_configuration(
                 episode_data = moving_avg[cfg_idx]
                 if len(episode_data) > 0:
                     steps = range(len(episode_data))
-                    avg_values = [
-                        np.mean(window) if isinstance(window, list) else window
-                        for window in episode_data
-                    ]
-                    ax.plot(steps, avg_values, label=agent_id, linewidth=1.5, alpha=0.7)
+                    ax.plot(
+                        steps, episode_data, label=agent_id, linewidth=1.5, alpha=0.7
+                    )
         ax.set_title(
             f"Configuration {cfg_idx + 1} – Moving Average Reward (All Agents)"
         )
