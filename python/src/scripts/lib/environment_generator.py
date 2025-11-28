@@ -69,8 +69,8 @@ class EnvironmentGenerator:
                 "position": [round(float(pos[0]), 1), round(float(pos[1]), 1)],
                 "orientation": round(float(orientation), 1),
                 "speed": self.agent_speed,
-                "reward": "NoReward",
-                "termination": "NeverTerminate",
+                "reward": "ExplorationDQN",
+                "termination": "ExplorationTermination",
                 "truncation": "NeverTruncate",
             }
         }
