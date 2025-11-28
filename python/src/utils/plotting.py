@@ -230,12 +230,11 @@ def plot_avg_reward_per_configuration(
                     ax.plot(
                         steps, episode_data, label=agent_id, linewidth=1.5, alpha=0.7
                     )
-        ax.set_title(
-            f"Configuration {cfg_idx + 1} – Moving Average Reward (All Agents)"
-        )
+        ax.set_title(f"Configuration {cfg_idx} – Moving Average Reward (All Agents)")
         ax.set_xlabel("Steps")
         ax.set_ylabel("Moving Average Reward")
-        ax.legend()
+        if len(agents) < 5:
+            ax.legend()
         ax.grid(True, alpha=0.3)
 
     # Hide any unused subplots
