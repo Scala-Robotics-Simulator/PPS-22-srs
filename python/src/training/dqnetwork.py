@@ -54,7 +54,7 @@ class DQNetwork:
             model.add(Dense(n, activation="relu"))
 
         model.add(Dense(self.action_count, name="Output"))
-        model.compile(loss="mse", optimizer=Adam(learning_rate=0.001))
+        model.compile(loss="mse", optimizer=Adam(learning_rate=0.003))
 
         return model
 
