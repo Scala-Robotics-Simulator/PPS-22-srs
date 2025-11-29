@@ -48,7 +48,7 @@ object PhototaxisReward:
     // Terminal rewards: HIGH goal bonus (4.4x farming potential) makes reaching light dominant strategy
     // Reduced failure penalty avoids excessive collision-avoidance fear
     private val GoalBonus = 2000.0
-    private val FailurePenalty = -100.0
+    private val FailurePenalty = -200.0
 
     private val NoLightThreshold = 0.01 // Sync with Environment
 
@@ -73,28 +73,31 @@ object PhototaxisReward:
             if positionChange < StationaryThreshold then StationaryPenalty
             else 0.0
 
+          // CRITICAL FIX: Calculate progress ALWAYS, not just when in light!
+          // This provides gradient even when agent is outside illumination radius
+          val prevDist = distanceToNearestLight(prev.environment, agentPrev)
+          val currDist = distanceToNearestLight(current.environment, agentNow)
+          val progress = prevDist - currDist
+
+          val rProgress =
+            if progress.isNaN then 0.0
+            else ProgressScale * progress
+
           val maxLight = agentNow
             .senseAll[Id](current.environment)
             .lightReadings
             .map(_.value)
             .foldLeft(0.0)(math.max)
 
-          if maxLight < NoLightThreshold then
-            // Out of light: darkness penalty + step penalty + stationary check
-            DarknessPenalty + StepPenalty + movementPenalty
-          else
-            // In light: reward progress towards nearest light
-            // No progress (e.g., oscillating) → rProgress ≈ 0 → net negative from StepPenalty
-            // Positive progress → net positive reward
-            val prevDist = distanceToNearestLight(prev.environment, agentPrev)
-            val currDist = distanceToNearestLight(current.environment, agentNow)
-            val progress = prevDist - currDist
+          // Apply darkness penalty ONLY when out of light
+          val darknessPenalty =
+            if maxLight < NoLightThreshold then DarknessPenalty
+            else 0.0
 
-            val rProgress =
-              if progress.isNaN then 0.0
-              else ProgressScale * progress
-
-            rProgress + StepPenalty + movementPenalty
+          // Reward = progress toward light + darkness penalty (if applicable) + step + movement penalties
+          // When in light: progress - 0.05 + movement
+          // When out of light: progress - 0.2 - 0.05 + movement
+          rProgress + darknessPenalty + StepPenalty + movementPenalty
         end if
 
       end if
