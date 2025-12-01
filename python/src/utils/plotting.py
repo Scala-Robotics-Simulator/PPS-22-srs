@@ -230,6 +230,7 @@ def plot_avg_reward_per_configuration(
                     ax.plot(
                         steps, episode_data, label=agent_id, linewidth=1.5, alpha=0.7
                     )
+        ax.set_yscale("symlog", linthresh=1.0)
         ax.set_title(f"Configuration {cfg_idx} – Moving Average Reward (All Agents)")
         ax.set_xlabel("Steps")
         ax.set_ylabel("Moving Average Reward")
