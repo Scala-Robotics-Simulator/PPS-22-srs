@@ -15,14 +15,14 @@ def plot_learning_history(
         ax1.plot(
             range(len(steps)),
             steps,
-            label=f"{agent_id} steps",
+            label=f"{agent_id[-2:] if len(agent_id) > 10 else agent_id} steps",
             linestyle="--",
             color="orange",
         )
         ax2.plot(
             range(len(total_rewards)),
             total_rewards,
-            label=f"{agent_id} reward",
+            label=f"{agent_id[-2:] if len(agent_id) > 10 else agent_id} reward",
             color="#1f77b4",
         )
 
@@ -59,10 +59,10 @@ def plot_total_reward(results: dict, agents: list[str], save_path: str = None):
     Displays 2 agents side by side.
     """
     n_agents = len(agents)
-    n_cols = 2
+    n_cols = min(3, n_agents)
     n_rows = (n_agents + n_cols - 1) // n_cols
 
-    fig, axes = plt.subplots(
+    _, axes = plt.subplots(
         n_rows, n_cols, figsize=(10 * n_cols, 4 * n_rows), sharex=False
     )
 
@@ -102,7 +102,9 @@ def plot_total_reward(results: dict, agents: list[str], save_path: str = None):
             bbox={"boxstyle": "round", "facecolor": "lightgreen", "alpha": 0.5},
         )
 
-        ax.set_title(f"{agent_id} – Total Reward per Episode")
+        ax.set_title(
+            f"{agent_id[-2:] if len(agent_id) > 10 else agent_id} – Total Reward per Episode"
+        )
         ax.set_xlabel("Episode")
         ax.set_ylabel("Total Reward")
         ax.legend()
@@ -123,9 +125,17 @@ def plot_td_loss_success(results: dict, agents: list[str], save_path: str = None
     Plot TD loss for successful episodes only for each agent.
     """
     n_agents = len(agents)
-    _, axes = plt.subplots(n_agents, 1, figsize=(10, 4 * n_agents), sharex=False)
+    n_cols = min(3, n_agents)
+    n_rows = (n_agents + n_cols - 1) // n_cols
 
-    if n_agents == 1:
+    _, axes = plt.subplots(
+        n_rows, n_cols, figsize=(5 * n_cols, 4 * n_rows), sharex=False
+    )
+
+    # Flatten axes array for easier indexing
+    if isinstance(axes, np.ndarray):
+        axes = axes.flatten()
+    else:
         axes = [axes]
 
     for idx, agent_id in enumerate(agents):
@@ -152,11 +162,17 @@ def plot_td_loss_success(results: dict, agents: list[str], save_path: str = None
             ax.plot(
                 successes_idx[: len(smoothed)], smoothed, label="Smoothed", linewidth=2
             )
-            ax.set_title(f"{agent_id} – TD Loss (Successful Episodes)")
+            ax.set_title(
+                f"{agent_id[-2:] if len(agent_id) > 10 else agent_id} – TD Loss (Successful Episodes)"
+            )
             ax.set_xlabel("Episode Index")
             ax.set_ylabel("TD Loss")
             ax.legend()
             ax.grid(True, linestyle="--", alpha=0.5)
+
+    # Hide any unused subplots
+    for idx in range(n_agents, len(axes)):
+        axes[idx].set_visible(False)
 
     plt.tight_layout()
     if save_path:
@@ -169,9 +185,17 @@ def plot_td_loss_all(results: dict, agents: list[str], save_path: str = None):
     Plot TD loss for all episodes for each agent.
     """
     n_agents = len(agents)
-    _, axes = plt.subplots(n_agents, 1, figsize=(10, 4 * n_agents), sharex=False)
+    n_cols = min(3, n_agents)
+    n_rows = (n_agents + n_cols - 1) // n_cols
 
-    if n_agents == 1:
+    _, axes = plt.subplots(
+        n_rows, n_cols, figsize=(5 * n_cols, 4 * n_rows), sharex=False
+    )
+
+    # Flatten axes array for easier indexing
+    if isinstance(axes, np.ndarray):
+        axes = axes.flatten()
+    else:
         axes = [axes]
 
     for idx, agent_id in enumerate(agents):
@@ -186,11 +210,17 @@ def plot_td_loss_all(results: dict, agents: list[str], save_path: str = None):
 
         ax.plot(episode_indices, episode_means, label="Mean TD Loss", alpha=0.6)
         ax.plot(episode_indices, smoothed, label="Smoothed", linewidth=2)
-        ax.set_title(f"{agent_id} – TD Loss (All Episodes)")
+        ax.set_title(
+            f"{agent_id[-2:] if len(agent_id) > 10 else agent_id} – TD Loss (All Episodes)"
+        )
         ax.set_xlabel("Episode Index")
         ax.set_ylabel("TD Loss")
         ax.legend()
         ax.grid(True, linestyle="--", alpha=0.5)
+
+    # Hide any unused subplots
+    for idx in range(n_agents, len(axes)):
+        axes[idx].set_visible(False)
 
     plt.tight_layout()
     if save_path:
