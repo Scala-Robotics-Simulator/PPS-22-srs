@@ -74,6 +74,17 @@ object Point2D:
       Point2D(p.x * scalar, p.y * scalar)
 
     /**
+     * Divides this point by a scalar value, resulting in a new point whose coordinates are divided by the scalar.
+     *
+     * @param scalar
+     *   the scalar value to divide the point by.
+     * @return
+     *   a new [[Point2D]] representing the scaled-down point.
+     */
+    infix def /(scalar: Double): Point2D =
+      Point2D(p.x / scalar, p.y / scalar)
+
+    /**
      * Calculates the dot product of this point with another point.
      * @param other
      *   the other point to compute the dot product with.
@@ -117,4 +128,11 @@ object Point2D:
       math.sqrt(math.pow(other.x - p.x, 2) + math.pow(other.y - p.y, 2))
 
   end extension
+
+  extension (points: List[Point2D])
+
+    def mean: Point2D =
+      points.reduceOption(_ + _) match
+        case Some(sum) => sum / points.size.toDouble
+        case None => Point2D(0, 0)
 end Point2D
