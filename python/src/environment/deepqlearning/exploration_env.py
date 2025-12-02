@@ -39,6 +39,7 @@ class ExplorationEnv(AbstractEnv):
         return cell_x, cell_y
 
     def _encode_observation(self, proximity_values, light_values, position, orientation):
+        # TODO
         # x_norm = np.clip(position.x / (self.grid_size[0] - 1), 0.0, 1.0)
         # y_norm = np.clip(position.y / (self.grid_size[1] - 1), 0.0, 1.0)
         # orientation_norm = (orientation % 360.0) / 360.0

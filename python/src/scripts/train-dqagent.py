@@ -325,7 +325,7 @@ def main() -> None:
     os.makedirs(os.path.dirname(checkpoint_base) or ".", exist_ok=True)
 
     # Train
-    _ = trainer.simple_dqn_training(checkpoint_base=checkpoint_base)
+    _ = trainer.simple_dqn_training(checkpoint_base=checkpoint_base, variable_steps=True)
 
     train_finish_time = time.time()
     train_elapsed_time = train_finish_time - train_start_time
