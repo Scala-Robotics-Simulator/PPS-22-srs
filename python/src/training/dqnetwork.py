@@ -1,5 +1,5 @@
 import numpy as np
-from keras.layers import Dense, Input
+from keras.layers import Dense, Input, GRU
 from keras.models import Sequential
 from keras.optimizers import Adam
 from keras.utils import plot_model
@@ -48,7 +48,11 @@ class DQNetwork:
             The constructed Deep Q-Network model.
         """
         model = Sequential()
-        model.add(Input(shape=self.input_count, name="Input"))
+        # TODO model.add(Input(shape=self.input_count, name="Input"))
+
+        model.add(Input(shape=(4, self.input_count), name="Input"))
+
+        model.add(GRU(64, return_sequences=False))
 
         for n in self.neuron_count_per_hidden_layer:
             model.add(Dense(n, activation="relu"))
