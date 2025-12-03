@@ -182,7 +182,7 @@ object PhototaxisRewardVariants:
       end if
     end evaluate
   end PhototaxisV3
-  
+
   final case class PhototaxisV4() extends RewardModel[Agent]:
     private val ProgressScale = 5.0
     private val StepPenalty = -0.05
