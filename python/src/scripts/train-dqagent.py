@@ -51,16 +51,18 @@ DEFAULTS = {
     "checkpoint_dir": None,  # inferred from config basename
     "client_name": "PhototaxisRLClient",
     "env": "phototaxis",
-    "neurons": [64, 32],
+    "neurons": [128, 64, 32],  # Increased capacity for 16-input observations
     "epsilon_max": 1.0,
     "epsilon_min": 0.01,
-    "gamma": 0.99,
+    "gamma": 0.95,  # Lowered from 0.99 for better immediate progress focus
     "replay_memory_max_size": 100000,
     "replay_memory_init_size": 10000,
-    "batch_size": 32,
-    "step_per_update": 4,
+    "batch_size": 64,  # Increased from 32 for more stable gradients
+    "step_per_update": 8,  # Increased from 4 to reduce update frequency
     "step_per_update_target_model": 1000,
-    "moving_avg_stop_thr": 100,
+    "moving_avg_stop_thr": 2700,  # 90% del GoalBonus (3000)
+    "learning_rate": 0.001,  # Tunable learning rate
+    "use_batch_norm": True,  # Enable batch normalization by default
 }
 FIXED_AGENT_ID = "00000000-0000-0000-0000-000000000001"
 
@@ -204,6 +206,27 @@ def parse_args() -> argparse.Namespace:
         help="Moving average reward threshold to stop training.",
         required=False,
     )
+    p.add_argument(
+        "--learning-rate",
+        type=float,
+        default=DEFAULTS["learning_rate"],
+        help="Learning rate for the Adam optimizer.",
+        required=False,
+    )
+    p.add_argument(
+        "--use-batch-norm",
+        type=bool,
+        default=DEFAULTS["use_batch_norm"],
+        help="Whether to use batch normalization in the network.",
+        required=False,
+    )
+    p.add_argument(
+        "--resume-from",
+        type=str,
+        default=None,
+        help="Specific checkpoint to resume from (e.g., 'photo_ep7469'). If not specified, uses '{name}_final'.",
+        required=False,
+    )
     return p.parse_args()
 
 
@@ -249,6 +272,8 @@ def print_effective_config(
     logger.info(f"  step_per_update             : {args.step_per_update}")
     logger.info(f"  step_per_update_target_model: {args.step_per_update_target_model}")
     logger.info(f"  moving_avg_stop_thr         : {args.moving_avg_stop_thr}")
+    logger.info(f"  learning_rate               : {args.learning_rate}")
+    logger.info(f"  use_batch_norm              : {args.use_batch_norm}")
     logger.info("================================\n")
 
 
@@ -273,20 +298,36 @@ def main() -> None:
     env.connect_to_client()
     env.init(configs[0])
 
+    # Check if resuming from checkpoint BEFORE creating agent
+    checkpoint_base = get_yaml_path(*args.checkpoint_dir)
+
+    # Use --resume-from if specified, otherwise default to {name}_final
+    if args.resume_from:
+        resume_checkpoint = f"{checkpoint_base.parent / args.resume_from}"
+    else:
+        resume_checkpoint = f"{checkpoint_base}_final"
+
+    is_resuming = os.path.exists(resume_checkpoint)
+
+    # Crea i network iniziali
     action_net = DQNetwork(
         env.observation_space.shape,
         args.neurons,
         env.action_space.n,
+        learning_rate=args.learning_rate,
+        use_batch_norm=args.use_batch_norm,
         summary=False,
     )
     target_net = DQNetwork(
         env.observation_space.shape,
         args.neurons,
         env.action_space.n,
+        learning_rate=args.learning_rate,
+        use_batch_norm=args.use_batch_norm,
         summary=False,
     )
 
-    # Agent(s)
+    # Agent(s) - SKIP replay memory init if resuming (will fill during training)
     agent = DQAgent(
         env,
         agent_id=FIXED_AGENT_ID,
@@ -296,7 +337,7 @@ def main() -> None:
         epsilon_min=args.epsilon_min,
         gamma=args.gamma,
         replay_memory_max_size=args.replay_memory_max_size,
-        replay_memory_init_size=args.replay_memory_init_size,
+        replay_memory_init_size=0 if is_resuming else args.replay_memory_init_size,
         batch_size=args.batch_size,
         step_per_update=args.step_per_update,
         step_per_update_target_model=args.step_per_update_target_model,
@@ -305,6 +346,29 @@ def main() -> None:
         episode_max_steps=args.steps,
         episodes=args.episodes,
     )
+
+    if is_resuming:
+        logger.info(f"Loading checkpoint from: {resume_checkpoint}")
+        try:
+            agent.load(resume_checkpoint)
+            logger.info(
+                f" Checkpoint loaded! Epsilon={agent.epsilon:.4f}, Gamma={agent.gamma:.2f}"
+            )
+
+            # Fill replay memory with experiences using the TRAINED policy
+            logger.info(
+                f"Filling replay memory with {args.replay_memory_init_size} experiences using trained policy..."
+            )
+            agent.simple_dqn_replay_memory_init(
+                env, agent.replay_memory, args.replay_memory_init_size, args.steps
+            )
+            logger.info(f"Replay memory filled: {len(agent.replay_memory)} experiences")
+
+        except Exception as e:
+            logger.error(f" Failed to load checkpoint: {e}")
+            logger.info("Starting fresh training...")
+    else:
+        logger.info("No previous checkpoint found, starting fresh training...")
 
     train_start_time = time.time()
 
@@ -316,8 +380,6 @@ def main() -> None:
         episode_max_steps=args.steps,
     )
 
-    # # Compute checkpoint base & show effective settings
-    checkpoint_base = get_yaml_path(*args.checkpoint_dir)
     print_effective_config(args, config_path, checkpoint_base)
 
     os.makedirs(os.path.dirname(checkpoint_base) or ".", exist_ok=True)

@@ -27,11 +27,6 @@ object PhototaxisReward:
 
   final case class Phototaxis() extends RewardModel[Agent]:
 
-    // Reward shaping for DQN phototaxis - optimized for 10x10 arena with 1000 max steps
-    // Based on empirical testing and literature (distance-based shaping, sparse terminal rewards)
-    // Key insight: Strong progress signal + high goal bonus prevents farming behavior
-
-    // Main reward signal: STRONG distance-based progress (doubled from 2.5 to 5.0)
     // Provides clear gradient for DQN to learn direction towards light
     private val ProgressScale = 5.0
 
@@ -45,12 +40,12 @@ object PhototaxisReward:
     private val StationaryPenalty = -0.2
     private val StationaryThreshold = 0.001
 
-    // Terminal rewards: HIGH goal bonus (4.4x farming potential) makes reaching light dominant strategy
+    // Terminal rewards: HIGH goal bonus (10.7x farming potential) makes reaching light dominant strategy
     // Reduced failure penalty avoids excessive collision-avoidance fear
-    private val GoalBonus = 2000.0
-    private val FailurePenalty = -200.0
+    private val GoalBonus = 3000.0
+    private val FailurePenalty = -100.0
 
-    private val NoLightThreshold = 0.01 // Sync with Environment
+    private val NoLightThreshold = 0.001 // Sync with Environment
 
     override def evaluate(
         prev: BaseState,
@@ -73,31 +68,28 @@ object PhototaxisReward:
             if positionChange < StationaryThreshold then StationaryPenalty
             else 0.0
 
-          // CRITICAL FIX: Calculate progress ALWAYS, not just when in light!
-          // This provides gradient even when agent is outside illumination radius
-          val prevDist = distanceToNearestLight(prev.environment, agentPrev)
-          val currDist = distanceToNearestLight(current.environment, agentNow)
-          val progress = prevDist - currDist
-
-          val rProgress =
-            if progress.isNaN then 0.0
-            else ProgressScale * progress
-
           val maxLight = agentNow
             .senseAll[Id](current.environment)
             .lightReadings
             .map(_.value)
             .foldLeft(0.0)(math.max)
 
-          // Apply darkness penalty ONLY when out of light
-          val darknessPenalty =
-            if maxLight < NoLightThreshold then DarknessPenalty
-            else 0.0
+          if maxLight < NoLightThreshold then
+            // Out of light: darkness penalty + step penalty + stationary check
+            DarknessPenalty + StepPenalty + movementPenalty
+          else
+            // In light: reward progress towards nearest light
+            // No progress (e.g., oscillating) → rProgress ≈ 0 → net negative from StepPenalty
+            // Positive progress → net positive reward
+            val prevDist = distanceToNearestLight(prev.environment, agentPrev)
+            val currDist = distanceToNearestLight(current.environment, agentNow)
+            val progress = prevDist - currDist
 
-          // Reward = progress toward light + darkness penalty (if applicable) + step + movement penalties
-          // When in light: progress - 0.05 + movement
-          // When out of light: progress - 0.2 - 0.05 + movement
-          rProgress + darknessPenalty + StepPenalty + movementPenalty
+            val rProgress =
+              if progress.isNaN then 0.0
+              else ProgressScale * progress
+
+            rProgress + StepPenalty + movementPenalty
         end if
 
       end if

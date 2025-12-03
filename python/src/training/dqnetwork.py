@@ -1,5 +1,5 @@
 import numpy as np
-from keras.layers import Dense, Input
+from keras.layers import BatchNormalization, Dense, Input
 from keras.models import Sequential
 from keras.optimizers import Adam
 from keras.utils import plot_model
@@ -16,6 +16,10 @@ class DQNetwork:
         Number of neurons in each hidden layer.
     action_count : int
         Number of possible actions.
+    learning_rate : float, optional (default=0.001)
+        Learning rate for the Adam optimizer.
+    use_batch_norm : bool, optional (default=True)
+        Whether to use batch normalization after each hidden layer.
     summary : bool, optional (default=False)
         Whether to print the model summary.
     plot_model_flag : bool, optional (default=False)
@@ -27,12 +31,16 @@ class DQNetwork:
         input_count: tuple,
         neuron_count_per_hidden_layer: list,
         action_count: int,
+        learning_rate: float = 0.001,
+        use_batch_norm: bool = True,
         summary: bool = False,
         plot_model_flag: bool = False,
     ):
         self.input_count = input_count
         self.neuron_count_per_hidden_layer = neuron_count_per_hidden_layer
         self.action_count = action_count
+        self.learning_rate = learning_rate
+        self.use_batch_norm = use_batch_norm
         self.model = self._build_simple_dqn()
         if summary:
             self.model.summary()
@@ -40,7 +48,7 @@ class DQNetwork:
             plot_model(self.model, show_shapes=True, show_layer_names=False)
 
     def _build_simple_dqn(self):
-        """Builds a simple Deep Q-Network model.
+        """Builds a simple Deep Q-Network model with optional batch normalization.
 
         Returns
         -------
@@ -52,9 +60,11 @@ class DQNetwork:
 
         for n in self.neuron_count_per_hidden_layer:
             model.add(Dense(n, activation="relu"))
+            if self.use_batch_norm:
+                model.add(BatchNormalization())
 
         model.add(Dense(self.action_count, name="Output"))
-        model.compile(loss="mse", optimizer=Adam(learning_rate=0.003))
+        model.compile(loss="mse", optimizer=Adam(learning_rate=self.learning_rate))
 
         return model
 
