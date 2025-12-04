@@ -117,6 +117,7 @@ object ExplorationReward:
     private val ExplorationBonus = +10.0
     private val MilestoneBonus = +2.0
     private val CoverageBonus = +500.0
+    private val MaxVisitsPerCell = 10
 
     override protected def stateManager: RewardStateManager[Agent, ExplorationState] =
       ExplorationRewardStateManager
@@ -175,7 +176,7 @@ object ExplorationReward:
 
 //      rCuriosity = novelty * 0.1
 
-      if isAgentStuck(updatedPos, WindowStuck) then rStuck = StuckPenalty
+      if isAgentStuck(updatedPos, WindowStuck) || updatedCounts(currentCell) > MaxVisitsPerCell then rStuck = StuckPenalty
 
       val rMove = movementReward(action, currentMin, 0.35) // moveReward(agent, prevAgent, action, currentMin)
 
