@@ -1,10 +1,9 @@
 package io.github.srs.model.entity.dynamicentity.agent.reward
 
-import io.github.srs.model.entity.dynamicentity.agent.Agent
-import io.github.srs.model.entity.dynamicentity.action.Action
-import io.github.srs.model.entity.dynamicentity.agent.reward.ObstacleAvoidanceRewardModule
-import io.github.srs.model.entity.dynamicentity.agent.reward.PhototaxisRewardModule
 import io.github.srs.model.ModelModule.BaseState
+import io.github.srs.model.entity.dynamicentity.action.Action
+import io.github.srs.model.entity.dynamicentity.agent.Agent
+import io.github.srs.model.entity.dynamicentity.agent.reward.{ ObstacleAvoidanceRewardModule, PhototaxisReward }
 
 /**
  * An enumeration of available reward models for agents.
@@ -17,6 +16,10 @@ enum Reward(val name: String) derives CanEqual:
   case QObstacleAvoidance extends Reward("QObstacleAvoidance")
   case DQObstacleAvoidance extends Reward("DQObstacleAvoidance")
   case Phototaxis extends Reward("Phototaxis")
+  case PhototaxisV2 extends Reward("PhototaxisV2")
+  case PhototaxisV3 extends Reward("PhototaxisV3")
+  case PhototaxisV4 extends Reward("PhototaxisV4")
+  case PhototaxisV5 extends Reward("PhototaxisV5")
   case Exploration extends Reward("Exploration")
 
   /**
@@ -41,7 +44,15 @@ enum Reward(val name: String) derives CanEqual:
       case DQObstacleAvoidance =>
         ObstacleAvoidanceRewardModule.DQObstacleAvoidance().evaluate(prev, current, entity, action)
       case Phototaxis =>
-        PhototaxisRewardModule.Phototaxis().evaluate(prev, current, entity, action)
+        PhototaxisReward.Phototaxis().evaluate(prev, current, entity, action)
+      case PhototaxisV2 =>
+        PhototaxisRewardVariants.PhototaxisV2().evaluate(prev, current, entity, action)
+      case PhototaxisV3 =>
+        PhototaxisRewardVariants.PhototaxisV3().evaluate(prev, current, entity, action)
+      case PhototaxisV4 =>
+        PhototaxisRewardVariants.PhototaxisV4().evaluate(prev, current, entity, action)
+      case PhototaxisV5 =>
+        PhototaxisRewardVariants.PhototaxisV5().evaluate(prev, current, entity, action)
       case Exploration =>
         ExplorationReward.Exploration().evaluate(prev, current, entity, action)
 
