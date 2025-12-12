@@ -155,7 +155,10 @@ def resolve_env(
             return ObstacleAvoidanceEnv(server_address, client_name)
         case "exploration":
             return ExplorationEnv(
-                server_address, client_name, grid_size=(10, 10), orientation_bins=8
+                server_address,
+                client_name,
+                grid_size=(5, 5), # TODO grid_size=(10, 10)
+                orientation_bins=8
             )
         case _:
             logger.error("Environment not found")
@@ -181,7 +184,7 @@ def print_effective_config(
 
 
 def run_episodes(
-    env: PhototaxisEnv | ObstacleAvoidanceEnv,
+    env: PhototaxisEnv | ObstacleAvoidanceEnv | ExplorationEnv,
     configs: list[str],
     agents: dict[str, QAgent],
     agent_id: str,
