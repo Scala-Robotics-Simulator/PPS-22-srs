@@ -45,7 +45,7 @@ class AbstractEnv(ABC):
     def _encode_observation(
         self, proximity_values, light_values, position, orientation, visited_positions
     ):
-        """Encode the observation from proximity and light values"""
+        """Encode the observation from proximity, light values, position and orientation"""
         pass
 
     @abstractmethod
