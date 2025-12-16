@@ -47,7 +47,6 @@ class ExplorationEnv(AbstractEnv):
         y_norm = np.clip(position.y / self.grid_size[1], 0.0, 1.0)
         orientation_sin = np.sin(np.radians(orientation))
         orientation_cos = np.cos(np.radians(orientation))
-        print(f"Visited positions: {visited_positions}")
         obs = np.concatenate([
             np.array([x_norm, y_norm, orientation_sin, orientation_cos, *visited_positions, *proximity_values], dtype=np.float32),
         ])
