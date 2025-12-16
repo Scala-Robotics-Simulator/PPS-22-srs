@@ -30,7 +30,7 @@ class ExplorationEnv(AbstractEnv):
         self.orientation_bins = orientation_bins
 
         self.observation_space = spaces.Box(
-            low=0.0, high=1.0, shape=(12,), dtype=np.float32
+            low=0.0, high=1.0, shape=(37,), dtype=np.float32
         )
 
     def _discrete_cell(self, position):
@@ -38,7 +38,7 @@ class ExplorationEnv(AbstractEnv):
         cell_y = int(position.y / self.cell_size)
         return cell_x, cell_y
 
-    def _encode_observation(self, proximity_values, light_values, position, orientation):
+    def _encode_observation(self, proximity_values, light_values, position, orientation, visited_positions):
         # TODO
         # x_norm = np.clip(position.x / (self.grid_size[0] - 1), 0.0, 1.0)
         # y_norm = np.clip(position.y / (self.grid_size[1] - 1), 0.0, 1.0)
@@ -47,12 +47,12 @@ class ExplorationEnv(AbstractEnv):
         y_norm = np.clip(position.y / self.grid_size[1], 0.0, 1.0)
         orientation_sin = np.sin(np.radians(orientation))
         orientation_cos = np.cos(np.radians(orientation))
-
+        print(f"Visited positions: {visited_positions}")
         obs = np.concatenate([
-            np.array([x_norm, y_norm, orientation_sin, orientation_cos, *proximity_values], dtype=np.float32),
+            np.array([x_norm, y_norm, orientation_sin, orientation_cos, *visited_positions, *proximity_values], dtype=np.float32),
         ])
 
-        assert obs.shape[0] == 12, f"Observation must have length 12 but got {obs.shape[0]}"
+        assert obs.shape[0] == 37, f"Observation must have length 37 but got {obs.shape[0]}"
         return obs
 
     def _decode_action(self, action) -> rl_pb2.ContinuousAction:
