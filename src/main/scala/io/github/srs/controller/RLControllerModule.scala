@@ -17,6 +17,8 @@ import io.github.srs.model.logic.RLLogicsBundle
 import io.github.srs.utils.random.{ RNG, SimpleRNG }
 import io.github.srs.view.rendering.EnvironmentRenderer
 import io.github.srs.model.entity.Point2D.*
+import io.github.srs.utils.SpatialUtils
+import io.github.srs.utils.SpatialUtils.{ discreteCell, nearbyVisitedPositions }
 
 object RLControllerModule:
 
@@ -24,6 +26,7 @@ object RLControllerModule:
       sensorReadings: SensorReadings,
       position: (Double, Double),
       orientation: Double,
+      visitedPositions: List[Double],
   )
 
   type Observations = Map[Agent, AgentObservation]
@@ -141,7 +144,15 @@ object RLControllerModule:
           _state = context.model.update(state)(using s => bundle.tickLogic.tick(s, state.dt)).unsafeRunSync()
           val actionsList =
             actions.map { (agent, action) =>
-              DynamicEntityProposal(agent.copy(lastAction = Some(action), aliveSteps = agent.aliveSteps + 1), action)
+              DynamicEntityProposal(
+                agent.copy(
+                  lastAction = Some(action),
+                  aliveSteps = agent.aliveSteps + 1,
+                  visitedCountPositions =
+                    nearbyVisitedPositions(discreteCell(agent.position), agent.visitedCountPositions)._1,
+                ),
+                action,
+              )
             }.toList.sortBy(_.entity.id)
           val prevState = state
           _state = context.model
@@ -202,7 +213,9 @@ object RLControllerModule:
           val sensors = a.senseAll[Id](env)
           val position = (a.position.x, a.position.y)
           val orientation = a.orientation.degrees
-          a -> AgentObservation(sensors, position, orientation)
+          val (_, visitedPositions) = nearbyVisitedPositions(discreteCell(position), a.visitedCountPositions)
+
+          a -> AgentObservation(sensors, position, orientation, visitedPositions)
         }.toMap
 
       def getInfos: Infos =

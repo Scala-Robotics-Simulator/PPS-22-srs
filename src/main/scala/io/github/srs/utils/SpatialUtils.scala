@@ -8,7 +8,7 @@ import io.github.srs.model.environment.Environment
 // TODO
 object SpatialUtils:
 
-  def discreteCell(pos: Point2D, cellSize: Double): (Int, Int) =
+  def discreteCell(pos: Point2D, cellSize: Double = 1.0): (Int, Int) =
     val cellX = (pos.x / cellSize).toInt
     val cellY = (pos.y / cellSize).toInt
     (cellX, cellY)
@@ -104,5 +104,19 @@ object SpatialUtils:
 //                         ): Int =
 //    val free = countExplorableCells(env, agentRadius, cellSize)
 //    (free * fraction).toInt
+
+  def nearbyVisitedPositions(pos: (Int, Int), m: Map[(Int, Int), Double]): (Map[(Int, Int), Double], List[Double]) =
+    val (x, y) = pos
+    val m2 = m.map((k, v) => k -> v * 0.999)
+    val newM = m2 ++ Map((x, y) -> 1.0)
+    val l = for
+      dx <- -2 to 2
+      dy <- -2 to 2
+    yield newM.get((x + dx, y + dy))
+    val l2 = l.map {
+      case Some(v) => v
+      case None => 0.0
+    }.toList
+    (newM, l2)
 
 end SpatialUtils

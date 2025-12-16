@@ -43,6 +43,7 @@ final case class Agent(
     termination: Termination = AgentDefaults.DefaultTermination,
     truncation: Truncation = AgentDefaults.DefaultTruncation,
     lastAction: Option[Action[IO]] = None,
+    visitedCountPositions: Map[(Int, Int), Double] = AgentDefaults.DefaultVisitedCountPositions,
     aliveSteps: Int = 0,
     didCollide: Boolean = false,
 ) extends DynamicEntity
@@ -78,6 +79,7 @@ object Agent:
       termination: Termination = AgentDefaults.DefaultTermination,
       truncation: Truncation = AgentDefaults.DefaultTruncation,
       action: Option[Action[IO]] = None,
+      visitedCountPositions: Map[(Int, Int), Double] = AgentDefaults.DefaultVisitedCountPositions,
       aliveSteps: Int = 0,
       didCollide: Boolean = false,
   ): Agent =
@@ -92,6 +94,7 @@ object Agent:
       termination,
       truncation,
       action,
+      visitedCountPositions,
       aliveSteps,
       didCollide,
     )
