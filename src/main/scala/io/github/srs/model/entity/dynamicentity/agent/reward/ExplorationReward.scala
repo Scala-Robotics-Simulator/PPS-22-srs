@@ -14,6 +14,7 @@ import io.github.srs.utils.EqualityGivenInstances.given_CanEqual_T_T
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Agent.CollisionAvoidance.CollisionTriggerDistance
 import io.github.srs.utils.SimulationDefaults.DynamicEntity.Agent.CoverageTermination.*
 import io.github.srs.utils.SpatialUtils.{ discreteCell, estimateCoverage, estimateRealCoverage }
+import utils.types.CircularBuffer
 
 object ExplorationReward:
 
@@ -22,9 +23,11 @@ object ExplorationReward:
   case class ExplorationState(
       var ticks: Int = 0,
       positions: List[Point2D] = List.empty,
+      actionHistory: CircularBuffer[Action[?]] = CircularBuffer(200),
       visitedCells: Set[(Int, Int)] = Set.empty,
       achievedMilestones: Set[Int] = Set.empty,
       visitedCounts: Map[(Int, Int), Int] = Map.empty,
+      lastCoverage: Double = 0.0,
       maxTicks: Int = 10_000,
   )
 
@@ -94,6 +97,7 @@ object ExplorationReward:
 
       val newState = state.copy(
         ticks = newTick,
+        actionHistory = state.actionHistory.add(action),
         positions = updatedPositions,
         visitedCells = updatedVisited,
         achievedMilestones = updateMilestones,
@@ -111,7 +115,6 @@ object ExplorationReward:
     private val ExplorationBonus = +10.0
     private val MilestoneBonus = +2.0
     private val CoverageBonus = +500.0
-    private val MaxVisitsPerCell = 10
 
     override protected def stateManager: RewardStateManager[Agent, ExplorationState] =
       ExplorationRewardStateManager
@@ -124,69 +127,65 @@ object ExplorationReward:
         state: ExplorationState,
     ): (Double, ExplorationState) =
 
+      var rCollision = 0.0
+      //      var rClearance = 0.0
+      var rExploration = 0.0
+      var rCountBasedExploration = 0.0
+      var rMilestone = 0.0
+      var rCompletion = 0.0
+      //      var rCuriosity = 0.0
+      var rStuck = 0.0
+
       val newTick = state.ticks + 1
       val updatedPos = agent.position :: state.positions
+      //      val prevAgent = getAgentFromId(agent, prev)
       val currentMin = distanceFromObstacle(current.environment, agent)
 
       val currentCell = discreteCell(agent.position, CellSize)
       val isNewCell = !state.visitedCells.contains(currentCell)
-      val updatedCells =
-        if isNewCell then state.visitedCells + currentCell else state.visitedCells
+      val updatedCells = if isNewCell then state.visitedCells + currentCell else state.visitedCells
 
-      val coverage =
-        estimateRealCoverage(updatedCells, current.environment, agent.shape.radius, CellSize)
+      val coverage = estimateRealCoverage(updatedCells, current.environment, agent.shape.radius, CellSize)
       val currentPercent = math.floor(coverage * Percent).toInt
       val achieved = state.achievedMilestones
-      val newMilestones =
-        (1 to currentPercent).filterNot(achieved.contains).toSet
-      val updateMilestones = achieved ++ newMilestones
+      val newMilestones = (1 to currentPercent).filterNot(achieved.contains).toSet
+
+      //      val centroid = updatedPos.mean
+      //      val novelty = agent.position.distanceTo(centroid)
 
       val oldCount = state.visitedCounts.getOrElse(currentCell, 0)
-      val updatedCounts: Map[(Int, Int), Int] =
-        state.visitedCounts + (currentCell -> (oldCount + 1))
+      val updatedCounts: Map[(Int, Int), Int] = state.visitedCounts + (currentCell -> (oldCount + 1))
 
-      // collision
-      val rCollision =
-        if currentMin < CollisionTriggerDistance then CollisionHardPenalty else 0.0
+      if currentMin < CollisionTriggerDistance then rCollision = CollisionHardPenalty
 
-      // exploration new cell
-      val rExploration =
-        if isNewCell then ExplorationBonus else 0.0
+      //      rClearance = clearanceReward(prev.environment, current.environment, agent, -5)
 
-      // count-based exploration
-      val rCountBasedExploration =
-        1.0 / math.sqrt(oldCount + 1)
+      if isNewCell then rExploration = ExplorationBonus
 
-      // milestone bonus
-      val rMilestone =
-        if newMilestones.nonEmpty
-        then newMilestones.map(m => (m.toDouble / Percent) * MilestoneBonus).sum
-        else 0.0
+      // COUNT-BASED EXPLORATION
+      rCountBasedExploration = 1.0 / math.sqrt(oldCount + 1)
 
-      // coverage completion bonus
-      val rCompletion =
-        if coverage >= CoverageThreshold then
-          val scaled = (coverage - CoverageThreshold) / (1.0 - CoverageThreshold)
-          CoverageBonus * math.min(1.0, math.max(0.0, scaled))
-        else 0.0
+      if newMilestones.nonEmpty then rMilestone = newMilestones.map(m => (m.toDouble / Percent) * MilestoneBonus).sum
 
-      // stuck penalty
-      val rStuck =
-        if isAgentStuck(updatedPos, WindowStuck) || updatedCounts(currentCell) > MaxVisitsPerCell
-        then StuckPenalty
-        else 0.0
+      if coverage >= CoverageThreshold then
+        val scaled = (coverage - CoverageThreshold) / (1.0 - CoverageThreshold)
+        rCompletion = CoverageBonus * math.min(1.0, math.max(0.0, scaled))
 
-      // movement reward
-      val rMove =
-        moveReward(action, currentMin, DangerThreshold)
+      //      rCuriosity = novelty * 0.1
+
+      if isAgentStuck(updatedPos, WindowStuck) then rStuck = StuckPenalty
+
+      val rMove = moveReward(action, currentMin, 0.35)
 
       val reward =
         rCollision +
+          //          rClearance +
           (rMove * 0.5) +
           (rCountBasedExploration * 10) +
           rExploration +
           rMilestone +
           rCompletion +
+          //          rCuriosity +
           rStuck
 
       logger.info(
@@ -196,24 +195,26 @@ object ExplorationReward:
           f"colliding=$rCollision " +
           f"stuck=$rStuck " +
           f"coverage=$coverage " +
-          f"countBasedExploration=${rCountBasedExploration * 10} " +
+          f"countBasedExploration=${rCountBasedExploration * 5} " +
           f"exploration=$rExploration " +
           s"updatedCounts=$updatedCounts " +
+          //          f"cur=$rCuriosity " +
           f"milestone=$rMilestone " +
           f"completion=$rCompletion " +
           f"move=${rMove * 0.5} ",
+          //          f"clearance=$rClearance ",
       )
 
       val newState = state.copy(
         ticks = newTick,
+        actionHistory = state.actionHistory.add(action),
         positions = updatedPos,
         visitedCells = updatedCells,
-        achievedMilestones = updateMilestones,
+        achievedMilestones = achieved ++ newMilestones,
         visitedCounts = updatedCounts,
-        maxTicks = current.simulationTime
-          .map(st => (st.toMillis / current.dt.toMillis).toInt)
-          .getOrElse(10_000),
+        maxTicks = current.simulationTime.map(st => (st.toMillis / current.dt.toMillis).toInt).getOrElse(10_000),
       )
+
       (reward, newState)
     end compute
 
@@ -250,5 +251,4 @@ object ExplorationReward:
         recentPositions.forall(p => head.distanceTo(p) < tolerance)
       }
     else false
-
 end ExplorationReward
