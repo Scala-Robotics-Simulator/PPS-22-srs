@@ -105,18 +105,45 @@ object SpatialUtils:
 //    val free = countExplorableCells(env, agentRadius, cellSize)
 //    (free * fraction).toInt
 
-  def nearbyVisitedPositions(pos: (Int, Int), m: Map[(Int, Int), Double]): (Map[(Int, Int), Double], List[Double]) =
+//  def nearbyVisitedPositions(pos: (Int, Int), m: Map[(Int, Int), Double]): (Map[(Int, Int), Double], List[Double]) =
+//    val (x, y) = pos
+//    val m2 = m.map((k, v) => k -> v * 0.999)
+//    val newM = m2 ++ Map((x, y) -> 1.0)
+//    val l = for
+//      dx <- -2 to 2
+//      dy <- -2 to 2
+//    yield newM.get((x + dx, y + dy))
+//    val l2 = l.map {
+//      case Some(v) => v
+//      case None => 0.0
+//    }.toList
+//    (newM, l2)
+
+  def nearbyVisitedPositions(
+      pos: (Int, Int),
+      m: Map[(Int, Int), Double],
+      width: Int,
+      height: Int,
+  ): (Map[(Int, Int), Double], List[Double]) =
     val (x, y) = pos
-    val m2 = m.map((k, v) => k -> v * 0.999)
-    val newM = m2 ++ Map((x, y) -> 1.0)
-    val l = for
-      dx <- -2 to 2
-      dy <- -2 to 2
-    yield newM.get((x + dx, y + dy))
-    val l2 = l.map {
-      case Some(v) => v
-      case None => 0.0
-    }.toList
-    (newM, l2)
+
+    val m2 = m.view.mapValues(_ * 0.999).toMap
+    val newM = m2 + ((x, y) -> 1.0)
+
+    def insideMap(px: Int, py: Int): Boolean =
+      px >= 0 && px < width && py >= 0 && py < height
+
+    val values =
+      for
+        dx <- -2 to 2
+        dy <- -2 to 2
+      yield
+        val px = x + dx
+        val py = y + dy
+
+        if !insideMap(px, py) then -1.0 else newM.getOrElse((px, py), 0.0)
+
+    (newM, values.toList)
+  end nearbyVisitedPositions
 
 end SpatialUtils
