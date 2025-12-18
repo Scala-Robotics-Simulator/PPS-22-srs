@@ -148,8 +148,12 @@ object RLControllerModule:
                 agent.copy(
                   lastAction = Some(action),
                   aliveSteps = agent.aliveSteps + 1,
-                  visitedCountPositions =
-                    nearbyVisitedPositions(discreteCell(agent.position), agent.visitedCountPositions)._1,
+                  visitedCountPositions = nearbyVisitedPositions(
+                    discreteCell(agent.position),
+                    agent.visitedCountPositions,
+                    state.environment.width,
+                    state.environment.height,
+                  )._1,
                 ),
                 action,
               )
@@ -213,7 +217,8 @@ object RLControllerModule:
           val sensors = a.senseAll[Id](env)
           val position = (a.position.x, a.position.y)
           val orientation = a.orientation.degrees
-          val (_, visitedPositions) = nearbyVisitedPositions(discreteCell(position), a.visitedCountPositions)
+          val (_, visitedPositions) =
+            nearbyVisitedPositions(discreteCell(position), a.visitedCountPositions, env.width, env.height)
 
           a -> AgentObservation(sensors, position, orientation, visitedPositions)
         }.toMap
