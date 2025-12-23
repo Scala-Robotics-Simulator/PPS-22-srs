@@ -270,6 +270,7 @@ object SimulationDefaults:
       val DefaultOrientation: Orientation = Orientation(0.0)
       val DefaultActuators: Seq[Actuator[Agent]] = Seq.empty
       val DefaultSensors: Vector[Sensor[Agent, Environment]] = Vector.empty
+      val DefaultVisitedCountPositions: Map[(Int, Int), Double] = Map.empty
       val MinRadius: Double = 0.01
       val MaxRadius: Double = 0.5
       val DefaultReward: Reward = Reward.NoReward

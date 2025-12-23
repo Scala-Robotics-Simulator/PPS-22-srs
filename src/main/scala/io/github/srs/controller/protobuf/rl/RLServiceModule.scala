@@ -218,6 +218,7 @@ object RLServiceModule:
                   ),
                 ),
                 orientation = obs.orientation,
+                visitedPositions = obs.visitedPositions,
               ),
             )
       end ServiceImpl

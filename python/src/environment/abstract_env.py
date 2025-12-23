@@ -43,7 +43,7 @@ class AbstractEnv(ABC):
 
     @abstractmethod
     def _encode_observation(
-        self, proximity_values, light_values, position, orientation
+        self, proximity_values, light_values, position, orientation, visited_positions
     ):
         """Encode the observation from proximity and light values"""
         pass
@@ -57,7 +57,7 @@ class AbstractEnv(ABC):
         """Encode multiple observations"""
         return {
             k: self._encode_observation(
-                v.proximity_values, v.light_values, v.position, v.orientation
+                v.proximity_values, v.light_values, v.position, v.orientation, v.visited_positions
             )
             for k, v in observations.items()
         }

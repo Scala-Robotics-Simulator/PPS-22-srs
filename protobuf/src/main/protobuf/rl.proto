@@ -39,6 +39,7 @@ message Observation {
     double y = 2;
   }
   Position position = 4;
+  repeated double visited_positions = 5;
 }
 
 message ResetResponse {
