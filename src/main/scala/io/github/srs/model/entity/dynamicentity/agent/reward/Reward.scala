@@ -1,10 +1,9 @@
 package io.github.srs.model.entity.dynamicentity.agent.reward
 
-import io.github.srs.model.entity.dynamicentity.agent.Agent
-import io.github.srs.model.entity.dynamicentity.action.Action
-import io.github.srs.model.entity.dynamicentity.agent.reward.ObstacleAvoidanceRewardModule
-import io.github.srs.model.entity.dynamicentity.agent.reward.PhototaxisRewardModule
 import io.github.srs.model.ModelModule.BaseState
+import io.github.srs.model.entity.dynamicentity.action.Action
+import io.github.srs.model.entity.dynamicentity.agent.Agent
+import io.github.srs.model.entity.dynamicentity.agent.reward.{ ObstacleAvoidanceRewardModule, PhototaxisReward }
 
 /**
  * An enumeration of available reward models for agents.
@@ -41,7 +40,7 @@ enum Reward(val name: String) derives CanEqual:
       case DQObstacleAvoidance =>
         ObstacleAvoidanceRewardModule.DQObstacleAvoidance().evaluate(prev, current, entity, action)
       case Phototaxis =>
-        PhototaxisRewardModule.Phototaxis().evaluate(prev, current, entity, action)
+        PhototaxisReward.Phototaxis().evaluate(prev, current, entity, action)
       case Exploration =>
         ExplorationReward.Exploration().evaluate(prev, current, entity, action)
 
