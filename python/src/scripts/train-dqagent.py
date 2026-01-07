@@ -216,7 +216,9 @@ def resolve_env(
         case "oa":
             return ObstacleAvoidanceEnv(server_address, client_name)
         case "exploration":
-            return ExplorationEnv(server_address, client_name, grid_size=(10, 10), orientation_bins=8)
+            return ExplorationEnv(
+                server_address, client_name, grid_size=(10, 10), orientation_bins=8
+            )
         case _:
             logger.error("Environment not found")
             exit(1)
@@ -325,7 +327,9 @@ def main() -> None:
     os.makedirs(os.path.dirname(checkpoint_base) or ".", exist_ok=True)
 
     # Train
-    _ = trainer.simple_dqn_training(checkpoint_base=checkpoint_base, variable_steps=True)
+    _ = trainer.simple_dqn_training(
+        checkpoint_base=checkpoint_base, variable_steps=True
+    )
 
     train_finish_time = time.time()
     train_elapsed_time = train_finish_time - train_start_time
