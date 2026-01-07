@@ -128,17 +128,14 @@ object ExplorationReward:
     ): (Double, ExplorationState) =
 
       var rCollision = 0.0
-      //      var rClearance = 0.0
       var rExploration = 0.0
       var rCountBasedExploration = 0.0
       var rMilestone = 0.0
       var rCompletion = 0.0
-      //      var rCuriosity = 0.0
       var rStuck = 0.0
 
       val newTick = state.ticks + 1
       val updatedPos = agent.position :: state.positions
-      //      val prevAgent = getAgentFromId(agent, prev)
       val currentMin = distanceFromObstacle(current.environment, agent)
 
       val currentCell = discreteCell(agent.position, CellSize)
@@ -150,19 +147,12 @@ object ExplorationReward:
       val achieved = state.achievedMilestones
       val newMilestones = (1 to currentPercent).filterNot(achieved.contains).toSet
 
-      //      val centroid = updatedPos.mean
-      //      val novelty = agent.position.distanceTo(centroid)
-
       val oldCount = state.visitedCounts.getOrElse(currentCell, 0)
       val updatedCounts: Map[(Int, Int), Int] = state.visitedCounts + (currentCell -> (oldCount + 1))
 
       if currentMin < CollisionTriggerDistance then rCollision = CollisionHardPenalty
-
-      //      rClearance = clearanceReward(prev.environment, current.environment, agent, -5)
-
       if isNewCell then rExploration = ExplorationBonus
 
-      // COUNT-BASED EXPLORATION
       rCountBasedExploration = 1.0 / math.sqrt(oldCount + 1)
 
       if newMilestones.nonEmpty then rMilestone = newMilestones.map(m => (m.toDouble / Percent) * MilestoneBonus).sum
@@ -171,21 +161,17 @@ object ExplorationReward:
         val scaled = (coverage - CoverageThreshold) / (1.0 - CoverageThreshold)
         rCompletion = CoverageBonus * math.min(1.0, math.max(0.0, scaled))
 
-      //      rCuriosity = novelty * 0.1
-
       if isAgentStuck(updatedPos, WindowStuck) then rStuck = StuckPenalty
 
       val rMove = moveReward(action, currentMin, 0.35)
 
       val reward =
         rCollision +
-          //          rClearance +
           (rMove * 0.5) +
           (rCountBasedExploration * 10) +
           rExploration +
           rMilestone +
           rCompletion +
-          //          rCuriosity +
           rStuck
 
       logger.info(
@@ -198,11 +184,9 @@ object ExplorationReward:
           f"countBasedExploration=${rCountBasedExploration * 5} " +
           f"exploration=$rExploration " +
           s"updatedCounts=$updatedCounts " +
-          //          f"cur=$rCuriosity " +
           f"milestone=$rMilestone " +
           f"completion=$rCompletion " +
           f"move=${rMove * 0.5} ",
-          //          f"clearance=$rClearance ",
       )
 
       val newState = state.copy(
@@ -231,10 +215,10 @@ object ExplorationReward:
         val isForward = l > 0 && r > 0
         val isRotate = (l == 0 && r != 0) || (r == 0 && l != 0)
 
-        if isForward then 0.2 // premio leggero sempre valido
+        if isForward then 0.2
         else if isRotate then
-          if currentMin < dangerThreshold then 0.2 // ruotare aiuta a evitare
-          else -0.1 // se lontano, ruotare non è utile → piccola penalità
+          if currentMin < dangerThreshold then 0.2
+          else -0.1
         else 0.0
 
       case _ => 0.0
