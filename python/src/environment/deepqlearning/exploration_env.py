@@ -21,8 +21,8 @@ class ExplorationEnv(AbstractEnv):
             (1.0, 1.0),  # move forward
             (1.0, -1.0),  # rotate in place clockwise
             (-1.0, 1.0),  # rotate in place counterclockwise
-            # (1.0, 0.0),  # gentle right curve (right wheel slower)
-            # (0.0, 1.0),  # gentle left curve (left wheel slower)
+            (1.0, 0.0),  # gentle right curve (right wheel slower)
+            (0.0, 1.0),  # gentle left curve (left wheel slower)
         ]
         self.action_space = spaces.Discrete(len(self.actions))
 
@@ -30,7 +30,7 @@ class ExplorationEnv(AbstractEnv):
         self.orientation_bins = orientation_bins
 
         self.observation_space = spaces.Box(
-            low=0.0, high=1.0, shape=(35,), dtype=np.float32
+            low=0.0, high=1.0, shape=(37,), dtype=np.float32
         )
 
     def _discrete_cell(self, position):
@@ -39,21 +39,16 @@ class ExplorationEnv(AbstractEnv):
         return cell_x, cell_y
 
     def _encode_observation(self, proximity_values, light_values, position, orientation, visited_positions):
-        # TODO
-        # x_norm = np.clip(position.x / (self.grid_size[0] - 1), 0.0, 1.0)
-        # y_norm = np.clip(position.y / (self.grid_size[1] - 1), 0.0, 1.0)
-        # orientation_norm = (orientation % 360.0) / 360.0
-        # x_norm = np.clip(position.x / self.grid_size[0], 0.0, 1.0)
-        # y_norm = np.clip(position.y / self.grid_size[1], 0.0, 1.0)
+        x_norm = np.clip(position.x / self.grid_size[0], 0.0, 1.0)
+        y_norm = np.clip(position.y / self.grid_size[1], 0.0, 1.0)
         orientation_sin = np.sin(np.radians(orientation))
         orientation_cos = np.cos(np.radians(orientation))
         print(f"visited_positions: {visited_positions}")
         obs = np.concatenate([
-            # np.array([x_norm, y_norm, orientation_sin, orientation_cos, *visited_positions, *proximity_values], dtype=np.float32),
-            np.array([orientation_sin, orientation_cos, *visited_positions, *proximity_values], dtype=np.float32),
+            np.array([x_norm, y_norm, orientation_sin, orientation_cos, *visited_positions, *proximity_values], dtype=np.float32),
         ])
 
-        assert obs.shape[0] == 35, f"Observation must have length 35 but got {obs.shape[0]}"
+        assert obs.shape[0] == 37, f"Observation must have length 37 but got {obs.shape[0]}"
         return obs
 
     def _decode_action(self, action) -> rl_pb2.ContinuousAction:

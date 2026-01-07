@@ -216,7 +216,7 @@ def resolve_env(
         case "oa":
             return ObstacleAvoidanceEnv(server_address, client_name)
         case "exploration":
-            return ExplorationEnv(server_address, client_name)
+            return ExplorationEnv(server_address, client_name, grid_size=(10, 10), orientation_bins=8)
         case _:
             logger.error("Environment not found")
             exit(1)
