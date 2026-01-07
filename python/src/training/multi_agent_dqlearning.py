@@ -138,11 +138,17 @@ class DQLearning:
                         logger.info(
                             f"\n[Checkpoint] Saved at episode {n + 1} | Reward: {train_rewards[n][agent.id]:.3f} | AvgReward: {max_avg_reward:.3f}"
                         )
-            # if (
-            #     self.agent.moving_avg_stop_thr
-            #     and moving_avg_reward >= self.agent.moving_avg_stop_thr
-            # ):
-            #     break
+
+            # Stop training when moving average reaches threshold
+            if any(
+                agent.moving_avg_stop_thr
+                and moving_avg_reward[agent.id] >= agent.moving_avg_stop_thr
+                for agent in self.agents
+            ):
+                logger.info(
+                    f"\nTraining stopped! Moving average reward reached threshold: {max_avg_reward:.3f} >= {self.agents[0].moving_avg_stop_thr}"
+                )
+                break
         if checkpoint_base is not None:
             for agent in self.agents:
                 save_path = f"{checkpoint_base}_final"
