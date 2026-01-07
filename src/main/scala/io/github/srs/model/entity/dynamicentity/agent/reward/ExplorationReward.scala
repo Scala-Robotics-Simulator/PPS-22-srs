@@ -181,7 +181,7 @@ object ExplorationReward:
           f"colliding=$rCollision " +
           f"stuck=$rStuck " +
           f"coverage=$coverage " +
-          f"countBasedExploration=${rCountBasedExploration * 5} " +
+          f"countBasedExploration=${rCountBasedExploration * 10} " +
           f"exploration=$rExploration " +
           s"updatedCounts=$updatedCounts " +
           f"milestone=$rMilestone " +
@@ -201,9 +201,6 @@ object ExplorationReward:
 
       (reward, newState)
     end compute
-
-    def getAgentFromId(agent: Agent, state: BaseState): Agent =
-      state.environment.entities.collectFirst { case a: Agent if a.id == agent.id => a }.getOrElse(agent)
   end ExplorationDQN
 
   private def moveReward(action: Action[?], currentMin: Double, dangerThreshold: Double): Double =

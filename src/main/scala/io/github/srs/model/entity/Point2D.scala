@@ -128,11 +128,4 @@ object Point2D:
       math.sqrt(math.pow(other.x - p.x, 2) + math.pow(other.y - p.y, 2))
 
   end extension
-
-  extension (points: List[Point2D])
-
-    def mean: Point2D =
-      points.reduceOption(_ + _) match
-        case Some(sum) => sum / points.size.toDouble
-        case None => Point2D(0, 0)
 end Point2D
