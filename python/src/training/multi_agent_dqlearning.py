@@ -35,7 +35,7 @@ class DQLearning:
         episode_count: int = 1000,
         episode_max_steps: int = 200,
         steps_start=100,
-        steps_end=20000
+        steps_end=20000,
     ):
         self.env = env
         self.agents = agents
@@ -45,16 +45,15 @@ class DQLearning:
         self.steps_start = steps_start
         self.steps_end = steps_end
 
-    def simple_dqn_training(self,
-                            checkpoint_base: str | None = None,
-                            variable_steps: bool = False):
+    def simple_dqn_training(
+        self, checkpoint_base: str | None = None, variable_steps: bool = False
+    ):
         """Trains the agent using the Deep Q-Learning algorithm."""
         train_rewards = []
         train_step_count = 0
         max_avg_reward = np.finfo(np.float32).min
 
         for n in trange(self.episode_count, desc="Training DQN", unit="ep"):
-
             if variable_steps:
                 max_steps = int(
                     self.steps_start
@@ -84,7 +83,9 @@ class DQLearning:
                     if not agent.terminated
                 }
 
-                next_states, rewards, terminateds, truncateds, _ = self.env.step(actions)
+                next_states, rewards, terminateds, truncateds, _ = self.env.step(
+                    actions
+                )
 
                 dones = {
                     agent.id: terminateds[agent.id] or truncateds[agent.id]
@@ -93,7 +94,6 @@ class DQLearning:
 
                 for agent in self.agents:
                     if not agent.terminated:
-
                         agent.store_transition(
                             states[agent.id],
                             actions[agent.id],
@@ -107,7 +107,10 @@ class DQLearning:
                         if dones[agent.id]:
                             agent.terminated = True
 
-                        if train_step_count % agent.step_per_update == 0 and len(agent.replay_memory) >= agent.batch_size:
+                        if (
+                            train_step_count % agent.step_per_update == 0
+                            and len(agent.replay_memory) >= agent.batch_size
+                        ):
                             agent.dqn_update()
 
                         if train_step_count % agent.step_per_update_target_model == 0:
@@ -161,7 +164,6 @@ class DQLearning:
             logger.info("\n[Final Save] Training complete.")
 
         return train_rewards
-
 
     def play_with_pygame(self, episodes=1, fps=30, render_scale=(800, 600)):
         """Run the trained agent and visualize with Pygame.

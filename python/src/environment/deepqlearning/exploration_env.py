@@ -9,11 +9,11 @@ class ExplorationEnv(AbstractEnv):
     """Custom environment for Deep Q-Learning Exploration via gRPC"""
 
     def __init__(
-            self,
-            server_address,
-            client_name,
-            grid_size: tuple = (5, 5),
-            orientation_bins: int = 8,
+        self,
+        server_address,
+        client_name,
+        grid_size: tuple = (5, 5),
+        orientation_bins: int = 8,
     ) -> None:
         super().__init__(server_address, client_name)
 
@@ -38,20 +38,29 @@ class ExplorationEnv(AbstractEnv):
         cell_y = int(position.y / self.cell_size)
         return cell_x, cell_y
 
-    def _encode_observation(self, proximity_values, light_values, position, orientation, visited_positions):
+    def _encode_observation(
+        self, proximity_values, light_values, position, orientation, visited_positions
+    ):
         # TODO
         # x_norm = np.clip(position.x / self.grid_size[0], 0.0, 1.0)
         # y_norm = np.clip(position.y / self.grid_size[1], 0.0, 1.0)
         orientation_sin = np.sin(np.radians(orientation))
         orientation_cos = np.cos(np.radians(orientation))
-        print(f"visited_positions: {visited_positions}")
-        obs = np.concatenate([
-            # np.array([x_norm, y_norm, orientation_sin, orientation_cos, *visited_positions, *proximity_values], dtype=np.float32),
-            np.array([orientation_sin, orientation_cos, *visited_positions, *proximity_values], dtype=np.float32),
-        ])
-
-        assert obs.shape[0] == 35, f"Observation must have length 35 but got {obs.shape[0]}"
-        return obs
+        # print(f"visited_positions: {visited_positions}")
+        return np.concatenate(
+            [
+                # np.array([x_norm, y_norm, orientation_sin, orientation_cos, *visited_positions, *proximity_values], dtype=np.float32),
+                np.array(
+                    [
+                        orientation_sin,
+                        orientation_cos,
+                        *visited_positions,
+                        *proximity_values,
+                    ],
+                    dtype=np.float32,
+                ),
+            ]
+        )
 
     def _decode_action(self, action) -> rl_pb2.ContinuousAction:
         left, right = self.actions[action]

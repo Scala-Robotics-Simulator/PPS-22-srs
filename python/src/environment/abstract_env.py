@@ -57,7 +57,11 @@ class AbstractEnv(ABC):
         """Encode multiple observations"""
         return {
             k: self._encode_observation(
-                v.proximity_values, v.light_values, v.position, v.orientation, v.visited_positions
+                v.proximity_values,
+                v.light_values,
+                v.position,
+                v.orientation,
+                v.visited_positions,
             )
             for k, v in observations.items()
         }
