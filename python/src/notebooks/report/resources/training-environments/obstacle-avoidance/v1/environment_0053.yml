@@ -1,0 +1,54 @@
+simulation:
+  seed: 430963
+environment:
+  width: 10
+  height: 10
+  entities:
+  - agent:
+      id: 00000000-0000-0000-0000-000000000001
+      radius: 0.25
+      withProximitySensors: true
+      withLightSensors: true
+      position:
+      - 5.9
+      - 7.7
+      orientation: 137.1
+      speed: 1.0
+      reward: ObstacleAvoidance
+      termination: CollisionDetection
+      truncation: EndSimulationTruncation
+  - obstacle:
+      orientation: 263.2
+      position:
+      - 3.5
+      - 9.2
+      height: 2.7
+      width: 1.0
+  - obstacle:
+      orientation: 348.6
+      position:
+      - 3.6
+      - 5.8
+      height: 0.9
+      width: 2.3
+  - obstacle:
+      orientation: 326.3
+      position:
+      - 7.2
+      - 4.3
+      height: 1.3
+      width: 2.6
+  - obstacle:
+      orientation: 161.3
+      position:
+      - 3.1
+      - 4.1
+      height: 2.2
+      width: 1.3
+  - obstacle:
+      orientation: 56.3
+      position:
+      - 8.6
+      - 7.7
+      height: 2.6
+      width: 1.0

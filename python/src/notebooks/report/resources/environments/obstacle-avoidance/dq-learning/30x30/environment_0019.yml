@@ -1,0 +1,124 @@
+simulation:
+  seed: 134879
+environment:
+  width: 30
+  height: 30
+  entities:
+  - agent:
+      id: 00000000-0000-0000-0000-000000000001
+      radius: 0.25
+      withProximitySensors: true
+      withLightSensors: true
+      position:
+      - 4.4
+      - 24.8
+      orientation: 80.5
+      speed: 1.0
+      reward: DQObstacleAvoidance
+      termination: CollisionDetection
+      truncation: EndSimulationTruncation
+  - obstacle:
+      orientation: 105.4
+      position:
+      - 10.2
+      - 21.2
+      height: 5.0
+      width: 0.5
+  - obstacle:
+      orientation: 107.6
+      position:
+      - 20.2
+      - 11.9
+      height: 0.9
+      width: 4.4
+  - obstacle:
+      orientation: 224.2
+      position:
+      - 8.5
+      - 11.9
+      height: 4.3
+      width: 1.8
+  - obstacle:
+      orientation: 350.2
+      position:
+      - 10.9
+      - 4.4
+      height: 1.8
+      width: 3.5
+  - obstacle:
+      orientation: 9.2
+      position:
+      - 28.7
+      - 2.0
+      height: 3.3
+      width: 1.5
+  - obstacle:
+      orientation: 292.0
+      position:
+      - 26.4
+      - 10.8
+      height: 5.0
+      width: 0.6
+  - obstacle:
+      orientation: 283.6
+      position:
+      - 6.2
+      - 18.1
+      height: 4.9
+      width: 1.2
+  - obstacle:
+      orientation: 38.1
+      position:
+      - 11.7
+      - 12.9
+      height: 1.1
+      width: 3.4
+  - obstacle:
+      orientation: 44.5
+      position:
+      - 26.7
+      - 19.1
+      height: 1.8
+      width: 3.3
+  - obstacle:
+      orientation: 288.0
+      position:
+      - 5.9
+      - 11.6
+      height: 0.4
+      width: 4.7
+  - obstacle:
+      orientation: 34.6
+      position:
+      - 22.5
+      - 20.6
+      height: 4.5
+      width: 1.8
+  - obstacle:
+      orientation: 43.4
+      position:
+      - 16.5
+      - 27.6
+      height: 1.8
+      width: 3.8
+  - obstacle:
+      orientation: 179.2
+      position:
+      - 17.6
+      - 24.3
+      height: 0.4
+      width: 4.9
+  - obstacle:
+      orientation: 25.7
+      position:
+      - 15.1
+      - 9.5
+      height: 2.4
+      width: 2.9
+  - obstacle:
+      orientation: 20.6
+      position:
+      - 2.0
+      - 11.9
+      height: 4.9
+      width: 1.0
