@@ -1,5 +1,5 @@
 import numpy as np
-from keras.layers import BatchNormalization, Dense, Input
+from keras.layers import Dense, Input
 from keras.models import Sequential
 from keras.optimizers import Adam
 from keras.utils import plot_model
@@ -41,6 +41,7 @@ class DQNetwork:
         self.action_count = action_count
         self.learning_rate = learning_rate
         self.use_batch_norm = use_batch_norm
+        self.action_count = int(action_count)
         self.model = self._build_simple_dqn()
         if summary:
             self.model.summary()
