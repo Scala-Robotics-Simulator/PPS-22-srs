@@ -1,0 +1,37 @@
+simulation:
+  seed: 580195
+environment:
+  width: 10
+  height: 10
+  entities:
+  - agent:
+      id: 00000000-0000-0000-0000-000000000001
+      radius: 0.25
+      withProximitySensors: true
+      withLightSensors: true
+      position:
+      - 6.0
+      - 9.1
+      orientation: 29.6
+      speed: 1.0
+      reward: PhototaxisDQ
+      termination: CrashOrReached
+      truncation: EndSimulationTruncation
+  - light:
+      orientation: 48.7
+      illuminationRadius: 7.9
+      radius: 0.2
+      intensity: 1.0
+      attenuation: 1.0
+      position:
+      - 0.7
+      - 6.9
+  - light:
+      orientation: 151.9
+      illuminationRadius: 4.4
+      radius: 0.2
+      intensity: 1.0
+      attenuation: 1.0
+      position:
+      - 5.9
+      - 6.5
