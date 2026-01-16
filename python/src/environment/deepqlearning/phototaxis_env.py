@@ -29,7 +29,12 @@ class PhototaxisEnv(AbstractEnv):
         self.action_space = spaces.Discrete(len(self.actions))
 
     def _encode_observation(
-        self, proximity_values, light_values, position=None, orientation=None
+        self,
+        proximity_values,
+        light_values,
+        position=None,
+        orientation=None,
+        visited_positions=None,
     ):
         prox = np.array(
             proximity_values[:8] if proximity_values else [0.0] * 8, dtype=np.float32
