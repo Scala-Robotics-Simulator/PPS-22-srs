@@ -1,0 +1,19 @@
+simulation:
+  seed: 227092
+environment:
+  width: 10
+  height: 10
+  entities:
+  - agent:
+      id: 00000000-0000-0000-0000-000000000001
+      radius: 0.25
+      withProximitySensors: true
+      withLightSensors: true
+      position:
+      - 8.6
+      - 1.4
+      orientation: 113.8
+      speed: 1.0
+      reward: Exploration
+      termination: ExplorationTermination
+      truncation: NeverTruncate
