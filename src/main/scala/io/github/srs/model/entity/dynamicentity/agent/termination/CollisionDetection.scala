@@ -1,4 +1,4 @@
-package io.github.srs.model.entity.dynamicentity.agent.termination
+package io.github.srs.model.entity.dynamicentity.agent.truncation
 
 import io.github.srs.model.ModelModule.BaseState
 import io.github.srs.model.entity.dynamicentity.action.Action
