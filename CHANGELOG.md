@@ -1,3 +1,9 @@
+## [2.0.1](https://github.com/Scala-Robotics-Simulator/PPS-22-srs/compare/v2.0.0...v2.0.1) (2026-01-16)
+
+### Bug Fixes
+
+* **ci:** docker tagged version publish ([fe9b0c9](https://github.com/Scala-Robotics-Simulator/PPS-22-srs/commit/fe9b0c9066e36eea689ad0d89c98d1bec6ccbc0e))
+
 ## [2.0.0](https://github.com/Scala-Robotics-Simulator/PPS-22-srs/compare/v1.1.1...v2.0.0) (2026-01-16)
 
 ### ⚠ BREAKING CHANGES
