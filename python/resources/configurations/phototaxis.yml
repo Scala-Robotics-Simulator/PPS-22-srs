@@ -13,9 +13,9 @@ environment:
         position: [1.0, 1.0]
         orientation: 0.0
         speed: 1.0
-        reward: Phototaxis
-        termination: LightReached
-        truncation: CollisionContact
+        reward: PhototaxisQ
+        termination: CrashOrReached
+        truncation: EndSimulationTruncation
 
     - light:
         position: [5.0, 5.0]
@@ -23,9 +23,3 @@ environment:
         radius: 0.3
         illuminationRadius: 7.0
         attenuation: 1.0
-#
-#    - obstacle:
-#        orientation: 0.0
-#        position: [3.0, 3.0]
-#        width: 1.0
-#        height: 1.2
