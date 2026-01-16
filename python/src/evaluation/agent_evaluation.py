@@ -9,13 +9,14 @@ from environment.qlearning.exploration_env import ExplorationEnv
 from environment.qlearning.obstacle_avoidance_env import ObstacleAvoidanceEnv
 from environment.qlearning.phototaxis_env import PhototaxisEnv
 
+
 def evaluate(
-        env: PhototaxisEnv | ObstacleAvoidanceEnv | ExplorationEnv,
-        agents: dict[str, QAgent | DQAgent],
-        configs: str,
-        max_steps: int,
-        did_succeed: Callable[[float, bool, bool, dict], bool],
-        window_size: int = 100,
+    env: PhototaxisEnv | ObstacleAvoidanceEnv | ExplorationEnv,
+    agents: dict[str, QAgent | DQAgent],
+    configs: str,
+    max_steps: int,
+    did_succeed: Callable[[float, bool, bool, dict], bool],
+    window_size: int = 100,
 ):
     successes = dict.fromkeys(agents.keys(), 0)
     successes_idx = {k: [] for k in agents.keys()}
@@ -75,17 +76,15 @@ def evaluate(
                     elif len(episode_rewards[agent_id]) < window_size:
                         moving_avg = episode_rewards[agent_id][-1]
                     else:
-                        moving_avg = np.mean(
-                            episode_rewards[agent_id][-window_size:]
-                        )
+                        moving_avg = np.mean(episode_rewards[agent_id][-window_size:])
 
                     episode_moving_avg_reward[agent_id].append(moving_avg)
 
                     if did_succeed(
-                            rewards[agent_id],
-                            terminateds[agent_id],
-                            truncateds[agent_id] or step == max_steps,
-                            infos.get(agent_id, {}),
+                        rewards[agent_id],
+                        terminateds[agent_id],
+                        truncateds[agent_id] or step == max_steps,
+                        infos.get(agent_id, {}),
                     ):
                         dones[agent_id] = True
                         successes[agent_id] += 1

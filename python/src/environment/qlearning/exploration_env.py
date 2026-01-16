@@ -8,6 +8,7 @@ from utils.log import Logger
 
 logger = Logger(__name__)
 
+
 class ExplorationEnv(AbstractEnv):
     """Custom environment for Q-Learning Exploration via gRPC"""
 
@@ -65,20 +66,24 @@ class ExplorationEnv(AbstractEnv):
     def reset(self, seed: int = 42):
         observations, infos = super().reset(seed)
         self.visited = np.zeros(self.grid_size, dtype=bool)
-        for agent_id, obs in observations.items():
+        for _agent_id, obs in observations.items():
             x, y = self._decode_position(obs)
             self.visited[x, y] = True
         explored_ratio = self.visited.sum() / self.total_cells
-        new_infos = {agent_id: {"explored_ratio": explored_ratio}
-                       for agent_id in observations.keys()}
+        new_infos = {
+            agent_id: {"explored_ratio": explored_ratio}
+            for agent_id in observations.keys()
+        }
         return observations, new_infos
 
     def step(self, actions: dict):
         observations, rewards, terminateds, truncateds, infos = super().step(actions)
-        for agent_id, obs in observations.items():
+        for _agent_id, obs in observations.items():
             x, y = self._decode_position(obs)
             self.visited[x, y] = True
         explored_ratio = self.visited.sum() / self.total_cells
-        new_infos = {agent_id: {"explored_ratio": explored_ratio}
-                       for agent_id in observations.keys()}
+        new_infos = {
+            agent_id: {"explored_ratio": explored_ratio}
+            for agent_id in observations.keys()
+        }
         return observations, rewards, terminateds, truncateds, new_infos
