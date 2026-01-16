@@ -305,7 +305,7 @@ jobs:
         run: docker tag ghcr.io/scala-robotics-simulator/pps-22-srs:latest ghcr.io/scala-robotics-simulator/pps-22-srs:${{ env.RELEASE_VERSION }}
       - name: Publish tagged docker image
         if: env.HAS_RELEASED == 'true'
-        run: docker ghcr.io/scala-robotics-simulator/pps-22-srs:${{ env.RELEASE_VERSION }}
+        run: docker push ghcr.io/scala-robotics-simulator/pps-22-srs:${{ env.RELEASE_VERSION }}
 
       - name: Publish latest docker image
         run: docker push ghcr.io/scala-robotics-simulator/pps-22-srs:latest
