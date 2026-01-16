@@ -1,9 +1,8 @@
 import gymnasium.spaces as spaces
 import numpy as np
+
 import rl_pb2
-
 from environment.abstract_env import AbstractEnv
-
 from utils.log import Logger
 
 logger = Logger(__name__)
@@ -41,7 +40,7 @@ class ExplorationEnv(AbstractEnv):
         self.total_cells = grid_size[0] * grid_size[1]
 
     def _encode_observation(
-        self, proximity_values, light_values, position, orientation
+        self, proximity_values, light_values, position, orientation, visited_positions
     ) -> int:
         """Encode the agent's position and orientation into a discrete state."""
         orientation_step = 360.0 / self.orientation_bins
