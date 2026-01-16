@@ -13,7 +13,7 @@ import io.github.srs.model.environment.Environment
 /**
  * Phototaxis Reward Module
  */
-object PhototaxisReward:
+object PhototaxisRewardModule:
   import io.github.srs.model.entity.Point2D.distanceTo
 
   private def getAgent(env: Environment, entity: Agent): Agent =
@@ -25,21 +25,15 @@ object PhototaxisReward:
     env.entities.collect { case l: Light => l }
       .foldLeft(Double.MaxValue)((minDist, light) => math.min(minDist, agent.position.distanceTo(light.position)))
 
-  final case class Phototaxis() extends RewardModel[Agent]:
+  private val NoLightThreshold = 0.01
 
-    // "Compass" (Far): A *small* nudge.
+  final case class PhototaxisQ() extends RewardModel[Agent]:
     private val ProgressScale = 2.0
-    // "Lava" (Always): The main motivator.
     private val StepPenalty = -0.1
-    // The "Bubble"
     private val GoalProximityRadius = 1.5
-    // "Tractor Beam" (Near): Must be stronger than the StepPenalty.
     private val TractorBeamScale = 2.0
-
     private val GoalBonus = 800.0
     private val FailurePenalty = -350.0
-
-    private val NoLightThreshold = 0.01 // Sync with Environment
 
     override def evaluate(
         prev: BaseState,
@@ -71,15 +65,11 @@ object PhototaxisReward:
               attractorEffect + StepPenalty
             else
               val progress = prevDist - currDist
-
-              val rProgress =
-                if progress.isNaN then 0.0
-                else ProgressScale * progress
+              val rProgress = if progress.isNaN then 0.0 else ProgressScale * progress
               rProgress + StepPenalty
         end if
-
       end if
     end evaluate
-  end Phototaxis
+  end PhototaxisQ
 
-end PhototaxisReward
+end PhototaxisRewardModule
