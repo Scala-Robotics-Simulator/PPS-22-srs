@@ -29,7 +29,8 @@ class EnvironmentGenerator:
         min_lights: int = 0,
         max_lights: int = 5,
         light_radius: float = 0.2,
-        light_illumination_radius: float = 5.0,
+        min_light_illumination_radius: float = 4.0,
+        max_light_illumination_radius: float = 10.0,
         light_intensity: float = 1.0,
         light_attenuation: float = 1.0,
         seed: int = 42,
@@ -49,7 +50,8 @@ class EnvironmentGenerator:
         self.min_lights = min_lights
         self.max_lights = max_lights
         self.light_radius = light_radius
-        self.light_illumination_radius = light_illumination_radius
+        self.min_light_illumination_radius = min_light_illumination_radius
+        self.max_light_illumination_radius = max_light_illumination_radius
         self.light_intensity = light_intensity
         self.light_attenuation = light_attenuation
         self.seed = seed if seed is not None else np.random.randint(0, 999999)
@@ -69,8 +71,8 @@ class EnvironmentGenerator:
                 "position": [round(float(pos[0]), 1), round(float(pos[1]), 1)],
                 "orientation": round(float(orientation), 1),
                 "speed": self.agent_speed,
-                "reward": "ExplorationDQN",
-                "termination": "ExplorationTermination",
+                "reward": "NoReward",
+                "termination": "NeverTerminate",
                 "truncation": "NeverTruncate",
             }
         }
@@ -84,6 +86,11 @@ class EnvironmentGenerator:
             [0, 0], [self.env_width, self.env_height], (num_lights, 2)
         )
         orientations = self.rng.uniform(0, 360, num_lights)
+        illumination_radii = self.rng.uniform(
+            self.min_light_illumination_radius,
+            self.max_light_illumination_radius,
+            num_lights,
+        )
 
         lights = []
         for i in range(num_lights):
@@ -91,7 +98,7 @@ class EnvironmentGenerator:
                 {
                     "light": {
                         "orientation": round(float(orientations[i]), 1),
-                        "illuminationRadius": self.light_illumination_radius,
+                        "illuminationRadius": round(float(illumination_radii[i]), 1),
                         "radius": self.light_radius,
                         "intensity": self.light_intensity,
                         "attenuation": self.light_attenuation,

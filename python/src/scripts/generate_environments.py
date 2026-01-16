@@ -44,6 +44,8 @@ DEFAULTS = {
     "light_min_num": 0,
     "light_max_num": 0,
     "agent_num": 1,
+    "light_min_illumination_radius": 4.0,
+    "light_max_illumination_radius": 10.0,
 }
 FIXED_AGENT_ID = "00000000-0000-0000-0000-000000000001"
 
@@ -147,6 +149,18 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULTS["agent_num"],
         help="Number of agents in the environment.",
     )
+    p.add_argument(
+        "--light-min-illumination-radius",
+        type=float,
+        default=DEFAULTS["light_min_illumination_radius"],
+        help="Minimum illumination radius for lights.",
+    )
+    p.add_argument(
+        "--light-max-illumination-radius",
+        type=float,
+        default=DEFAULTS["light_max_illumination_radius"],
+        help="Maximum illumination radius for lights.",
+    )
     return p.parse_args()
 
 
@@ -165,6 +179,12 @@ def print_effective_config(args: argparse.Namespace) -> None:
     logger.info(f"  light_min_num               : {args.light_min_num}")
     logger.info(f"  light_max_num               : {args.light_max_num}")
     logger.info(f"  agent_num                   : {args.agent_num}")
+    logger.info(
+        f"  light_min_illumination_radius: {args.light_min_illumination_radius}"
+    )
+    logger.info(
+        f"  light_max_illumination_radius: {args.light_max_illumination_radius}"
+    )
     logger.info("================================\n")
 
 
@@ -194,6 +214,8 @@ def main() -> None:
         "max_obstacle_height": args.obstacle_max_size,
         "min_lights": args.light_min_num,
         "max_lights": args.light_max_num,
+        "min_light_illumination_radius": args.light_min_illumination_radius,
+        "max_light_illumination_radius": args.light_max_illumination_radius,
         "agent_num": args.agent_num,
     }
 
