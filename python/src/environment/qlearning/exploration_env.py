@@ -43,6 +43,7 @@ class ExplorationEnv(AbstractEnv):
     def _encode_observation(
         self, proximity_values, light_values, position, orientation
     ) -> int:
+        """Encode the agent's position and orientation into a discrete state."""
         orientation_step = 360.0 / self.orientation_bins
         orientation_idx = int((orientation % 360) / orientation_step)
 
@@ -55,15 +56,18 @@ class ExplorationEnv(AbstractEnv):
         return state
 
     def _decode_action(self, action) -> rl_pb2.ContinuousAction:
+        """Decode the discrete action into continuous wheel speeds."""
         left, right = self.actions[action]
         return rl_pb2.ContinuousAction(left_wheel=left, right_wheel=right)
 
     def _decode_position(self, state):
+        """Decode the discrete state into the agent's (x, y) position."""
         x = state % self.grid_size[0]
         y = (state // self.grid_size[0]) % self.grid_size[1]
         return x, y
 
     def reset(self, seed: int = 42):
+        """Reset the environment and visited grid."""
         observations, infos = super().reset(seed)
         self.visited = np.zeros(self.grid_size, dtype=bool)
         for _agent_id, obs in observations.items():
@@ -77,6 +81,7 @@ class ExplorationEnv(AbstractEnv):
         return observations, new_infos
 
     def step(self, actions: dict):
+        """Take a step in the environment and update visited grid."""
         observations, rewards, terminateds, truncateds, infos = super().step(actions)
         for _agent_id, obs in observations.items():
             x, y = self._decode_position(obs)
