@@ -60,24 +60,24 @@ class DQAgent:
     """
 
     def __init__(
-            self,
-            env,
-            agent_id,
-            action_model: DQNetwork,
-            target_model: DQNetwork,
-            epsilon_max: float = 1.0,
-            epsilon_min: float = 0.01,
-            gamma: float = 0.99,
-            replay_memory_max_size: int = 100000,
-            replay_memory_init_size: int = 1000,
-            batch_size: int = 64,
-            step_per_update: int = 4,
-            step_per_update_target_model: int = 8,
-            moving_avg_window_size: int = 20,
-            moving_avg_stop_thr: int = 100,
-            episode_max_steps: int = 400,
-            episodes: int = 1000,
-            n_step: int = 1,  # NEW: number of steps for n-step returns
+        self,
+        env,
+        agent_id,
+        action_model: DQNetwork,
+        target_model: DQNetwork,
+        epsilon_max: float = 1.0,
+        epsilon_min: float = 0.01,
+        gamma: float = 0.99,
+        replay_memory_max_size: int = 100000,
+        replay_memory_init_size: int = 1000,
+        batch_size: int = 64,
+        step_per_update: int = 4,
+        step_per_update_target_model: int = 8,
+        moving_avg_window_size: int = 20,
+        moving_avg_stop_thr: int = 100,
+        episode_max_steps: int = 400,
+        episodes: int = 1000,
+        n_step: int = 1,  # NEW: number of steps for n-step returns
     ):
         self.env = env
         self.id = agent_id
@@ -124,15 +124,15 @@ class DQAgent:
 
         @tf.function
         def train_step(
-                action_model,
-                target_model,
-                states,
-                actions,
-                rewards,
-                next_states,
-                dones,
-                gamma,
-                n_steps,
+            action_model,
+            target_model,
+            states,
+            actions,
+            rewards,
+            next_states,
+            dones,
+            gamma,
+            n_steps,
         ):
             """Compiled function for training step with n-step returns."""
             # Get target Q-values for next states
@@ -179,12 +179,12 @@ class DQAgent:
         return int(tf.argmax(q_values[0]).numpy())
 
     def store_transition(
-            self,
-            state: np.ndarray,
-            action: int,
-            reward: float,
-            next_state: np.ndarray,
-            done: bool,
+        self,
+        state: np.ndarray,
+        action: int,
+        reward: float,
+        next_state: np.ndarray,
+        done: bool,
     ):
         """Store transition with n-step returns."""
         # Add to n-step buffer
@@ -217,7 +217,7 @@ class DQAgent:
                     last_next_state,
                     last_done,
                     self.gamma**actual_n,
-                    ]
+                ]
             )
 
             # Clear buffer if episode ended
@@ -237,15 +237,15 @@ class DQAgent:
     def decay_epsilon(self, episode: int):
         """Decay the exploration rate epsilon."""
         self.epsilon = self.epsilon_min + (
-                self.epsilon_max - self.epsilon_min
+            self.epsilon_max - self.epsilon_min
         ) * math.exp(-self.epsilon_decay * episode)
 
     def simple_dqn_replay_memory_init(
-            self,
-            env,
-            replay_memory: deque,
-            replay_memory_init_size: int,
-            episode_max_steps: int,
+        self,
+        env,
+        replay_memory: deque,
+        replay_memory_init_size: int,
+        episode_max_steps: int,
     ):
         """Initialize replay memory with random transitions."""
         while len(replay_memory) < replay_memory_init_size:
@@ -268,7 +268,7 @@ class DQAgent:
                 step_count += 1
 
     def get_random_batch_from_replay_memory(
-            self, replay_memory: deque, batch_size: int
+        self, replay_memory: deque, batch_size: int
     ):
         """Retrieve a random mini-batch from the given replay memory."""
         minibatch_indices = np.random.choice(range(len(replay_memory)), size=batch_size)
@@ -333,12 +333,12 @@ class DQAgent:
         return float(loss.numpy())
 
     def compute_td_loss(
-            self,
-            state: np.ndarray,
-            action: int,
-            reward: float,
-            next_state: np.ndarray,
-            done: bool,
+        self,
+        state: np.ndarray,
+        action: int,
+        reward: float,
+        next_state: np.ndarray,
+        done: bool,
     ) -> float:
         """Compute TD loss for a single transition (useful for inference/evaluation).
 
