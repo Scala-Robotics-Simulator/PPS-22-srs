@@ -22,8 +22,8 @@ class PhototaxisEnv(AbstractEnv):
         light_has_no_light_state: bool = False,
         light_intensity_bins: int = 1,
         # prox
-        prox_direction: str = "front_min",
-        prox_intensity_bins: int = 3,
+        prox_direction: str = "none",
+        prox_intensity_bins: int = 1,
         # thresholds
         no_light_threshold: float = 0.01,  # sync with scala reward
         prox_thresholds: list[float] | None = None,
@@ -40,6 +40,8 @@ class PhototaxisEnv(AbstractEnv):
                 prox_thresholds = [0.15]
             elif prox_intensity_bins == 3:
                 prox_thresholds = [0.03, 0.15]
+        if prox_intensity_bins <= 1:
+            prox_thresholds = []
         if light_intensity_thresholds is None:
             light_intensity_thresholds = [0.2, 0.6]
 
@@ -176,6 +178,7 @@ class PhototaxisEnv(AbstractEnv):
         light_values: list[float],
         position=None,
         orientation=None,
+        visited_positions=None,
     ) -> int:
         prox_padded = self._pad_prox(proximity_values)
         light_padded = self._pad_light(light_values)
