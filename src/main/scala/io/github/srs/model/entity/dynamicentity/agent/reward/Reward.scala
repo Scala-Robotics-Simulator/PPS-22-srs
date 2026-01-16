@@ -3,7 +3,7 @@ package io.github.srs.model.entity.dynamicentity.agent.reward
 import io.github.srs.model.entity.dynamicentity.agent.Agent
 import io.github.srs.model.entity.dynamicentity.action.Action
 import io.github.srs.model.entity.dynamicentity.agent.reward.ObstacleAvoidanceRewardModule
-import io.github.srs.model.entity.dynamicentity.agent.reward.PhototaxisRewardModule
+import io.github.srs.model.entity.dynamicentity.agent.reward.PhototaxisReward
 import io.github.srs.model.ModelModule.BaseState
 
 /**
@@ -17,6 +17,7 @@ enum Reward(val name: String) derives CanEqual:
   case QObstacleAvoidance extends Reward("QObstacleAvoidance")
   case DQObstacleAvoidance extends Reward("DQObstacleAvoidance")
   case PhototaxisQ extends Reward("PhototaxisQ")
+  case PhototaxisDQ extends Reward("PhototaxisDQ")
   case ExplorationQL extends Reward("ExplorationQL")
   case ExplorationDQN extends Reward("ExplorationDQN")
 
@@ -42,7 +43,9 @@ enum Reward(val name: String) derives CanEqual:
       case DQObstacleAvoidance =>
         ObstacleAvoidanceRewardModule.DQObstacleAvoidance().evaluate(prev, current, entity, action)
       case PhototaxisQ =>
-        PhototaxisRewardModule.PhototaxisQ().evaluate(prev, current, entity, action)
+        PhototaxisReward.PhototaxisQ().evaluate(prev, current, entity, action)
+      case PhototaxisDQ =>
+        PhototaxisReward.PhototaxisDQ().evaluate(prev, current, entity, action)
       case ExplorationQL =>
         ExplorationReward.ExplorationQL().evaluate(prev, current, entity, action)
       case ExplorationDQN =>

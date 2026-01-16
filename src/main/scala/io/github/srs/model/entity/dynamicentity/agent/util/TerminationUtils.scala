@@ -9,10 +9,10 @@ import io.github.srs.model.environment.Environment
 
 object TerminationUtils:
 
-  private val DefaultMargin = 0.098
+  private val DefaultMargin = 0.09
   private val DefaultHysteresis = 0.02
 
-  private val Eps = 1e-4 // TODO: make configurable
+  private val Eps = 1e-4
 
   def atLeastOneLightReached(agent: Agent, env: Environment): Boolean =
     val rA = agent.shape.radius
