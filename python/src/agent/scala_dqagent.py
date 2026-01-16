@@ -401,25 +401,11 @@ class DQAgent:
         )
 
     def load(self, directory: str):
-        """Load agent state: models, epsilon, and parameters.
-
-        Loads only the weights to avoid optimizer version mismatch issues.
-        The optimizer state is reinitialized, which may cause a brief performance dip
-        but the network will quickly recover since the weights are correct.
-        """
+        """Load agent state: models, epsilon, and parameters."""
         from keras.models import load_model
 
-        # Load a temporary model just to extract weights
-        temp_action = load_model(
-            os.path.join(directory, "action_model.keras"), compile=False
-        )
-        temp_target = load_model(
-            os.path.join(directory, "target_model.keras"), compile=False
-        )
-
-        # Copy weights to existing models (which are already compiled)
-        self.action_model.set_weights(temp_action.get_weights())
-        self.target_model.set_weights(temp_target.get_weights())
+        self.action_model = load_model(os.path.join(directory, "action_model.keras"))
+        self.target_model = load_model(os.path.join(directory, "target_model.keras"))
 
         # Recreate TensorFlow functions after loading models
         self._create_tf_functions()
