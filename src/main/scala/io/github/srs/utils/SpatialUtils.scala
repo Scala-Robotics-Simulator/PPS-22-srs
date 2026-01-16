@@ -5,7 +5,6 @@ import io.github.srs.model.entity.Point2D.*
 import io.github.srs.model.entity.staticentity.StaticEntity.Obstacle
 import io.github.srs.model.environment.Environment
 
-// TODO
 object SpatialUtils:
 
   def discreteCell(pos: Point2D, cellSize: Double = 1.0): (Int, Int) =
@@ -13,14 +12,6 @@ object SpatialUtils:
     val cellY = (pos.y / cellSize).toInt
     (cellX, cellY)
 
-  /**
-   * Estimates the total number of discrete cells in the environment.
-   *
-   * @param env
-   *   the environment being explored
-   * @return
-   *   approximate number of total cells
-   */
   private def estimateTotalCells(env: Environment, cellSize: Double): Int =
     val nX = (env.width / cellSize).toInt
     val nY = (env.height / cellSize).toInt
@@ -68,11 +59,6 @@ object SpatialUtils:
     if freeCells.isEmpty then 0.0
     else visitedCells.count(freeCells.contains).toDouble / freeCells.size.toDouble
 
-//  def totalCells(env: Environment, cellSize: Double): Int =
-//    val nX = (env.width / cellSize).toInt
-//    val nY = (env.height / cellSize).toInt
-//    nX * nY
-
   def countExplorableCells(
       env: Environment,
       agentRadius: Double,
@@ -86,38 +72,6 @@ object SpatialUtils:
       y <- 0 until nY
       if isCellFree(x, y, env, agentRadius, cellSize)
     yield ()).size
-
-//  def percentageExplorable(
-//                            env: Environment,
-//                            agentRadius: Double,
-//                            cellSize: Double,
-//                          ): Double =
-//    val free = countExplorableCells(env, agentRadius, cellSize)
-//    val total = totalCells(env, cellSize)
-//    free.toDouble / total.toDouble
-//
-//  def explorableThreshold(
-//                           env: Environment,
-//                           agentRadius: Double,
-//                           cellSize: Double,
-//                           fraction: Double,
-//                         ): Int =
-//    val free = countExplorableCells(env, agentRadius, cellSize)
-//    (free * fraction).toInt
-
-//  def nearbyVisitedPositions(pos: (Int, Int), m: Map[(Int, Int), Double]): (Map[(Int, Int), Double], List[Double]) =
-//    val (x, y) = pos
-//    val m2 = m.map((k, v) => k -> v * 0.999)
-//    val newM = m2 ++ Map((x, y) -> 1.0)
-//    val l = for
-//      dx <- -2 to 2
-//      dy <- -2 to 2
-//    yield newM.get((x + dx, y + dy))
-//    val l2 = l.map {
-//      case Some(v) => v
-//      case None => 0.0
-//    }.toList
-//    (newM, l2)
 
   def nearbyVisitedPositions(
       pos: (Int, Int),

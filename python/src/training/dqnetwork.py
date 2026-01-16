@@ -1,5 +1,5 @@
 import numpy as np
-from keras.layers import Dense, Input
+from keras.layers import Dense, Input, BatchNormalization
 from keras.models import Sequential
 from keras.optimizers import Adam
 from keras.utils import plot_model
@@ -32,7 +32,7 @@ class DQNetwork:
         neuron_count_per_hidden_layer: list,
         action_count: int,
         learning_rate: float = 0.001,
-        use_batch_norm: bool = True,
+        use_batch_norm: bool = False,
         summary: bool = False,
         plot_model_flag: bool = False,
     ):

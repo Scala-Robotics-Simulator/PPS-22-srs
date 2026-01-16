@@ -157,8 +157,8 @@ def resolve_env(
             return ExplorationEnv(
                 server_address,
                 client_name,
-                grid_size=(5, 5), # TODO grid_size=(10, 10)
-                orientation_bins=8
+                grid_size=(5, 5),  # TODO grid_size=(10, 10)
+                orientation_bins=8,
             )
         case _:
             logger.error("Environment not found")
