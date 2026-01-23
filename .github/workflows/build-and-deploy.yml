@@ -50,7 +50,7 @@ jobs:
       - name: Checkout
         uses: DanySK/action-checkout@0.2.27
       - name: Set up python
-        uses: actions/setup-python@v6.1.0
+        uses: actions/setup-python@v6.2.0
         with:
           python-version: ${{ matrix.python-version }}
       - name: Set up uv
@@ -93,7 +93,7 @@ jobs:
       - name: Checkout
         uses: DanySK/action-checkout@0.2.27
       - name: Set up python
-        uses: actions/setup-python@v6.1.0
+        uses: actions/setup-python@v6.2.0
         with:
           python-version: "3.13"
       - name: Set up uv
