@@ -6,7 +6,7 @@ on:
         required: false
         type: string
         default: "false"
-  workflow_dispatch: # Optional, for direct invocation
+  workflow_dispatch:
     inputs:
       release:
         description: "Trigger a release?"
