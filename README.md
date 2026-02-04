@@ -33,7 +33,7 @@ The documentation is available at [PPS-22-srs doc](https://scala-robotics-simula
 
 ## Autonomous Agents
 
-The documentation for the Autonomous Agents portion of the project can be found in the dedicated [README](./python/README.md) file.
+The documentation for the Autonomous Agents portion of the project can be found in the dedicated [README](https://github.com/Scala-Robotics-Simulator/PPS-22-srs/blob/main/python/README.md) file.
 
 ## License
 
