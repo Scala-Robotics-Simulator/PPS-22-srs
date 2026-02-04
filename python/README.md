@@ -42,7 +42,7 @@ uv pip install -r pyproject.toml
 ## Documentation
 
 The introduction of *autonomous agents* in the system has been done for the **Reinforcement Learning** course.
-The main documentation of the project can be found at [report.ipynb](./src/notebooks/report/index.ipynb), while task specific informations are located at:
+The main documentation of the project can be found at [report.ipynb](./src/notebooks/report/index.ipynb), while task specific information is located at:
 
 - [exploration](./src/notebooks/report/exploration.ipynb)
 - [obstacle avoidance](./src/notebooks/report/obstacle-avoidance.ipynb)
@@ -52,7 +52,7 @@ The main documentation of the project can be found at [report.ipynb](./src/noteb
 
 ### Environment generation
 
-The script [generate_environments.py](./src/scripts/generate_environments.py) can be used to generate ad-hoc environments for the task at hand. Documentation for the scipt is located inside the file itself.
+The script [generate_environments.py](./src/scripts/generate_environments.py) can be used to generate ad-hoc environments for the task at hand. Documentation for the script is located inside the file itself.
 
 ### Training
 
@@ -61,5 +61,5 @@ Creating new training scenarios is as easy as creating a custom environment file
 
 ### Validation
 
-Validation can be done either visually, as shown in [show_training_results.ipynb](./src/notebooks/q-learning/show_training_results.ipynb) or via a more thorough analisys of success rate, moving average reward, temporal difference loss and steps to success as shown in the task specific notebooks above.
+Validation can be done either visually, as shown in [show_training_results.ipynb](./src/notebooks/q-learning/show_training_results.ipynb) or via a more thorough analysis of success rate, moving average reward, temporal difference loss and steps to success as shown in the task specific notebooks above.
 
