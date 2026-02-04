@@ -31,6 +31,10 @@ You can find more informations about the other flags available in our [User Guid
 
 The documentation is available at [PPS-22-srs doc](https://scala-robotics-simulator.github.io/PPS-22-srs/).
 
+## Autonomous Agents
+
+The documentation for the Autonomous Agents portion of the project can be found in the dedicated [README](https://github.com/Scala-Robotics-Simulator/PPS-22-srs/blob/main/python/README.md) file.
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](https://github.com/Scala-Robotics-Simulator/PPS-22-srs/blob/main/LICENSE) file for details.

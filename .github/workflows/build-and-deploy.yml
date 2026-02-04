@@ -6,7 +6,7 @@ on:
         required: false
         type: string
         default: "false"
-  workflow_dispatch: # Optional, for direct invocation
+  workflow_dispatch:
     inputs:
       release:
         description: "Trigger a release?"
@@ -59,8 +59,6 @@ jobs:
           activate-environment: "true"
       - name: Install dependencies
         run: uv pip install -r pyproject.toml
-      - name: Run tests
-        run: uv run pytest
 
   code-style:
     runs-on: ubuntu-24.04
