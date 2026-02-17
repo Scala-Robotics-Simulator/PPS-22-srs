@@ -14,7 +14,7 @@ object Dependencies {
   private val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion
   private val scalactic = "org.scalactic" %% "scalactic" % scalaTestVersion % "test"
   val scalaTestJUnit5 = "org.scalatestplus" %% "junit-5-10" % "3.2.19.1" % "test"
-  val logback = "ch.qos.logback" % "logback-classic" % "1.5.31"
+  val logback = "ch.qos.logback" % "logback-classic" % "1.5.32"
   val scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % "3.9.6"
   val squidLib = "com.squidpony" % "squidlib-util" % squidLibVersion
   val catsCore = "org.typelevel" %% "cats-core" % "2.13.0"
