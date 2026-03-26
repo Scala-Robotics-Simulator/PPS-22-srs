@@ -5,7 +5,7 @@ object Dependencies {
   /*
    * Versions
    */
-  private lazy val scalaTestVersion = "3.2.19"
+  private lazy val scalaTestVersion = "3.2.20"
   private lazy val squidLibVersion = "3.0.6"
 
   /*
