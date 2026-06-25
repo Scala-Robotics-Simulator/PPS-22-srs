@@ -21,7 +21,7 @@ object Dependencies {
   val catsEffect = "org.typelevel" %% "cats-effect" % "3.7-4972921"
   val scalaYaml = "org.virtuslab" %% "scala-yaml" % "0.3.2"
   val circeYaml = "io.circe" %% "circe-yaml" % "1.15.0"
-  val circeGeneric = "io.circe" %% "circe-generic" % "0.14.15"
+  val circeGeneric = "io.circe" %% "circe-generic" % "0.14.16"
   val fs2Io = "co.fs2" %% "fs2-io" % "3.13.0"
   val parallelCollections = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.2.0"
   val scopt = "com.github.scopt" %% "scopt" % "4.1.0"
