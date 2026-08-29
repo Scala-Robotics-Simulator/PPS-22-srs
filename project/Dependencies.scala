@@ -18,7 +18,7 @@ object Dependencies {
   val scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % "3.9.6"
   val squidLib = "com.squidpony" % "squidlib-util" % squidLibVersion
   val catsCore = "org.typelevel" %% "cats-core" % "2.13.0"
-  val catsEffect = "org.typelevel" %% "cats-effect" % "3.7-4972921"
+  val catsEffect = "org.typelevel" %% "cats-effect" % "3.7.1"
   val scalaYaml = "org.virtuslab" %% "scala-yaml" % "0.3.3"
   val circeYaml = "io.circe" %% "circe-yaml" % "1.15.0"
   val circeGeneric = "io.circe" %% "circe-generic" % "0.14.16"
