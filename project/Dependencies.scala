@@ -22,7 +22,7 @@ object Dependencies {
   val scalaYaml = "org.virtuslab" %% "scala-yaml" % "0.3.3"
   val circeYaml = "io.circe" %% "circe-yaml" % "1.15.0"
   val circeGeneric = "io.circe" %% "circe-generic" % "0.14.16"
-  val fs2Io = "co.fs2" %% "fs2-io" % "3.13.0"
+  val fs2Io = "co.fs2" %% "fs2-io" % "3.14.0"
   val parallelCollections = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.2.0"
   val scopt = "com.github.scopt" %% "scopt" % "4.1.0"
   val grpc = "io.grpc" % "grpc-netty-shaded" % scalapb.compiler.Version.grpcJavaVersion
